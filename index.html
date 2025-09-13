@@ -101,6 +101,20 @@
       75% { transform: translate(30px, 30px) rotate(5deg); }
     }
 
+    /* Efecto de líneas de escaneo CRT */
+    .scan-lines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.1) 50%);
+      background-size: 100% 4px;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.2;
+    }
+
     header {
       background: rgba(10, 10, 24, 0.8);
       backdrop-filter: blur(10px);
@@ -109,6 +123,28 @@
       top: 0;
       z-index: 1000;
       padding: 1rem 0;
+      overflow: hidden;
+    }
+
+    /* Contenedor de cascada neon para el header */
+    .neon-cascade {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .cascade-particle {
+      position: absolute;
+      width: 2px;
+      height: 15px;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+      opacity: 0;
+      border-radius: 2px;
     }
 
     .header-container {
@@ -118,9 +154,10 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: relative;
     }
 
-    /* Efecto retro mejorado para el logo */
+    /* Efecto de neón retro para el logo */
     .logo {
       font-size: 1.8rem;
       font-weight: bold;
@@ -134,122 +171,7 @@
       position: relative;
       font-family: 'Courier New', monospace;
       letter-spacing: 1px;
-    }
-
-    /* Contenedor para el efecto de neón retro */
-    .logo-neon {
-      position: relative;
-      display: inline-block;
-    }
-
-    /* Efecto de parpadeo aleatorio más pronunciado */
-    .logo-neon::before {
-      content: attr(data-text);
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      color: var(--primary);
-      z-index: -1;
-      animation: flicker 3s infinite alternate;
-      text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
-    }
-
-    .logo-neon::after {
-      content: attr(data-text);
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      color: transparent;
-      background: linear-gradient(45deg, var(--primary) 0%, var(--secondary) 30%, var(--accent) 70%, var(--primary) 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      z-index: -2;
-      animation: flicker 7s infinite alternate-reverse;
-      filter: blur(3px);
-      opacity: 0.7;
-    }
-
-    /* Efecto de parpadeo más dramático */
-    @keyframes flicker {
-      0%, 17%, 19%, 21%, 23%, 25%, 54%, 56%, 80%, 83%, 85%, 87%, 89%, 91%, 100% {
-        opacity: 1;
-        text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary), 0 0 15px var(--primary), 0 0 20px var(--secondary);
-      }
-      18%, 20%, 22%, 24%, 55%, 81%, 84%, 86%, 88%, 90% {
-        opacity: 0.6;
-        text-shadow: 0 0 3px var(--primary), 0 0 7px var(--primary);
-      }
-      82% {
-        opacity: 0.3;
-        text-shadow: 0 0 2px var(--primary);
-      }
-    }
-
-    /* Efecto de chispa mejorado */
-    .logo-spark {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: var(--primary);
-      opacity: 0;
-      transform: translateY(-50%);
-      filter: blur(1px);
-      z-index: -1;
-      animation: spark 8s infinite;
-    }
-
-    @keyframes spark {
-      0%, 15%, 17%, 19%, 21%, 67%, 69%, 71%, 100% {
-        opacity: 0;
-        width: 100%;
-        left: 0;
-      }
-      16% {
-        opacity: 0.8;
-        width: 110%;
-        left: -5%;
-        box-shadow: 0 0 15px 2px var(--primary);
-      }
-      18% {
-        opacity: 1;
-        width: 120%;
-        left: -10%;
-        box-shadow: 0 0 20px 3px var(--primary);
-      }
-      20% {
-        opacity: 0.9;
-        width: 130%;
-        left: -15%;
-        box-shadow: 0 0 25px 4px var(--primary);
-      }
-      68% {
-        opacity: 0.5;
-        width: 105%;
-        left: -2.5%;
-        box-shadow: 0 0 10px 1px var(--primary);
-      }
-      70% {
-        opacity: 0.7;
-        width: 115%;
-        left: -7.5%;
-        box-shadow: 0 0 15px 2px var(--primary);
-      }
-    }
-
-    /* Efecto glitch ocasional */
-    @keyframes glitch {
-      0% { transform: translate(0); }
-      20% { transform: translate(-2px, 2px); }
-      40% { transform: translate(-2px, -2px); }
-      60% { transform: translate(2px, 2px); }
-      80% { transform: translate(2px, -2px); }
-      100% { transform: translate(0); }
+      animation: flicker 5s infinite alternate;
     }
 
     .logo:hover {
@@ -258,10 +180,16 @@
       text-shadow: 0 0 15px var(--primary), 0 0 25px var(--primary), 0 0 40px var(--primary);
     }
 
-    .logo:hover .logo-neon::before,
-    .logo:hover .logo-neon::after {
-      animation: none;
-      opacity: 0;
+    /* Efecto de parpadeo aleatorio */
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        opacity: 1;
+        text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
+      }
+      20%, 24%, 55% {
+        opacity: 0.8;
+        text-shadow: 0 0 7px var(--primary), 0 0 15px var(--primary), 0 0 25px var(--secondary);
+      }
     }
 
     nav ul {
@@ -332,41 +260,6 @@
       text-shadow: 0 0 10px rgba(0, 247, 255, 0.3);
       font-family: 'Courier New', monospace;
       letter-spacing: 2px;
-      position: relative;
-      display: inline-block;
-    }
-
-    /* Efecto de escaneo retro para el título */
-    .hero-content h1::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(transparent 0%, rgba(0, 247, 255, 0.2) 50%, transparent 100%);
-      opacity: 0;
-      animation: scan 5s linear infinite;
-    }
-
-    @keyframes scan {
-      0% { 
-        opacity: 0;
-        top: -100%; 
-      }
-      5% { 
-        opacity: 0.5;
-      }
-      50% { 
-        opacity: 0.2;
-      }
-      95% { 
-        opacity: 0.5;
-      }
-      100% { 
-        opacity: 0;
-        top: 100%; 
-      }
     }
 
     .hero-content p {
@@ -447,20 +340,6 @@
       height: 100%;
     }
 
-    /* Efecto de líneas de escaneo retro */
-    .scan-lines {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.1) 50%);
-      background-size: 100% 4px;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0.2;
-    }
-
     /* Responsive */
     @media (max-width: 900px) {
       .hero { 
@@ -532,12 +411,12 @@
   <div class="scan-lines"></div>
 
   <header>
+    <!-- Efecto de cascada neon -->
+    <div class="neon-cascade" id="neonCascade"></div>
+    
     <div class="header-container">
       <a href="index.html" class="logo">
-        <span class="logo-neon" data-text="ONELIFE">
-          <i class="fas fa-infinity"></i> ONELIFE
-        </span>
-        <span class="logo-spark"></span>
+        <i class="fas fa-infinity"></i> ONELIFE
       </a>
       <div class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></div>
       <nav>
@@ -704,23 +583,78 @@
       init();
     });
 
-    // Efecto glitch aleatorio para el título
-    const titleElement = document.querySelector('.hero-content h1');
-    let glitchInterval;
+    // Efecto de cascada neon en el header
+    const neonCascade = document.getElementById('neonCascade');
+    const particles = [];
     
-    function startGlitch() {
-      // Aplicar glitch aleatorio cada 5-10 segundos
-      glitchInterval = setInterval(() => {
-        if (Math.random() > 0.7) {
-          titleElement.style.animation = 'glitch 0.3s linear';
-          setTimeout(() => {
-            titleElement.style.animation = '';
-          }, 300);
+    function createCascadeParticle() {
+      const particle = document.createElement('div');
+      particle.classList.add('cascade-particle');
+      
+      // Posición aleatoria en el header
+      const posX = Math.random() * 100;
+      particle.style.left = `${posX}%`;
+      
+      // Tamaño y opacidad aleatorios
+      const size = 1 + Math.random() * 2;
+      const height = 10 + Math.random() * 20;
+      particle.style.width = `${size}px`;
+      particle.style.height = `${height}px`;
+      
+      // Color aleatorio (principalmente tonos cian y púrpura)
+      const colorChoice = Math.random();
+      if (colorChoice < 0.7) {
+        particle.style.background = var(--primary);
+        particle.style.boxShadow = `0 0 10px ${getComputedStyle(document.documentElement).getPropertyValue('--primary')}, 0 0 20px ${getComputedStyle(document.documentElement).getPropertyValue('--primary')}`;
+      } else {
+        particle.style.background = var(--secondary);
+        particle.style.boxShadow = `0 0 10px ${getComputedStyle(document.documentElement).getPropertyValue('--secondary')}, 0 0 20px ${getComputedStyle(document.documentElement).getPropertyValue('--secondary')}`;
+      }
+      
+      // Opacidad inicial
+      particle.style.opacity = '0';
+      
+      // Añadir al contenedor
+      neonCascade.appendChild(particle);
+      
+      // Animación
+      const animationDuration = 3 + Math.random() * 4; // 3-7 segundos
+      const animationDelay = Math.random() * 2; // 0-2 segundos
+      
+      // Aplicar animación con keyframes
+      particle.animate([
+        { 
+          transform: 'translateY(-20px)',
+          opacity: 0
+        },
+        { 
+          transform: 'translateY(0)',
+          opacity: 0.7
+        },
+        { 
+          transform: `translateY(${window.innerHeight}px)`,
+          opacity: 0
         }
-      }, 5000);
+      ], {
+        duration: animationDuration * 1000,
+        delay: animationDelay * 1000,
+        easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+      });
+      
+      // Eliminar partícula después de animación
+      setTimeout(() => {
+        particle.remove();
+      }, (animationDuration + animationDelay) * 1000);
     }
     
-    startGlitch();
+    // Crear partículas continuamente
+    function generateCascadeParticles() {
+      createCascadeParticle();
+      setTimeout(generateCascadeParticles, 100 + Math.random() * 200); // Nueva partícula cada 100-300ms
+    }
+    
+    // Iniciar efecto de cascada
+    generateCascadeParticles();
   </script>
 </body>
 </html>
