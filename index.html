@@ -6,7 +6,6 @@
   <title>Mi Web Oficial</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Reset y variables globales */
     :root {
       --primary: #4361ee;
       --secondary: #3f37c9;
@@ -20,20 +19,16 @@
       --radius: 16px;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
       color: #333;
-      line-height: 1.6;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
     /* Header */
@@ -77,13 +72,8 @@
       color: var(--dark);
       font-weight: 600;
       transition: var(--transition);
-      padding: 0.5rem 0;
-      position: relative;
     }
-
-    nav ul li a:hover {
-      color: var(--primary);
-    }
+    nav ul li a:hover { color: var(--primary); }
 
     .menu-toggle {
       display: none;
@@ -94,17 +84,19 @@
 
     /* Hero con animación */
     .hero {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      position: relative;
+      display: flex;
       align-items: center;
-      gap: 2rem;
-      padding: 4rem 2rem;
+      justify-content: space-between;
+      padding: 5rem 2rem;
       max-width: 1200px;
-      margin: 0 auto 3rem;
+      margin: 0 auto;
+      z-index: 1;
     }
 
     .hero-content {
-      text-align: left;
+      max-width: 550px;
+      z-index: 2;
     }
 
     .hero h1 {
@@ -118,7 +110,6 @@
       font-size: 1.3rem;
       color: var(--gray);
       margin-bottom: 2.5rem;
-      max-width: 500px;
     }
 
     .hero-cta {
@@ -127,123 +118,66 @@
       flex-wrap: wrap;
     }
 
-    /* Área animada */
-    .hero-animation {
-      position: relative;
-      width: 100%;
-      height: 400px;
-      overflow: hidden;
-      background: linear-gradient(135deg, var(--accent), var(--success));
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-
-    .bubble {
-      position: absolute;
-      bottom: -100px;
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      animation: floatUp 12s infinite ease-in;
-    }
-
-    .bubble:nth-child(1) {
-      left: 20%;
-      width: 60px;
-      height: 60px;
-      animation-duration: 10s;
-    }
-
-    .bubble:nth-child(2) {
-      left: 40%;
-      width: 40px;
-      height: 40px;
-      animation-duration: 12s;
-    }
-
-    .bubble:nth-child(3) {
-      left: 60%;
-      width: 80px;
-      height: 80px;
-      animation-duration: 14s;
-    }
-
-    .bubble:nth-child(4) {
-      left: 80%;
-      width: 50px;
-      height: 50px;
-      animation-duration: 11s;
-    }
-
-    .bubble:nth-child(5) {
-      left: 30%;
-      width: 70px;
-      height: 70px;
-      animation-duration: 15s;
-    }
-
-    @keyframes floatUp {
-      0% {
-        transform: translateY(0) scale(1);
-        opacity: 0.7;
-      }
-      50% {
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-500px) scale(1.3);
-        opacity: 0;
-      }
-    }
-
     /* Botones */
     .btn {
       padding: 1rem 2rem;
       border-radius: 50px;
-      text-decoration: none;
       font-weight: 600;
       transition: var(--transition);
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      border: none;
-      cursor: pointer;
       font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
     }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-      box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
-    }
-
-    .btn-primary:hover {
-      background: var(--secondary);
-      transform: translateY(-3px);
-    }
-
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--secondary); transform: translateY(-3px); }
     .btn-secondary {
-      background: transparent;
-      color: var(--primary);
-      border: 2px solid var(--primary);
+      background: transparent; border: 2px solid var(--primary); color: var(--primary);
+    }
+    .btn-secondary:hover { background: var(--primary); color: white; transform: translateY(-3px); }
+
+    /* Animación de ondas */
+    .hero::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: -20%;
+      width: 70%;
+      height: 100%;
+      background: radial-gradient(circle at top left, var(--accent), var(--success));
+      clip-path: path("M0,160 C 320,320 480,0 960,160 L960,0 L0,0 Z");
+      animation: wave 8s ease-in-out infinite alternate;
+      z-index: 0;
     }
 
-    .btn-secondary:hover {
-      background: var(--primary);
-      color: white;
-      transform: translateY(-3px);
+    @keyframes wave {
+      0% {
+        clip-path: path("M0,160 C 320,320 480,0 960,160 L960,0 L0,0 Z");
+      }
+      50% {
+        clip-path: path("M0,200 C 320,100 640,300 960,140 L960,0 L0,0 Z");
+      }
+      100% {
+        clip-path: path("M0,160 C 320,280 640,80 960,200 L960,0 L0,0 Z");
+      }
     }
 
     /* Responsive */
     @media (max-width: 992px) {
       .hero {
-        grid-template-columns: 1fr;
+        flex-direction: column;
         text-align: center;
+        padding: 4rem 1.5rem;
       }
-      .hero-content {
-        text-align: center;
-      }
-      .hero-animation {
-        height: 250px;
+      .hero::after {
+        width: 100%;
+        right: 0;
+        top: auto;
+        bottom: 0;
+        height: 50%;
       }
     }
   </style>
@@ -256,9 +190,7 @@
         <i class="fas fa-code"></i>
         <span>MiWeb</span>
       </a>
-      <div class="menu-toggle" id="menuToggle">
-        <i class="fas fa-bars"></i>
-      </div>
+      <div class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></div>
       <nav>
         <ul id="navMenu">
           <li><a href="index.html">Inicio</a></li>
@@ -270,34 +202,21 @@
     </div>
   </header>
 
-  <!-- Hero con animación -->
+  <!-- Hero -->
   <section class="hero">
     <div class="hero-content">
       <h1>Bienvenido a mi espacio digital</h1>
       <p>Explora mi trabajo, proyectos y recursos académicos en un solo lugar</p>
       <div class="hero-cta">
-        <a href="academicos.html" class="btn btn-primary">
-          <i class="fas fa-graduation-cap"></i>
-          Archivos Académicos
-        </a>
-        <a href="about.html" class="btn btn-secondary">
-          <i class="fas fa-user"></i>
-          Conóceme
-        </a>
+        <a href="academicos.html" class="btn btn-primary"><i class="fas fa-graduation-cap"></i> Archivos Académicos</a>
+        <a href="about.html" class="btn btn-secondary"><i class="fas fa-user"></i> Conóceme</a>
       </div>
-    </div>
-    <div class="hero-animation">
-      <div class="bubble"></div>
-      <div class="bubble"></div>
-      <div class="bubble"></div>
-      <div class="bubble"></div>
-      <div class="bubble"></div>
     </div>
   </section>
 
   <script>
-    // Menu toggle para móviles
-    document.getElementById('menuToggle').addEventListener('click', function() {
+    // Menu móvil
+    document.getElementById('menuToggle').addEventListener('click', () => {
       document.getElementById('navMenu').classList.toggle('active');
     });
   </script>
