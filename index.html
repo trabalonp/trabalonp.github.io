@@ -120,6 +120,7 @@
       align-items: center;
     }
 
+    /* Animación de parpadeo retro para el logo */
     .logo {
       font-size: 1.8rem;
       font-weight: bold;
@@ -128,13 +129,81 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      text-shadow: var(--neon-glow);
+      text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
       transition: var(--transition);
+      animation: flicker 5s infinite alternate;
+      position: relative;
     }
 
     .logo:hover {
       color: #fff;
+      animation: none;
       text-shadow: 0 0 15px var(--primary), 0 0 25px var(--primary), 0 0 40px var(--primary);
+    }
+
+    /* Efecto de parpadeo aleatorio */
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
+        opacity: 1;
+      }
+      20%, 24%, 55% {
+        text-shadow: 0 0 7px var(--primary), 0 0 15px var(--primary), 0 0 25px var(--secondary);
+        opacity: 0.9;
+      }
+    }
+
+    /* Efecto de chispa aleatoria */
+    .logo::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--primary);
+      opacity: 0;
+      z-index: -1;
+      transform: translateY(-50%);
+      animation: spark 8s infinite;
+    }
+
+    @keyframes spark {
+      0%, 15%, 17%, 19%, 21%, 67%, 69%, 71%, 100% {
+        opacity: 0;
+        filter: blur(0px);
+        width: 100%;
+      }
+      16% {
+        opacity: 0.4;
+        filter: blur(5px);
+        width: 110%;
+        left: -5%;
+      }
+      18% {
+        opacity: 0.6;
+        filter: blur(10px);
+        width: 120%;
+        left: -10%;
+      }
+      20% {
+        opacity: 0.8;
+        filter: blur(15px);
+        width: 130%;
+        left: -15%;
+      }
+      68% {
+        opacity: 0.3;
+        filter: blur(3px);
+        width: 105%;
+        left: -2.5%;
+      }
+      70% {
+        opacity: 0.5;
+        filter: blur(7px);
+        width: 115%;
+        left: -7.5%;
+      }
     }
 
     nav ul {
@@ -283,6 +352,54 @@
       height: 100%;
     }
 
+    /* Matrix rain effect for the title */
+    .matrix-rain {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0.1;
+    }
+
+    .matrix-column {
+      position: absolute;
+      top: -20px;
+      width: 20px;
+      height: 100%;
+      font-family: monospace;
+      font-size: 20px;
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      color: var(--primary);
+      text-shadow: 0 0 5px var(--primary);
+      animation: matrix-rain 10s linear infinite;
+      opacity: 0;
+      overflow: hidden;
+    }
+
+    @keyframes matrix-rain {
+      0% {
+        top: -100%;
+        opacity: 0;
+      }
+      5% {
+        opacity: 0.7;
+      }
+      50% {
+        opacity: 0.7;
+      }
+      95% {
+        opacity: 0;
+      }
+      100% {
+        top: 100%;
+        opacity: 0;
+      }
+    }
+
     /* Responsive */
     @media (max-width: 900px) {
       .hero { 
@@ -348,7 +465,7 @@
 
   <header>
     <div class="header-container">
-      <a href="index.html" class="logo"><i class="fas fa-infinit(y)"></i> ONELIFE</a>
+      <a href="index.html" class="logo"><i class="fas fa-infinity"></i> ONELIFE</a>
       <div class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></div>
       <nav>
         <ul id="navMenu">
@@ -363,7 +480,7 @@
 
   <section class="hero">
     <div class="hero-content">
-      <h1>   </h1>
+      <h1>BIENVENIDO</h1>
       <p>   </p>
       <div class="hero-cta">
         <a href="academicos.html" class="btn btn-primary">
@@ -513,6 +630,28 @@
       canvas.height = canvas.offsetHeight;
       init();
     });
+
+    // Efecto Matrix aleatorio en el título (opcional)
+    function createMatrixEffect() {
+      const title = document.querySelector('.logo');
+      const titleRect = title.getBoundingClientRect();
+      
+      // Solo crear efecto si el título es visible
+      if (titleRect.width > 0) {
+        for (let i = 0; i < 3; i++) {
+          const column = document.createElement('div');
+          column.className = 'matrix-column';
+          column.style.left = Math.random() * titleRect.width + 'px';
+          column.style.animationDelay = Math.random() * 5 + 's';
+          column.style.animationDuration = (5 + Math.random() * 5) + 's';
+          column.textContent = '0101011010';
+          title.appendChild(column);
+        }
+      }
+    }
+
+    // Iniciar efecto Matrix después de un retraso
+    setTimeout(createMatrixEffect, 1000);
   </script>
 </body>
 </html>
