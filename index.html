@@ -75,7 +75,7 @@
 
     .menu-toggle { display: none; }
 
-    /* HERO con animación relajante */
+    /* HERO con canvas */
     .hero {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -130,15 +130,15 @@
       border-radius: var(--radius);
       overflow: hidden;
       box-shadow: var(--shadow);
-      background: linear-gradient(135deg, #a0e9ff, #4895ef);
+      background: #0a0a23;
     }
     canvas {
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      display: block;
     }
 
+    /* Responsive */
     @media(max-width: 900px) {
       .hero { grid-template-columns: 1fr; text-align: center; }
       .hero-content { text-align: center; }
@@ -175,7 +175,7 @@
       </div>
     </div>
     <div class="hero-animation">
-      <canvas id="relaxCanvas"></canvas>
+      <canvas id="particles"></canvas>
     </div>
   </section>
 
@@ -185,74 +185,76 @@
       document.getElementById('navMenu').classList.toggle('active');
     });
 
-    // Animación relajante: ondas + partículas
-    const canvas = document.getElementById("relaxCanvas");
+    // Animación de partículas conectadas
+    const canvas = document.getElementById("particles");
     const ctx = canvas.getContext("2d");
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
 
-    function resizeCanvas(){
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+    let particlesArray = [];
+    const numParticles = 50;
+
+    class Particle {
+      constructor(){
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = 2 + Math.random() * 2;
+        this.speedX = (Math.random() - 0.5) * 1.5;
+        this.speedY = (Math.random() - 0.5) * 1.5;
+      }
+      update(){
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if(this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if(this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+      }
+      draw(){
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+        ctx.fillStyle = "#4cc9f0";
+        ctx.fill();
+      }
     }
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
 
-    // Ondas
-    const waves = [
-      { amplitude: 15, wavelength: 0.02, speed: 0.01, phase: 0, color: "rgba(255,255,255,0.3)" },
-      { amplitude: 20, wavelength: 0.015, speed: 0.008, phase: 0, color: "rgba(255,255,255,0.2)" }
-    ];
+    function init(){
+      particlesArray = [];
+      for(let i=0; i<numParticles; i++){
+        particlesArray.push(new Particle());
+      }
+    }
 
-    // Partículas flotantes
-    const particles = [];
-    const numParticles = 30;
-    for(let i=0;i<numParticles;i++){
-      particles.push({
-        x: Math.random()*canvas.width,
-        y: Math.random()*canvas.height,
-        size: 2+Math.random()*4,
-        speedX: (Math.random()-0.5)*0.3,
-        speedY: (Math.random()-0.5)*0.3,
-        alpha: 0.3 + Math.random()*0.3
-      });
+    function connect(){
+      for(let a=0; a<particlesArray.length; a++){
+        for(let b=a; b<particlesArray.length; b++){
+          let dx = particlesArray[a].x - particlesArray[b].x;
+          let dy = particlesArray[a].y - particlesArray[b].y;
+          let dist = Math.sqrt(dx*dx + dy*dy);
+          if(dist < 120){
+            ctx.strokeStyle = "rgba(72,149,239,0.3)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+            ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+            ctx.stroke();
+          }
+        }
+      }
     }
 
     function animate(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
-
-      // Dibujar ondas
-      waves.forEach(wave => {
-        wave.phase += wave.speed;
-        ctx.beginPath();
-        ctx.moveTo(0, canvas.height/2);
-        for(let x=0; x<canvas.width; x++){
-          const y = canvas.height/2 + wave.amplitude * Math.sin(x*wave.wavelength + wave.phase*2*Math.PI);
-          ctx.lineTo(x, y);
-        }
-        ctx.lineTo(canvas.width, canvas.height);
-        ctx.lineTo(0, canvas.height);
-        ctx.closePath();
-        ctx.fillStyle = wave.color;
-        ctx.fill();
-      });
-
-      // Dibujar partículas flotantes
-      particles.forEach(p=>{
-        p.x += p.speedX;
-        p.y += p.speedY;
-
-        if(p.x < 0 || p.x > canvas.width) p.speedX *= -1;
-        if(p.y < 0 || p.y > canvas.height) p.speedY *= -1;
-
-        ctx.beginPath();
-        ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-        ctx.fillStyle = `rgba(255,255,255,${p.alpha})`;
-        ctx.fill();
-      });
-
+      particlesArray.forEach(p => { p.update(); p.draw(); });
+      connect();
       requestAnimationFrame(animate);
     }
 
+    init();
     animate();
+    window.addEventListener("resize", () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      init();
+    });
   </script>
 </body>
 </html>
