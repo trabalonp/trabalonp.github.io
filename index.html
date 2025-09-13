@@ -120,7 +120,7 @@
       align-items: center;
     }
 
-    /* Animación de parpadeo retro para el logo */
+    /* Efecto retro mejorado para el logo */
     .logo {
       font-size: 1.8rem;
       font-weight: bold;
@@ -131,8 +131,125 @@
       gap: 0.5rem;
       text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
       transition: var(--transition);
-      animation: flicker 5s infinite alternate;
       position: relative;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+    }
+
+    /* Contenedor para el efecto de neón retro */
+    .logo-neon {
+      position: relative;
+      display: inline-block;
+    }
+
+    /* Efecto de parpadeo aleatorio más pronunciado */
+    .logo-neon::before {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      color: var(--primary);
+      z-index: -1;
+      animation: flicker 3s infinite alternate;
+      text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
+    }
+
+    .logo-neon::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      color: transparent;
+      background: linear-gradient(45deg, var(--primary) 0%, var(--secondary) 30%, var(--accent) 70%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      z-index: -2;
+      animation: flicker 7s infinite alternate-reverse;
+      filter: blur(3px);
+      opacity: 0.7;
+    }
+
+    /* Efecto de parpadeo más dramático */
+    @keyframes flicker {
+      0%, 17%, 19%, 21%, 23%, 25%, 54%, 56%, 80%, 83%, 85%, 87%, 89%, 91%, 100% {
+        opacity: 1;
+        text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary), 0 0 15px var(--primary), 0 0 20px var(--secondary);
+      }
+      18%, 20%, 22%, 24%, 55%, 81%, 84%, 86%, 88%, 90% {
+        opacity: 0.6;
+        text-shadow: 0 0 3px var(--primary), 0 0 7px var(--primary);
+      }
+      82% {
+        opacity: 0.3;
+        text-shadow: 0 0 2px var(--primary);
+      }
+    }
+
+    /* Efecto de chispa mejorado */
+    .logo-spark {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--primary);
+      opacity: 0;
+      transform: translateY(-50%);
+      filter: blur(1px);
+      z-index: -1;
+      animation: spark 8s infinite;
+    }
+
+    @keyframes spark {
+      0%, 15%, 17%, 19%, 21%, 67%, 69%, 71%, 100% {
+        opacity: 0;
+        width: 100%;
+        left: 0;
+      }
+      16% {
+        opacity: 0.8;
+        width: 110%;
+        left: -5%;
+        box-shadow: 0 0 15px 2px var(--primary);
+      }
+      18% {
+        opacity: 1;
+        width: 120%;
+        left: -10%;
+        box-shadow: 0 0 20px 3px var(--primary);
+      }
+      20% {
+        opacity: 0.9;
+        width: 130%;
+        left: -15%;
+        box-shadow: 0 0 25px 4px var(--primary);
+      }
+      68% {
+        opacity: 0.5;
+        width: 105%;
+        left: -2.5%;
+        box-shadow: 0 0 10px 1px var(--primary);
+      }
+      70% {
+        opacity: 0.7;
+        width: 115%;
+        left: -7.5%;
+        box-shadow: 0 0 15px 2px var(--primary);
+      }
+    }
+
+    /* Efecto glitch ocasional */
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(-2px, -2px); }
+      60% { transform: translate(2px, 2px); }
+      80% { transform: translate(2px, -2px); }
+      100% { transform: translate(0); }
     }
 
     .logo:hover {
@@ -141,69 +258,10 @@
       text-shadow: 0 0 15px var(--primary), 0 0 25px var(--primary), 0 0 40px var(--primary);
     }
 
-    /* Efecto de parpadeo aleatorio */
-    @keyframes flicker {
-      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-        text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
-        opacity: 1;
-      }
-      20%, 24%, 55% {
-        text-shadow: 0 0 7px var(--primary), 0 0 15px var(--primary), 0 0 25px var(--secondary);
-        opacity: 0.9;
-      }
-    }
-
-    /* Efecto de chispa aleatoria */
-    .logo::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--primary);
+    .logo:hover .logo-neon::before,
+    .logo:hover .logo-neon::after {
+      animation: none;
       opacity: 0;
-      z-index: -1;
-      transform: translateY(-50%);
-      animation: spark 8s infinite;
-    }
-
-    @keyframes spark {
-      0%, 15%, 17%, 19%, 21%, 67%, 69%, 71%, 100% {
-        opacity: 0;
-        filter: blur(0px);
-        width: 100%;
-      }
-      16% {
-        opacity: 0.4;
-        filter: blur(5px);
-        width: 110%;
-        left: -5%;
-      }
-      18% {
-        opacity: 0.6;
-        filter: blur(10px);
-        width: 120%;
-        left: -10%;
-      }
-      20% {
-        opacity: 0.8;
-        filter: blur(15px);
-        width: 130%;
-        left: -15%;
-      }
-      68% {
-        opacity: 0.3;
-        filter: blur(3px);
-        width: 105%;
-        left: -2.5%;
-      }
-      70% {
-        opacity: 0.5;
-        filter: blur(7px);
-        width: 115%;
-        left: -7.5%;
-      }
     }
 
     nav ul {
@@ -272,6 +330,43 @@
       background-clip: text;
       color: transparent;
       text-shadow: 0 0 10px rgba(0, 247, 255, 0.3);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
+      position: relative;
+      display: inline-block;
+    }
+
+    /* Efecto de escaneo retro para el título */
+    .hero-content h1::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(transparent 0%, rgba(0, 247, 255, 0.2) 50%, transparent 100%);
+      opacity: 0;
+      animation: scan 5s linear infinite;
+    }
+
+    @keyframes scan {
+      0% { 
+        opacity: 0;
+        top: -100%; 
+      }
+      5% { 
+        opacity: 0.5;
+      }
+      50% { 
+        opacity: 0.2;
+      }
+      95% { 
+        opacity: 0.5;
+      }
+      100% { 
+        opacity: 0;
+        top: 100%; 
+      }
     }
 
     .hero-content p {
@@ -352,52 +447,18 @@
       height: 100%;
     }
 
-    /* Matrix rain effect for the title */
-    .matrix-rain {
-      position: absolute;
+    /* Efecto de líneas de escaneo retro */
+    .scan-lines {
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
+      background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.1) 50%);
+      background-size: 100% 4px;
+      z-index: 0;
       pointer-events: none;
-      z-index: 2;
-      opacity: 0.1;
-    }
-
-    .matrix-column {
-      position: absolute;
-      top: -20px;
-      width: 20px;
-      height: 100%;
-      font-family: monospace;
-      font-size: 20px;
-      writing-mode: vertical-rl;
-      text-orientation: upright;
-      color: var(--primary);
-      text-shadow: 0 0 5px var(--primary);
-      animation: matrix-rain 10s linear infinite;
-      opacity: 0;
-      overflow: hidden;
-    }
-
-    @keyframes matrix-rain {
-      0% {
-        top: -100%;
-        opacity: 0;
-      }
-      5% {
-        opacity: 0.7;
-      }
-      50% {
-        opacity: 0.7;
-      }
-      95% {
-        opacity: 0;
-      }
-      100% {
-        top: 100%;
-        opacity: 0;
-      }
+      opacity: 0.2;
     }
 
     /* Responsive */
@@ -451,6 +512,10 @@
       .hero {
         padding: 3rem 1rem;
       }
+      
+      .logo {
+        font-size: 1.5rem;
+      }
     }
   </style>
   <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -462,10 +527,18 @@
     <div class="shape shape-2"></div>
     <div class="shape shape-3"></div>
   </div>
+  
+  <!-- Efecto de líneas de escaneo CRT -->
+  <div class="scan-lines"></div>
 
   <header>
     <div class="header-container">
-      <a href="index.html" class="logo"><i class="fas fa-infinit(y)"></i> ONELIFE</a>
+      <a href="index.html" class="logo">
+        <span class="logo-neon" data-text="ONELIFE">
+          <i class="fas fa-infinity"></i> ONELIFE
+        </span>
+        <span class="logo-spark"></span>
+      </a>
       <div class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></div>
       <nav>
         <ul id="navMenu">
@@ -480,8 +553,8 @@
 
   <section class="hero">
     <div class="hero-content">
-      <h1>BIENVENIDO</h1>
-      <p>   </p>
+      <h1>EXPLORA EL FUTURO</h1>
+      <p>Descubre mis proyectos, trabajos y recursos en un espacio digital avanzado. Tecnología, innovación y creatividad en un solo lugar.</p>
       <div class="hero-cta">
         <a href="academicos.html" class="btn btn-primary">
           <i class="fas fa-graduation-cap"></i> UPCT-DATOS
@@ -631,27 +704,23 @@
       init();
     });
 
-    // Efecto Matrix aleatorio en el título (opcional)
-    function createMatrixEffect() {
-      const title = document.querySelector('.logo');
-      const titleRect = title.getBoundingClientRect();
-      
-      // Solo crear efecto si el título es visible
-      if (titleRect.width > 0) {
-        for (let i = 0; i < 3; i++) {
-          const column = document.createElement('div');
-          column.className = 'matrix-column';
-          column.style.left = Math.random() * titleRect.width + 'px';
-          column.style.animationDelay = Math.random() * 5 + 's';
-          column.style.animationDuration = (5 + Math.random() * 5) + 's';
-          column.textContent = '0101011010';
-          title.appendChild(column);
+    // Efecto glitch aleatorio para el título
+    const titleElement = document.querySelector('.hero-content h1');
+    let glitchInterval;
+    
+    function startGlitch() {
+      // Aplicar glitch aleatorio cada 5-10 segundos
+      glitchInterval = setInterval(() => {
+        if (Math.random() > 0.7) {
+          titleElement.style.animation = 'glitch 0.3s linear';
+          setTimeout(() => {
+            titleElement.style.animation = '';
+          }, 300);
         }
-      }
+      }, 5000);
     }
-
-    // Iniciar efecto Matrix después de un retraso
-    setTimeout(createMatrixEffect, 1000);
+    
+    startGlitch();
   </script>
 </body>
 </html>
