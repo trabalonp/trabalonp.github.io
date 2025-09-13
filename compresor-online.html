@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compresor y Conversor Universal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4ade80;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --purple: #9d4edd;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark);
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #64748b;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 40px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 30px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .card-body {
+            padding: 30px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #cbd5e1;
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            background-color: #f8fafc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover .upload-icon {
+            color: var(--primary);
+        }
+        
+        .upload-text h3 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+        
+        .upload-text p {
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            outline: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(to right, var(--success), #22c55e);
+            color: white;
+            box-shadow: 0 4px 15px rgba(74, 222, 128, 0.3);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(74, 222, 128, 0.4);
+        }
+        
+        .btn-purple {
+            background: linear-gradient(to right, var(--purple), #7b2cbf);
+            color: white;
+            box-shadow: 0 4px 15px rgba(157, 78, 221, 0.3);
+        }
+        
+        .btn-purple:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(157, 78, 221, 0.4);
+        }
+        
+        .file-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .preview-container {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .preview-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .preview-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .preview-box {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .preview-box h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .preview-media {
+            width: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            background: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 250px;
+        }
+        
+        #preview, #compressedPreview {
+            max-width: 100%;
+            max-height: 300px;
+            display: block;
+        }
+        
+        #videoPreview, #compressedVideoPreview {
+            max-width: 100%;
+            max-height: 300px;
+            display: block;
+        }
+        
+        .file-info {
+            background: #f1f5f9;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .info-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .controls-container {
+            display: none;
+            margin-top: 30px;
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+        }
+        
+        .control-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .control-item {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .control-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .dimension-inputs {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .dimension-input {
+            flex: 1;
+        }
+        
+        select, input[type="number"], input[type="range"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: white;
+        }
+        
+        select:focus, input[type="number"]:focus, input[type="range"]:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        input[type="range"] {
+            padding: 0;
+            height: 8px;
+            -webkit-appearance: none;
+            background: #e2e8f0;
+            border-radius: 10px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(67, 97, 238, 0.3);
+        }
+        
+        .quality-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .result-container {
+            display: none;
+            margin-top: 30px;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid var(--success);
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .result-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: #f0fdf4;
+            border-radius: 12px;
+            padding: 20px;
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--success);
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            color: #64748b;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .feature-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+        
+        .feature-desc {
+            color: #64748b;
+            line-height: 1.6;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #64748b;
+            font-size: 0.9rem;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 20px;
+        }
+        
+        .compression-indicator {
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .compression-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .video-note {
+            background: #fffbeb;
+            border-left: 4px solid var(--warning);
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .format-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+        
+        .file-type-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .file-type {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .supported-formats {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .status-message {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            display: none;
+        }
+        
+        .status-processing {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+        
+        .status-success {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+        
+        .status-error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        
+        .time-estimation {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .time-item {
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .time-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 5px 0;
+        }
+        
+        .time-label {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        
+        .error-message {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+        }
+        
+        .conversion-options {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .format-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #e0e7ff;
+            color: #4f46e5;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 3px;
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .preview-content {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .time-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .conversion-options {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-file-export logo-icon"></i>
+                <h1>Compresor y Conversor Universal</h1>
+            </div>
+            <p class="subtitle">Optimiza y convierte cualquier imagen o video a diferentes formatos manteniendo la calidad</p>
+        </header>
+        
+        <main>
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    Subir archivo
+                </div>
+                <div class="card-body">
+                    <div class="upload-area" id="dropArea">
+                        <i class="fas fa-file-upload upload-icon"></i>
+                        <div class="upload-text">
+                            <h3>Arrastra y suelta tu archivo</h3>
+                            <p>Aceptamos cualquier tipo de imagen o video:</p>
+                            <div class="file-type-list">
+                                <span class="file-type">JPG</span>
+                                <span class="file-type">PNG</span>
+                                <span class="file-type">WEBP</span>
+                                <span class="file-type">GIF</span>
+                                <span class="file-type">MP4</span>
+                                <span class="file-type">MOV</span>
+                                <span class="file-type">WEBM</span>
+                                <span class="file-type">AVI</span>
+                            </div>
+                            <p>Tamaño máximo: 100MB</p>
+                        </div>
+                        <button class="btn btn-primary" id="uploadBtn">
+                            <i class="fas fa-folder-open me-2"></i>Seleccionar archivo
+                        </button>
+                        <input type="file" id="fileInput" class="file-input" accept="image/*,video/*">
+                    </div>
+                    
+                    <div id="errorMessage" class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i> <span id="errorText"></span>
+                    </div>
+                    
+                    <div class="preview-container" id="previewContainer">
+                        <h3 class="preview-title">
+                            <i class="fas fa-eye"></i>
+                            Previsualización
+                        </h3>
+                        
+                        <div class="preview-content">
+                            <div class="preview-box">
+                                <h4><i class="fas fa-file"></i> Original</h4>
+                                <div class="preview-media">
+                                    <img id="preview" src="" alt="Preview" style="display: none;">
+                                    <video id="videoPreview" controls style="display: none;"></video>
+                                </div>
+                            </div>
+                            
+                            <div class="preview-box">
+                                <h4><i class="fas fa-compress-alt"></i> Resultado</h4>
+                                <div class="preview-media">
+                                    <img id="compressedPreview" src="" alt="Result Preview" style="display: none;">
+                                    <video id="compressedVideoPreview" controls style="display: none;"></video>
+                                    <p id="compressionPlaceholder" style="color: #94a3b8; font-style: italic; padding: 20px;">
+                                        El resultado aparecerá aquí después del proceso
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="file-info">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Nombre del archivo</div>
+                                    <div class="info-value" id="fileName">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Tipo de archivo</div>
+                                    <div class="info-value" id="fileType">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Tamaño original</div>
+                                    <div class="info-value" id="fileSize">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Resolución</div>
+                                    <div class="info-value" id="originalResolution">-</div>
+                                </div>
+                                <div class="info-item" id="fpsInfo" style="display: none;">
+                                    <div class="info-label">Velocidad (FPS)</div>
+                                    <div class="info-value" id="videoFps">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="controls-container" id="controlsContainer">
+                        <h3 class="section-title">
+                            <i class="fas fa-sliders-h"></i>
+                            Configuración de compresión y conversión
+                        </h3>
+                        
+                        <div class="control-group">
+                            <div class="control-row">
+                                <div class="control-item">
+                                    <label class="control-label">
+                                        <i class="fas fa-expand"></i>
+                                        Resolución
+                                    </label>
+                                    <div class="dimension-inputs">
+                                        <div class="dimension-input">
+                                            <input type="number" id="widthInput" min="100" value="800" class="form-control">
+                                            <small>Ancho (px)</small>
+                                        </div>
+                                        <span>×</span>
+                                        <div class="dimension-input">
+                                            <input type="number" id="heightInput" min="100" value="600" class="form-control">
+                                            <small>Alto (px)</small>
+                                        </div>
+                                    </div>
+                                    <div class="form-check" style="margin-top: 10px;">
+                                        <input class="form-check-input" type="checkbox" id="maintainAspect" checked>
+                                        <label class="form-check-label" for="maintainAspect">Mantener relación de aspecto</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="control-item">
+                                    <label class="control-label">
+                                        <i class="fas fa-tachometer-alt"></i>
+                                        Calidad
+                                    </label>
+                                    <input type="range" min="20" max="100" value="80" class="form-range" id="qualitySlider">
+                                    <div class="quality-indicator">
+                                        <span>Peor calidad</span>
+                                        <span><strong id="qualityValue">80</strong>%</span>
+                                        <span>Mejor calidad</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <div class="control-row">
+                                <div class="control-item">
+                                    <label class="control-label">
+                                        <i class="fas fa-exchange-alt"></i>
+                                        Formato de salida
+                                    </label>
+                                    <select id="formatSelect" class="form-control">
+                                        <option value="original">Mismo formato original</option>
+                                        <optgroup label="Formatos de imagen">
+                                            <option value="jpg">JPG (Imagen)</option>
+                                            <option value="png">PNG (Imagen)</option>
+                                            <option value="webp">WEBP (Imagen)</option>
+                                        </optgroup>
+                                        <optgroup label="Formatos de video">
+                                            <option value="mp4">MP4 (Video)</option>
+                                            <option value="webm">WEBM (Video)</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                                
+                                <div class="control-item">
+                                    <label class="control-label">
+                                        <i class="fas fa-bolt"></i>
+                                        Acción rápida
+                                    </label>
+                                    <div class="conversion-options">
+                                        <button class="btn btn-purple" id="convertToWebp">
+                                            <i class="fas fa-file-image"></i> Convertir a WEBP
+                                        </button>
+                                        <button class="btn btn-purple" id="convertToWebm">
+                                            <i class="fas fa-file-video"></i> Convertir a WEBM
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" id="compressBtn">
+                                    <i class="fas fa-cogs me-2"></i>Procesar Archivo
+                                </button>
+                                <button class="btn btn-success" id="downloadBtn" style="display: none;">
+                                    <i class="fas fa-download me-2"></i>Descargar Resultado
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="compression-indicator">
+                            <div class="compression-bar" id="compressionBar"></div>
+                        </div>
+                        
+                        <div class="progress-info">
+                            <span id="progressText">Progreso: 0%</span>
+                            <span id="timeInfo">Tiempo: 0s</span>
+                        </div>
+                        
+                        <div class="time-estimation" id="timeEstimation">
+                            <div class="time-info">
+                                <div class="time-item">
+                                    <div class="time-value" id="elapsedTime">0s</div>
+                                    <div class="time-label">Tiempo transcurrido</div>
+                                </div>
+                                <div class="time-item">
+                                    <div class="time-value" id="remainingTime">0s</div>
+                                    <div class="time-label">Tiempo estimado</div>
+                                </div>
+                                <div class="time-item">
+                                    <div class="time-value" id="progressPercent">0%</div>
+                                    <div class="time-label">Progreso</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="statusMessage" class="status-message">
+                            <i class="fas fa-sync fa-spin"></i> Procesando archivo...
+                        </div>
+                        
+                        <div class="video-note">
+                            <i class="fas fa-info-circle"></i> Nota: La conversión de video está en fase beta por lo que no se garantiza que funcione correctamente.
+                        </div>
+                    </div>
+                    
+                    <div class="result-container" id="resultContainer">
+                        <div class="result-header">
+                            <h3 class="section-title">
+                                <i class="fas fa-check-circle"></i>
+                                Proceso Completado
+                            </h3>
+                        </div>
+                        
+                        <div class="result-stats">
+                            <div class="stat-card">
+                                <div class="stat-label">Tamaño original</div>
+                                <div class="stat-value" id="originalSizeStat">0 KB</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Tamaño resultante</div>
+                                <div class="stat-value" id="compressedSizeStat">0 KB</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Reducción</div>
+                                <div class="stat-value" id="reductionPercent">0%</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Formato resultante</div>
+                                <div class="stat-value" id="resultFormat">-</div>
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <button class="btn btn-success" id="finalDownloadBtn">
+                                <i class="fas fa-download me-2"></i>Descargar Archivo
+                            </button>
+                            <button class="btn btn-primary" id="compressAnotherBtn">
+                                <i class="fas fa-redo me-2"></i>Procesar Otro Archivo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="features">
+                <div class="feature-card">
+                    <i class="fas fa-compress-arrows-alt feature-icon"></i>
+                    <h3 class="feature-title">Compresión Inteligente</h3>
+                    <p class="feature-desc">Reduce el tamaño de tus archivos manteniendo la máxima calidad posible.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-exchange-alt feature-icon"></i>
+                    <h3 class="feature-title">Conversión de Formatos</h3>
+                    <p class="feature-desc">Convierte entre los formatos más populares con un solo clic.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt feature-icon"></i>
+                    <h3 class="feature-title">Privacidad Garantizada</h3>
+                    <p class="feature-desc">Todo el procesamiento se realiza localmente en tu navegador.</p>
+                </div>
+            </div>
+            
+            <div class="supported-formats">
+                <h3><i class="fas fa-exchange-alt"></i> Formatos soportados para conversión</h3>
+                <div class="file-type-list">
+                    <span class="format-badge"><i class="fas fa-file-image"></i> JPG</span>
+                    <span class="format-badge"><i class="fas fa-file-image"></i> PNG</span>
+                    <span class="format-badge"><i class="fas fa-file-image"></i> WEBP</span>
+                    <span class="format-badge"><i class="fas fa-file-image"></i> GIF</span>
+                    <span class="format-badge"><i class="fas fa-file-video"></i> MP4</span>
+                    <span class="format-badge"><i class="fas fa-file-video"></i> WEBM</span>
+                    <span class="format-badge"><i class="fas fa-file-video"></i> MOV</span>
+                    <span class="format-badge"><i class="fas fa-file-video"></i> AVI</span>
+                </div>
+                <p class="text-muted" style="margin-top: 15px;">Convierte entre cualquier combinación de formatos</p>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Compresor y Conversor Universal &copy; 2023 - Todos los derechos reservados</p>
+            <p>Tus archivos se procesan localmente en tu navegador, no se suben a ningún servidor.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del DOM
+            const fileInput = document.getElementById('fileInput');
+            const dropArea = document.getElementById('dropArea');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const previewContainer = document.getElementById('previewContainer');
+            const controlsContainer = document.getElementById('controlsContainer');
+            const resultContainer = document.getElementById('resultContainer');
+            const preview = document.getElementById('preview');
+            const videoPreview = document.getElementById('videoPreview');
+            const compressedPreview = document.getElementById('compressedPreview');
+            const compressedVideoPreview = document.getElementById('compressedVideoPreview');
+            const compressionPlaceholder = document.getElementById('compressionPlaceholder');
+            const fileName = document.getElementById('fileName');
+            const fileType = document.getElementById('fileType');
+            const fileSize = document.getElementById('fileSize');
+            const originalResolution = document.getElementById('originalResolution');
+            const videoFps = document.getElementById('videoFps');
+            const fpsInfo = document.getElementById('fpsInfo');
+            const widthInput = document.getElementById('widthInput');
+            const heightInput = document.getElementById('heightInput');
+            const maintainAspect = document.getElementById('maintainAspect');
+            const qualitySlider = document.getElementById('qualitySlider');
+            const qualityValue = document.getElementById('qualityValue');
+            const formatSelect = document.getElementById('formatSelect');
+            const convertToWebp = document.getElementById('convertToWebp');
+            const convertToWebm = document.getElementById('convertToWebm');
+            const compressBtn = document.getElementById('compressBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const finalDownloadBtn = document.getElementById('finalDownloadBtn');
+            const compressAnotherBtn = document.getElementById('compressAnotherBtn');
+            const compressionBar = document.getElementById('compressionBar');
+            const originalSizeStat = document.getElementById('originalSizeStat');
+            const compressedSizeStat = document.getElementById('compressedSizeStat');
+            const reductionPercent = document.getElementById('reductionPercent');
+            const resultFormat = document.getElementById('resultFormat');
+            const statusMessage = document.getElementById('statusMessage');
+            const timeEstimation = document.getElementById('timeEstimation');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            const progressText = document.getElementById('progressText');
+            const timeInfo = document.getElementById('timeInfo');
+            const elapsedTimeElem = document.getElementById('elapsedTime');
+            const remainingTimeElem = document.getElementById('remainingTime');
+            const progressPercentElem = document.getElementById('progressPercent');
+            
+            // Variables de estado
+            let originalFile = null;
+            let originalWidth = 0;
+            let originalHeight = 0;
+            let originalSize = 0;
+            let compressedBlob = null;
+            let isVideo = false;
+            let fileExtension = '';
+            let mimeType = '';
+            let videoDurationValue = 0;
+            let videoFpsValue = 30;
+            let selectedFormat = 'original';
+            let resultFileExtension = '';
+            
+            // Variables para el progreso
+            let startTime = 0;
+            let timerInterval = null;
+            let elapsedTime = 0;
+            
+            // Event listeners
+            fileInput.addEventListener('change', handleFileSelect);
+            uploadBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                fileInput.click();
+            });
+            qualitySlider.addEventListener('input', updateQualityValue);
+            compressBtn.addEventListener('click', processFile);
+            downloadBtn.addEventListener('click', downloadCompressedFile);
+            finalDownloadBtn.addEventListener('click', downloadCompressedFile);
+            compressAnotherBtn.addEventListener('click', resetApp);
+            formatSelect.addEventListener('change', function() {
+                selectedFormat = this.value;
+            });
+            convertToWebp.addEventListener('click', function() {
+                formatSelect.value = 'webp';
+                selectedFormat = 'webp';
+                processFile();
+            });
+            convertToWebm.addEventListener('click', function() {
+                formatSelect.value = 'webm';
+                selectedFormat = 'webm';
+                processFile();
+            });
+            
+            // Mantener relación de aspecto
+            widthInput.addEventListener('input', function() {
+                if (maintainAspect.checked && originalWidth && originalHeight) {
+                    const ratio = originalHeight / originalWidth;
+                    heightInput.value = Math.round(this.value * ratio);
+                }
+            });
+            
+            heightInput.addEventListener('input', function() {
+                if (maintainAspect.checked && originalWidth && originalHeight) {
+                    const ratio = originalWidth / originalHeight;
+                    widthInput.value = Math.round(this.value * ratio);
+                }
+            });
+            
+            // Drag and drop
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            dropArea.addEventListener('drop', handleDrop, false);
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            function highlight() {
+                dropArea.classList.add('dragover');
+            }
+            
+            function unhighlight() {
+                dropArea.classList.remove('dragover');
+            }
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length) {
+                    handleFiles(files[0]);
+                }
+            }
+            
+            function updateQualityValue() {
+                qualityValue.textContent = qualitySlider.value;
+            }
+            
+            function handleFileSelect(e) {
+                const files = e.target.files;
+                if (files.length) {
+                    handleFiles(files[0]);
+                }
+            }
+            
+            function handleFiles(file) {
+                errorMessage.style.display = 'none';
+                originalFile = file;
+                
+                // Obtener extensión del archivo
+                const fileNameParts = file.name.split('.');
+                fileExtension = fileNameParts[fileNameParts.length - 1].toLowerCase();
+                mimeType = file.type;
+                
+                // Validar tipo de archivo
+                const isImage = file.type.match('image.*') || 
+                               ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(fileExtension);
+                               
+                const isVideo = file.type.match('video.*') || 
+                               ['mp4', 'mov', 'avi', 'mkv', 'webm', 'flv', '3gp', 'm4v'].includes(fileExtension);
+                
+                if (!isImage && !isVideo) {
+                    showError('Formato no soportado. Por favor, selecciona un archivo de imagen o video válido.');
+                    return;
+                }
+                
+                // Validar tamaño
+                if (file.size > 100 * 1024 * 1024) {
+                    showError('El archivo es demasiado grande. El tamaño máximo permitido es 100MB.');
+                    return;
+                }
+                
+                // Mostrar información del archivo
+                fileName.textContent = file.name;
+                fileType.textContent = `${file.type || 'video/mp4'} (${fileExtension})`;
+                fileSize.textContent = formatFileSize(file.size);
+                originalSize = file.size;
+                
+                // Mostrar controles
+                previewContainer.style.display = 'block';
+                controlsContainer.style.display = 'block';
+                resultContainer.style.display = 'none';
+                downloadBtn.style.display = 'none';
+                compressionBar.style.width = '0%';
+                statusMessage.style.display = 'none';
+                timeEstimation.style.display = 'none';
+                progressText.textContent = 'Progreso: 0%';
+                timeInfo.textContent = 'Tiempo: 0s';
+                
+                // Resetear vista previa comprimida
+                compressedPreview.style.display = 'none';
+                compressedVideoPreview.style.display = 'none';
+                compressionPlaceholder.style.display = 'block';
+                
+                // Determinar si es video
+                isVideo = isVideo;
+                
+                // Previsualizar archivo
+                if (isVideo) {
+                    fpsInfo.style.display = 'block';
+                    preview.style.display = 'none';
+                    videoPreview.style.display = 'block';
+                    
+                    // Solución para MP4 con tipo MIME incorrecto
+                    const videoUrl = URL.createObjectURL(file);
+                    videoPreview.src = videoUrl;
+                    
+                    videoPreview.onloadedmetadata = function() {
+                        originalWidth = videoPreview.videoWidth;
+                        originalHeight = videoPreview.videoHeight;
+                        videoDurationValue = videoPreview.duration;
+                        originalResolution.textContent = `${originalWidth} × ${originalHeight} px`;
+                        
+                        try {
+                            videoFpsValue = Math.round(videoPreview.getVideoPlaybackQuality().totalVideoFrames / videoDurationValue);
+                        } catch (e) {
+                            videoFpsValue = 30; // Valor predeterminado
+                        }
+                        
+                        videoFps.textContent = `${videoFpsValue} FPS`;
+                        
+                        // Establecer valores iniciales
+                        widthInput.value = Math.min(originalWidth, 1280);
+                        if (maintainAspect.checked) {
+                            heightInput.value = Math.round(widthInput.value * originalHeight / originalWidth);
+                        }
+                    };
+                    
+                    videoPreview.onerror = function() {
+                        showError('Error al cargar el video. Intenta con otro archivo.');
+                    };
+                } else {
+                    fpsInfo.style.display = 'none';
+                    videoPreview.style.display = 'none';
+                    preview.style.display = 'block';
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        
+                        // Obtener dimensiones
+                        const img = new Image();
+                        img.onload = function() {
+                            originalWidth = img.width;
+                            originalHeight = img.height;
+                            originalResolution.textContent = `${originalWidth} × ${originalHeight} px`;
+                            
+                            // Establecer valores iniciales
+                            widthInput.value = Math.min(originalWidth, 1200);
+                            if (maintainAspect.checked) {
+                                heightInput.value = Math.round(widthInput.value * originalHeight / originalWidth);
+                            }
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+            
+            function processFile() {
+                if (!originalFile) {
+                    showError('Por favor, selecciona un archivo primero.');
+                    return;
+                }
+                
+                const width = parseInt(widthInput.value);
+                const height = parseInt(heightInput.value);
+                const quality = parseInt(qualitySlider.value) / 100;
+                
+                if (isNaN(width) || isNaN(height) || width < 10 || height < 10) {
+                    showError('Por favor, introduce valores válidos para ancho y alto.');
+                    return;
+                }
+                
+                // Mostrar mensaje de estado
+                statusMessage.textContent = 'Procesando archivo...';
+                statusMessage.className = 'status-message status-processing';
+                statusMessage.style.display = 'block';
+                statusMessage.innerHTML = '<i class="fas fa-sync fa-spin"></i> Procesando archivo...';
+                
+                // Iniciar el temporizador
+                startTimer();
+                
+                // Determinar el formato de salida
+                if (selectedFormat === 'original') {
+                    resultFileExtension = fileExtension;
+                } else {
+                    resultFileExtension = selectedFormat;
+                }
+                
+                // Comprimir según el tipo
+                if (isVideo) {
+                    compressVideo(width, height, quality);
+                } else {
+                    compressImage(width, height, quality);
+                }
+            }
+            
+            function startTimer() {
+                startTime = Date.now();
+                elapsedTime = 0;
+                if (timerInterval) clearInterval(timerInterval);
+                timerInterval = setInterval(updateTimer, 1000);
+                timeEstimation.style.display = 'block';
+                elapsedTimeElem.textContent = '0s';
+                remainingTimeElem.textContent = 'Calculando...';
+                progressPercentElem.textContent = '0%';
+            }
+            
+            function updateTimer() {
+                const now = Date.now();
+                elapsedTime = (now - startTime) / 1000;
+                elapsedTimeElem.textContent = formatTime(elapsedTime);
+                timeInfo.textContent = `Tiempo: ${formatTime(elapsedTime)}`;
+            }
+            
+            function formatTime(seconds) {
+                if (seconds < 60) {
+                    return seconds.toFixed(0) + 's';
+                } else {
+                    const minutes = Math.floor(seconds / 60);
+                    const secs = Math.floor(seconds % 60);
+                    return minutes + 'm ' + secs + 's';
+                }
+            }
+            
+            function compressImage(width, height, quality) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    // Dibujar imagen redimensionada
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Determinar el tipo MIME basado en el formato seleccionado
+                    let outputMime = 'image/jpeg';
+                    if (resultFileExtension === 'png') outputMime = 'image/png';
+                    else if (resultFileExtension === 'gif') outputMime = 'image/gif';
+                    else if (resultFileExtension === 'webp') outputMime = 'image/webp';
+                    else if (resultFileExtension === 'bmp') outputMime = 'image/bmp';
+                    
+                    // Simular progreso para imágenes
+                    let progress = 0;
+                    const progressInterval = setInterval(() => {
+                        progress += 10;
+                        if (progress > 90) {
+                            clearInterval(progressInterval);
+                        }
+                        compressionBar.style.width = `${progress}%`;
+                        progressText.textContent = `Progreso: ${progress}%`;
+                        progressPercentElem.textContent = `${progress}%`;
+                    }, 100);
+                    
+                    // Obtener blob comprimido
+                    canvas.toBlob(function(blob) {
+                        clearInterval(timerInterval);
+                        clearInterval(progressInterval);
+                        compressionBar.style.width = '100%';
+                        progressText.textContent = 'Progreso: 100%';
+                        progressPercentElem.textContent = '100%';
+                        
+                        compressedBlob = blob;
+                        showCompressionResult(blob);
+                        
+                        // Mostrar previsualización comprimida
+                        compressedPreview.src = URL.createObjectURL(blob);
+                        compressedPreview.style.display = 'block';
+                        compressionPlaceholder.style.display = 'none';
+                        compressedVideoPreview.style.display = 'none';
+                        
+                        // Mostrar botón de descarga
+                        downloadBtn.style.display = 'inline-block';
+                        
+                        // Actualizar mensaje de estado
+                        statusMessage.textContent = 'Proceso completado con éxito!';
+                        statusMessage.className = 'status-message status-success';
+                        statusMessage.innerHTML = '<i class="fas fa-check-circle"></i> Proceso completado con éxito!';
+                    }, outputMime, quality);
+                };
+                img.src = URL.createObjectURL(originalFile);
+            }
+            
+            function compressVideo(width, height, quality) {
+                try {
+                    // Crear un canvas para procesar el video
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Crear un elemento de video para procesamiento
+                    const processingVideo = document.createElement('video');
+                    processingVideo.src = URL.createObjectURL(originalFile);
+                    processingVideo.muted = true;
+                    processingVideo.playsInline = true;
+                    
+                    processingVideo.onloadedmetadata = function() {
+                        // Calcular duración
+                        const duration = processingVideo.duration;
+                        
+                        // Configurar canvas
+                        const stream = canvas.captureStream(videoFpsValue);
+                        
+                        // Determinar el formato de salida basado en la selección
+                        let outputMime = 'video/webm';
+                        if (resultFileExtension === 'mp4') outputMime = 'video/mp4';
+                        
+                        const recorder = new MediaRecorder(stream, { 
+                            mimeType: outputMime,
+                            videoBitsPerSecond: 1000000 * quality
+                        });
+                        
+                        const chunks = [];
+                        recorder.ondataavailable = function(e) {
+                            chunks.push(e.data);
+                        };
+                        
+                        recorder.onstop = function() {
+                            clearInterval(timerInterval);
+                            compressionBar.style.width = '100%';
+                            progressText.textContent = 'Progreso: 100%';
+                            progressPercentElem.textContent = '100%';
+                            
+                            const blob = new Blob(chunks, { 
+                                type: outputMime
+                            });
+                            
+                            compressedBlob = blob;
+                            showCompressionResult(blob);
+                            
+                            // Mostrar previsualización comprimida
+                            compressedVideoPreview.src = URL.createObjectURL(blob);
+                            compressedVideoPreview.style.display = 'block';
+                            compressionPlaceholder.style.display = 'none';
+                            compressedPreview.style.display = 'none';
+                            
+                            // Mostrar botón de descarga
+                            downloadBtn.style.display = 'inline-block';
+                            
+                            // Actualizar mensaje de estado
+                            statusMessage.textContent = 'Proceso de video completado!';
+                            statusMessage.className = 'status-message status-success';
+                            statusMessage.innerHTML = '<i class="fas fa-check-circle"></i> Proceso de video completado!';
+                        };
+                        
+                        // Iniciar grabación
+                        recorder.start();
+                        
+                        // Procesar el video frame por frame
+                        let currentTime = 0;
+                        const frameInterval = 1000 / videoFpsValue;
+                        
+                        function processFrame() {
+                            if (currentTime > duration) {
+                                recorder.stop();
+                                return;
+                            }
+                            
+                            // Calcular progreso
+                            const progress = Math.min(99, (currentTime / duration) * 100);
+                            compressionBar.style.width = `${progress}%`;
+                            progressText.textContent = `Progreso: ${progress.toFixed(0)}%`;
+                            progressPercentElem.textContent = `${progress.toFixed(0)}%`;
+                            
+                            // Calcular tiempo restante
+                            if (progress > 0) {
+                                const elapsed = (Date.now() - startTime) / 1000;
+                                const estimatedTotal = elapsed / (progress / 100);
+                                const remaining = estimatedTotal - elapsed;
+                                remainingTimeElem.textContent = formatTime(remaining);
+                            }
+                            
+                            // Establecer tiempo actual
+                            processingVideo.currentTime = currentTime;
+                            
+                            // Esperar a que el video esté listo para ese frame
+                            processingVideo.onseeked = function() {
+                                // Dibujar frame en canvas
+                                ctx.clearRect(0, 0, width, height);
+                                ctx.drawImage(processingVideo, 0, 0, width, height);
+                                
+                                // Avanzar al siguiente frame
+                                currentTime += 1 / videoFpsValue;
+                                setTimeout(processFrame, frameInterval);
+                            };
+                        }
+                        
+                        // Iniciar procesamiento
+                        processFrame();
+                    };
+                    
+                    // Manejar errores
+                    processingVideo.onerror = function() {
+                        clearInterval(timerInterval);
+                        showError('Error al procesar el video. El formato podría no ser compatible.');
+                    };
+                    
+                    // Cargar video
+                    processingVideo.load();
+                } catch (error) {
+                    clearInterval(timerInterval);
+                    showError('Error procesando el video: ' + error.message);
+                    console.error('Error procesando video:', error);
+                }
+            }
+            
+            function showCompressionResult(blob) {
+                const compressedSize = blob.size;
+                const reduction = ((originalSize - compressedSize) / originalSize * 100).toFixed(1);
+                
+                // Actualizar estadísticas
+                originalSizeStat.textContent = formatFileSize(originalSize);
+                compressedSizeStat.textContent = formatFileSize(compressedSize);
+                reductionPercent.textContent = reduction;
+                resultFormat.textContent = resultFileExtension.toUpperCase();
+                
+                // Mostrar sección de resultados
+                resultContainer.style.display = 'block';
+                resultContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            function downloadCompressedFile() {
+                if (!compressedBlob) {
+                    showError('Primero debes procesar un archivo.');
+                    return;
+                }
+                
+                const url = URL.createObjectURL(compressedBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                
+                // Generar nombre de archivo
+                const originalName = originalFile.name;
+                const newName = originalName.replace(/\.[^/.]+$/, '') + `_convertido.${resultFileExtension}`;
+                
+                a.download = newName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+            
+            function resetApp() {
+                // Restablecer la aplicación a su estado inicial
+                fileInput.value = '';
+                previewContainer.style.display = 'none';
+                controlsContainer.style.display = 'none';
+                resultContainer.style.display = 'none';
+                downloadBtn.style.display = 'none';
+                compressionBar.style.width = '0%';
+                statusMessage.style.display = 'none';
+                timeEstimation.style.display = 'none';
+                errorMessage.style.display = 'none';
+                progressText.textContent = 'Progreso: 0%';
+                timeInfo.textContent = 'Tiempo: 0s';
+                
+                preview.src = '';
+                videoPreview.src = '';
+                compressedPreview.src = '';
+                compressedVideoPreview.src = '';
+                
+                fileName.textContent = '-';
+                fileType.textContent = '-';
+                fileSize.textContent = '-';
+                originalResolution.textContent = '-';
+                
+                compressedPreview.style.display = 'none';
+                compressedVideoPreview.style.display = 'none';
+                compressionPlaceholder.style.display = 'block';
+                
+                // Resetear selección de formato
+                formatSelect.value = 'original';
+                selectedFormat = 'original';
+                
+                originalFile = null;
+                compressedBlob = null;
+                
+                // Limpiar temporizador
+                if (timerInterval) clearInterval(timerInterval);
+            }
+            
+            function formatFileSize(bytes) {
+                if (bytes < 1024) return bytes + ' bytes';
+                else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+                else return (bytes / 1048576).toFixed(1) + ' MB';
+            }
+            
+            function showError(message) {
+                errorText.textContent = message;
+                errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Actualizar el valor de calidad al cargar
+            updateQualityValue();
+        });
+    </script>
+</body>
+</html>
