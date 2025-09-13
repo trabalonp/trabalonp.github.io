@@ -19,14 +19,15 @@
       --shadow: 0 0 20px rgba(0, 247, 255, 0.3);
       --neon-glow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary);
       
-      /* Colores para modo claro */
-      --bg-gradient-light: linear-gradient(135deg, #e4edf5 0%, #f5f7fa 100%);
-      --text-light: #212529;
-      --header-bg-light: rgba(255, 255, 255, 0.95);
-      --header-border-light: rgba(0, 0, 0, 0.1);
-      --btn-bg-light: rgba(0, 247, 255, 0.15);
-      --btn-border-light: rgba(0, 247, 255, 0.4);
-      --canvas-bg-light: rgba(255, 255, 255, 0.5);
+      /* Colores para modo día mejorado */
+      --day-primary: #0072ff;
+      --day-secondary: #8a2be2;
+      --day-accent: #ff0080;
+      --day-bg: linear-gradient(135deg, #e6f0ff 0%, #ffffff 100%);
+      --day-text: #1a1a40;
+      --day-card: rgba(255, 255, 255, 0.9);
+      --day-border: rgba(0, 114, 255, 0.2);
+      --day-glow: 0 0 10px rgba(0, 114, 255, 0.4);
     }
 
     * {
@@ -47,8 +48,8 @@
     }
 
     body.light-mode {
-      background: var(--bg-gradient-light);
-      color: var(--text-light);
+      background: var(--day-bg);
+      color: var(--day-text);
     }
 
     /* Efectos de fondo futurista */
@@ -68,8 +69,8 @@
 
     .light-mode .bg-grid {
       background: 
-        linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+        linear-gradient(rgba(0, 114, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 114, 255, 0.05) 1px, transparent 1px);
     }
 
     .floating-shapes {
@@ -116,8 +117,19 @@
       animation: float 12s infinite ease-in-out 2s;
     }
 
-    .light-mode .shape {
+    .light-mode .shape-1 {
+      background: var(--day-primary);
+      opacity: 0.2;
+    }
+
+    .light-mode .shape-2 {
+      background: var(--day-secondary);
       opacity: 0.15;
+    }
+
+    .light-mode .shape-3 {
+      background: var(--day-accent);
+      opacity: 0.1;
     }
 
     @keyframes float {
@@ -143,6 +155,7 @@
 
     .light-mode .scan-lines {
       background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.03) 50%);
+      opacity: 0.1;
     }
 
     header {
@@ -158,8 +171,9 @@
     }
 
     .light-mode header {
-      background: var(--header-bg-light);
-      border-bottom: 1px solid var(--header-border-light);
+      background: rgba(255, 255, 255, 0.9);
+      border-bottom: 1px solid var(--day-border);
+      backdrop-filter: blur(10px);
     }
 
     /* Contenedor de cascada neon para el header */
@@ -184,8 +198,8 @@
     }
 
     .light-mode .cascade-particle {
-      background: var(--secondary);
-      box-shadow: 0 0 10px var(--secondary), 0 0 20px var(--secondary);
+      background: var(--day-primary);
+      box-shadow: 0 0 10px var(--day-primary), 0 0 20px var(--day-primary);
     }
 
     .header-container {
@@ -216,8 +230,8 @@
     }
 
     .light-mode .logo {
-      color: var(--secondary);
-      text-shadow: 0 0 5px rgba(119, 0, 255, 0.5), 0 0 10px rgba(119, 0, 255, 0.3);
+      color: var(--day-primary);
+      text-shadow: var(--day-glow);
     }
 
     .logo:hover {
@@ -227,8 +241,8 @@
     }
 
     .light-mode .logo:hover {
-      color: var(--primary);
-      text-shadow: 0 0 15px var(--primary), 0 0 25px var(--primary), 0 0 40px var(--primary);
+      color: var(--day-secondary);
+      text-shadow: 0 0 15px var(--day-primary), 0 0 25px var(--day-primary);
     }
 
     /* Efecto de parpadeo aleatorio */
@@ -260,11 +274,15 @@
     }
 
     .light-mode nav ul li a {
-      color: #6c757d;
+      color: #4a4a8a;
     }
 
     nav ul li a:hover {
       color: var(--primary);
+    }
+
+    .light-mode nav ul li a:hover {
+      color: var(--day-primary);
     }
 
     nav ul li a::after {
@@ -277,6 +295,11 @@
       background: var(--primary);
       box-shadow: var(--shadow);
       transition: var(--transition);
+    }
+
+    .light-mode nav ul li a::after {
+      background: var(--day-primary);
+      box-shadow: var(--day-glow);
     }
 
     nav ul li a:hover::after {
@@ -301,12 +324,16 @@
     }
 
     .light-mode .theme-toggle {
-      color: #6c757d;
+      color: #4a4a8a;
     }
 
     .theme-toggle:hover {
       color: var(--primary);
       transform: rotate(30deg);
+    }
+
+    .light-mode .theme-toggle:hover {
+      color: var(--day-primary);
     }
 
     .menu-toggle { 
@@ -315,6 +342,10 @@
       font-size: 1.5rem;
       cursor: pointer;
       transition: var(--transition);
+    }
+
+    .light-mode .menu-toggle {
+      color: var(--day-primary);
     }
 
     .menu-toggle:hover {
@@ -345,8 +376,8 @@
     }
 
     .light-mode .hero-content h1 {
-      background: linear-gradient(90deg, var(--secondary), var(--primary));
-      text-shadow: 0 0 10px rgba(119, 0, 255, 0.2);
+      background: linear-gradient(90deg, var(--day-primary), var(--day-secondary));
+      text-shadow: 0 0 10px rgba(0, 114, 255, 0.2);
     }
 
     .hero-cta {
@@ -380,10 +411,10 @@
     }
 
     .light-mode .btn-primary {
-      background: var(--btn-bg-light);
-      color: var(--secondary);
-      border: 1px solid var(--btn-border-light);
-      box-shadow: 0 0 15px rgba(119, 0, 255, 0.2);
+      background: rgba(0, 114, 255, 0.1);
+      color: var(--day-primary);
+      border: 1px solid var(--day-border);
+      box-shadow: 0 0 15px rgba(0, 114, 255, 0.2);
     }
 
     .btn-primary:hover {
@@ -393,8 +424,8 @@
     }
 
     .light-mode .btn-primary:hover {
-      background: rgba(0, 247, 255, 0.25);
-      box-shadow: 0 10px 25px rgba(0, 247, 255, 0.3);
+      background: rgba(0, 114, 255, 0.2);
+      box-shadow: 0 10px 25px rgba(0, 114, 255, 0.3);
     }
 
     .btn-primary::before {
@@ -407,6 +438,10 @@
       background: linear-gradient(90deg, transparent, rgba(0, 247, 255, 0.2), transparent);
       transition: 0.5s;
       z-index: -1;
+    }
+
+    .light-mode .btn-primary::before {
+      background: linear-gradient(90deg, transparent, rgba(0, 114, 255, 0.2), transparent);
     }
 
     .btn-primary:hover::before {
@@ -425,9 +460,9 @@
     }
 
     .light-mode .hero-animation {
-      background: var(--canvas-bg-light);
-      border: 1px solid var(--btn-border-light);
-      box-shadow: 0 0 20px rgba(119, 0, 255, 0.2);
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid var(--day-border);
+      box-shadow: 0 0 20px rgba(0, 114, 255, 0.2);
     }
 
     canvas {
@@ -470,7 +505,7 @@
       
       .light-mode nav ul {
         background: rgba(255, 255, 255, 0.95);
-        border-top: 1px solid var(--header-border-light);
+        border-top: 1px solid var(--day-border);
       }
       
       nav ul.active {
@@ -595,6 +630,13 @@
       {r: 255, g: 0, b: 200}  // rosa
     ];
 
+    // Colores para modo día
+    const dayColors = [
+      {r: 0, g: 114, b: 255}, // azul
+      {r: 138, g: 43, b: 226}, // blueviolet
+      {r: 255, g: 0, b: 128}  // rosa
+    ];
+
     class Particle {
       constructor(){
         this.x = Math.random() * canvas.width;
@@ -617,6 +659,10 @@
       }
       
       draw(){
+        // Usar colores diferentes según el modo
+        const currentColors = document.body.classList.contains('light-mode') ? dayColors : colors;
+        const particleColor = currentColors[Math.floor(Math.random() * currentColors.length)];
+        
         // Dibujar glow
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size + this.glow, 0, Math.PI * 2);
@@ -624,15 +670,15 @@
           this.x, this.y, this.size, 
           this.x, this.y, this.size + this.glow
         );
-        gradient.addColorStop(0, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 0.8)`);
-        gradient.addColorStop(1, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 0)`);
+        gradient.addColorStop(0, `rgba(${particleColor.r}, ${particleColor.g}, ${particleColor.b}, 0.8)`);
+        gradient.addColorStop(1, `rgba(${particleColor.r}, ${particleColor.g}, ${particleColor.b}, 0)`);
         ctx.fillStyle = gradient;
         ctx.fill();
         
         // Dibujar núcleo de la partícula
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgb(${this.color.r}, ${this.color.g}, ${this.color.b})`;
+        ctx.fillStyle = `rgb(${particleColor.r}, ${particleColor.g}, ${particleColor.b})`;
         ctx.fill();
       }
     }
@@ -655,14 +701,17 @@
             // Calcular opacidad en base a la distancia
             let opacity = 1 - (dist / connectionDistance);
             
+            // Usar colores diferentes según el modo
+            const currentColors = document.body.classList.contains('light-mode') ? dayColors : colors;
+            
             // Crear gradiente para la línea de conexión
             const gradient = ctx.createLinearGradient(
               particlesArray[a].x, particlesArray[a].y,
               particlesArray[b].x, particlesArray[b].y
             );
             
-            gradient.addColorStop(0, `rgba(${particlesArray[a].color.r}, ${particlesArray[a].color.g}, ${particlesArray[a].color.b}, ${opacity * 0.3})`);
-            gradient.addColorStop(1, `rgba(${particlesArray[b].color.r}, ${particlesArray[b].color.g}, ${particlesArray[b].color.b}, ${opacity * 0.3})`);
+            gradient.addColorStop(0, `rgba(${currentColors[0].r}, ${currentColors[0].g}, ${currentColors[0].b}, ${opacity * 0.3})`);
+            gradient.addColorStop(1, `rgba(${currentColors[1].r}, ${currentColors[1].g}, ${currentColors[1].b}, ${opacity * 0.3})`);
             
             ctx.strokeStyle = gradient;
             ctx.lineWidth = 1;
@@ -714,14 +763,14 @@
       particle.style.width = `${size}px`;
       particle.style.height = `${height}px`;
       
-      // Color aleatorio (principalmente tonos cian y púrpura)
-      const colorChoice = Math.random();
-      if (colorChoice < 0.7) {
+      // Color según el modo actual
+      const isLightMode = document.body.classList.contains('light-mode');
+      if (isLightMode) {
+        particle.style.background = 'var(--day-primary)';
+        particle.style.boxShadow = '0 0 10px var(--day-primary), 0 0 20px var(--day-primary)';
+      } else {
         particle.style.background = 'var(--primary)';
         particle.style.boxShadow = '0 0 10px var(--primary), 0 0 20px var(--primary)';
-      } else {
-        particle.style.background = 'var(--secondary)';
-        particle.style.boxShadow = '0 0 10px var(--secondary), 0 0 20px var(--secondary)';
       }
       
       // Opacidad inicial
@@ -778,6 +827,8 @@
     if (savedTheme) {
       document.body.classList.toggle('light-mode', savedTheme === 'light');
       updateThemeIcon();
+      // Reiniciar animación de partículas para aplicar nuevos colores
+      init();
     }
     
     // Alternar tema al hacer clic en el botón
@@ -786,6 +837,8 @@
       const currentTheme = document.body.classList.contains('light-mode') ? 'light' : 'dark';
       localStorage.setItem('theme', currentTheme);
       updateThemeIcon();
+      // Reiniciar animación de partículas para aplicar nuevos colores
+      init();
     });
     
     // Actualizar icono según el tema actual
