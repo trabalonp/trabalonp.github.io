@@ -3,21 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mi Web Oficial</title>
+  <title>Onelife</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     /* Reset y variables globales */
     :root {
-      --primary: #4361ee;
-      --secondary: #3f37c9;
-      --accent: #4895ef;
-      --success: #4cc9f0;
-      --light: #f8f9fa;
-      --dark: #212529;
-      --gray: #6c757d;
-      --transition: all 0.3s ease;
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      --radius: 16px;
+      --primary: #2c3e50;
+      --secondary: #e74c3c;
+      --accent: #3498db;
+      --light: #ecf0f1;
+      --dark: #2c3e50;
+      --text: #34495e;
+      --transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
     }
 
     * {
@@ -27,505 +24,379 @@
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
-      color: #333;
+      font-family: 'Poppins', 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #2c3e50 0%, #4a6580 100%);
+      color: var(--light);
       line-height: 1.6;
       min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Contenedor principal */
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sección de contenido */
+    .content-section {
+      flex: 1;
       display: flex;
       flex-direction: column;
-    }
-
-    /* Header y navegación */
-    header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      padding: 1rem 0;
-    }
-
-    .header-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+      z-index: 2;
     }
 
     .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--primary);
-      text-decoration: none;
-    }
-
-    .logo i {
-      font-size: 2rem;
-    }
-
-    nav ul {
-      display: flex;
-      list-style: none;
-      gap: 2rem;
-    }
-
-    nav ul li a {
-      text-decoration: none;
-      color: var(--dark);
-      font-weight: 600;
-      transition: var(--transition);
-      padding: 0.5rem 0;
-      position: relative;
-    }
-
-    nav ul li a:hover {
-      color: var(--primary);
-    }
-
-    nav ul li a::after {
-      content: '';
       position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 0;
-      height: 3px;
-      background: var(--primary);
-      transition: var(--transition);
+      top: 2rem;
+      left: 2rem;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--light);
+      z-index: 10;
     }
 
-    nav ul li a:hover::after {
-      width: 100%;
-    }
-
-    .menu-toggle {
-      display: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: var(--dark);
-    }
-
-    /* Contenido principal */
-    main {
-      flex: 1;
-      width: 100%;
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 2rem;
-    }
-
-    /* Hero Section */
-    .hero {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding: 3rem 1rem;
-      margin-bottom: 3rem;
-    }
-
-    .hero h1 {
-      font-size: 3.5rem;
-      color: var(--dark);
-      margin-bottom: 1.5rem;
-      line-height: 1.2;
-    }
-
-    .hero p {
-      font-size: 1.3rem;
-      color: var(--gray);
-      max-width: 700px;
+    .welcome-text {
       margin-bottom: 2.5rem;
     }
 
-    .hero-cta {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    /* Botones */
-    .btn {
-      padding: 1rem 2rem;
-      border-radius: 50px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      border: none;
-      cursor: pointer;
-      font-size: 1rem;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-      box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
-    }
-
-    .btn-primary:hover {
-      background: var(--secondary);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
-    }
-
-    .btn-secondary {
-      background: transparent;
-      color: var(--primary);
-      border: 2px solid var(--primary);
-    }
-
-    .btn-secondary:hover {
-      background: var(--primary);
-      color: white;
-      transform: translateY(-3px);
-    }
-
-    /* Tarjetas de características */
-    .features {
-      margin: 4rem 0;
-    }
-
-    .section-title {
-      text-align: center;
-      font-size: 2.5rem;
-      margin-bottom: 3rem;
-      color: var(--dark);
+    .welcome-text h1 {
+      font-size: 4rem;
+      font-weight: 300;
+      margin-bottom: 1rem;
+      color: var(--light);
       position: relative;
-      padding-bottom: 1rem;
+      display: inline-block;
     }
 
-    .section-title::after {
+    .welcome-text h1::after {
       content: '';
       position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100px;
+      bottom: -10px;
+      left: 0;
+      width: 60%;
       height: 4px;
-      background: linear-gradient(to right, var(--accent), var(--success));
+      background: var(--secondary);
       border-radius: 2px;
     }
 
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-    }
-
-    .feature-card {
-      background: white;
-      padding: 2.5rem;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      transition: var(--transition);
-      text-align: center;
-    }
-
-    .feature-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-    }
-
-    .feature-icon {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, var(--accent), var(--success));
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1.5rem;
-      color: white;
-      font-size: 2rem;
-    }
-
-    .feature-card h3 {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-      color: var(--dark);
-    }
-
-    .feature-card p {
-      color: var(--gray);
-    }
-
-    /* Footer */
-    footer {
-      background: var(--dark);
-      color: white;
-      padding: 3rem 0 1rem;
-      margin-top: auto;
-    }
-
-    .footer-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 2rem;
-    }
-
-    .footer-content {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 2rem;
-      margin-bottom: 2rem;
-    }
-
-    .footer-section h3 {
-      margin-bottom: 1.5rem;
-      color: white;
-      font-size: 1.5rem;
-    }
-
-    .footer-section p {
-      color: #ddd;
-      line-height: 1.6;
-    }
-
-    .footer-links {
-      list-style: none;
-    }
-
-    .footer-links li {
-      margin-bottom: 0.75rem;
-    }
-
-    .footer-links a {
-      color: #ddd;
-      text-decoration: none;
-      transition: var(--transition);
-    }
-
-    .footer-links a:hover {
-      color: white;
-      padding-left: 5px;
-    }
-
-    .social-links {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
-
-    .social-links a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 45px;
-      height: 45px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      transition: var(--transition);
-      color: white;
+    .welcome-text p {
       font-size: 1.2rem;
+      max-width: 500px;
+      margin-top: 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
     }
 
-    .social-links a:hover {
-      background: var(--primary);
-      transform: translateY(-3px);
+    /* Entradas/Botones */
+    .entries {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      max-width: 400px;
     }
 
-    .footer-bottom {
-      text-align: center;
-      padding-top: 2rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      color: #ddd;
-      font-size: 0.9rem;
+    .entry-btn {
+      padding: 1.2rem 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50px;
+      color: var(--light);
+      font-size: 1.1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .entry-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(10px);
+    }
+
+    .entry-btn i {
+      font-size: 1.5rem;
+      transition: var(--transition);
+    }
+
+    .entry-btn:hover i {
+      color: var(--secondary);
+      transform: scale(1.2);
+    }
+
+    /* Sección de animación */
+    .animation-section {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Animación de "árbol de la vida" */
+    .tree-of-life {
+      position: relative;
+      width: 400px;
+      height: 400px;
+    }
+
+    .circle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      animation: pulse 8s infinite ease-in-out;
+    }
+
+    .circle:nth-child(2) {
+      width: 300px;
+      height: 300px;
+      animation-delay: -2s;
+    }
+
+    .circle:nth-child(3) {
+      width: 400px;
+      height: 400px;
+      animation-delay: -4s;
+    }
+
+    .branch {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.7);
+      width: 2px;
+      height: 100px;
+      top: 50%;
+      left: 50%;
+      transform-origin: bottom center;
+    }
+
+    .leaf {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--secondary);
+      border-radius: 50%;
+      animation: float 4s infinite ease-in-out;
+    }
+
+    .particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 50%;
+      animation: float 6s infinite ease-in-out;
+    }
+
+    /* Animaciones */
+    @keyframes pulse {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.5;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.05);
+        opacity: 0.8;
+      }
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg);
+      }
+      33% {
+        transform: translateY(-10px) rotate(120deg);
+      }
+      66% {
+        transform: translateY(10px) rotate(240deg);
+      }
+    }
+
+    /* Efectos de iluminación */
+    .light-effect {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(52, 152, 219, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+      border-radius: 50%;
+      filter: blur(20px);
+      animation: moveLight 15s infinite alternate ease-in-out;
+    }
+
+    @keyframes moveLight {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+        top: 20%;
+        left: 70%;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1.2);
+        top: 80%;
+        left: 30%;
+      }
     }
 
     /* Responsive */
     @media (max-width: 992px) {
-      .hero h1 {
-        font-size: 2.8rem;
+      .container {
+        flex-direction: column;
       }
       
-      .hero p {
-        font-size: 1.2rem;
+      .content-section {
+        padding-top: 5rem;
+      }
+      
+      .animation-section {
+        min-height: 50vh;
       }
     }
 
     @media (max-width: 768px) {
-      .menu-toggle {
-        display: block;
+      .welcome-text h1 {
+        font-size: 3rem;
       }
       
-      nav ul {
-        position: fixed;
-        top: 80px;
-        left: 0;
-        right: 0;
-        background: white;
-        flex-direction: column;
-        padding: 2rem;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        gap: 1.5rem;
-        clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
-        transition: var(--transition);
-      }
-      
-      nav ul.active {
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-      }
-      
-      .hero h1 {
-        font-size: 2.3rem;
-      }
-      
-      .hero p {
-        font-size: 1.1rem;
-      }
-      
-      .section-title {
-        font-size: 2rem;
+      .tree-of-life {
+        transform: scale(0.8);
       }
     }
 
     @media (max-width: 480px) {
-      .header-container {
-        padding: 0 1rem;
+      .welcome-text h1 {
+        font-size: 2.5rem;
       }
       
-      .hero {
-        padding: 2rem 0.5rem;
+      .entry-btn {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
       }
       
-      .hero h1 {
-        font-size: 2rem;
-      }
-      
-      .hero-cta {
-        flex-direction: column;
-        align-items: center;
-      }
-      
-      .btn {
-        width: 100%;
-        justify-content: center;
-      }
-      
-      .feature-card {
-        padding: 1.5rem;
+      .tree-of-life {
+        transform: scale(0.6);
       }
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header>
-    <div class="header-container">
-      <a href="index.html" class="logo">
-        <i class="fas fa-code"></i>
-        <span>MiWeb</span>
-      </a>
+  <div class="container">
+    <!-- Sección de contenido -->
+    <div class="content-section">
+      <div class="logo">ONELIFE</div>
       
-      <div class="menu-toggle" id="menuToggle">
-        <i class="fas fa-bars"></i>
+      <div class="welcome-text">
+        <h1>bienvenido</h1>
+        <p>Descubre una nueva forma de experimentar la vida. Donde cada momento cuenta y cada elección define tu camino.</p>
       </div>
       
-      <nav>
-        <ul id="navMenu">
-          <li><a href="index.html">Inicio</a></li>
-          <li><a href="about.html">Sobre mí</a></li>
-          <li><a href="academicos.html">Archivos Académicos</a></li>
-          <li><a href="contacto.html">Contacto</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
-
-  <!-- Contenido principal -->
-  <main>
-    <!-- Hero Section -->
-    <section class="hero">
-      <h1>Bienvenido a mi espacio digital</h1>
-      <p>Explora mi trabajo, proyectos y recursos académicos en un solo lugar</p>
-      <div class="hero-cta">
-        <a href="academicos.html" class="btn btn-primary">
-          <i class="fas fa-graduation-cap"></i>
-          Archivos Académicos
-        </a>
-        <a href="about.html" class="btn btn-secondary">
-          <i class="fas fa-user"></i>
-          Conóceme
-        </a>
-      </div>
-    </section>
-
-    <!-- Características -->
-    <section class="features">
-      <h2 class="section-title">¿Qué encontrarás aquí?</h2>
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-file-pdf"></i>
-          </div>
-          <h3>Archivos Académicos</h3>
-          <p>Accede a apuntes, ejercicios y material de estudio organizado por asignaturas.</p>
+      <div class="entries">
+        <div class="entry-btn">
+          <i class="fas fa-compass"></i>
+          <span>Explorar</span>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-project-diagram"></i>
-          </div>
-          <h3>Proyectos</h3>
-          <p>Descubre los trabajos y proyectos en los que he estado involucrado.</p>
+        <div class="entry-btn">
+          <i class="fas fa-heart"></i>
+          <span>Experiencias</span>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-envelope"></i>
-          </div>
-          <h3>Contacto</h3>
-          <p>Formas de contactar conmigo para colaboraciones o consultas.</p>
+        <div class="entry-btn">
+          <i class="fas fa-book-open"></i>
+          <span>Historias</span>
         </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Footer -->
-  <footer>
-    <div class="footer-container">
-      <div class="footer-content">
-        <div class="footer-section">
-          <h3>MiWeb</h3>
-          <p>Mi espacio personal en la web con recursos y información profesional.</p>
+        <div class="entry-btn">
+          <i class="fas fa-users"></i>
+          <span>Conexiones</span>
         </div>
-        <div class="footer-section">
-          <h3>Enlaces rápidos</h3>
-          <ul class="footer-links">
-            <li><a href="index.html">Inicio</a></li>
-            <li><a href="about.html">Sobre mí</a></li>
-            <li><a href="academicos.html">Archivos Académicos</a></li>
-            <li><a href="contacto.html">Contacto</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h3>Contacto</h3>
-          <div class="social-links">
-            <a href="#"><i class="fab fa-github"></i></a>
-            <a href="#"><i class="fab fa-linkedin"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fas fa-envelope"></i></a>
-          </div>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>&copy; 2023 MiWeb. Todos los derechos reservados.</p>
       </div>
     </div>
-  </footer>
+    
+    <!-- Sección de animación -->
+    <div class="animation-section">
+      <div class="light-effect"></div>
+      <div class="tree-of-life" id="treeOfLife">
+        <!-- Generado por JavaScript -->
+      </div>
+    </div>
+  </div>
 
   <script>
-    // Menu toggle para móviles
-    document.getElementById('menuToggle').addEventListener('click', function() {
-      document.getElementById('navMenu').classList.toggle('active');
+    // Crear el árbol de la vida con ramas y hojas
+    document.addEventListener('DOMContentLoaded', function() {
+      const treeOfLife = document.getElementById('treeOfLife');
+      const numBranches = 12;
+      const numLeaves = 24;
+      const numParticles = 50;
+      
+      // Crear círculos concéntricos
+      for (let i = 0; i < 3; i++) {
+        const circle = document.createElement('div');
+        circle.className = 'circle';
+        treeOfLife.appendChild(circle);
+      }
+      
+      // Crear ramas
+      for (let i = 0; i < numBranches; i++) {
+        const angle = (i * (360 / numBranches));
+        const branch = document.createElement('div');
+        branch.className = 'branch';
+        branch.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+        treeOfLife.appendChild(branch);
+        
+        // Añadir hojas a las ramas
+        const leaf = document.createElement('div');
+        leaf.className = 'leaf';
+        const leafSize = 10 + Math.random() * 8;
+        const leafPos = 70 + Math.random() * 20;
+        leaf.style.width = `${leafSize}px`;
+        leaf.style.height = `${leafSize}px`;
+        leaf.style.top = `50%`;
+        leaf.style.left = `50%`;
+        leaf.style.transform = `translate(-50%, -50%) translate(${leafPos}px) rotate(${angle}deg)`;
+        leaf.style.animationDelay = `${-Math.random() * 4}s`;
+        treeOfLife.appendChild(leaf);
+      }
+      
+      // Crear partículas flotantes
+      const particles = document.createElement('div');
+      particles.className = 'particles';
+      treeOfLife.appendChild(particles);
+      
+      for (let i = 0; i < numParticles; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        const size = 2 + Math.random() * 4;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.top = `${Math.random() * 100}%`;
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.animationDelay = `${-Math.random() * 6}s`;
+        particles.appendChild(particle);
+      }
+      
+      // Interactividad con los botones
+      const buttons = document.querySelectorAll('.entry-btn');
+      buttons.forEach(button => {
+        button.addEventListener('click', function() {
+          buttons.forEach(btn => btn.style.background = 'rgba(255, 255, 255, 0.1)');
+          this.style.background = 'rgba(231, 76, 60, 0.3)';
+        });
+      });
     });
   </script>
 </body>
