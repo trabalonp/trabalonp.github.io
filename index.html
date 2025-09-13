@@ -19,15 +19,16 @@
       --shadow: 0 0 20px rgba(0, 247, 255, 0.3);
       --neon-glow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary);
       
-      /* Colores para modo día mejorado */
-      --day-primary: #0072ff;
-      --day-secondary: #8a2be2;
-      --day-accent: #ff0080;
-      --day-bg: linear-gradient(135deg, #e6f0ff 0%, #ffffff 100%);
-      --day-text: #1a1a40;
-      --day-card: rgba(255, 255, 255, 0.9);
-      --day-border: rgba(0, 114, 255, 0.2);
-      --day-glow: 0 0 10px rgba(0, 114, 255, 0.4);
+      /* Colores para modo claro mejorado - más suaves y menos contrastados */
+      --day-primary: #5d8aa8;
+      --day-secondary: #8a83c2;
+      --day-accent: #b19cd9;
+      --day-bg: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      --day-text: #495057;
+      --day-card: rgba(255, 255, 255, 0.95);
+      --day-border: rgba(93, 138, 168, 0.2);
+      --day-glow: 0 0 10px rgba(93, 138, 168, 0.2);
+      --day-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
     }
 
     * {
@@ -69,8 +70,8 @@
 
     .light-mode .bg-grid {
       background: 
-        linear-gradient(rgba(0, 114, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 114, 255, 0.05) 1px, transparent 1px);
+        linear-gradient(rgba(93, 138, 168, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(93, 138, 168, 0.03) 1px, transparent 1px);
     }
 
     .floating-shapes {
@@ -119,17 +120,17 @@
 
     .light-mode .shape-1 {
       background: var(--day-primary);
-      opacity: 0.2;
+      opacity: 0.1;
     }
 
     .light-mode .shape-2 {
       background: var(--day-secondary);
-      opacity: 0.15;
+      opacity: 0.08;
     }
 
     .light-mode .shape-3 {
       background: var(--day-accent);
-      opacity: 0.1;
+      opacity: 0.06;
     }
 
     @keyframes float {
@@ -139,7 +140,7 @@
       75% { transform: translate(30px, 30px) rotate(5deg); }
     }
 
-    /* Efecto de líneas de escaneo CRT */
+    /* Efecto de líneas de escaneo CRT - más suave en modo claro */
     .scan-lines {
       position: fixed;
       top: 0;
@@ -154,7 +155,7 @@
     }
 
     .light-mode .scan-lines {
-      background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.03) 50%);
+      background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.02) 50%);
       opacity: 0.1;
     }
 
@@ -171,7 +172,7 @@
     }
 
     .light-mode header {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(248, 249, 250, 0.9);
       border-bottom: 1px solid var(--day-border);
       backdrop-filter: blur(10px);
     }
@@ -199,7 +200,8 @@
 
     .light-mode .cascade-particle {
       background: var(--day-primary);
-      box-shadow: 0 0 10px var(--day-primary), 0 0 20px var(--day-primary);
+      box-shadow: 0 0 8px var(--day-primary), 0 0 15px var(--day-primary);
+      opacity: 0.6;
     }
 
     .header-container {
@@ -231,7 +233,7 @@
 
     .light-mode .logo {
       color: var(--day-primary);
-      text-shadow: var(--day-glow);
+      text-shadow: 0 0 5px rgba(93, 138, 168, 0.3), 0 0 8px rgba(93, 138, 168, 0.2);
     }
 
     .logo:hover {
@@ -242,7 +244,7 @@
 
     .light-mode .logo:hover {
       color: var(--day-secondary);
-      text-shadow: 0 0 15px var(--day-primary), 0 0 25px var(--day-primary);
+      text-shadow: 0 0 8px rgba(138, 131, 194, 0.4);
     }
 
     /* Efecto de parpadeo aleatorio */
@@ -274,7 +276,7 @@
     }
 
     .light-mode nav ul li a {
-      color: #4a4a8a;
+      color: #6c757d;
     }
 
     nav ul li a:hover {
@@ -324,7 +326,8 @@
     }
 
     .light-mode .theme-toggle {
-      color: #4a4a8a;
+      color: #6c757d;
+      background: rgba(93, 138, 168, 0.1);
     }
 
     .theme-toggle:hover {
@@ -334,6 +337,7 @@
 
     .light-mode .theme-toggle:hover {
       color: var(--day-primary);
+      background: rgba(93, 138, 168, 0.2);
     }
 
     .menu-toggle { 
@@ -377,7 +381,7 @@
 
     .light-mode .hero-content h1 {
       background: linear-gradient(90deg, var(--day-primary), var(--day-secondary));
-      text-shadow: 0 0 10px rgba(0, 114, 255, 0.2);
+      text-shadow: 0 0 8px rgba(93, 138, 168, 0.2);
     }
 
     .hero-cta {
@@ -411,10 +415,10 @@
     }
 
     .light-mode .btn-primary {
-      background: rgba(0, 114, 255, 0.1);
+      background: rgba(93, 138, 168, 0.08);
       color: var(--day-primary);
       border: 1px solid var(--day-border);
-      box-shadow: 0 0 15px rgba(0, 114, 255, 0.2);
+      box-shadow: var(--day-shadow);
     }
 
     .btn-primary:hover {
@@ -424,8 +428,8 @@
     }
 
     .light-mode .btn-primary:hover {
-      background: rgba(0, 114, 255, 0.2);
-      box-shadow: 0 10px 25px rgba(0, 114, 255, 0.3);
+      background: rgba(93, 138, 168, 0.15);
+      box-shadow: 0 8px 20px rgba(93, 138, 168, 0.2);
     }
 
     .btn-primary::before {
@@ -441,7 +445,7 @@
     }
 
     .light-mode .btn-primary::before {
-      background: linear-gradient(90deg, transparent, rgba(0, 114, 255, 0.2), transparent);
+      background: linear-gradient(90deg, transparent, rgba(93, 138, 168, 0.1), transparent);
     }
 
     .btn-primary:hover::before {
@@ -460,9 +464,9 @@
     }
 
     .light-mode .hero-animation {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.15);
       border: 1px solid var(--day-border);
-      box-shadow: 0 0 20px rgba(0, 114, 255, 0.2);
+      box-shadow: var(--day-shadow);
     }
 
     canvas {
@@ -504,7 +508,7 @@
       }
       
       .light-mode nav ul {
-        background: rgba(255, 255, 255, 0.95);
+        background: rgba(248, 249, 250, 0.95);
         border-top: 1px solid var(--day-border);
       }
       
@@ -623,18 +627,18 @@
     const numParticles = 80;
     const connectionDistance = 120;
 
-    // Colores neón para las partículas
+    // Colores neón para las partículas (modo oscuro)
     const colors = [
       {r: 0, g: 247, b: 255}, // cian
       {r: 119, g: 0, b: 255}, // violeta
       {r: 255, g: 0, b: 200}  // rosa
     ];
 
-    // Colores para modo día
+    // Colores para modo claro (más suaves)
     const dayColors = [
-      {r: 0, g: 114, b: 255}, // azul
-      {r: 138, g: 43, b: 226}, // blueviolet
-      {r: 255, g: 0, b: 128}  // rosa
+      {r: 93, g: 138, b: 168},   // azul suave
+      {r: 138, g: 131, b: 194},  // púrpura suave
+      {r: 177, g: 156, b: 217}   // lila suave
     ];
 
     class Particle {
@@ -660,8 +664,12 @@
       
       draw(){
         // Usar colores diferentes según el modo
-        const currentColors = document.body.classList.contains('light-mode') ? dayColors : colors;
+        const isLightMode = document.body.classList.contains('light-mode');
+        const currentColors = isLightMode ? dayColors : colors;
         const particleColor = currentColors[Math.floor(Math.random() * currentColors.length)];
+        
+        // Reducir la intensidad del glow en modo claro
+        const glowIntensity = isLightMode ? 0.4 : 0.8;
         
         // Dibujar glow
         ctx.beginPath();
@@ -670,7 +678,7 @@
           this.x, this.y, this.size, 
           this.x, this.y, this.size + this.glow
         );
-        gradient.addColorStop(0, `rgba(${particleColor.r}, ${particleColor.g}, ${particleColor.b}, 0.8)`);
+        gradient.addColorStop(0, `rgba(${particleColor.r}, ${particleColor.g}, ${particleColor.b}, ${glowIntensity})`);
         gradient.addColorStop(1, `rgba(${particleColor.r}, ${particleColor.g}, ${particleColor.b}, 0)`);
         ctx.fillStyle = gradient;
         ctx.fill();
@@ -702,7 +710,11 @@
             let opacity = 1 - (dist / connectionDistance);
             
             // Usar colores diferentes según el modo
-            const currentColors = document.body.classList.contains('light-mode') ? dayColors : colors;
+            const isLightMode = document.body.classList.contains('light-mode');
+            const currentColors = isLightMode ? dayColors : colors;
+            
+            // Reducir la opacidad en modo claro
+            const lineOpacity = isLightMode ? 0.2 : 0.3;
             
             // Crear gradiente para la línea de conexión
             const gradient = ctx.createLinearGradient(
@@ -710,8 +722,8 @@
               particlesArray[b].x, particlesArray[b].y
             );
             
-            gradient.addColorStop(0, `rgba(${currentColors[0].r}, ${currentColors[0].g}, ${currentColors[0].b}, ${opacity * 0.3})`);
-            gradient.addColorStop(1, `rgba(${currentColors[1].r}, ${currentColors[1].g}, ${currentColors[1].b}, ${opacity * 0.3})`);
+            gradient.addColorStop(0, `rgba(${currentColors[0].r}, ${currentColors[0].g}, ${currentColors[0].b}, ${opacity * lineOpacity})`);
+            gradient.addColorStop(1, `rgba(${currentColors[1].r}, ${currentColors[1].g}, ${currentColors[1].b}, ${opacity * lineOpacity})`);
             
             ctx.strokeStyle = gradient;
             ctx.lineWidth = 1;
@@ -767,7 +779,7 @@
       const isLightMode = document.body.classList.contains('light-mode');
       if (isLightMode) {
         particle.style.background = 'var(--day-primary)';
-        particle.style.boxShadow = '0 0 10px var(--day-primary), 0 0 20px var(--day-primary)';
+        particle.style.boxShadow = '0 0 8px var(--day-primary), 0 0 15px var(--day-primary)';
       } else {
         particle.style.background = 'var(--primary)';
         particle.style.boxShadow = '0 0 10px var(--primary), 0 0 20px var(--primary)';
@@ -791,7 +803,7 @@
         },
         { 
           transform: 'translateY(0)',
-          opacity: 0.7
+          opacity: isLightMode ? 0.6 : 0.7
         },
         { 
           transform: `translateY(${window.innerHeight}px)`,
