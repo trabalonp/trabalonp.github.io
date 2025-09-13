@@ -12,11 +12,21 @@
       --accent: #ff00c8;
       --success: #00ff9d;
       --dark: #0a0a18;
+      --light: #f0f0f0;
       --gray: #a0a0c0;
       --transition: all 0.3s ease;
       --radius: 12px;
       --shadow: 0 0 20px rgba(0, 247, 255, 0.3);
       --neon-glow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary);
+      
+      /* Colores para modo claro */
+      --bg-gradient-light: linear-gradient(135deg, #e4edf5 0%, #f5f7fa 100%);
+      --text-light: #212529;
+      --header-bg-light: rgba(255, 255, 255, 0.95);
+      --header-border-light: rgba(0, 0, 0, 0.1);
+      --btn-bg-light: rgba(0, 247, 255, 0.15);
+      --btn-border-light: rgba(0, 247, 255, 0.4);
+      --canvas-bg-light: rgba(255, 255, 255, 0.5);
     }
 
     * {
@@ -33,6 +43,12 @@
       flex-direction: column;
       min-height: 100vh;
       overflow-x: hidden;
+      transition: var(--transition);
+    }
+
+    body.light-mode {
+      background: var(--bg-gradient-light);
+      color: var(--text-light);
     }
 
     /* Efectos de fondo futurista */
@@ -48,6 +64,12 @@
       background-size: 40px 40px;
       z-index: -1;
       perspective: 1000px;
+    }
+
+    .light-mode .bg-grid {
+      background: 
+        linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
     }
 
     .floating-shapes {
@@ -94,6 +116,10 @@
       animation: float 12s infinite ease-in-out 2s;
     }
 
+    .light-mode .shape {
+      opacity: 0.15;
+    }
+
     @keyframes float {
       0%, 100% { transform: translate(0, 0) rotate(0deg); }
       25% { transform: translate(-30px, 40px) rotate(5deg); }
@@ -115,6 +141,10 @@
       opacity: 0.2;
     }
 
+    .light-mode .scan-lines {
+      background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.03) 50%);
+    }
+
     header {
       background: rgba(10, 10, 24, 0.8);
       backdrop-filter: blur(10px);
@@ -124,6 +154,12 @@
       z-index: 1000;
       padding: 1rem 0;
       overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .light-mode header {
+      background: var(--header-bg-light);
+      border-bottom: 1px solid var(--header-border-light);
     }
 
     /* Contenedor de cascada neon para el header */
@@ -145,6 +181,11 @@
       box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
       opacity: 0;
       border-radius: 2px;
+    }
+
+    .light-mode .cascade-particle {
+      background: var(--secondary);
+      box-shadow: 0 0 10px var(--secondary), 0 0 20px var(--secondary);
     }
 
     .header-container {
@@ -174,9 +215,19 @@
       animation: flicker 5s infinite alternate;
     }
 
+    .light-mode .logo {
+      color: var(--secondary);
+      text-shadow: 0 0 5px rgba(119, 0, 255, 0.5), 0 0 10px rgba(119, 0, 255, 0.3);
+    }
+
     .logo:hover {
       color: #fff;
       animation: none;
+      text-shadow: 0 0 15px var(--primary), 0 0 25px var(--primary), 0 0 40px var(--primary);
+    }
+
+    .light-mode .logo:hover {
+      color: var(--primary);
       text-shadow: 0 0 15px var(--primary), 0 0 25px var(--primary), 0 0 40px var(--primary);
     }
 
@@ -196,6 +247,7 @@
       list-style: none;
       display: flex;
       gap: 2rem;
+      align-items: center;
     }
 
     nav ul li a {
@@ -205,6 +257,10 @@
       transition: var(--transition);
       position: relative;
       padding: 0.5rem 0;
+    }
+
+    .light-mode nav ul li a {
+      color: #6c757d;
     }
 
     nav ul li a:hover {
@@ -225,6 +281,32 @@
 
     nav ul li a:hover::after {
       width: 100%;
+    }
+
+    /* Botón de cambio de tema */
+    .theme-toggle {
+      background: transparent;
+      border: none;
+      color: var(--gray);
+      cursor: pointer;
+      font-size: 1.2rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      margin-left: 1rem;
+    }
+
+    .light-mode .theme-toggle {
+      color: #6c757d;
+    }
+
+    .theme-toggle:hover {
+      color: var(--primary);
+      transform: rotate(30deg);
     }
 
     .menu-toggle { 
@@ -262,6 +344,11 @@
       letter-spacing: 2px;
     }
 
+    .light-mode .hero-content h1 {
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      text-shadow: 0 0 10px rgba(119, 0, 255, 0.2);
+    }
+
     .hero-cta {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -292,10 +379,22 @@
       box-shadow: var(--shadow);
     }
 
+    .light-mode .btn-primary {
+      background: var(--btn-bg-light);
+      color: var(--secondary);
+      border: 1px solid var(--btn-border-light);
+      box-shadow: 0 0 15px rgba(119, 0, 255, 0.2);
+    }
+
     .btn-primary:hover {
       background: rgba(0, 247, 255, 0.2);
       transform: translateY(-3px);
       box-shadow: 0 10px 25px rgba(0, 247, 255, 0.4);
+    }
+
+    .light-mode .btn-primary:hover {
+      background: rgba(0, 247, 255, 0.25);
+      box-shadow: 0 10px 25px rgba(0, 247, 255, 0.3);
     }
 
     .btn-primary::before {
@@ -323,6 +422,12 @@
       box-shadow: var(--shadow);
       border: 1px solid rgba(0, 247, 255, 0.3);
       background: rgba(0, 0, 0, 0.3);
+    }
+
+    .light-mode .hero-animation {
+      background: var(--canvas-bg-light);
+      border: 1px solid var(--btn-border-light);
+      box-shadow: 0 0 20px rgba(119, 0, 255, 0.2);
     }
 
     canvas {
@@ -363,12 +468,22 @@
         border-top: 1px solid rgba(0, 247, 255, 0.2);
       }
       
+      .light-mode nav ul {
+        background: rgba(255, 255, 255, 0.95);
+        border-top: 1px solid var(--header-border-light);
+      }
+      
       nav ul.active {
         display: flex;
       }
       
       .menu-toggle {
         display: block;
+      }
+
+      .theme-toggle {
+        margin-left: 0;
+        margin-top: 1rem;
       }
     }
 
@@ -418,6 +533,11 @@
           <li><a href="about.html">SOBRE MÍ</a></li>
           <li><a href="academicos.html">UPCT-DATOS</a></li>
           <li><a href="contacto.html">CONTACTO</a></li>
+          <li>
+            <button class="theme-toggle" id="themeToggle" aria-label="Cambiar modo claro/oscuro">
+              <i class="fas fa-moon"></i>
+            </button>
+          </li>
         </ul>
       </nav>
     </div>
@@ -648,6 +768,36 @@
     
     // Iniciar efecto de cascada
     generateCascadeParticles();
+
+    // Funcionalidad para el cambio de tema
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = themeToggle.querySelector('i');
+    
+    // Comprobar si hay una preferencia guardada
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      document.body.classList.toggle('light-mode', savedTheme === 'light');
+      updateThemeIcon();
+    }
+    
+    // Alternar tema al hacer clic en el botón
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('light-mode');
+      const currentTheme = document.body.classList.contains('light-mode') ? 'light' : 'dark';
+      localStorage.setItem('theme', currentTheme);
+      updateThemeIcon();
+    });
+    
+    // Actualizar icono según el tema actual
+    function updateThemeIcon() {
+      if (document.body.classList.contains('light-mode')) {
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+      } else {
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+      }
+    }
   </script>
 </body>
 </html>
