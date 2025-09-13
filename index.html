@@ -2,21 +2,125 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Inicio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Web Oficial</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <nav>
-    <ul>
-      <li><a href="index.html">Inicio</a></li>
-      <li><a href="about.html">Sobre mí</a></li>
-      <li><a href="contacto.html">Contacto</a></li>
-    </ul>
-  </nav>
+  <!-- Header con navegación -->
+  <header>
+    <div class="container">
+      <div class="logo">
+        <h1>MiWeb</h1>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="index.html" class="active">Inicio</a></li>
+          <li><a href="about.html">Sobre mí</a></li>
+          <li><a href="academicos.html">Archivos Académicos</a></li>
+          <li><a href="contacto.html">Contacto</a></li>
+        </ul>
+      </nav>
+      <div class="menu-toggle">
+        <i class="fas fa-bars"></i>
+      </div>
+    </div>
+  </header>
 
-  <div class="container">
-    <h1>Bienvenido a mi web 🚀</h1>
-    <p>Este es un ejemplo de menú bonito con GitHub Pages.</p>
-  </div>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h2>Bienvenido a mi espacio digital</h2>
+      <p>Explora mi trabajo, proyectos y recursos académicos</p>
+      <div class="cta-buttons">
+        <a href="academicos.html" class="btn btn-primary">Archivos Académicos</a>
+        <a href="about.html" class="btn btn-secondary">Conóceme</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="floating-card">
+        <i class="fas fa-graduation-cap"></i>
+        <h3>Recursos Educativos</h3>
+      </div>
+      <div class="floating-card">
+        <i class="fas fa-laptop-code"></i>
+        <h3>Proyectos</h3>
+      </div>
+      <div class="floating-card">
+        <i class="fas fa-book-open"></i>
+        <h3>Documentación</h3>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <h2>¿Qué encontrarás aquí?</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-file-pdf"></i>
+          </div>
+          <h3>Archivos Académicos</h3>
+          <p>Accede a apuntes, ejercicios y material de estudio organizado por asignaturas.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-project-diagram"></i>
+          </div>
+          <h3>Proyectos</h3>
+          <p>Descubre los trabajos y proyectos en los que he estado involucrado.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <h3>Contacto</h3>
+          <p>Formas de contactar conmigo para colaboraciones o consultas.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>MiWeb</h3>
+          <p>Mi espacio personal en la web con recursos y información profesional.</p>
+        </div>
+        <div class="footer-section">
+          <h4>Enlaces rápidos</h4>
+          <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="about.html">Sobre mí</a></li>
+            <li><a href="academicos.html">Archivos Académicos</a></li>
+            <li><a href="contacto.html">Contacto</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Contacto</h4>
+          <div class="social-links">
+            <a href="#"><i class="fab fa-github"></i></a>
+            <a href="#"><i class="fab fa-linkedin"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2023 MiWeb. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Menu toggle para móviles
+    document.querySelector('.menu-toggle').addEventListener('click', function() {
+      document.querySelector('nav ul').classList.toggle('show');
+    });
+  </script>
 </body>
 </html>
