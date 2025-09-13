@@ -262,13 +262,6 @@
       letter-spacing: 2px;
     }
 
-    .hero-content p {
-      font-size: 1.2rem;
-      color: var(--gray);
-      margin-bottom: 2.5rem;
-      line-height: 1.6;
-    }
-
     .hero-cta {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -416,7 +409,7 @@
     
     <div class="header-container">
       <a href="index.html" class="logo">
-        <i class="fas fa-infinity"></i> ONELIFE
+        ONELIFE
       </a>
       <div class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></div>
       <nav>
@@ -432,8 +425,7 @@
 
   <section class="hero">
     <div class="hero-content">
-      <h1>EXPLORA EL FUTURO</h1>
-      <p>Descubre mis proyectos, trabajos y recursos en un espacio digital avanzado. Tecnología, innovación y creatividad en un solo lugar.</p>
+      <h1>BIENVENIDO</h1>
       <div class="hero-cta">
         <a href="academicos.html" class="btn btn-primary">
           <i class="fas fa-graduation-cap"></i> UPCT-DATOS
@@ -466,7 +458,7 @@
       document.getElementById('navMenu').classList.toggle('active');
     });
 
-    // Animación de partículas futurista
+    // Animación de partículas futurista (con velocidad reducida)
     const canvas = document.getElementById("particles");
     const ctx = canvas.getContext("2d");
     canvas.width = canvas.offsetWidth;
@@ -488,8 +480,9 @@
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
         this.size = 1 + Math.random() * 3;
-        this.speedX = (Math.random() - 0.5) * 2;
-        this.speedY = (Math.random() - 0.5) * 2;
+        // Velocidad reducida a la mitad
+        this.speedX = (Math.random() - 0.5) * 1; 
+        this.speedY = (Math.random() - 0.5) * 1;
         this.color = colors[Math.floor(Math.random() * colors.length)];
         this.glow = 5 + Math.random() * 10;
       }
@@ -574,6 +567,7 @@
       requestAnimationFrame(animate);
     }
 
+    // Inicializar y comenzar animación
     init();
     animate();
     
@@ -585,7 +579,6 @@
 
     // Efecto de cascada neon en el header
     const neonCascade = document.getElementById('neonCascade');
-    const particles = [];
     
     function createCascadeParticle() {
       const particle = document.createElement('div');
@@ -604,11 +597,11 @@
       // Color aleatorio (principalmente tonos cian y púrpura)
       const colorChoice = Math.random();
       if (colorChoice < 0.7) {
-        particle.style.background = var(--primary);
-        particle.style.boxShadow = `0 0 10px ${getComputedStyle(document.documentElement).getPropertyValue('--primary')}, 0 0 20px ${getComputedStyle(document.documentElement).getPropertyValue('--primary')}`;
+        particle.style.background = 'var(--primary)';
+        particle.style.boxShadow = '0 0 10px var(--primary), 0 0 20px var(--primary)';
       } else {
-        particle.style.background = var(--secondary);
-        particle.style.boxShadow = `0 0 10px ${getComputedStyle(document.documentElement).getPropertyValue('--secondary')}, 0 0 20px ${getComputedStyle(document.documentElement).getPropertyValue('--secondary')}`;
+        particle.style.background = 'var(--secondary)';
+        particle.style.boxShadow = '0 0 10px var(--secondary), 0 0 20px var(--secondary)';
       }
       
       // Opacidad inicial
