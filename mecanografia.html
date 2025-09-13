@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mecanografía con Texto Aleatorio</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #2c3e50;
+        }
+        
+        .typing-app {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            margin: 20px auto;
+        }
+        
+        .app-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .app-title {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            color: #3498db;
+            font-weight: 600;
+        }
+        
+        .app-description {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto 15px;
+            line-height: 1.6;
+            color: #7f8c8d;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .stat-box {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .typing-container {
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            min-height: 200px;
+            border: 1px solid #e9ecef;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.03);
+        }
+        
+        #textDisplay {
+            font-size: 1.3rem;
+            line-height: 1.7;
+            min-height: 150px;
+            color: #34495e;
+            overflow-wrap: break-word;
+            letter-spacing: 0.3px;
+        }
+        
+        #textDisplay span {
+            padding: 2px 1px;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+        
+        .correct {
+            color: #27ae60;
+            background-color: rgba(39, 174, 96, 0.08);
+        }
+        
+        .incorrect {
+            color: #e74c3c;
+            background-color: rgba(231, 76, 60, 0.08);
+            text-decoration: line-through;
+        }
+        
+        .current {
+            background-color: rgba(52, 152, 219, 0.15);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { background-color: rgba(52, 152, 219, 0.15); }
+            50% { background-color: rgba(52, 152, 219, 0.3); }
+            100% { background-color: rgba(52, 152, 219, 0.15); }
+        }
+        
+        .input-container {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        
+        #typingInput {
+            width: 100%;
+            height: 120px;
+            padding: 20px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            background: #f8f9fa;
+            color: #2c3e50;
+            resize: none;
+            outline: none;
+            transition: all 0.3s;
+            line-height: 1.6;
+        }
+        
+        #typingInput:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            background: white;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 28px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn-reset {
+            background: #95a5a6;
+            box-shadow: 0 4px 10px rgba(149, 165, 166, 0.2);
+        }
+        
+        .btn-reset:hover {
+            background: #7f8c8d;
+            box-shadow: 0 6px 15px rgba(149, 165, 166, 0.25);
+        }
+        
+        .difficulty {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .difficulty-btn {
+            padding: 10px 22px;
+            font-size: 0.95rem;
+            border: none;
+            border-radius: 8px;
+            background: #ecf0f1;
+            color: #7f8c8d;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .difficulty-btn.active, .difficulty-btn:hover {
+            background: #3498db;
+            color: white;
+        }
+        
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            font-size: 0.95rem;
+            border: 1px solid #e9ecef;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #3498db;
+            text-align: center;
+        }
+        
+        .instructions ul {
+            padding-left: 22px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+            color: #34495e;
+        }
+        
+        .app-footer {
+            margin-top: 25px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+        
+        @media (max-width: 768px) {
+            .typing-app {
+                padding: 25px;
+            }
+            
+            .app-title {
+                font-size: 1.9rem;
+            }
+            
+            #textDisplay {
+                font-size: 1.15rem;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .typing-app {
+                padding: 20px;
+            }
+            
+            .app-title {
+                font-size: 1.7rem;
+            }
+            
+            #textDisplay {
+                font-size: 1.05rem;
+            }
+            
+            #typingInput {
+                height: 100px;
+                padding: 15px;
+            }
+            
+            .controls {
+                gap: 10px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="typing-app">
+        <div class="app-header">
+            <h1 class="app-title">Mecanografía con Texto Aleatorio</h1>
+            <p class="app-description">Escribe el texto generado automáticamente. Las letras correctas se marcarán en verde y los errores en rojo.</p>
+        </div>
+        
+        <div class="stats-container">
+            <div class="stat-box">
+                <div class="stat-value" id="accuracy">100%</div>
+                <div class="stat-label">Precisión</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="typed">0</div>
+                <div class="stat-label">Caracteres</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="errors">0</div>
+                <div class="stat-label">Errores</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="time">0s</div>
+                <div class="stat-label">Tiempo</div>
+            </div>
+        </div>
+        
+        <div class="typing-container">
+            <div id="textDisplay"></div>
+        </div>
+        
+        <div class="input-container">
+            <textarea id="typingInput" placeholder="Comienza a escribir aquí..."></textarea>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" id="startBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+                </svg>
+                Comenzar
+            </button>
+            <button class="btn btn-reset" id="resetBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                </svg>
+                Reiniciar
+            </button>
+        </div>
+        
+        <div class="difficulty">
+            <button class="difficulty-btn active" data-difficulty="short">Corto (50-70 palabras)</button>
+            <button class="difficulty-btn" data-difficulty="medium">Medio (100-120 palabras)</button>
+            <button class="difficulty-btn" data-difficulty="long">Largo (150-200 palabras)</button>
+        </div>
+        
+        <div class="instructions">
+            <h3>¿Cómo funciona?</h3>
+            <ul>
+                <li>Selecciona la longitud del texto (Corto, Medio o Largo)</li>
+                <li>Haz clic en "Comenzar" para generar un nuevo texto aleatorio</li>
+                <li>Escribe exactamente el texto que aparece arriba</li>
+                <li>Las letras correctas se mostrarán en <span style="color:#27ae60;">verde</span></li>
+                <li>Los errores se mostrarán en <span style="color:#e74c3c;">rojo</span> y tachados</li>
+                <li>La posición actual se resalta con un fondo azul claro</li>
+                <li>Usa "Reiniciar" para comenzar un nuevo ejercicio</li>
+            </ul>
+        </div>
+        
+        <div class="app-footer">
+            <p>Herramienta de mecanografía con texto aleatorio &copy; 2023</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos DOM
+            const textDisplay = document.getElementById('textDisplay');
+            const typingInput = document.getElementById('typingInput');
+            const startBtn = document.getElementById('startBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const accuracyDisplay = document.getElementById('accuracy');
+            const typedDisplay = document.getElementById('typed');
+            const errorsDisplay = document.getElementById('errors');
+            const timeDisplay = document.getElementById('time');
+            const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+            
+            // Variables de estado
+            let originalText = '';
+            let startTime = 0;
+            let timerInterval = null;
+            let currentDifficulty = 'short';
+            let exerciseStarted = false;
+            
+            // Banco de palabras para generar texto aleatorio
+            const wordBank = [
+                "el", "la", "los", "las", "un", "una", "unos", "unas", "yo", "tú", 
+                "él", "ella", "nosotros", "vosotros", "ellos", "este", "ese", "aquel",
+                "mi", "tu", "su", "nuestro", "vuestro", "mío", "tuyo", "suyo", "qué",
+                "quién", "cuál", "cuánto", "dónde", "cuándo", "cómo", "por", "para",
+                "con", "sin", "sobre", "bajo", "entre", "hacia", "desde", "hasta",
+                "durante", "mediante", "según", "ante", "bajo", "cabe", "contra",
+                "desde", "durante", "en", "entre", "hacia", "hasta", "mediante",
+                "para", "por", "según", "sin", "sobre", "tras", "a", "ante", "bajo",
+                "cabe", "con", "contra", "de", "desde", "durante", "en", "entre",
+                "hacia", "hasta", "mediante", "para", "por", "según", "sin", "sobre",
+                "tras", "y", "o", "pero", "aunque", "mas", "sino", "porque", "pues",
+                "si", "como", "cuando", "mientras", "que", "aquel", "cuyo", "donde",
+                "como", "cuando", "mientras", "aunque", "si", "porque", "pues", "pero",
+                "sino", "mas", "y", "o", "bien", "sea", "ya", "tan", "tanto", "tal",
+                "así", "también", "además", "incluso", "hasta", "aun", "siquiera",
+                "no", "nunca", "jamás", "tampoco", "nadie", "nada", "ninguno", "ni",
+                "sí", "siempre", "también", "claro", "efectivamente", "ciertamente",
+                "quizá", "acaso", "tal", "vez", "puede", "ser", "deber", "haber",
+                "estar", "tener", "hacer", "poder", "decir", "ir", "ver", "dar",
+                "saber", "querer", "llegar", "pasar", "dejar", "llevar", "encontrar",
+                "seguir", "venir", "pensar", "parecer", "hablar", "llevar", "dejar",
+                "empezar", "esperar", "buscar", "existir", "entrar", "trabajar",
+                "necesitar", "ocurrir", "recordar", "pedir", "permitir", "aparecer",
+                "considerar", "intentar", "lograr", "incluir", "continuar", "cambiar",
+                "presentar", "crear", "recibir", "abrir", "mantener", "explicar",
+                "conseguir", "formar", "traer", "comenzar", "servir", "sacar", "dejar",
+                "terminar", "permitir", "escribir", "ofrecer", "leer", "caer", "conocer",
+                "vivir", "sentir", "tratar", "mirar", "contar", "empezar", "esperar",
+                "buscar", "existir", "entrar", "trabajar", "necesitar", "ocurrir",
+                "recordar", "pedir", "permitir", "aparecer", "considerar", "intentar",
+                "lograr", "incluir", "continuar", "cambiar", "presentar", "crear",
+                "recibir", "abrir", "mantener", "explicar", "conseguir", "formar",
+                "traer", "comenzar", "servir", "sacar", "dejar", "terminar", "permitir",
+                "escribir", "ofrecer", "leer", "caer", "conocer", "vivir", "sentir",
+                "tratar", "mirar", "contar", "ganar", "elegir", "desarrollar", "entender",
+                "aceptar", "valorar", "mostrar", "comprender", "demostrar", "construir",
+                "ocurrir", "responder", "estudiar", "mejorar", "analizar", "descubrir",
+                "producir", "publicar", "compartir", "superar", "controlar", "defender",
+                "demostrar", "diseñar", "distinguir", "ejercer", "elevar", "eliminar",
+                "garantizar", "generar", "gestionar", "impulsar", "incrementar", "indicar",
+                "informar", "iniciar", "inspirar", "instalar", "interpretar", "intervenir",
+                "introducir", "inventar", "invertir", "invitar", "jugar", "juzgar",
+                "lanzar", "limitar", "lograr", "manejar", "manifestar", "mantener",
+                "marcar", "medir", "mejorar", "mencionar", "mostrar", "mover", "nacer",
+                "necesitar", "negociar", "notar", "obtener", "ofrecer", "operar",
+                "organizar", "orientar", "originar", "participar", "pensar", "perder",
+                "permitir", "perseguir", "plantear", "poseer", "precisar", "preferir",
+                "preguntar", "preparar", "presentar", "presionar", "pretender", "prevenir",
+                "probar", "proceder", "producir", "promover", "proponer", "proteger",
+                "protestar", "proveer", "publicar", "quedar", "realizar", "recibir",
+                "reclamar", "reconocer", "recordar", "reducir", "referir", "reflejar",
+                "registrar", "regular", "relacionar", "representar", "requerir", "resolver",
+                "responder", "resultar", "reunir", "revelar", "saber", "satisfacer",
+                "seguir", "seleccionar", "señalar", "separar", "ser", "servir", "significar",
+                "situar", "sobrevivir", "solicitar", "someter", "sonar", "subir", "sufrir",
+                "sugerir", "superar", "suponer", "surgir", "sustituir", "tener", "terminar",
+                "tocar", "tomar", "trabajar", "traducir", "traer", "tratar", "unir", "usar",
+                "utilizar", "valer", "variar", "vender", "venir", "ver", "viajar", "vivir",
+                "volver", "votar", "yacer"
+            ];
+            
+            // Inicializar
+            generateRandomText();
+            updateStats();
+            
+            // Configurar eventos
+            typingInput.addEventListener('input', handleTyping);
+            startBtn.addEventListener('click', startExercise);
+            resetBtn.addEventListener('click', resetExercise);
+            
+            difficultyButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    setDifficulty(this.dataset.difficulty);
+                });
+            });
+            
+            // Funciones
+            function setDifficulty(difficulty) {
+                currentDifficulty = difficulty;
+                
+                // Actualizar botones de dificultad
+                difficultyButtons.forEach(btn => {
+                    if (btn.dataset.difficulty === difficulty) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+                
+                // Generar nuevo texto según la dificultad
+                generateRandomText();
+                resetExercise();
+            }
+            
+            function generateRandomText() {
+                let wordCount;
+                
+                switch(currentDifficulty) {
+                    case 'short':
+                        wordCount = Math.floor(Math.random() * 21) + 50; // 50-70 palabras
+                        break;
+                    case 'medium':
+                        wordCount = Math.floor(Math.random() * 21) + 100; // 100-120 palabras
+                        break;
+                    case 'long':
+                        wordCount = Math.floor(Math.random() * 51) + 150; // 150-200 palabras
+                        break;
+                    default:
+                        wordCount = 50;
+                }
+                
+                // Generar texto aleatorio
+                let generatedText = '';
+                for (let i = 0; i < wordCount; i++) {
+                    const randomWord = wordBank[Math.floor(Math.random() * wordBank.length)];
+                    
+                    // Cada 10-15 palabras, agregar una coma o punto
+                    if (i > 0 && i % (Math.floor(Math.random() * 6) + 10) === 0) {
+                        const punctuation = Math.random() > 0.7 ? '.' : ',';
+                        generatedText += punctuation + ' ';
+                    }
+                    
+                    // La primera palabra de cada oración en mayúscula
+                    if (generatedText.length === 0 || generatedText.slice(-2) === '. ') {
+                        generatedText += randomWord.charAt(0).toUpperCase() + randomWord.slice(1) + ' ';
+                    } else {
+                        generatedText += randomWord + ' ';
+                    }
+                }
+                
+                // Asegurar que termina con punto
+                generatedText = generatedText.trim();
+                if (generatedText.slice(-1) !== '.') {
+                    generatedText += '.';
+                }
+                
+                originalText = generatedText;
+                renderText();
+            }
+            
+            function renderText() {
+                textDisplay.innerHTML = '';
+                originalText.split('').forEach(char => {
+                    const span = document.createElement('span');
+                    span.textContent = char;
+                    textDisplay.appendChild(span);
+                });
+            }
+            
+            function startExercise() {
+                if (exerciseStarted) return;
+                
+                startBtn.textContent = "En progreso...";
+                startBtn.disabled = true;
+                exerciseStarted = true;
+                typingInput.disabled = false;
+                typingInput.value = '';
+                typingInput.focus();
+                startTime = Date.now();
+                
+                timerInterval = setInterval(() => {
+                    const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+                    timeDisplay.textContent = `${elapsedSeconds}s`;
+                }, 1000);
+            }
+            
+            function resetExercise() {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                
+                startBtn.textContent = "Comenzar";
+                startBtn.disabled = false;
+                exerciseStarted = false;
+                typingInput.disabled = false;
+                typingInput.value = '';
+                
+                startTime = 0;
+                timeDisplay.textContent = "0s";
+                
+                updateStats();
+            }
+            
+            function handleTyping() {
+                if (!exerciseStarted && typingInput.value.length > 0) {
+                    startExercise();
+                }
+                
+                const typedText = typingInput.value;
+                const originalChars = originalText.split('');
+                const displayChars = textDisplay.querySelectorAll('span');
+                
+                let correctCount = 0;
+                let errorCount = 0;
+                
+                originalChars.forEach((char, index) => {
+                    if (index < typedText.length) {
+                        if (char === typedText[index]) {
+                            displayChars[index].className = 'correct';
+                            correctCount++;
+                        } else {
+                            displayChars[index].className = 'incorrect';
+                            errorCount++;
+                        }
+                    } else {
+                        displayChars[index].className = '';
+                    }
+                    
+                    // Eliminar clase "current" de todos los caracteres
+                    displayChars[index].classList.remove('current');
+                });
+                
+                // Resaltar la posición actual
+                if (typedText.length < originalText.length) {
+                    displayChars[typedText.length].classList.add('current');
+                }
+                
+                // Actualizar estadísticas
+                const totalTyped = typedText.length;
+                const accuracy = totalTyped > 0 ? Math.round((correctCount / totalTyped) * 100) : 100;
+                
+                accuracyDisplay.textContent = `${accuracy}%`;
+                typedDisplay.textContent = totalTyped;
+                errorsDisplay.textContent = errorCount;
+                
+                // Si se completó el texto, detener el temporizador
+                if (typedText.length === originalText.length) {
+                    clearInterval(timerInterval);
+                    startBtn.textContent = "¡Completado!";
+                }
+            }
+            
+            function updateStats() {
+                accuracyDisplay.textContent = "100%";
+                typedDisplay.textContent = "0";
+                errorsDisplay.textContent = "0";
+                timeDisplay.textContent = "0s";
+            }
+        });
+    </script>
+</body>
+</html>
