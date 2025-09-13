@@ -206,6 +206,132 @@
       animation: float 6s infinite ease-in-out;
     }
 
+    /* Secciones de contenido */
+    .content-pages {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--dark);
+      z-index: 100;
+      display: none;
+      overflow-y: auto;
+      padding: 2rem;
+    }
+
+    .page-content {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--secondary);
+    }
+
+    .page-title {
+      font-size: 2.5rem;
+      color: var(--light);
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--light);
+      font-size: 1.5rem;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: rotate(90deg);
+    }
+
+    /* Estilos para las diferentes páginas */
+    #aboutPage p {
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+      line-height: 1.8;
+    }
+
+    .skill-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .skill-card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1.5rem;
+      border-radius: 15px;
+      transition: var(--transition);
+    }
+
+    .skill-card:hover {
+      transform: translateY(-5px);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .skill-card h3 {
+      color: var(--secondary);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    #contactPage .contact-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .contact-card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1.5rem;
+      border-radius: 15px;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .contact-card:hover {
+      transform: translateY(-5px);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .contact-card i {
+      font-size: 2.5rem;
+      color: var(--secondary);
+      margin-bottom: 1rem;
+    }
+
+    .contact-card h3 {
+      margin-bottom: 0.5rem;
+    }
+
+    #academicPage {
+      padding: 1rem;
+    }
+
     /* Animaciones */
     @keyframes pulse {
       0%, 100% {
@@ -267,6 +393,11 @@
       .animation-section {
         min-height: 50vh;
       }
+      
+      .skill-cards,
+      .contact-info {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 768px) {
@@ -276,6 +407,14 @@
       
       .tree-of-life {
         transform: scale(0.8);
+      }
+      
+      .page-content {
+        padding: 1.5rem;
+      }
+      
+      .page-title {
+        font-size: 2rem;
       }
     }
 
@@ -292,6 +431,10 @@
       .tree-of-life {
         transform: scale(0.6);
       }
+      
+      .page-content {
+        padding: 1rem;
+      }
     }
   </style>
 </head>
@@ -307,21 +450,21 @@
       </div>
       
       <div class="entries">
-        <div class="entry-btn">
-          <i class="fas fa-compass"></i>
-          <span>Explorar</span>
+        <div class="entry-btn" onclick="showPage('aboutPage')">
+          <i class="fas fa-user"></i>
+          <span>Sobre Mí</span>
+        </div>
+        <div class="entry-btn" onclick="showPage('academicPage')">
+          <i class="fas fa-graduation-cap"></i>
+          <span>Archivos Académicos</span>
+        </div>
+        <div class="entry-btn" onclick="showPage('contactPage')">
+          <i class="fas fa-envelope"></i>
+          <span>Contacto</span>
         </div>
         <div class="entry-btn">
-          <i class="fas fa-heart"></i>
-          <span>Experiencias</span>
-        </div>
-        <div class="entry-btn">
-          <i class="fas fa-book-open"></i>
-          <span>Historias</span>
-        </div>
-        <div class="entry-btn">
-          <i class="fas fa-users"></i>
-          <span>Conexiones</span>
+          <i class="fas fa-star"></i>
+          <span>Proyectos</span>
         </div>
       </div>
     </div>
@@ -331,6 +474,120 @@
       <div class="light-effect"></div>
       <div class="tree-of-life" id="treeOfLife">
         <!-- Generado por JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Páginas de contenido -->
+  <div id="aboutPage" class="content-pages">
+    <div class="page-content">
+      <div class="page-header">
+        <h2 class="page-title">Sobre Mí</h2>
+        <button class="close-btn" onclick="hidePages()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div>
+        <p>Soy un apasionado por el conocimiento y la innovación. Mi camino profesional se ha centrado en explorar las intersecciones entre la tecnología, el diseño y la educación.</p>
+        
+        <p>Con una formación multidisciplinar, he tenido la oportunidad de trabajar en proyectos diversos que van desde el desarrollo web hasta la investigación académica.</p>
+        
+        <h3 style="margin: 2rem 0 1rem; color: var(--secondary);">Habilidades</h3>
+        <div class="skill-cards">
+          <div class="skill-card">
+            <h3><i class="fas fa-code"></i> Desarrollo Web</h3>
+            <p>HTML, CSS, JavaScript, React, Node.js y más. Creación de experiencias digitales atractivas y funcionales.</p>
+          </div>
+          <div class="skill-card">
+            <h3><i class="fas fa-paint-brush"></i> Diseño</h3>
+            <p>Diseño UI/UX, experiencia de usuario, interfaces intuitivas y atractivas visualmente.</p>
+          </div>
+          <div class="skill-card">
+            <h3><i class="fas fa-chalkboard-teacher"></i> Docencia</h3>
+            <p>Formación en habilidades tecnológicas, creación de material educativo y cursos especializados.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="academicPage" class="content-pages">
+    <div class="page-content">
+      <div class="page-header">
+        <h2 class="page-title">Archivos Académicos</h2>
+        <button class="close-btn" onclick="hidePages()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div>
+        <p>Aquí encontrarás todos mis recursos académicos organizados por materias. Selecciona una asignatura para acceder a sus archivos.</p>
+        
+        <div class="skill-cards">
+          <div class="skill-card" onclick="showSubject('Cálculo I')">
+            <h3><i class="fas fa-calculator"></i> Cálculo I</h3>
+            <p>Fundamentos matemáticos para el análisis de funciones y límites.</p>
+          </div>
+          <div class="skill-card" onclick="showSubject('Álgebra I')">
+            <h3><i class="fas fa-infinity"></i> Álgebra I</h3>
+            <p>Estudio de estructuras algebraicas y sus propiedades.</p>
+          </div>
+          <div class="skill-card" onclick="showSubject('Probabilidad')">
+            <h3><i class="fas fa-dice"></i> Probabilidad</h3>
+            <p>Análisis de eventos aleatorios y modelos probabilísticos.</p>
+          </div>
+          <div class="skill-card" onclick="showSubject('Estructuras de Datos')">
+            <h3><i class="fas fa-database"></i> Estructuras de Datos</h3>
+            <p>Estructuras de datos y algoritmos de ordenamiento.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="contactPage" class="content-pages">
+    <div class="page-content">
+      <div class="page-header">
+        <h2 class="page-title">Contacto</h2>
+        <button class="close-btn" onclick="hidePages()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div>
+        <p>¿Quieres ponerte en contacto conmigo? Utiliza cualquiera de los siguientes medios. Estoy siempre abierto a nuevas colaboraciones e ideas.</p>
+        
+        <div class="contact-info">
+          <div class="contact-card">
+            <i class="fas fa-envelope"></i>
+            <h3>Email</h3>
+            <p>contacto@onelife.com</p>
+          </div>
+          <div class="contact-card">
+            <i class="fas fa-phone"></i>
+            <h3>Teléfono</h3>
+            <p>+34 612 345 678</p>
+          </div>
+          <div class="contact-card">
+            <i class="fas fa-map-marker-alt"></i>
+            <h3>Ubicación</h3>
+            <p>Madrid, España</p>
+          </div>
+        </div>
+        
+        <h3 style="margin: 2rem 0 1rem; color: var(--secondary);">Redes Sociales</h3>
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <i class="fab fa-twitter"></i>
+          </div>
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <i class="fab fa-linkedin"></i>
+          </div>
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <i class="fab fa-github"></i>
+          </div>
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <i class="fab fa-instagram"></i>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -388,16 +645,28 @@
         particle.style.animationDelay = `${-Math.random() * 6}s`;
         particles.appendChild(particle);
       }
-      
-      // Interactividad con los botones
-      const buttons = document.querySelectorAll('.entry-btn');
-      buttons.forEach(button => {
-        button.addEventListener('click', function() {
-          buttons.forEach(btn => btn.style.background = 'rgba(255, 255, 255, 0.1)');
-          this.style.background = 'rgba(231, 76, 60, 0.3)';
-        });
-      });
     });
+
+    // Funciones para mostrar/ocultar páginas
+    function showPage(pageId) {
+      // Ocultar todas las páginas primero
+      document.querySelectorAll('.content-pages').forEach(page => {
+        page.style.display = 'none';
+      });
+      
+      // Mostrar la página seleccionada
+      document.getElementById(pageId).style.display = 'block';
+    }
+
+    function hidePages() {
+      document.querySelectorAll('.content-pages').forEach(page => {
+        page.style.display = 'none';
+      });
+    }
+
+    function showSubject(subjectName) {
+      alert(`Has seleccionado: ${subjectName}\n\nEn una implementación completa, aquí se cargarían los archivos de la asignatura seleccionada.`);
+    }
   </script>
 </body>
 </html>
