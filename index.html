@@ -75,7 +75,7 @@
 
     .menu-toggle { display: none; }
 
-    /* HERO con animación de ondas */
+    /* HERO con animación relajante */
     .hero {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -130,7 +130,7 @@
       border-radius: var(--radius);
       overflow: hidden;
       box-shadow: var(--shadow);
-      background: linear-gradient(135deg, #4cc9f0, #4895ef);
+      background: linear-gradient(135deg, #a0e9ff, #4895ef);
     }
     canvas {
       position: absolute;
@@ -175,7 +175,7 @@
       </div>
     </div>
     <div class="hero-animation">
-      <canvas id="waveCanvas"></canvas>
+      <canvas id="relaxCanvas"></canvas>
     </div>
   </section>
 
@@ -185,8 +185,8 @@
       document.getElementById('navMenu').classList.toggle('active');
     });
 
-    // Animación de ondas
-    const canvas = document.getElementById("waveCanvas");
+    // Animación relajante: ondas + partículas
+    const canvas = document.getElementById("relaxCanvas");
     const ctx = canvas.getContext("2d");
 
     function resizeCanvas(){
@@ -196,14 +196,30 @@
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
+    // Ondas
     const waves = [
-      { amplitude: 20, wavelength: 0.02, speed: 0.02, phase: 0, color: "rgba(255,255,255,0.3)" },
-      { amplitude: 30, wavelength: 0.015, speed: 0.015, phase: 0, color: "rgba(255,255,255,0.2)" },
-      { amplitude: 40, wavelength: 0.01, speed: 0.01, phase: 0, color: "rgba(255,255,255,0.15)" }
+      { amplitude: 15, wavelength: 0.02, speed: 0.01, phase: 0, color: "rgba(255,255,255,0.3)" },
+      { amplitude: 20, wavelength: 0.015, speed: 0.008, phase: 0, color: "rgba(255,255,255,0.2)" }
     ];
 
-    function draw(){
+    // Partículas flotantes
+    const particles = [];
+    const numParticles = 30;
+    for(let i=0;i<numParticles;i++){
+      particles.push({
+        x: Math.random()*canvas.width,
+        y: Math.random()*canvas.height,
+        size: 2+Math.random()*4,
+        speedX: (Math.random()-0.5)*0.3,
+        speedY: (Math.random()-0.5)*0.3,
+        alpha: 0.3 + Math.random()*0.3
+      });
+    }
+
+    function animate(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
+
+      // Dibujar ondas
       waves.forEach(wave => {
         wave.phase += wave.speed;
         ctx.beginPath();
@@ -218,9 +234,25 @@
         ctx.fillStyle = wave.color;
         ctx.fill();
       });
-      requestAnimationFrame(draw);
+
+      // Dibujar partículas flotantes
+      particles.forEach(p=>{
+        p.x += p.speedX;
+        p.y += p.speedY;
+
+        if(p.x < 0 || p.x > canvas.width) p.speedX *= -1;
+        if(p.y < 0 || p.y > canvas.height) p.speedY *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+        ctx.fillStyle = `rgba(255,255,255,${p.alpha})`;
+        ctx.fill();
+      });
+
+      requestAnimationFrame(animate);
     }
-    draw();
+
+    animate();
   </script>
 </body>
 </html>
