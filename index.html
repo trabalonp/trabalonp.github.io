@@ -19,7 +19,7 @@
       --shadow: 0 0 20px rgba(0, 247, 255, 0.3);
       --neon-glow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary);
       
-      /* Colores para modo claro mejorado - más suaves y menos contrastados */
+      /* Colores para modo claro mejorado */
       --day-primary: #5d8aa8;
       --day-secondary: #8a83c2;
       --day-accent: #b19cd9;
@@ -381,6 +381,9 @@
 
     .light-mode .hero-content h1 {
       background: linear-gradient(90deg, var(--day-primary), var(--day-secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
       text-shadow: 0 0 8px rgba(93, 138, 168, 0.2);
     }
 
@@ -649,7 +652,12 @@
         // Velocidad reducida a la mitad
         this.speedX = (Math.random() - 0.5) * 1; 
         this.speedY = (Math.random() - 0.5) * 1;
-        this.color = colors[Math.floor(Math.random() * colors.length)];
+        
+        // Asignar un color fijo en el constructor
+        const isLightMode = document.body.classList.contains('light-mode');
+        const currentColors = isLightMode ? dayColors : colors;
+        this.color = currentColors[Math.floor(Math.random() * currentColors.length)];
+        
         this.glow = 5 + Math.random() * 10;
       }
       
@@ -663,12 +671,8 @@
       }
       
       draw(){
-        // Usar colores diferentes según el modo
-        const isLightMode = document.body.classList.contains('light-mode');
-        const currentColors = isLightMode ? dayColors : colors;
-        const particleColor = currentColors[Math.floor(Math.random() * currentColors.length)];
-        
         // Reducir la intensidad del glow en modo claro
+        const isLightMode = document.body.classList.contains('light-mode');
         const glowIntensity = isLightMode ? 0.4 : 0.8;
         
         // Dibujar glow
@@ -678,15 +682,15 @@
           this.x, this.y, this.size, 
           this.x, this.y, this.size + this.glow
         );
-        gradient.addColorStop(0, `rgba(${particleColor.r}, ${particleColor.g}, ${particleColor.b}, ${glowIntensity})`);
-        gradient.addColorStop(1, `rgba(${particleColor.r}, ${particleColor.g}, ${particleColor.b}, 0)`);
+        gradient.addColorStop(0, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${glowIntensity})`);
+        gradient.addColorStop(1, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 0)`);
         ctx.fillStyle = gradient;
         ctx.fill();
         
         // Dibujar núcleo de la partícula
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgb(${particleColor.r}, ${particleColor.g}, ${particleColor.b})`;
+        ctx.fillStyle = `rgb(${this.color.r}, ${this.color.g}, ${this.color.b})`;
         ctx.fill();
       }
     }
@@ -709,11 +713,8 @@
             // Calcular opacidad en base a la distancia
             let opacity = 1 - (dist / connectionDistance);
             
-            // Usar colores diferentes según el modo
-            const isLightMode = document.body.classList.contains('light-mode');
-            const currentColors = isLightMode ? dayColors : colors;
-            
             // Reducir la opacidad en modo claro
+            const isLightMode = document.body.classList.contains('light-mode');
             const lineOpacity = isLightMode ? 0.2 : 0.3;
             
             // Crear gradiente para la línea de conexión
@@ -722,8 +723,8 @@
               particlesArray[b].x, particlesArray[b].y
             );
             
-            gradient.addColorStop(0, `rgba(${currentColors[0].r}, ${currentColors[0].g}, ${currentColors[0].b}, ${opacity * lineOpacity})`);
-            gradient.addColorStop(1, `rgba(${currentColors[1].r}, ${currentColors[1].g}, ${currentColors[1].b}, ${opacity * lineOpacity})`);
+            gradient.addColorStop(0, `rgba(${particlesArray[a].color.r}, ${particlesArray[a].color.g}, ${particlesArray[a].color.b}, ${opacity * lineOpacity})`);
+            gradient.addColorStop(1, `rgba(${particlesArray[b].color.r}, ${particlesArray[b].color.g}, ${particlesArray[b].color.b}, ${opacity * lineOpacity})`);
             
             ctx.strokeStyle = gradient;
             ctx.lineWidth = 1;
