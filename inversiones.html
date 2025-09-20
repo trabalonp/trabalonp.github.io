@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>iShares Core S&P 500 UCITS — Gráfica en tiempo real</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:0;background:#f6f8fa;color:#000}
+    header{display:flex;gap:12px;align-items:center;padding:12px;background:#fff;border-bottom:1px solid #e6e9ee}
+    .controls{display:flex;gap:8px;align-items:center}
+    select,input,button{padding:8px;border:1px solid #d6dbe6;border-radius:6px;background:#fff;color:#000;cursor:pointer}
+    #container{padding:12px}
+    #chart{height:640px;border-radius:8px;overflow:hidden;background:#fff}
+    .small{font-size:13px;color:#555}
+    footer{padding:8px 12px;font-size:13px;color:#666}
+
+    /* Estilos para modo oscuro */
+    body.dark{background:#0d1117;color:#ddd}
+    body.dark header{background:#161b22;border-bottom:1px solid #30363d}
+    body.dark #chart{background:#161b22}
+    body.dark select,body.dark input,body.dark button{background:#0d1117;color:#ddd;border:1px solid #30363d}
+    body.dark footer{color:#999}
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <strong>iShares Core S&amp;P 500 UCITS — Gráfica en tiempo real</strong>
+      <div class="small">ISIN: IE00B5BMR087 — seleccione listado / símbolo</div>
+    </div>
+
+    <div style="flex:1"></div>
+
+    <div class="controls">
+      <label class="small">Símbolo:</label>
+      <input id="symbolInput" value="XETR:SXR8" style="width:180px" />
+      <label class="small">Intervalo:</label>
+      <select id="intervalSelect">
+        <option value="1">1</option>
+        <option value="5">5</option>
+        <option value="15">15</option>
+        <option value="30">30</option>
+        <option value="60">60</option>
+        <option value="D" selected>1D</option>
+        <option value="W">1W</option>
+        <option value="M">1M</option>
+      </select>
+      <button id="reloadBtn">Cargar</button>
+      <button id="themeBtn">🌙/☀️</button>
+    </div>
+  </header>
+
+  <div id="container">
+    <div id="chart"></div>
+  </div>
+
+  <footer>Este ejemplo usa los widgets oficiales de TradingView para proporcionar datos y gráficos en tiempo real (sujeto a las fuentes y límites de TradingView). Puede introducir otro símbolo manualmente (por ejemplo: <code>LSE:CSPX</code>, <code>XETR:SXR8</code>, <code>MIL:CSSPX</code>). Si necesita datos de baja latencia o feed profesional, se requiere API de mercado con licencia.</footer>
+
+  <!-- TradingView widget script -->
+  <script src="https://s3.tradingview.com/tv.js"></script>
+  <script>
+    let widget = null;
+    let isDark = localStorage.getItem("theme") === "dark";
+    let savedChart = localStorage.getItem("chartState");
+
+    function createWidget(symbol, interval){
+      const chart = document.getElementById('chart');
+      chart.innerHTML = '';
+
+      widget = new TradingView.widget({
+        autosize: true,
+        symbol: symbol,
+        interval: interval,
+        timezone: 'Europe/Madrid',
+        theme: isDark ? 'Dark' : 'Light',
+        style: '1',
+        locale: 'es',
+        enable_publishing: false,
+        allow_symbol_change: true,
+        withdateranges: true,
+        hide_side_toolbar: false,
+        details: true,
+        studies: [
+          'MACD@tv-basicstudies',
+          'RSI@tv-basicstudies',
+          'Volume@tv-basicstudies'
+        ],
+        container_id: 'chart',
+        toolbar_bg: isDark ? '#0d1117' : '#f7f9fb'
+      });
+
+      // Guardar/restaurar estado del gráfico
+      widget.onChartReady(() => {
+        const chartObj = widget.chart();
+
+        // Restaurar si existe
+        if(savedChart){
+          try {
+            chartObj.load(JSON.parse(savedChart));
+          } catch(e) {
+            console.warn("Error al cargar estado guardado:", e);
+          }
+        }
+
+        // Guardar automáticamente cada vez que cambie algo
+        function saveState(){
+          chartObj.save(state => {
+            localStorage.setItem("chartState", JSON.stringify(state));
+          });
+        }
+        chartObj.onIntervalChanged().subscribe(null, saveState);
+        chartObj.onSymbolChanged().subscribe(null, saveState);
+        chartObj.onChartTypeChanged().subscribe(null, saveState);
+      });
+    }
+
+    document.getElementById('reloadBtn').addEventListener('click', ()=>{
+      const sym = document.getElementById('symbolInput').value.trim();
+      const iv = document.getElementById('intervalSelect').value;
+      if(!sym){alert('Introduce un símbolo válido como LSE:CSPX o XETR:SXR8');return}
+      createWidget(sym, iv);
+    });
+
+    document.getElementById('themeBtn').addEventListener('click', ()=>{
+      isDark = !isDark;
+      document.body.classList.toggle('dark', isDark);
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+      const sym = document.getElementById('symbolInput').value.trim();
+      const iv = document.getElementById('intervalSelect').value;
+      createWidget(sym, iv);
+    });
+
+    window.addEventListener('load', ()=>{
+      document.body.classList.toggle('dark', isDark);
+      createWidget(document.getElementById('symbolInput').value, document.getElementById('intervalSelect').value);
+    });
+  </script>
+</body>
+</html>
