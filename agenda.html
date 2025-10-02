@@ -47,7 +47,7 @@ const appwrite = new Appwrite();
 appwrite.setEndpoint('https://fra.cloud.appwrite.io/v1');
 appwrite.setProject('68de5edd000689a4f63a');
 const databaseId = '68de61870012fa5ed16c';
-const collectionId = 'agenda';
+const collectionId = 'agenda'; // Si tienes el ID real de la colección, reemplázalo aquí
 
 // Mostrar/ocultar secciones
 function showAgenda() {
@@ -82,6 +82,9 @@ loginForm.onsubmit = async (e) => {
       loginEmail.value,
       loginPassword.value
     );
+    // Verificar usuario autenticado
+    const user = await appwrite.account.get();
+    console.log('Usuario autenticado:', user);
     showAgenda();
     loadAgenda();
   } catch (err) {
@@ -100,7 +103,7 @@ agendaForm.onsubmit = async (e) => {
   e.preventDefault();
   try {
     const user = await appwrite.account.get();
-    await appwrite.database.createDocument(
+    await appwrite.databases.createDocument(
       databaseId,
       collectionId,
       appwrite.ID.unique(),
@@ -113,6 +116,7 @@ agendaForm.onsubmit = async (e) => {
     loadAgenda();
   } catch (err) {
     alert('Error al guardar: ' + err.message);
+    console.error('Error al guardar:', err);
   }
 };
 
@@ -121,7 +125,7 @@ async function loadAgenda() {
   agendaList.innerHTML = '';
   try {
     const user = await appwrite.account.get();
-    const res = await appwrite.database.listDocuments(
+    const res = await appwrite.databases.listDocuments(
       databaseId,
       collectionId,
       [appwrite.Query.equal('userId', user.$id)]
@@ -133,17 +137,20 @@ async function loadAgenda() {
     });
   } catch (err) {
     agendaList.innerHTML = '<li>Error al cargar la agenda</li>';
+    console.error('Error al cargar la agenda:', err);
   }
 }
 
 // Comprobar sesión al cargar
 (async () => {
   try {
-    await appwrite.account.get();
+    const user = await appwrite.account.get();
+    console.log('Sesión detectada:', user);
     showAgenda();
     loadAgenda();
-  } catch {
+  } catch (err) {
     showAuth();
+    console.log('No hay sesión activa');
   }
 })();
 </script>
