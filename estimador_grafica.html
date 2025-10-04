@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estimación semanal CSPX ETF</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: #f5f5f5;
+  }
+  h1 {
+    text-align: center;
+    color: #0077cc;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+  }
+  th {
+    background-color: #0077cc;
+    color: white;
+  }
+  tr:nth-child(even) {
+    background-color: #eaf2f8;
+  }
+  td.probabilidad {
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<h1>Estimación semanal CSPX ETF (SXR8)</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Día</th>
+      <th>Cierre estimado (€)</th>
+      <th>Dirección</th>
+      <th>Fluctuación</th>
+      <th>Probabilidad</th>
+      <th>Stop-Loss (€)</th>
+      <th>Target (€)</th>
+      <th>Comentarios</th>
+    </tr>
+  </thead>
+  <tbody id="tabla-etf">
+    <!-- Filas generadas por JavaScript -->
+  </tbody>
+</table>
+
+<script>
+// Datos estimativos de la semana
+const datosSemana = [
+  {dia: "Lunes 6", cierre: 615.2, direccion: "📈 Larga leve", fluct: "Media", prob: "55%", sl: 610, tp: 621, comentarios: "Impulso alcista moderado tras cierre semanal positivo."},
+  {dia: "Martes 7", cierre: 613.0, direccion: "📉 Corta leve", fluct: "Media", prob: "50%", sl: 617, tp: 606, comentarios: "Posible corrección tras alzas previas."},
+  {dia: "Miércoles 8", cierre: 614.0, direccion: "📈 Larga moderada", fluct: "Alta", prob: "48%", sl: 609, tp: 621, comentarios: "Expectativa de volatilidad por datos macroeconómicos."},
+  {dia: "Jueves 9", cierre: 617.0, direccion: "📈 Larga", fluct: "Media-Alta", prob: "53%", sl: 611, tp: 623, comentarios: "Posibles noticias positivas impulsan al alza."},
+  {dia: "Viernes 10", cierre: 614.8, direccion: "📉 Corta leve", fluct: "Media", prob: "52%", sl: 619, tp: 607, comentarios: "Toma de beneficios al cierre de semana."}
+];
+
+// Función para generar la tabla
+function generarTabla() {
+  const tbody = document.getElementById("tabla-etf");
+  datosSemana.forEach(item => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${item.dia}</td>
+      <td>${item.cierre.toFixed(2)}</td>
+      <td>${item.direccion}</td>
+      <td>${item.fluct}</td>
+      <td class="probabilidad">${item.prob}</td>
+      <td>${item.sl.toFixed(2)}</td>
+      <td>${item.tp.toFixed(2)}</td>
+      <td>${item.comentarios}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// Ejecutar
+generarTabla();
+</script>
+
+</body>
+</html>
