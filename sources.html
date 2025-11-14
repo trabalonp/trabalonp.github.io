@@ -37,6 +37,10 @@
       box-sizing: border-box;
     }
 
+    html {
+      font-size: 16px; /* Tamaño base para mejor escalado */
+    }
+
     body {
       font-family: 'Segoe UI', Tahoma, sans-serif;
       background: linear-gradient(135deg, #0a0a18 0%, #12122e 100%);
@@ -46,6 +50,7 @@
       min-height: 100vh;
       overflow-x: hidden;
       transition: var(--transition);
+      line-height: 1.6;
     }
 
     body.light-mode {
@@ -363,11 +368,12 @@
       margin: 2rem auto;
       padding: 0 1rem;
       gap: 3rem;
+      align-items: flex-start;
     }
 
-    /* Barra lateral - ÍNDICE SIMPLIFICADO */
+    /* Barra lateral - ÍNDICE VERTICAL SIMPLE */
     .sources-sidebar {
-      flex: 0 0 200px;
+      flex: 0 0 220px;
       position: sticky;
       top: 100px;
       height: fit-content;
@@ -390,19 +396,23 @@
     }
 
     .sidebar-nav ul {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
       list-style: none;
     }
 
     .sidebar-nav li {
-      margin-bottom: 0.3rem;
+      display: block;
     }
 
     .sidebar-nav a {
       color: var(--gray);
       text-decoration: none;
       display: block;
-      padding: 0.3rem 0;
+      padding: 0.5rem 0;
       transition: var(--transition);
+      border-radius: 4px;
     }
 
     .light-mode .sidebar-nav a {
@@ -411,24 +421,31 @@
 
     .sidebar-nav a:hover {
       color: var(--primary);
+      background: rgba(0, 247, 255, 0.05);
+      padding-left: 0.5rem;
     }
 
     .light-mode .sidebar-nav a:hover {
       color: var(--day-primary);
+      background: rgba(93, 138, 168, 0.05);
     }
 
     .sidebar-nav a.active {
       color: var(--primary);
       font-weight: 600;
+      background: rgba(0, 247, 255, 0.1);
+      padding-left: 0.5rem;
     }
 
     .light-mode .sidebar-nav a.active {
       color: var(--day-primary);
+      background: rgba(93, 138, 168, 0.1);
     }
 
     /* Contenido principal */
     .sources-content {
       flex: 1;
+      min-width: 0; /* Permite que el contenido se ajuste */
       background: rgba(10, 10, 24, 0.7);
       backdrop-filter: blur(10px);
       border-radius: var(--radius);
@@ -464,7 +481,7 @@
     }
 
     .section-title {
-      font-size: 1.8rem;
+      font-size: clamp(1.5rem, 4vw, 1.8rem); /* Tamaño responsive */
       color: var(--primary);
       margin-bottom: 0.5rem;
       font-family: 'Courier New', monospace;
@@ -475,7 +492,7 @@
     }
 
     .section-subtitle {
-      font-size: 1.2rem;
+      font-size: clamp(1rem, 3vw, 1.2rem); /* Tamaño responsive */
       color: var(--gray);
       margin-bottom: 0.5rem;
     }
@@ -616,7 +633,17 @@
       color: var(--day-secondary);
     }
 
-    /* Responsive */
+    /* RESPONSIVE DESIGN MEJORADO */
+    @media (max-width: 1024px) {
+      .sources-container {
+        gap: 2rem;
+      }
+      
+      .sources-sidebar {
+        flex: 0 0 200px;
+      }
+    }
+
     @media (max-width: 900px) {
       .sources-container {
         flex-direction: column;
@@ -626,6 +653,13 @@
       .sources-sidebar {
         position: static;
         width: 100%;
+        flex: none;
+      }
+      
+      .sidebar-nav ul {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 0.5rem;
       }
       
       nav ul {
@@ -660,9 +694,23 @@
       }
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
+      .sources-content {
+        padding: 1.5rem;
+      }
+      
       .header-container {
         padding: 0 1rem;
+      }
+      
+      .sidebar-nav ul {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      }
+    }
+
+    @media (max-width: 600px) {
+      html {
+        font-size: 14px; /* Tamaño de fuente más pequeño en móviles */
       }
       
       .logo {
@@ -670,11 +718,55 @@
       }
 
       .sources-content {
-        padding: 1.5rem;
+        padding: 1rem;
       }
 
-      .section-title {
-        font-size: 1.5rem;
+      .code-block {
+        padding: 1rem;
+      }
+      
+      .sidebar-nav ul {
+        grid-template-columns: 1fr; /* Una columna en móviles muy pequeños */
+      }
+    }
+
+    @media (max-width: 480px) {
+      html {
+        font-size: 13px; /* Tamaño aún más pequeño para móviles muy pequeños */
+      }
+      
+      .header-container {
+        padding: 0 0.5rem;
+      }
+      
+      .sources-container {
+        padding: 0 0.5rem;
+      }
+    }
+
+    /* Mejoras para zoom y escalado */
+    @media (min-resolution: 2dppx) {
+      /* Mejora para pantallas de alta densidad */
+      .bg-grid {
+        background-size: 20px 20px;
+      }
+    }
+
+    /* Soporte para modo de alto contraste */
+    @media (prefers-contrast: high) {
+      :root {
+        --primary: #00ffff;
+        --secondary: #ff00ff;
+        --accent: #ffff00;
+      }
+    }
+
+    /* Mejora de rendimiento para animaciones */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
       }
     }
   </style>
@@ -705,7 +797,6 @@
           <li><a href="https://trabalonp.github.io">INICIO</a></li>
           <li><a href="enlaces">ENLACES</a></li>
           <li><a href="inversiones">INVERSIONES</a></li>
-          <li><a href="sources.html">SOURCES</a></li>
           <li>
             <button class="theme-toggle" id="themeToggle" aria-label="Cambiar modo claro/oscuro">
               <i class="fas fa-moon"></i>
@@ -717,7 +808,7 @@
   </header>
 
   <div class="sources-container">
-    <!-- Barra lateral de navegación - SIMPLIFICADA -->
+    <!-- Barra lateral de navegación - VERTICAL SIMPLE -->
     <aside class="sources-sidebar">
       <h3 class="sidebar-title">Índice</h3>
       <nav class="sidebar-nav">
@@ -732,6 +823,11 @@
           <li><a href="#automation-scripts">Scripts de Automatización</a></li>
           <li><a href="#networking">Redes y Conectividad</a></li>
           <li><a href="#security">Seguridad</a></li>
+          <li><a href="#database">Bases de Datos</a></li>
+          <li><a href="#web-development">Desarrollo Web</a></li>
+          <li><a href="#mobile-apps">Apps Móviles</a></li>
+          <li><a href="#cloud-services">Servicios Cloud</a></li>
+          <li><a href="#devops">DevOps</a></li>
         </ul>
       </nav>
     </aside>
@@ -854,136 +950,6 @@ tar -xzvf archivo_comprimido.tar.gz</code></pre>
             <li><strong>df -h</strong>: Muestra el uso de disco en formato legible</li>
             <li><strong>htop</strong>: Monitor de procesos interactivo (necesita instalación)</li>
           </ul>
-        </div>
-      </section>
-
-      <!-- Sección Web Scraping -->
-      <section id="web-scraping" class="content-section">
-        <div class="section-header">
-          <h1 class="section-title">Web Scraping</h1>
-          <p class="section-subtitle">Extracción de datos de páginas web</p>
-          <div class="tags">
-            <span class="tag">Python</span>
-            <span class="tag">BeautifulSoup</span>
-            <span class="tag">Scraping</span>
-          </div>
-        </div>
-        
-        <div class="explanation">
-          <p>Extraer datos de páginas web utilizando BeautifulSoup y requests. Este ejemplo muestra cómo extraer títulos de una página web y guardarlos en un archivo CSV.</p>
-        </div>
-        
-        <div class="code-block">
-          <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
-          <pre><code>import requests
-from bs4 import BeautifulSoup
-import csv
-
-# Hacer la solicitud HTTP
-url = 'https://ejemplo.com'
-response = requests.get(url)
-
-# Verificar que la solicitud fue exitosa
-if response.status_code == 200:
-    # Parsear el contenido HTML
-    soup = BeautifulSoup(response.content, 'html.parser')
-    
-    # Encontrar elementos por etiqueta y clase
-    titulos = soup.find_all('h2', class_='titulo')
-    
-    # Extraer texto de los elementos
-    datos = []
-    for titulo in titulos:
-        datos.append(titulo.get_text().strip())
-    
-    # Guardar en CSV
-    with open('datos_extraidos.csv', 'w', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        writer.writerow(['Títulos'])
-        for dato in datos:
-            writer.writerow([dato])
-    
-    print("Datos extraídos y guardados correctamente")
-else:
-    print(f"Error al acceder a la página: {response.status_code}")</code></pre>
-        </div>
-        
-        <div class="explanation">
-          <h3>Instalación de dependencias:</h3>
-        </div>
-        
-        <div class="command-block">
-          <code>pip install beautifulsoup4 requests</code>
-        </div>
-        
-        <div class="explanation">
-          <h3>Consideraciones importantes:</h3>
-          <ul>
-            <li>Respeta los términos de servicio del sitio web</li>
-            <li>No hagas demasiadas solicitudes en poco tiempo</li>
-            <li>Considera usar delays entre solicitudes</li>
-            <li>Algunos sitios pueden requerir headers específicos</li>
-          </ul>
-        </div>
-      </section>
-
-      <!-- Sección Servidor Minecraft -->
-      <section id="minecraft-server" class="content-section">
-        <div class="section-header">
-          <h1 class="section-title">Servidor Minecraft</h1>
-          <p class="section-subtitle">Configuración de servidor en Linux</p>
-          <div class="tags">
-            <span class="tag">Minecraft</span>
-            <span class="tag">Java</span>
-            <span class="tag">Servidor</span>
-            <span class="tag">Linux</span>
-          </div>
-        </div>
-        
-        <div class="explanation">
-          <p>Cómo configurar un servidor de Minecraft en tu PC para jugar con amigos. Esta guía asume que estás usando un sistema basado en Linux.</p>
-        </div>
-        
-        <div class="code-block">
-          <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
-          <pre><code># Descargar el servidor de Minecraft
-wget https://piston-data.mojang.com/v1/objects/8f3112a1049751cc472ec13e397eade5336ca7ae/server.jar
-
-# Ejecutar por primera vez para generar archivos
-java -Xmx1024M -Xms1024M -jar server.jar nogui
-
-# Editar el archivo eula.txt y cambiar a true
-nano eula.txt
-
-# Configurar el servidor (opcional)
-nano server.properties
-
-# Ejecutar el servidor
-java -Xmx1024M -Xms1024M -jar server.jar nogui</code></pre>
-        </div>
-        
-        <div class="explanation">
-          <h3>Configuración del servidor:</h3>
-          <ul>
-            <li><strong>Xmx1024M</strong>: Memoria máxima asignada (1GB)</li>
-            <li><strong>Xms1024M</strong>: Memoria inicial asignada (1GB)</li>
-            <li><strong>nogui</strong>: Ejecutar sin interfaz gráfica</li>
-          </ul>
-          
-          <h3>Configuración importante en server.properties:</h3>
-          <ul>
-            <li><strong>server-port</strong>: Puerto del servidor (default: 25565)</li>
-            <li><strong>online-mode</strong>: Verificación de cuentas (true/false)</li>
-            <li><strong>max-players</strong>: Número máximo de jugadores</li>
-          </ul>
-        </div>
-        
-        <div class="explanation">
-          <h3>Para ejecutar en segundo plano:</h3>
-        </div>
-        
-        <div class="command-block">
-          <code>nohup java -Xmx1024M -Xms1024M -jar server.jar nogui &</code>
         </div>
       </section>
 
@@ -1166,6 +1132,9 @@ java -Xmx1024M -Xms1024M -jar server.jar nogui</code></pre>
         }
       });
     });
+
+    // Mejorar la experiencia en dispositivos táctiles
+    document.addEventListener('touchstart', function() {}, {passive: true});
   </script>
 </body>
 </html>
