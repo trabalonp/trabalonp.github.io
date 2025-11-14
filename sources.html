@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ONELIFE - SOURCES</title>
+  <title>ONELIFE Sources</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
@@ -356,189 +356,163 @@
       transform: scale(1.1);
     }
 
-    /* HERO con canvas */
-    .hero {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 4rem 2rem;
-      max-width: 1200px;
-      margin: auto;
-      text-align: center;
-      gap: 1.5rem;
-    }
-
-    .hero-content h1 {
-      font-size: 3.5rem;
-      margin-bottom: 1rem;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      text-shadow: 0 0 10px rgba(0, 247, 255, 0.3);
-      font-family: 'Courier New', monospace;
-      letter-spacing: 2px;
-    }
-
-    .light-mode .hero-content h1 {
-      background: linear-gradient(90deg, var(--day-primary), var(--day-secondary));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      text-shadow: 0 0 8px rgba(93, 138, 168, 0.2);
-    }
-
-    .hero-content p {
-      font-size: 1.2rem;
-      max-width: 700px;
-      margin: 0 auto;
-      color: var(--gray);
-      line-height: 1.6;
-    }
-
-    .light-mode .hero-content p {
-      color: #6c757d;
-    }
-
-    /* Contenedor principal de sources */
+    /* Contenedor principal */
     .sources-container {
+      display: flex;
       max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
-      display: grid;
+      margin: 2rem auto;
+      padding: 0 1rem;
       gap: 2rem;
     }
 
-    /* Filtros de categorías */
-    .category-filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      justify-content: center;
-      margin-bottom: 2rem;
-    }
-
-    .filter-btn {
-      padding: 0.7rem 1.5rem;
-      background: rgba(0, 247, 255, 0.1);
-      border: 1px solid rgba(0, 247, 255, 0.3);
-      color: var(--primary);
-      border-radius: var(--radius);
-      cursor: pointer;
-      transition: var(--transition);
-      font-weight: 600;
-    }
-
-    .light-mode .filter-btn {
-      background: rgba(93, 138, 168, 0.08);
-      border: 1px solid var(--day-border);
-      color: var(--day-primary);
-    }
-
-    .filter-btn:hover, .filter-btn.active {
-      background: rgba(0, 247, 255, 0.2);
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0, 247, 255, 0.3);
-    }
-
-    .light-mode .filter-btn:hover, .light-mode .filter-btn.active {
-      background: rgba(93, 138, 168, 0.15);
-      box-shadow: 0 5px 15px rgba(93, 138, 168, 0.2);
-    }
-
-    /* Tarjetas de código */
-    .code-card {
+    /* Barra lateral */
+    .sources-sidebar {
+      flex: 0 0 250px;
+      position: sticky;
+      top: 100px;
+      height: calc(100vh - 120px);
+      overflow-y: auto;
       background: rgba(10, 10, 24, 0.7);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(0, 247, 255, 0.2);
       border-radius: var(--radius);
-      padding: 2rem;
-      transition: var(--transition);
+      border: 1px solid rgba(0, 247, 255, 0.2);
+      padding: 1.5rem;
       box-shadow: var(--shadow);
-      overflow: hidden;
-      position: relative;
+      transition: var(--transition);
     }
 
-    .light-mode .code-card {
-      background: var(--day-card);
+    .light-mode .sources-sidebar {
+      background: rgba(248, 249, 250, 0.8);
       border: 1px solid var(--day-border);
       box-shadow: var(--day-shadow);
     }
 
-    .code-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(0, 247, 255, 0.4);
-    }
-
-    .light-mode .code-card:hover {
-      box-shadow: 0 10px 30px rgba(93, 138, 168, 0.3);
-    }
-
-    .code-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 0.5s ease;
-    }
-
-    .code-card:hover::before {
-      transform: scaleX(1);
-    }
-
-    .light-mode .code-card::before {
-      background: linear-gradient(90deg, var(--day-primary), var(--day-secondary));
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 1.5rem;
-    }
-
-    .card-title {
-      font-size: 1.5rem;
+    .sidebar-title {
+      font-size: 1.2rem;
       color: var(--primary);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(0, 247, 255, 0.3);
+      font-family: 'Courier New', monospace;
+    }
+
+    .light-mode .sidebar-title {
+      color: var(--day-primary);
+      border-bottom: 1px solid var(--day-border);
+    }
+
+    .sidebar-nav ul {
+      list-style: none;
+    }
+
+    .sidebar-nav li {
       margin-bottom: 0.5rem;
     }
 
-    .light-mode .card-title {
-      color: var(--day-primary);
-    }
-
-    .card-category {
-      display: inline-block;
-      padding: 0.3rem 0.8rem;
-      background: rgba(0, 247, 255, 0.1);
-      border: 1px solid rgba(0, 247, 255, 0.3);
-      border-radius: 20px;
-      font-size: 0.8rem;
-      color: var(--primary);
-    }
-
-    .light-mode .card-category {
-      background: rgba(93, 138, 168, 0.1);
-      border: 1px solid var(--day-border);
-      color: var(--day-primary);
-    }
-
-    .card-description {
-      margin-bottom: 1.5rem;
-      line-height: 1.6;
+    .sidebar-nav a {
       color: var(--gray);
+      text-decoration: none;
+      display: block;
+      padding: 0.5rem 0.8rem;
+      border-radius: var(--radius);
+      transition: var(--transition);
+      position: relative;
     }
 
-    .light-mode .card-description {
+    .light-mode .sidebar-nav a {
       color: #6c757d;
     }
 
+    .sidebar-nav a:hover {
+      color: var(--primary);
+      background: rgba(0, 247, 255, 0.1);
+    }
+
+    .light-mode .sidebar-nav a:hover {
+      color: var(--day-primary);
+      background: rgba(93, 138, 168, 0.1);
+    }
+
+    .sidebar-nav a.active {
+      color: var(--primary);
+      background: rgba(0, 247, 255, 0.15);
+      font-weight: 600;
+    }
+
+    .light-mode .sidebar-nav a.active {
+      color: var(--day-primary);
+      background: rgba(93, 138, 168, 0.15);
+    }
+
+    /* Contenido principal */
+    .sources-content {
+      flex: 1;
+      background: rgba(10, 10, 24, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius);
+      border: 1px solid rgba(0, 247, 255, 0.2);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .light-mode .sources-content {
+      background: rgba(248, 249, 250, 0.8);
+      border: 1px solid var(--day-border);
+      box-shadow: var(--day-shadow);
+    }
+
+    .content-section {
+      margin-bottom: 3rem;
+      scroll-margin-top: 100px;
+    }
+
+    .content-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-header {
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(0, 247, 255, 0.2);
+    }
+
+    .light-mode .section-header {
+      border-bottom: 1px solid var(--day-border);
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      font-family: 'Courier New', monospace;
+    }
+
+    .light-mode .section-title {
+      color: var(--day-primary);
+    }
+
+    .section-subtitle {
+      font-size: 1.2rem;
+      color: var(--gray);
+      margin-bottom: 0.5rem;
+    }
+
+    .light-mode .section-subtitle {
+      color: #6c757d;
+    }
+
+    .section-description {
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      color: var(--gray);
+    }
+
+    .light-mode .section-description {
+      color: #6c757d;
+    }
+
+    /* Bloques de código */
     .code-block {
       background: rgba(0, 0, 0, 0.4);
       border-radius: var(--radius);
@@ -599,41 +573,59 @@
       background: rgba(93, 138, 168, 0.2);
     }
 
-    .card-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 1.5rem;
-      padding-top: 1rem;
-      border-top: 1px solid rgba(0, 247, 255, 0.1);
+    /* Bloques de comandos */
+    .command-block {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-left: 3px solid var(--secondary);
     }
 
-    .light-mode .card-footer {
-      border-top: 1px solid var(--day-border);
+    .light-mode .command-block {
+      background: rgba(0, 0, 0, 0.05);
+      border-left: 3px solid var(--day-secondary);
     }
 
-    .card-date {
-      font-size: 0.9rem;
-      color: var(--gray);
+    .command-block code {
+      font-family: 'Courier New', monospace;
+      color: var(--success);
     }
 
-    .light-mode .card-date {
-      color: #6c757d;
+    .light-mode .command-block code {
+      color: #28a745;
     }
 
-    .card-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
+    /* Texto explicativo */
+    .explanation {
+      margin: 1.5rem 0;
+      line-height: 1.6;
     }
 
+    .explanation p {
+      margin-bottom: 1rem;
+    }
+
+    .explanation ul, .explanation ol {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .explanation li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* Etiquetas y categorías */
     .tag {
+      display: inline-block;
       padding: 0.2rem 0.6rem;
       background: rgba(119, 0, 255, 0.1);
       border: 1px solid rgba(119, 0, 255, 0.3);
       border-radius: 12px;
       font-size: 0.7rem;
       color: var(--secondary);
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
     }
 
     .light-mode .tag {
@@ -642,45 +634,15 @@
       color: var(--day-secondary);
     }
 
-    /* Botón flotante para añadir nuevo código */
-    .add-code-btn {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      box-shadow: var(--shadow);
-      cursor: pointer;
-      transition: var(--transition);
-      z-index: 100;
-      border: none;
-    }
-
-    .light-mode .add-code-btn {
-      background: linear-gradient(135deg, var(--day-primary), var(--day-secondary));
-      box-shadow: var(--day-shadow);
-    }
-
-    .add-code-btn:hover {
-      transform: scale(1.1) rotate(90deg);
-      box-shadow: 0 0 20px var(--primary), 0 0 30px var(--primary);
-    }
-
-    .light-mode .add-code-btn:hover {
-      box-shadow: 0 0 15px var(--day-primary), 0 0 25px var(--day-primary);
-    }
-
     /* Responsive */
     @media (max-width: 900px) {
       .sources-container {
-        padding: 1rem;
+        flex-direction: column;
+      }
+      
+      .sources-sidebar {
+        position: static;
+        height: auto;
       }
       
       nav ul {
@@ -713,43 +675,23 @@
         margin-left: 0;
         margin-top: 1rem;
       }
-
-      .card-header {
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      .card-footer {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-      }
     }
 
     @media (max-width: 600px) {
-      .hero-content h1 {
-        font-size: 2.5rem;
-      }
-      
       .header-container {
         padding: 0 1rem;
-      }
-      
-      .hero {
-        padding: 3rem 1rem;
       }
       
       .logo {
         font-size: 1.5rem;
       }
 
-      .category-filters {
-        gap: 0.5rem;
+      .sources-content {
+        padding: 1.5rem;
       }
 
-      .filter-btn {
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
+      .section-title {
+        font-size: 1.5rem;
       }
     }
   </style>
@@ -791,75 +733,45 @@
     </div>
   </header>
 
-  <section class="hero">
-    <div class="hero-content">
-      <h1>SOURCES</h1>
-      <p>Códigos, comandos y recursos útiles para tus proyectos</p>
-    </div>
-  </section>
-
   <div class="sources-container">
-    <div class="category-filters">
-      <button class="filter-btn active" data-category="all">Todos</button>
-      <button class="filter-btn" data-category="python">Python</button>
-      <button class="filter-btn" data-category="linux">Linux</button>
-      <button class="filter-btn" data-category="web">Web</button>
-      <button class="filter-btn" data-category="server">Servidores</button>
-    </div>
+    <!-- Barra lateral de navegación -->
+    <aside class="sources-sidebar">
+      <h3 class="sidebar-title">Índice</h3>
+      <nav class="sidebar-nav">
+        <ul>
+          <li><a href="#python-api" class="active">API Python</a></li>
+          <li><a href="#linux-commands">Comandos Linux</a></li>
+          <li><a href="#web-scraping">Web Scraping</a></li>
+          <li><a href="#minecraft-server">Servidor Minecraft</a></li>
+          <li><a href="#docker-setup">Configuración Docker</a></li>
+          <li><a href="#git-workflow">Flujo de trabajo Git</a></li>
+          <li><a href="#data-analysis">Análisis de Datos</a></li>
+        </ul>
+      </nav>
+    </aside>
 
-    <div class="code-card" data-category="server">
-      <div class="card-header">
-        <div>
-          <h2 class="card-title">Servidor de Minecraft</h2>
-          <span class="card-category">Server</span>
+    <!-- Contenido principal -->
+    <main class="sources-content">
+      <!-- Sección API Python -->
+      <section id="python-api" class="content-section">
+        <div class="section-header">
+          <h1 class="section-title">API Python</h1>
+          <p class="section-subtitle">Creación de APIs REST con Flask</p>
+          <div class="tags">
+            <span class="tag">Python</span>
+            <span class="tag">Flask</span>
+            <span class="tag">API</span>
+            <span class="tag">REST</span>
+          </div>
         </div>
-      </div>
-      <p class="card-description">
-        Cómo configurar un servidor de Minecraft en tu PC para jugar con amigos.
-      </p>
-      
-      <div class="code-block">
-        <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
-        <pre><code># Descargar el servidor de Minecraft
-wget https://piston-data.mojang.com/v1/objects/8f3112a1049751cc472ec13e397eade5336ca7ae/server.jar
-
-# Ejecutar por primera vez para generar archivos
-java -Xmx1024M -Xms1024M -jar server.jar nogui
-
-# Editar el archivo eula.txt y cambiar a true
-nano eula.txt
-
-# Configurar el servidor (opcional)
-nano server.properties
-
-# Ejecutar el servidor
-java -Xmx1024M -Xms1024M -jar server.jar nogui</code></pre>
-      </div>
-      
-      <div class="card-footer">
-        <span class="card-date">Publicado: 15/03/2023</span>
-        <div class="card-tags">
-          <span class="tag">Minecraft</span>
-          <span class="tag">Java</span>
-          <span class="tag">Servidor</span>
+        
+        <div class="explanation">
+          <p>Crear una API REST simple utilizando Flask para gestionar una lista de tareas. Este ejemplo muestra cómo implementar operaciones CRUD básicas.</p>
         </div>
-      </div>
-    </div>
-
-    <div class="code-card" data-category="python">
-      <div class="card-header">
-        <div>
-          <h2 class="card-title">API REST con Flask</h2>
-          <span class="card-category">Python</span>
-        </div>
-      </div>
-      <p class="card-description">
-        Crear una API REST simple utilizando Flask para gestionar una lista de tareas.
-      </p>
-      
-      <div class="code-block">
-        <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
-        <pre><code>from flask import Flask, jsonify, request
+        
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+          <pre><code>from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
@@ -877,39 +789,50 @@ def add_task():
 
 @app.route('/tasks/&lt;int:task_id&gt;', methods=['DELETE'])
 def delete_task(task_id):
-    if task_id < len(tasks):
+    if task_id &lt; len(tasks):
         deleted_task = tasks.pop(task_id)
         return jsonify(deleted_task)
     return jsonify({'error': 'Task not found'}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)</code></pre>
-      </div>
-      
-      <div class="card-footer">
-        <span class="card-date">Publicado: 10/03/2023</span>
-        <div class="card-tags">
-          <span class="tag">Flask</span>
-          <span class="tag">API</span>
-          <span class="tag">REST</span>
         </div>
-      </div>
-    </div>
+        
+        <div class="explanation">
+          <h3>Explicación del código:</h3>
+          <ul>
+            <li><strong>Flask</strong>: Framework web minimalista para Python</li>
+            <li><strong>GET /tasks</strong>: Obtiene todas las tareas</li>
+            <li><strong>POST /tasks</strong>: Crea una nueva tarea</li>
+            <li><strong>DELETE /tasks/{id}</strong>: Elimina una tarea específica</li>
+          </ul>
+          <p>Para ejecutar este código, necesitas instalar Flask:</p>
+        </div>
+        
+        <div class="command-block">
+          <code>pip install flask</code>
+        </div>
+      </section>
 
-    <div class="code-card" data-category="linux">
-      <div class="card-header">
-        <div>
-          <h2 class="card-title">Comandos útiles de Linux</h2>
-          <span class="card-category">Linux</span>
+      <!-- Sección Comandos Linux -->
+      <section id="linux-commands" class="content-section">
+        <div class="section-header">
+          <h1 class="section-title">Comandos Linux</h1>
+          <p class="section-subtitle">Comandos esenciales de administración</p>
+          <div class="tags">
+            <span class="tag">Linux</span>
+            <span class="tag">Terminal</span>
+            <span class="tag">Bash</span>
+          </div>
         </div>
-      </div>
-      <p class="card-description">
-        Lista de comandos de terminal que uso frecuentemente para administrar sistemas.
-      </p>
-      
-      <div class="code-block">
-        <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
-        <pre><code># Encontrar archivos por nombre
+        
+        <div class="explanation">
+          <p>Lista de comandos útiles para la administración de sistemas Linux que uso frecuentemente.</p>
+        </div>
+        
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+          <pre><code># Encontrar archivos por nombre
 find /ruta/busqueda -name "nombre_archivo"
 
 # Buscar texto dentro de archivos
@@ -935,32 +858,38 @@ tar -czvf archivo_comprimido.tar.gz directorio/
 
 # Descomprimir archivo
 tar -xzvf archivo_comprimido.tar.gz</code></pre>
-      </div>
-      
-      <div class="card-footer">
-        <span class="card-date">Publicado: 05/03/2023</span>
-        <div class="card-tags">
-          <span class="tag">Terminal</span>
-          <span class="tag">Bash</span>
-          <span class="tag">Administración</span>
         </div>
-      </div>
-    </div>
+        
+        <div class="explanation">
+          <h3>Comandos explicados:</h3>
+          <ul>
+            <li><strong>find</strong>: Busca archivos en el sistema de archivos</li>
+            <li><strong>grep</strong>: Busca patrones de texto dentro de archivos</li>
+            <li><strong>df -h</strong>: Muestra el uso de disco en formato legible</li>
+            <li><strong>htop</strong>: Monitor de procesos interactivo (necesita instalación)</li>
+          </ul>
+        </div>
+      </section>
 
-    <div class="code-card" data-category="web">
-      <div class="card-header">
-        <div>
-          <h2 class="card-title">Web Scraping con Python</h2>
-          <span class="card-category">Web</span>
+      <!-- Sección Web Scraping -->
+      <section id="web-scraping" class="content-section">
+        <div class="section-header">
+          <h1 class="section-title">Web Scraping</h1>
+          <p class="section-subtitle">Extracción de datos de páginas web</p>
+          <div class="tags">
+            <span class="tag">Python</span>
+            <span class="tag">BeautifulSoup</span>
+            <span class="tag">Scraping</span>
+          </div>
         </div>
-      </div>
-      <p class="card-description">
-        Extraer datos de páginas web utilizando BeautifulSoup y requests.
-      </p>
-      
-      <div class="code-block">
-        <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
-        <pre><code>import requests
+        
+        <div class="explanation">
+          <p>Extraer datos de páginas web utilizando BeautifulSoup y requests. Este ejemplo muestra cómo extraer títulos de una página web y guardarlos en un archivo CSV.</p>
+        </div>
+        
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+          <pre><code>import requests
 from bs4 import BeautifulSoup
 import csv
 
@@ -991,22 +920,91 @@ if response.status_code == 200:
     print("Datos extraídos y guardados correctamente")
 else:
     print(f"Error al acceder a la página: {response.status_code}")</code></pre>
-      </div>
-      
-      <div class="card-footer">
-        <span class="card-date">Publicado: 28/02/2023</span>
-        <div class="card-tags">
-          <span class="tag">BeautifulSoup</span>
-          <span class="tag">Scraping</span>
-          <span class="tag">Data Extraction</span>
         </div>
-      </div>
-    </div>
-  </div>
+        
+        <div class="explanation">
+          <h3>Instalación de dependencias:</h3>
+        </div>
+        
+        <div class="command-block">
+          <code>pip install beautifulsoup4 requests</code>
+        </div>
+        
+        <div class="explanation">
+          <h3>Consideraciones importantes:</h3>
+          <ul>
+            <li>Respeta los términos de servicio del sitio web</li>
+            <li>No hagas demasiadas solicitudes en poco tiempo</li>
+            <li>Considera usar delays entre solicitudes</li>
+            <li>Algunos sitios pueden requerir headers específicos</li>
+          </ul>
+        </div>
+      </section>
 
-  <button class="add-code-btn" id="addCodeBtn">
-    <i class="fas fa-plus"></i>
-  </button>
+      <!-- Sección Servidor Minecraft -->
+      <section id="minecraft-server" class="content-section">
+        <div class="section-header">
+          <h1 class="section-title">Servidor Minecraft</h1>
+          <p class="section-subtitle">Configuración de servidor en Linux</p>
+          <div class="tags">
+            <span class="tag">Minecraft</span>
+            <span class="tag">Java</span>
+            <span class="tag">Servidor</span>
+            <span class="tag">Linux</span>
+          </div>
+        </div>
+        
+        <div class="explanation">
+          <p>Cómo configurar un servidor de Minecraft en tu PC para jugar con amigos. Esta guía asume que estás usando un sistema basado en Linux.</p>
+        </div>
+        
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+          <pre><code># Descargar el servidor de Minecraft
+wget https://piston-data.mojang.com/v1/objects/8f3112a1049751cc472ec13e397eade5336ca7ae/server.jar
+
+# Ejecutar por primera vez para generar archivos
+java -Xmx1024M -Xms1024M -jar server.jar nogui
+
+# Editar el archivo eula.txt y cambiar a true
+nano eula.txt
+
+# Configurar el servidor (opcional)
+nano server.properties
+
+# Ejecutar el servidor
+java -Xmx1024M -Xms1024M -jar server.jar nogui</code></pre>
+        </div>
+        
+        <div class="explanation">
+          <h3>Configuración del servidor:</h3>
+          <ul>
+            <li><strong>Xmx1024M</strong>: Memoria máxima asignada (1GB)</li>
+            <li><strong>Xms1024M</strong>: Memoria inicial asignada (1GB)</li>
+            <li><strong>nogui</strong>: Ejecutar sin interfaz gráfica</li>
+          </ul>
+          
+          <h3>Configuración importante en server.properties:</h3>
+          <ul>
+            <li><strong>server-port</strong>: Puerto del servidor (default: 25565)</li>
+            <li><strong>online-mode</strong>: Verificación de cuentas (true/false)</li>
+            <li><strong>max-players</strong>: Número máximo de jugadores</li>
+          </ul>
+        </div>
+        
+        <div class="explanation">
+          <h3>Para ejecutar en segundo plano:</h3>
+        </div>
+        
+        <div class="command-block">
+          <code>nohup java -Xmx1024M -Xms1024M -jar server.jar nogui &</code>
+        </div>
+      </section>
+
+      <!-- Más secciones pueden añadirse aquí -->
+      
+    </main>
+  </div>
 
   <script>
     // Menu móvil
@@ -1116,30 +1114,6 @@ else:
       }
     }
 
-    // Filtrado por categorías
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const codeCards = document.querySelectorAll('.code-card');
-    
-    filterButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        // Remover clase activa de todos los botones
-        filterButtons.forEach(btn => btn.classList.remove('active'));
-        // Agregar clase activa al botón clickeado
-        button.classList.add('active');
-        
-        const category = button.getAttribute('data-category');
-        
-        // Mostrar/ocultar tarjetas según la categoría
-        codeCards.forEach(card => {
-          if (category === 'all' || card.getAttribute('data-category') === category) {
-            card.style.display = 'block';
-          } else {
-            card.style.display = 'none';
-          }
-        });
-      });
-    });
-
     // Función para copiar código
     function copyCode(button) {
       const codeBlock = button.parentElement;
@@ -1158,9 +1132,53 @@ else:
       });
     }
 
-    // Botón para añadir nuevo código (simulado)
-    document.getElementById('addCodeBtn').addEventListener('click', () => {
-      alert('Funcionalidad para añadir nuevo código. En una implementación real, aquí se abriría un formulario.');
+    // Navegación suave para enlaces internos
+    document.querySelectorAll('.sidebar-nav a').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Remover clase activa de todos los enlaces
+        document.querySelectorAll('.sidebar-nav a').forEach(a => {
+          a.classList.remove('active');
+        });
+        
+        // Agregar clase activa al enlace clickeado
+        this.classList.add('active');
+        
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        
+        if (targetElement) {
+          window.scrollTo({
+            top: targetElement.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+
+    // Detectar sección activa al hacer scroll
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('.content-section');
+      const navLinks = document.querySelectorAll('.sidebar-nav a');
+      
+      let current = '';
+      
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        
+        if (window.scrollY >= (sectionTop - 150)) {
+          current = section.getAttribute('id');
+        }
+      });
+      
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+          link.classList.add('active');
+        }
+      });
     });
   </script>
 </body>
