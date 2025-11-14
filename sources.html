@@ -362,38 +362,26 @@
       max-width: 1200px;
       margin: 2rem auto;
       padding: 0 1rem;
-      gap: 2rem;
+      gap: 3rem;
     }
 
-    /* Barra lateral */
+    /* Barra lateral - ÍNDICE SIMPLIFICADO */
     .sources-sidebar {
-      flex: 0 0 250px;
+      flex: 0 0 200px;
       position: sticky;
       top: 100px;
-      height: calc(100vh - 120px);
+      height: fit-content;
+      max-height: calc(100vh - 120px);
       overflow-y: auto;
-      background: rgba(10, 10, 24, 0.7);
-      backdrop-filter: blur(10px);
-      border-radius: var(--radius);
-      border: 1px solid rgba(0, 247, 255, 0.2);
-      padding: 1.5rem;
-      box-shadow: var(--shadow);
-      transition: var(--transition);
-    }
-
-    .light-mode .sources-sidebar {
-      background: rgba(248, 249, 250, 0.8);
-      border: 1px solid var(--day-border);
-      box-shadow: var(--day-shadow);
     }
 
     .sidebar-title {
       font-size: 1.2rem;
       color: var(--primary);
       margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid rgba(0, 247, 255, 0.3);
       font-family: 'Courier New', monospace;
+      border-bottom: 1px solid rgba(0, 247, 255, 0.3);
+      padding-bottom: 0.5rem;
     }
 
     .light-mode .sidebar-title {
@@ -406,17 +394,15 @@
     }
 
     .sidebar-nav li {
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
     }
 
     .sidebar-nav a {
       color: var(--gray);
       text-decoration: none;
       display: block;
-      padding: 0.5rem 0.8rem;
-      border-radius: var(--radius);
+      padding: 0.3rem 0;
       transition: var(--transition);
-      position: relative;
     }
 
     .light-mode .sidebar-nav a {
@@ -425,23 +411,19 @@
 
     .sidebar-nav a:hover {
       color: var(--primary);
-      background: rgba(0, 247, 255, 0.1);
     }
 
     .light-mode .sidebar-nav a:hover {
       color: var(--day-primary);
-      background: rgba(93, 138, 168, 0.1);
     }
 
     .sidebar-nav a.active {
       color: var(--primary);
-      background: rgba(0, 247, 255, 0.15);
       font-weight: 600;
     }
 
     .light-mode .sidebar-nav a.active {
       color: var(--day-primary);
-      background: rgba(93, 138, 168, 0.15);
     }
 
     /* Contenido principal */
@@ -638,11 +620,12 @@
     @media (max-width: 900px) {
       .sources-container {
         flex-direction: column;
+        gap: 2rem;
       }
       
       .sources-sidebar {
         position: static;
-        height: auto;
+        width: 100%;
       }
       
       nav ul {
@@ -734,7 +717,7 @@
   </header>
 
   <div class="sources-container">
-    <!-- Barra lateral de navegación -->
+    <!-- Barra lateral de navegación - SIMPLIFICADA -->
     <aside class="sources-sidebar">
       <h3 class="sidebar-title">Índice</h3>
       <nav class="sidebar-nav">
@@ -746,6 +729,9 @@
           <li><a href="#docker-setup">Configuración Docker</a></li>
           <li><a href="#git-workflow">Flujo de trabajo Git</a></li>
           <li><a href="#data-analysis">Análisis de Datos</a></li>
+          <li><a href="#automation-scripts">Scripts de Automatización</a></li>
+          <li><a href="#networking">Redes y Conectividad</a></li>
+          <li><a href="#security">Seguridad</a></li>
         </ul>
       </nav>
     </aside>
