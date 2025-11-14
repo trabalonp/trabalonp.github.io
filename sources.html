@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ONELIFE - SOURCES</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #00f7ff;
+      --secondary: #7700ff;
+      --accent: #ff00c8;
+      --success: #00ff9d;
+      --dark: #0a0a18;
+      --light: #f0f0f0;
+      --gray: #a0a0c0;
+      --transition: all 0.3s ease;
+      --radius: 12px;
+      --shadow: 0 0 20px rgba(0, 247, 255, 0.3);
+      --neon-glow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary);
+      
+      /* Colores para modo claro mejorado */
+      --day-primary: #5d8aa8;
+      --day-secondary: #8a83c2;
+      --day-accent: #b19cd9;
+      --day-bg: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      --day-text: #495057;
+      --day-card: rgba(255, 255, 255, 0.95);
+      --day-border: rgba(93, 138, 168, 0.2);
+      --day-glow: 0 0 10px rgba(93, 138, 168, 0.2);
+      --day-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: linear-gradient(135deg, #0a0a18 0%, #12122e 100%);
+      color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: var(--transition);
+    }
+
+    body.light-mode {
+      background: var(--day-bg);
+      color: var(--day-text);
+    }
+
+    /* Efectos de fondo futurista */
+    .bg-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(rgba(0, 247, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 247, 255, 0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: -1;
+      perspective: 1000px;
+    }
+
+    .light-mode .bg-grid {
+      background: 
+        linear-gradient(rgba(93, 138, 168, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(93, 138, 168, 0.03) 1px, transparent 1px);
+    }
+
+    .floating-shapes {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .shape {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.3;
+      filter: blur(60px);
+    }
+
+    .shape-1 {
+      width: 300px;
+      height: 300px;
+      background: var(--primary);
+      top: -100px;
+      left: -100px;
+      animation: float 15s infinite ease-in-out;
+    }
+
+    .shape-2 {
+      width: 500px;
+      height: 500px;
+      background: var(--secondary);
+      bottom: -200px;
+      right: -200px;
+      animation: float 18s infinite ease-in-out reverse;
+    }
+
+    .shape-3 {
+      width: 200px;
+      height: 200px;
+      background: var(--accent);
+      top: 50%;
+      left: 70%;
+      animation: float 12s infinite ease-in-out 2s;
+    }
+
+    .light-mode .shape-1 {
+      background: var(--day-primary);
+      opacity: 0.1;
+    }
+
+    .light-mode .shape-2 {
+      background: var(--day-secondary);
+      opacity: 0.08;
+    }
+
+    .light-mode .shape-3 {
+      background: var(--day-accent);
+      opacity: 0.06;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(-30px, 40px) rotate(5deg); }
+      50% { transform: translate(20px, -30px) rotate(-5deg); }
+      75% { transform: translate(30px, 30px) rotate(5deg); }
+    }
+
+    /* Efecto de líneas de escaneo CRT - más suave en modo claro */
+    .scan-lines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.1) 50%);
+      background-size: 100% 4px;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.2;
+    }
+
+    .light-mode .scan-lines {
+      background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.02) 50%);
+      opacity: 0.1;
+    }
+
+    header {
+      background: rgba(10, 10, 24, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0, 247, 255, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      padding: 1rem 0;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .light-mode header {
+      background: rgba(248, 249, 250, 0.9);
+      border-bottom: 1px solid var(--day-border);
+      backdrop-filter: blur(10px);
+    }
+
+    /* Contenedor de cascada neon para el header */
+    .neon-cascade {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .cascade-particle {
+      position: absolute;
+      width: 2px;
+      height: 15px;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+      opacity: 0;
+      border-radius: 2px;
+    }
+
+    .light-mode .cascade-particle {
+      background: var(--day-primary);
+      box-shadow: 0 0 8px var(--day-primary), 0 0 15px var(--day-primary);
+      opacity: 0.6;
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Efecto de neón retro para el logo */
+    .logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
+      transition: var(--transition);
+      position: relative;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+      animation: flicker 5s infinite alternate;
+    }
+
+    .light-mode .logo {
+      color: var(--day-primary);
+      text-shadow: 0 0 5px rgba(93, 138, 168, 0.3), 0 0 8px rgba(93, 138, 168, 0.2);
+    }
+
+    .logo:hover {
+      color: #fff;
+      animation: none;
+      text-shadow: 0 0 15px var(--primary), 0 0 25px var(--primary), 0 0 40px var(--primary);
+    }
+
+    .light-mode .logo:hover {
+      color: var(--day-secondary);
+      text-shadow: 0 0 8px rgba(138, 131, 194, 0.4);
+    }
+
+    /* Efecto de parpadeo aleatorio */
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        opacity: 1;
+        text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
+      }
+      20%, 24%, 55% {
+        opacity: 0.8;
+        text-shadow: 0 0 7px var(--primary), 0 0 15px var(--primary), 0 0 25px var(--secondary);
+      }
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    nav ul li a {
+      text-decoration: none;
+      color: var(--gray);
+      font-weight: 600;
+      transition: var(--transition);
+      position: relative;
+      padding: 0.5rem 0;
+    }
+
+    .light-mode nav ul li a {
+      color: #6c757d;
+    }
+
+    nav ul li a:hover {
+      color: var(--primary);
+    }
+
+    .light-mode nav ul li a:hover {
+      color: var(--day-primary);
+    }
+
+    nav ul li a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .light-mode nav ul li a::after {
+      background: var(--day-primary);
+      box-shadow: var(--day-glow);
+    }
+
+    nav ul li a:hover::after {
+      width: 100%;
+    }
+
+    /* Botón de cambio de tema */
+    .theme-toggle {
+      background: transparent;
+      border: none;
+      color: var(--gray);
+      cursor: pointer;
+      font-size: 1.2rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      margin-left: 1rem;
+    }
+
+    .light-mode .theme-toggle {
+      color: #6c757d;
+      background: rgba(93, 138, 168, 0.1);
+    }
+
+    .theme-toggle:hover {
+      color: var(--primary);
+      transform: rotate(30deg);
+    }
+
+    .light-mode .theme-toggle:hover {
+      color: var(--day-primary);
+      background: rgba(93, 138, 168, 0.2);
+    }
+
+    .menu-toggle { 
+      display: none; 
+      color: var(--primary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .light-mode .menu-toggle {
+      color: var(--day-primary);
+    }
+
+    .menu-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    /* HERO con canvas */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: auto;
+      text-align: center;
+      gap: 1.5rem;
+    }
+
+    .hero-content h1 {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 10px rgba(0, 247, 255, 0.3);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
+    }
+
+    .light-mode .hero-content h1 {
+      background: linear-gradient(90deg, var(--day-primary), var(--day-secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 8px rgba(93, 138, 168, 0.2);
+    }
+
+    .hero-content p {
+      font-size: 1.2rem;
+      max-width: 700px;
+      margin: 0 auto;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+
+    .light-mode .hero-content p {
+      color: #6c757d;
+    }
+
+    /* Contenedor principal de sources */
+    .sources-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: grid;
+      gap: 2rem;
+    }
+
+    /* Filtros de categorías */
+    .category-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .filter-btn {
+      padding: 0.7rem 1.5rem;
+      background: rgba(0, 247, 255, 0.1);
+      border: 1px solid rgba(0, 247, 255, 0.3);
+      color: var(--primary);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 600;
+    }
+
+    .light-mode .filter-btn {
+      background: rgba(93, 138, 168, 0.08);
+      border: 1px solid var(--day-border);
+      color: var(--day-primary);
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background: rgba(0, 247, 255, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 247, 255, 0.3);
+    }
+
+    .light-mode .filter-btn:hover, .light-mode .filter-btn.active {
+      background: rgba(93, 138, 168, 0.15);
+      box-shadow: 0 5px 15px rgba(93, 138, 168, 0.2);
+    }
+
+    /* Tarjetas de código */
+    .code-card {
+      background: rgba(10, 10, 24, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(0, 247, 255, 0.2);
+      border-radius: var(--radius);
+      padding: 2rem;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .light-mode .code-card {
+      background: var(--day-card);
+      border: 1px solid var(--day-border);
+      box-shadow: var(--day-shadow);
+    }
+
+    .code-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 247, 255, 0.4);
+    }
+
+    .light-mode .code-card:hover {
+      box-shadow: 0 10px 30px rgba(93, 138, 168, 0.3);
+    }
+
+    .code-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.5s ease;
+    }
+
+    .code-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .light-mode .code-card::before {
+      background: linear-gradient(90deg, var(--day-primary), var(--day-secondary));
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .light-mode .card-title {
+      color: var(--day-primary);
+    }
+
+    .card-category {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      background: rgba(0, 247, 255, 0.1);
+      border: 1px solid rgba(0, 247, 255, 0.3);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: var(--primary);
+    }
+
+    .light-mode .card-category {
+      background: rgba(93, 138, 168, 0.1);
+      border: 1px solid var(--day-border);
+      color: var(--day-primary);
+    }
+
+    .card-description {
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+      color: var(--gray);
+    }
+
+    .light-mode .card-description {
+      color: #6c757d;
+    }
+
+    .code-block {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      position: relative;
+      overflow-x: auto;
+      border-left: 3px solid var(--primary);
+    }
+
+    .light-mode .code-block {
+      background: rgba(0, 0, 0, 0.05);
+      border-left: 3px solid var(--day-primary);
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .code-block code {
+      color: #f0f0f0;
+    }
+
+    .light-mode .code-block code {
+      color: var(--day-text);
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: rgba(0, 247, 255, 0.1);
+      border: 1px solid rgba(0, 247, 255, 0.3);
+      color: var(--primary);
+      border-radius: var(--radius);
+      padding: 0.3rem 0.7rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .light-mode .copy-btn {
+      background: rgba(93, 138, 168, 0.1);
+      border: 1px solid var(--day-border);
+      color: var(--day-primary);
+    }
+
+    .copy-btn:hover {
+      background: rgba(0, 247, 255, 0.2);
+    }
+
+    .light-mode .copy-btn:hover {
+      background: rgba(93, 138, 168, 0.2);
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(0, 247, 255, 0.1);
+    }
+
+    .light-mode .card-footer {
+      border-top: 1px solid var(--day-border);
+    }
+
+    .card-date {
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+
+    .light-mode .card-date {
+      color: #6c757d;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .tag {
+      padding: 0.2rem 0.6rem;
+      background: rgba(119, 0, 255, 0.1);
+      border: 1px solid rgba(119, 0, 255, 0.3);
+      border-radius: 12px;
+      font-size: 0.7rem;
+      color: var(--secondary);
+    }
+
+    .light-mode .tag {
+      background: rgba(138, 131, 194, 0.1);
+      border: 1px solid var(--day-border);
+      color: var(--day-secondary);
+    }
+
+    /* Botón flotante para añadir nuevo código */
+    .add-code-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: var(--transition);
+      z-index: 100;
+      border: none;
+    }
+
+    .light-mode .add-code-btn {
+      background: linear-gradient(135deg, var(--day-primary), var(--day-secondary));
+      box-shadow: var(--day-shadow);
+    }
+
+    .add-code-btn:hover {
+      transform: scale(1.1) rotate(90deg);
+      box-shadow: 0 0 20px var(--primary), 0 0 30px var(--primary);
+    }
+
+    .light-mode .add-code-btn:hover {
+      box-shadow: 0 0 15px var(--day-primary), 0 0 25px var(--day-primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .sources-container {
+        padding: 1rem;
+      }
+      
+      nav ul {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: rgba(10, 10, 24, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 1rem 0;
+        border-top: 1px solid rgba(0, 247, 255, 0.2);
+      }
+      
+      .light-mode nav ul {
+        background: rgba(248, 249, 250, 0.95);
+        border-top: 1px solid var(--day-border);
+      }
+      
+      nav ul.active {
+        display: flex;
+      }
+      
+      .menu-toggle {
+        display: block;
+      }
+
+      .theme-toggle {
+        margin-left: 0;
+        margin-top: 1rem;
+      }
+
+      .card-header {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .card-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .hero-content h1 {
+        font-size: 2.5rem;
+      }
+      
+      .header-container {
+        padding: 0 1rem;
+      }
+      
+      .hero {
+        padding: 3rem 1rem;
+      }
+      
+      .logo {
+        font-size: 1.5rem;
+      }
+
+      .category-filters {
+        gap: 0.5rem;
+      }
+
+      .filter-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="floating-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+  
+  <!-- Efecto de líneas de escaneo CRT -->
+  <div class="scan-lines"></div>
+
+  <header>
+    <!-- Efecto de cascada neon -->
+    <div class="neon-cascade" id="neonCascade"></div>
+    
+    <div class="header-container">
+      <a href="https://trabalonp.github.io" class="logo">
+        ONELIFE
+      </a>
+      <div class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></div>
+      <nav>
+        <ul id="navMenu">
+          <li><a href="https://trabalonp.github.io">INICIO</a></li>
+          <li><a href="enlaces">ENLACES</a></li>
+          <li><a href="inversiones">INVERSIONES</a></li>
+          <li><a href="sources.html">SOURCES</a></li>
+          <li>
+            <button class="theme-toggle" id="themeToggle" aria-label="Cambiar modo claro/oscuro">
+              <i class="fas fa-moon"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1>SOURCES</h1>
+      <p>Códigos, comandos y recursos útiles para tus proyectos</p>
+    </div>
+  </section>
+
+  <div class="sources-container">
+    <div class="category-filters">
+      <button class="filter-btn active" data-category="all">Todos</button>
+      <button class="filter-btn" data-category="python">Python</button>
+      <button class="filter-btn" data-category="linux">Linux</button>
+      <button class="filter-btn" data-category="web">Web</button>
+      <button class="filter-btn" data-category="server">Servidores</button>
+    </div>
+
+    <div class="code-card" data-category="server">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Servidor de Minecraft</h2>
+          <span class="card-category">Server</span>
+        </div>
+      </div>
+      <p class="card-description">
+        Cómo configurar un servidor de Minecraft en tu PC para jugar con amigos.
+      </p>
+      
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+        <pre><code># Descargar el servidor de Minecraft
+wget https://piston-data.mojang.com/v1/objects/8f3112a1049751cc472ec13e397eade5336ca7ae/server.jar
+
+# Ejecutar por primera vez para generar archivos
+java -Xmx1024M -Xms1024M -jar server.jar nogui
+
+# Editar el archivo eula.txt y cambiar a true
+nano eula.txt
+
+# Configurar el servidor (opcional)
+nano server.properties
+
+# Ejecutar el servidor
+java -Xmx1024M -Xms1024M -jar server.jar nogui</code></pre>
+      </div>
+      
+      <div class="card-footer">
+        <span class="card-date">Publicado: 15/03/2023</span>
+        <div class="card-tags">
+          <span class="tag">Minecraft</span>
+          <span class="tag">Java</span>
+          <span class="tag">Servidor</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-card" data-category="python">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">API REST con Flask</h2>
+          <span class="card-category">Python</span>
+        </div>
+      </div>
+      <p class="card-description">
+        Crear una API REST simple utilizando Flask para gestionar una lista de tareas.
+      </p>
+      
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+        <pre><code>from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+tasks = []
+
+@app.route('/tasks', methods=['GET'])
+def get_tasks():
+    return jsonify(tasks)
+
+@app.route('/tasks', methods=['POST'])
+def add_task():
+    task = request.json
+    tasks.append(task)
+    return jsonify(task), 201
+
+@app.route('/tasks/&lt;int:task_id&gt;', methods=['DELETE'])
+def delete_task(task_id):
+    if task_id < len(tasks):
+        deleted_task = tasks.pop(task_id)
+        return jsonify(deleted_task)
+    return jsonify({'error': 'Task not found'}), 404
+
+if __name__ == '__main__':
+    app.run(debug=True)</code></pre>
+      </div>
+      
+      <div class="card-footer">
+        <span class="card-date">Publicado: 10/03/2023</span>
+        <div class="card-tags">
+          <span class="tag">Flask</span>
+          <span class="tag">API</span>
+          <span class="tag">REST</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-card" data-category="linux">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Comandos útiles de Linux</h2>
+          <span class="card-category">Linux</span>
+        </div>
+      </div>
+      <p class="card-description">
+        Lista de comandos de terminal que uso frecuentemente para administrar sistemas.
+      </p>
+      
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+        <pre><code># Encontrar archivos por nombre
+find /ruta/busqueda -name "nombre_archivo"
+
+# Buscar texto dentro de archivos
+grep -r "texto_a_buscar" /ruta/
+
+# Ver uso de disco
+df -h
+
+# Ver uso de memoria
+free -h
+
+# Monitorear procesos en tiempo real
+htop
+
+# Cambiar permisos de archivo
+chmod 755 archivo.txt
+
+# Cambiar propietario de archivo
+chown usuario:grupo archivo.txt
+
+# Comprimir directorio
+tar -czvf archivo_comprimido.tar.gz directorio/
+
+# Descomprimir archivo
+tar -xzvf archivo_comprimido.tar.gz</code></pre>
+      </div>
+      
+      <div class="card-footer">
+        <span class="card-date">Publicado: 05/03/2023</span>
+        <div class="card-tags">
+          <span class="tag">Terminal</span>
+          <span class="tag">Bash</span>
+          <span class="tag">Administración</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-card" data-category="web">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Web Scraping con Python</h2>
+          <span class="card-category">Web</span>
+        </div>
+      </div>
+      <p class="card-description">
+        Extraer datos de páginas web utilizando BeautifulSoup y requests.
+      </p>
+      
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+        <pre><code>import requests
+from bs4 import BeautifulSoup
+import csv
+
+# Hacer la solicitud HTTP
+url = 'https://ejemplo.com'
+response = requests.get(url)
+
+# Verificar que la solicitud fue exitosa
+if response.status_code == 200:
+    # Parsear el contenido HTML
+    soup = BeautifulSoup(response.content, 'html.parser')
+    
+    # Encontrar elementos por etiqueta y clase
+    titulos = soup.find_all('h2', class_='titulo')
+    
+    # Extraer texto de los elementos
+    datos = []
+    for titulo in titulos:
+        datos.append(titulo.get_text().strip())
+    
+    # Guardar en CSV
+    with open('datos_extraidos.csv', 'w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Títulos'])
+        for dato in datos:
+            writer.writerow([dato])
+    
+    print("Datos extraídos y guardados correctamente")
+else:
+    print(f"Error al acceder a la página: {response.status_code}")</code></pre>
+      </div>
+      
+      <div class="card-footer">
+        <span class="card-date">Publicado: 28/02/2023</span>
+        <div class="card-tags">
+          <span class="tag">BeautifulSoup</span>
+          <span class="tag">Scraping</span>
+          <span class="tag">Data Extraction</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="add-code-btn" id="addCodeBtn">
+    <i class="fas fa-plus"></i>
+  </button>
+
+  <script>
+    // Menu móvil
+    document.getElementById('menuToggle').addEventListener('click', () => {
+      document.getElementById('navMenu').classList.toggle('active');
+    });
+
+    // Efecto de cascada neon en el header
+    const neonCascade = document.getElementById('neonCascade');
+    
+    function createCascadeParticle() {
+      const particle = document.createElement('div');
+      particle.classList.add('cascade-particle');
+      
+      // Posición aleatoria en el header
+      const posX = Math.random() * 100;
+      particle.style.left = `${posX}%`;
+      
+      // Tamaño y opacidad aleatorios
+      const size = 1 + Math.random() * 2;
+      const height = 10 + Math.random() * 20;
+      particle.style.width = `${size}px`;
+      particle.style.height = `${height}px`;
+      
+      // Color según el modo actual
+      const isLightMode = document.body.classList.contains('light-mode');
+      if (isLightMode) {
+        particle.style.background = 'var(--day-primary)';
+        particle.style.boxShadow = '0 0 8px var(--day-primary), 0 0 15px var(--day-primary)';
+      } else {
+        particle.style.background = 'var(--primary)';
+        particle.style.boxShadow = '0 0 10px var(--primary), 0 0 20px var(--primary)';
+      }
+      
+      // Opacidad inicial
+      particle.style.opacity = '0';
+      
+      // Añadir al contenedor
+      neonCascade.appendChild(particle);
+      
+      // Animación
+      const animationDuration = 3 + Math.random() * 4; // 3-7 segundos
+      const animationDelay = Math.random() * 2; // 0-2 segundos
+      
+      // Aplicar animación con keyframes
+      particle.animate([
+        { 
+          transform: 'translateY(-20px)',
+          opacity: 0
+        },
+        { 
+          transform: 'translateY(0)',
+          opacity: isLightMode ? 0.6 : 0.7
+        },
+        { 
+          transform: `translateY(${window.innerHeight}px)`,
+          opacity: 0
+        }
+      ], {
+        duration: animationDuration * 1000,
+        delay: animationDelay * 1000,
+        easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+      });
+      
+      // Eliminar partícula después de animación
+      setTimeout(() => {
+        particle.remove();
+      }, (animationDuration + animationDelay) * 1000);
+    }
+    
+    // Crear partículas continuamente
+    function generateCascadeParticles() {
+      createCascadeParticle();
+      setTimeout(generateCascadeParticles, 100 + Math.random() * 200); // Nueva partícula cada 100-300ms
+    }
+    
+    // Iniciar efecto de cascada
+    generateCascadeParticles();
+
+    // Funcionalidad para el cambio de tema
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = themeToggle.querySelector('i');
+    
+    // Comprobar si hay una preferencia guardada
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      document.body.classList.toggle('light-mode', savedTheme === 'light');
+      updateThemeIcon();
+    }
+    
+    // Alternar tema al hacer clic en el botón
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('light-mode');
+      const currentTheme = document.body.classList.contains('light-mode') ? 'light' : 'dark';
+      localStorage.setItem('theme', currentTheme);
+      updateThemeIcon();
+    });
+    
+    // Actualizar icono según el tema actual
+    function updateThemeIcon() {
+      if (document.body.classList.contains('light-mode')) {
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+      } else {
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+      }
+    }
+
+    // Filtrado por categorías
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const codeCards = document.querySelectorAll('.code-card');
+    
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Remover clase activa de todos los botones
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        // Agregar clase activa al botón clickeado
+        button.classList.add('active');
+        
+        const category = button.getAttribute('data-category');
+        
+        // Mostrar/ocultar tarjetas según la categoría
+        codeCards.forEach(card => {
+          if (category === 'all' || card.getAttribute('data-category') === category) {
+            card.style.display = 'block';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // Función para copiar código
+    function copyCode(button) {
+      const codeBlock = button.parentElement;
+      const codeText = codeBlock.querySelector('code').textContent;
+      
+      navigator.clipboard.writeText(codeText).then(() => {
+        // Cambiar temporalmente el ícono para indicar éxito
+        const originalIcon = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        
+        setTimeout(() => {
+          button.innerHTML = originalIcon;
+        }, 2000);
+      }).catch(err => {
+        console.error('Error al copiar: ', err);
+      });
+    }
+
+    // Botón para añadir nuevo código (simulado)
+    document.getElementById('addCodeBtn').addEventListener('click', () => {
+      alert('Funcionalidad para añadir nuevo código. En una implementación real, aquí se abriría un formulario.');
+    });
+  </script>
+</body>
+</html>
