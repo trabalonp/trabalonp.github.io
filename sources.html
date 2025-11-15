@@ -869,12 +869,35 @@ zip -r ejemplo.zip carpeta_destino/
 tar -xvf ejemplo.tar.gz
 unzip ejemplo.zip</code></pre>
         </div>
+
+        <h3>Información del sistema y procesos:</h3>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+          <pre><code># Mostrar los procesos que se están ejecutando y el uso de los recursos del sistema en tiempo real (CPU, memoria)
+top
+# Mostrar una instantánea de los procesos en ejecución
+ps
+# Mostrar el uso del espacio en disco
+df
+du
+# Mostrar el uso de memoria del sistema
+free
+# Mostrar cuánto tiempo lleva el sistema en funcionamiento
+uptime</code></pre>
+        </div>
+
+        <h3>Redes y seguridad:</h3>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+          <pre><code># Conectarse de forma segura y remota a otro equipo
+ssh
+# Mostrar o configurar las interfaces de red
+ifconfig / ip</code></pre>
+        </div>
         
         <div class="explanation">
           <h3>Comandos explicados:</h3>
           <ul>
-            <li><strong>find</strong>: Busca archivos en el sistema de archivos</li>
-            <li><strong>grep</strong>: Busca patrones de texto dentro de archivos</li>
             <li><strong>df -h</strong>: Muestra el uso de disco en formato legible</li>
             <li><strong>htop</strong>: Monitor de procesos interactivo (necesita instalación)</li>
           </ul>
