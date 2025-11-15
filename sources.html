@@ -813,7 +813,6 @@
       <h3 class="sidebar-title">Índice</h3>
       <nav class="sidebar-nav">
         <ul>
-          <li><a href="#python-api" class="active">API Python</a></li>
           <li><a href="#linux-commands">Comandos Linux</a></li>
         </ul>
       </nav>
@@ -821,68 +820,6 @@
 
     <!-- Contenido principal -->
     <main class="sources-content">
-      <!-- Sección API Python -->
-      <!section id="python-api" class="content-section">
-        <div class="section-header">
-          <h1 class="section-title">API Python</h1>
-          <p class="section-subtitle">Creación de APIs REST con Flask</p>
-          <div class="tags">
-            <span class="tag">Python</span>
-            <span class="tag">Flask</span>
-            <span class="tag">API</span>
-            <span class="tag">REST</span>
-          </div>
-        </div>
-        
-        <div class="explanation">
-          <p>Crear una API REST simple utilizando Flask para gestionar una lista de tareas. Este ejemplo muestra cómo implementar operaciones CRUD básicas.</p>
-        </div>
-        
-        <div class="code-block">
-          <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
-          <pre><code>from flask import Flask, jsonify, request
-
-app = Flask(__name__)
-
-tasks = []
-
-@app.route('/tasks', methods=['GET'])
-def get_tasks():
-    return jsonify(tasks)
-
-@app.route('/tasks', methods=['POST'])
-def add_task():
-    task = request.json
-    tasks.append(task)
-    return jsonify(task), 201
-
-@app.route('/tasks/&lt;int:task_id&gt;', methods=['DELETE'])
-def delete_task(task_id):
-    if task_id &lt; len(tasks):
-        deleted_task = tasks.pop(task_id)
-        return jsonify(deleted_task)
-    return jsonify({'error': 'Task not found'}), 404
-
-if __name__ == '__main__':
-    app.run(debug=True)</code></pre>
-        </div>
-        
-        <div class="explanation">
-          <h3>Explicación del código:</h3>
-          <ul>
-            <li><strong>Flask</strong>: Framework web minimalista para Python</li>
-            <li><strong>GET /tasks</strong>: Obtiene todas las tareas</li>
-            <li><strong>POST /tasks</strong>: Crea una nueva tarea</li>
-            <li><strong>DELETE /tasks/{id}</strong>: Elimina una tarea específica</li>
-          </ul>
-          <p>Para ejecutar este código, necesitas instalar Flask:</p>
-        </div>
-        
-        <div class="command-block">
-          <code>pip install flask</code>
-        </div>
-      <!/section>
-
       <!-- Sección Comandos Linux -->
       <section id="linux-commands" class="content-section">
         <div class="section-header">
@@ -891,42 +828,46 @@ if __name__ == '__main__':
           <div class="tags">
             <span class="tag">Linux</span>
             <span class="tag">Terminal</span>
-            <span class="tag">Bash</span>
           </div>
         </div>
         
         <div class="explanation">
-          <p>Lista de comandos útiles para la administración de sistemas Linux que uso frecuentemente.</p>
+          <p>Listado de comandos útiles para la administración de sistemas Linux.</p>
         </div>
-        
+        <h3>Gestión de archivos y directorios:</h3>
         <div class="code-block">
           <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
-          <pre><code># Encontrar archivos por nombre
+          <pre><code># Listar el contenido de un directorio
+ls
+ls -a
+# Cambiar el directorio actual
+cd
+# Mostrar la ruta completa del directorio de trabajo actual
+pwd
+# Crear una carpeta nueva
+mkdir nombre_carpeta
+# Eliminar una carpeta vacía
+rmdir nombre_carpeta
+# Eliminar archivos
+rm -r nombre_archivo
+# Copiar archivos y directorios
+cp origen destino
+# Mover archivos y directorios
+mv origen destino
+# Crear un archivo vacío
+touch ejemplo.txt
+# Mostrar el contenido de un archivo
+cat nombre_archivo
+# Buscar archivos y directorios según varios criterios
 find /ruta/busqueda -name "nombre_archivo"
-
-# Buscar texto dentro de archivos
-grep -r "texto_a_buscar" /ruta/
-
-# Ver uso de disco
-df -h
-
-# Ver uso de memoria
-free -h
-
-# Monitorear procesos en tiempo real
-htop
-
 # Cambiar permisos de archivo
-chmod 755 archivo.txt
-
-# Cambiar propietario de archivo
-chown usuario:grupo archivo.txt
-
-# Comprimir directorio
-tar -czvf archivo_comprimido.tar.gz directorio/
-
-# Descomprimir archivo
-tar -xzvf archivo_comprimido.tar.gz</code></pre>
+chmod 755 nombre_archivo
+# Comprimir directorio en tar y zip
+tar -czvf ejemplo.tar.gz carpeta_destino/
+zip -r ejemplo.zip carpeta_destino/
+# Descomprimir directorio
+tar -xvf ejemplo.tar.gz
+unzip ejemplo.zip</code></pre>
         </div>
         
         <div class="explanation">
