@@ -82,6 +82,64 @@
             background-color: #e8f4fd;
             font-weight: bold;
         }
+        .schedule-analysis {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 5px;
+            margin-top: 20px;
+        }
+        .schedule-header {
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            background-color: #2c3e50;
+            color: white;
+        }
+        .schedule-cell {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+            background-color: white;
+        }
+        .schedule-cell.high-activity {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .schedule-cell.medium-activity {
+            background-color: #f39c12;
+            color: white;
+        }
+        .schedule-cell.low-activity {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .schedule-cell.no-data {
+            background-color: #ecf0f1;
+        }
+        .recommendations {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e8f4fd;
+            border-radius: 8px;
+        }
+        .recommendation-item {
+            margin-bottom: 15px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .recommendation-item:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #3498db;
+            font-weight: bold;
+        }
         @media (max-width: 768px) {
             .summary {
                 flex-direction: column;
@@ -91,6 +149,10 @@
             }
             .chart-container {
                 height: 300px;
+            }
+            .schedule-grid {
+                grid-template-columns: repeat(4, 1fr);
+                font-size: 12px;
             }
         }
     </style>
@@ -134,6 +196,22 @@
                 <!-- Los datos se llenarán con JavaScript -->
             </tbody>
         </table>
+        
+        <div class="schedule-analysis">
+            <h2>Análisis de Horarios de Encuestas</h2>
+            <p>Basado en tu historial, estas son las horas y días con mayor probabilidad de encontrar encuestas:</p>
+            
+            <div class="schedule-grid" id="schedule-grid">
+                <!-- Se generará con JavaScript -->
+            </div>
+            
+            <div class="recommendations">
+                <h3>Recomendaciones:</h3>
+                <div id="recommendations-list">
+                    <!-- Se generará con JavaScript -->
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -160,9 +238,10 @@
             const partes = fechaLimpia.split(' ');
             
             // Encontrar día, mes y año
-            let dia, mes, año;
+            let dia, mes, año, hora = 0, minutos = 0;
             
-            for (let parte of partes) {
+            for (let i = 0; i < partes.length; i++) {
+                const parte = partes[i];
                 // Buscar día (número)
                 if (!isNaN(parte) && parte.length <= 2 && !dia) {
                     dia = parseInt(parte);
@@ -175,11 +254,27 @@
                 else if (!isNaN(parte) && parte.length === 4 && !año) {
                     año = parseInt(parte);
                 }
+                // Buscar hora (formato hh:mm)
+                else if (parte.includes(':')) {
+                    const [h, m] = parte.split(':');
+                    hora = parseInt(h);
+                    minutos = parseInt(m);
+                    
+                    // Ajustar hora según formato AM/PM
+                    if (i + 1 < partes.length) {
+                        const siguienteParte = partes[i + 1];
+                        if (siguienteParte === 'p.' || siguienteParte === 'p.m.') {
+                            if (hora < 12) hora += 12;
+                        } else if (siguienteParte === 'a.' || siguienteParte === 'a.m.') {
+                            if (hora === 12) hora = 0;
+                        }
+                    }
+                }
             }
             
             // Validar que tenemos todos los componentes
             if (dia && mes !== undefined && año) {
-                return new Date(año, mes, dia);
+                return new Date(año, mes, dia, hora, minutos);
             } else {
                 console.warn('Fecha no válida:', fechaStr, {dia, mes, año});
                 // Retornar una fecha por defecto para evitar errores
@@ -490,6 +585,167 @@
                     }
                 }
             });
+            
+            // Análisis de horarios de encuestas
+            analizarHorariosEncuestas();
+        }
+
+        // Función para analizar los horarios de encuestas
+        function analizarHorariosEncuestas() {
+            // Filtrar solo las encuestas pagadas
+            const encuestas = historial.filter(t => 
+                t.concepto === "Encuesta pagada" && t.puntos > 0
+            );
+            
+            // Analizar por día de la semana y hora del día
+            const actividadPorDia = Array(7).fill(0); // 0=Domingo, 1=Lunes, ..., 6=Sábado
+            const actividadPorHora = Array(24).fill(0); // 0-23 horas
+            
+            encuestas.forEach(encuesta => {
+                const dia = encuesta.fecha.getDay(); // 0=Domingo, 1=Lunes, ..., 6=Sábado
+                const hora = encuesta.fecha.getHours();
+                
+                actividadPorDia[dia]++;
+                actividadPorHora[hora]++;
+            });
+            
+            // Encontrar los días y horas con más actividad
+            const maxActividadDia = Math.max(...actividadPorDia);
+            const maxActividadHora = Math.max(...actividadPorHora);
+            
+            // Crear la cuadrícula de horarios
+            const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            const horasDia = Array.from({length: 24}, (_, i) => i);
+            
+            const scheduleGrid = document.getElementById('schedule-grid');
+            
+            // Crear encabezados
+            scheduleGrid.innerHTML = '<div class="schedule-header">Hora/Día</div>';
+            diasSemana.forEach(dia => {
+                scheduleGrid.innerHTML += `<div class="schedule-header">${dia}</div>`;
+            });
+            
+            // Crear filas para cada hora
+            horasDia.forEach(hora => {
+                // Formatear hora para mostrar en formato 12 horas
+                const horaFormateada = hora === 0 ? '12 a.m.' : 
+                                     hora < 12 ? `${hora} a.m.` :
+                                     hora === 12 ? '12 p.m.' : 
+                                     `${hora - 12} p.m.`;
+                
+                scheduleGrid.innerHTML += `<div class="schedule-header">${horaFormateada}</div>`;
+                
+                diasSemana.forEach((_, diaIndex) => {
+                    // Contar encuestas para esta hora y día
+                    const encuestasEnHorario = encuestas.filter(e => 
+                        e.fecha.getDay() === diaIndex && e.fecha.getHours() === hora
+                    ).length;
+                    
+                    let claseActividad = 'no-data';
+                    if (encuestasEnHorario > 0) {
+                        if (encuestasEnHorario >= 3) {
+                            claseActividad = 'high-activity';
+                        } else if (encuestasEnHorario >= 2) {
+                            claseActividad = 'medium-activity';
+                        } else {
+                            claseActividad = 'low-activity';
+                        }
+                    }
+                    
+                    scheduleGrid.innerHTML += `
+                        <div class="schedule-cell ${claseActividad}">
+                            ${encuestasEnHorario > 0 ? encuestasEnHorario : ''}
+                        </div>
+                    `;
+                });
+            });
+            
+            // Generar recomendaciones
+            generarRecomendaciones(actividadPorDia, actividadPorHora, diasSemana);
+        }
+
+        // Función para generar recomendaciones basadas en los datos
+        function generarRecomendaciones(actividadPorDia, actividadPorHora, diasSemana) {
+            const recommendationsList = document.getElementById('recommendations-list');
+            
+            // Encontrar los días con más actividad
+            const maxActividadDia = Math.max(...actividadPorDia);
+            const mejoresDias = actividadPorDia
+                .map((actividad, index) => ({ dia: diasSemana[index], actividad }))
+                .filter(item => item.actividad === maxActividadDia)
+                .map(item => item.dia);
+            
+            // Encontrar las horas con más actividad
+            const maxActividadHora = Math.max(...actividadPorHora);
+            const mejoresHoras = actividadPorHora
+                .map((actividad, index) => ({ hora: index, actividad }))
+                .filter(item => item.actividad === maxActividadHora)
+                .map(item => {
+                    // Formatear hora para mostrar en formato 12 horas
+                    const hora = item.hora;
+                    return hora === 0 ? '12 a.m.' : 
+                           hora < 12 ? `${hora} a.m.` :
+                           hora === 12 ? '12 p.m.' : 
+                           `${hora - 12} p.m.`;
+                });
+            
+            // Generar recomendaciones
+            let recomendacionesHTML = '';
+            
+            if (mejoresDias.length > 0) {
+                recomendacionesHTML += `
+                    <div class="recommendation-item">
+                        Días con más encuestas: ${mejoresDias.join(', ')}.
+                    </div>
+                `;
+            }
+            
+            if (mejoresHoras.length > 0) {
+                recomendacionesHTML += `
+                    <div class="recommendation-item">
+                        Hora con más encuestas: ${mejoresHoras.join(', ')}
+                    </div>
+                `;
+            }
+            
+            // Recomendación general basada en el total de encuestas
+            const totalEncuestas = historial.filter(t => 
+                t.concepto === "Encuesta pagada" && t.puntos > 0
+            ).length;
+            
+            if (totalEncuestas > 50) {
+                recomendacionesHTML += `
+                    <div class="recommendation-item">
+                    Considera establecer horarios fijos para revisar la plataforma.
+                    </div>
+                `;
+            } else {
+                recomendacionesHTML += `
+                    <div class="recommendation-item">
+                    Cuantas mas encuestas realizadas el análisis será mas precisa.
+                    </div>
+                `;
+            }
+            
+            // Recomendación sobre días laborables vs fines de semana
+            const actividadLaborables = actividadPorDia.slice(1, 6).reduce((a, b) => a + b, 0);
+            const actividadFinSemana = actividadPorDia[0] + actividadPorDia[6];
+            
+            if (actividadLaborables > actividadFinSemana * 2) {
+                recomendacionesHTML += `
+                    <div class="recommendation-item">
+                        Hay muchas más encuestas durante los días laborables.
+                    </div>
+                `;
+            } else if (actividadFinSemana > actividadLaborables) {
+                recomendacionesHTML += `
+                    <div class="recommendation-item">
+                        Hay mucha más actividad durante los fines de semana.
+                    </div>
+                `;
+            }
+            
+            recommendationsList.innerHTML = recomendacionesHTML;
         }
 
         // Inicializar cuando se carga la página
