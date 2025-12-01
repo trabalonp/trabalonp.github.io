@@ -1,348 +1,490 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyLifepoints</title>
+    <title>MyLifepoints Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --bg-1: #0f172a;
+            --bg-2: #1e293b;
+            --bg-3: #334155;
+            --text-1: #f1f5f9;
+            --text-2: #cbd5e1;
+            --text-3: #94a3b8;
+            --border: #334155;
+        }
+
+        [data-theme="light"] {
+            --bg-1: #ffffff;
+            --bg-2: #f8fafc;
+            --bg-3: #f1f5f9;
+            --text-1: #0f172a;
+            --text-2: #334155;
+            --text-3: #64748b;
+            --border: #e2e8f0;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-1);
+            color: var(--text-1);
+            line-height: 1.6;
+            transition: all 0.3s ease;
         }
+
         .container {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 25px;
-            margin-bottom: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
         }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
         }
-        .summary {
+
+        header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,0 Q300,60 600,30 T1200,0 L1200,120 L0,120 Z" fill="rgba(255,255,255,0.05)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .header-content {
+            position: relative;
             display: flex;
             justify-content: space-between;
-            flex-wrap: wrap;
-            margin-bottom: 30px;
+            align-items: center;
         }
-        .summary-item {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 10px;
-            flex: 1;
-            min-width: 200px;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+
+        h1 {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        .summary-value {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 10px 0;
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
-        .lifepoints {
-            color: #3498db;
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
         }
-        .euros {
-            color: #27ae60;
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
-        .withdrawals {
-            color: #e74c3c;
+
+        .stat-card {
+            background: var(--bg-2);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .chart-container {
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-label {
+            color: var(--text-3);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-subtext {
+            color: var(--text-3);
+            font-size: 1rem;
+        }
+
+        .chart-section {
+            background: var(--bg-2);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .chart-section h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .chart-wrapper {
             position: relative;
             height: 400px;
-            margin-bottom: 30px;
         }
+
+        .table-section {
+            background: var(--bg-2);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 1rem;
         }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
+
         th {
-            background-color: #f8f9fa;
+            background: var(--bg-3);
+            padding: 1rem;
+            text-align: left;
             font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
         }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-2);
+        }
+
         tr:hover {
-            background-color: #f5f5f5;
+            background: var(--bg-3);
         }
-        .highlight {
-            background-color: #e8f4fd;
-            font-weight: bold;
-        }
-        .schedule-analysis {
-            margin-top: 40px;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-        }
+
         .schedule-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            gap: 5px;
-            margin-top: 20px;
+            gap: 4px;
+            margin-top: 1.5rem;
         }
+
         .schedule-header {
-            font-weight: bold;
+            font-weight: 600;
             text-align: center;
-            padding: 10px;
-            background-color: #2c3e50;
+            padding: 0.75rem;
+            background: var(--primary);
             color: white;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
         }
+
         .schedule-cell {
-            padding: 10px;
+            padding: 0.75rem;
             text-align: center;
-            border: 1px solid #ddd;
-            background-color: white;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
         }
+
         .schedule-cell.high-activity {
-            background-color: #2ecc71;
+            background: var(--success);
             color: white;
         }
+
         .schedule-cell.medium-activity {
-            background-color: #f39c12;
+            background: var(--warning);
             color: white;
         }
+
         .schedule-cell.low-activity {
-            background-color: #e74c3c;
+            background: var(--error);
             color: white;
         }
+
         .schedule-cell.no-data {
-            background-color: #ecf0f1;
+            background: var(--bg-3);
+            color: var(--text-3);
         }
+
         .recommendations {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #e8f4fd;
-            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1));
+            border: 1px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-top: 2rem;
         }
+
+        .recommendations h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
         .recommendation-item {
-            margin-bottom: 15px;
-            padding-left: 20px;
+            margin-bottom: 0.75rem;
+            padding-left: 1.5rem;
             position: relative;
+            color: var(--text-2);
         }
+
         .recommendation-item:before {
-            content: "•";
+            content: "💡";
             position: absolute;
             left: 0;
-            color: #3498db;
-            font-weight: bold;
         }
+
         @media (max-width: 768px) {
-            .summary {
-                flex-direction: column;
+            h1 {
+                font-size: 1.75rem;
             }
-            .summary-item {
-                min-width: auto;
+
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
-            .chart-container {
+
+            .chart-wrapper {
                 height: 300px;
             }
+
             .schedule-grid {
                 grid-template-columns: repeat(4, 1fr);
-                font-size: 12px;
+                font-size: 0.7rem;
             }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card,
+        .chart-section,
+        .table-section {
+            animation: fadeInUp 0.6s ease-out;
         }
     </style>
 </head>
-<body>
+
+<body data-theme="dark">
     <div class="container">
-        <h1>Resumen cuenta</h1>
-        
-        <div class="summary">
-            <div class="summary-item">
-                <div>Lifepoints Ganados</div>
-                <div class="summary-value lifepoints" id="total-lifepoints">0</div>
-                <div>≈ <span id="total-euros">0</span> €</div>
+        <header>
+            <div class="header-content">
+                <h1>💰 MyLifepoints Dashboard</h1>
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span id="theme-icon">☀️</span>
+                    <span id="theme-text">Modo Claro</span>
+                </button>
             </div>
-            <div class="summary-item">
-                <div>Lifepoints Actuales</div>
-                <div class="summary-value lifepoints" id="current-lifepoints">0</div>
-                <div>≈ <span id="current-euros">0</span> €</div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Lifepoints Ganados</div>
+                <div class="stat-value" id="total-lifepoints">0</div>
+                <div class="stat-subtext">≈ <span id="total-euros">0</span> €</div>
             </div>
-            <div class="summary-item">
-                <div>Retirados (PayPal)</div>
-                <div class="summary-value withdrawals" id="withdrawn-lifepoints">0</div>
-                <div>≈ <span id="withdrawn-euros">0</span> €</div>
+            <div class="stat-card">
+                <div class="stat-label">Lifepoints Actuales</div>
+                <div class="stat-value" id="current-lifepoints">0</div>
+                <div class="stat-subtext">≈ <span id="current-euros">0</span> €</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Retirados (PayPal)</div>
+                <div class="stat-value" id="withdrawn-lifepoints">0</div>
+                <div class="stat-subtext">≈ <span id="withdrawn-euros">0</span> €</div>
             </div>
         </div>
-        
-        <div class="chart-container">
-            <canvas id="lifepointsChart"></canvas>
-        </div>
-        
-        <h2>Resumen por Mes</h2>
-        <table id="monthly-summary">
-            <thead>
-                <tr>
-                    <th>Mes</th>
-                    <th>Lifepoints Ganados</th>
-                    <th>Valor Aprox. (€)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Los datos se llenarán con JavaScript -->
-            </tbody>
-        </table>
-        
-        <div class="schedule-analysis">
-            <h2>Probabilidades de Horarios de Encuestas</h2>
-            
-            <div class="schedule-grid" id="schedule-grid">
-                <!-- Se generará con JavaScript -->
+
+        <div class="chart-section">
+            <h2>📈 Evolución de Lifepoints</h2>
+            <div class="chart-wrapper">
+                <canvas id="lifepointsChart"></canvas>
             </div>
-            
+        </div>
+
+        <div class="table-section">
+            <h2>📊 Resumen por Mes</h2>
+            <table id="monthly-summary">
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th>Lifepoints Ganados</th>
+                        <th>Valor Aprox. (€)</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="chart-section">
+            <h2>⏰ Probabilidades de Horarios de Encuestas</h2>
+            <div class="schedule-grid" id="schedule-grid"></div>
+
             <div class="recommendations">
-                <h3>Recomendaciones:</h3>
-                <div id="recommendations-list">
-                    <!-- Se generará con JavaScript -->
-                </div>
+                <h3>💡 Recomendaciones Personalizadas</h3>
+                <div id="recommendations-list"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // Función mejorada para convertir fechas en español a formato Date
         function parsearFecha(fechaStr) {
-            // Mapeo completo de meses en español
             const meses = {
-                'ene': 0, 'enero': 0,
-                'feb': 1, 'febrero': 1,
-                'mar': 2, 'marzo': 2,
-                'abr': 3, 'abril': 3,
-                'may': 4, 'mayo': 4,
-                'jun': 5, 'junio': 5,
-                'jul': 6, 'julio': 6,
-                'ago': 7, 'agosto': 7,
-                'sep': 8, 'sept': 8, 'septiembre': 8,
-                'oct': 9, 'octubre': 9,
-                'nov': 10, 'noviembre': 10,
-                'dic': 11, 'diciembre': 11
+                'ene': 0, 'enero': 0, 'feb': 1, 'febrero': 1, 'mar': 2, 'marzo': 2,
+                'abr': 3, 'abril': 3, 'may': 4, 'mayo': 4, 'jun': 5, 'junio': 5,
+                'jul': 6, 'julio': 6, 'ago': 7, 'agosto': 7, 'sep': 8, 'sept': 8, 'septiembre': 8,
+                'oct': 9, 'octubre': 9, 'nov': 10, 'noviembre': 10, 'dic': 11, 'diciembre': 11
             };
-            
-            // Limpiar y dividir la fecha
+
             const fechaLimpia = fechaStr.replace(',', '').toLowerCase();
             const partes = fechaLimpia.split(' ');
-            
-            // Encontrar día, mes y año
             let dia, mes, año, hora = 0, minutos = 0;
-            
+
             for (let i = 0; i < partes.length; i++) {
                 const parte = partes[i];
-                // Buscar día (número)
                 if (!isNaN(parte) && parte.length <= 2 && !dia) {
                     dia = parseInt(parte);
-                }
-                // Buscar mes (texto)
-                else if (meses[parte] !== undefined && !mes) {
+                } else if (meses[parte] !== undefined && mes === undefined) {
                     mes = meses[parte];
-                }
-                // Buscar año (número de 4 dígitos)
-                else if (!isNaN(parte) && parte.length === 4 && !año) {
+                } else if (!isNaN(parte) && parte.length === 4 && !año) {
                     año = parseInt(parte);
-                }
-                // Buscar hora (formato hh:mm)
-                else if (parte.includes(':')) {
+                } else if (parte.includes(':')) {
                     const [h, m] = parte.split(':');
                     hora = parseInt(h);
                     minutos = parseInt(m);
-                    
-                    // Ajustar hora según formato AM/PM
                     if (i + 1 < partes.length) {
-                        const siguienteParte = partes[i + 1];
-                        if (siguienteParte === 'p.' || siguienteParte === 'p.m.') {
-                            if (hora < 12) hora += 12;
-                        } else if (siguienteParte === 'a.' || siguienteParte === 'a.m.') {
-                            if (hora === 12) hora = 0;
-                        }
+                        const sig = partes[i + 1];
+                        if ((sig === 'p.' || sig === 'p.m.') && hora < 12) hora += 12;
+                        else if ((sig === 'a.' || sig === 'a.m.') && hora === 12) hora = 0;
                     }
                 }
             }
-            
-            // Validar que tenemos todos los componentes
-            if (dia && mes !== undefined && año) {
-                return new Date(año, mes, dia, hora, minutos);
-            } else {
-                console.warn('Fecha no válida:', fechaStr, {dia, mes, año});
-                // Retornar una fecha por defecto para evitar errores
-                return new Date(2025, 0, 1);
-            }
+
+            return dia && mes !== undefined && año ? new Date(año, mes, dia, hora, minutos) : new Date(2025, 0, 1);
         }
 
-        // Datos del historial con fechas parseadas
         const historial = [
             { fecha: parsearFecha("01 dic 2025, 02:48 p. m."), concepto: "Encuesta pagada", puntos: 65},
             { fecha: parsearFecha("01 dic 2025, 01:52 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("01 dic 2025, 01:51 p. m."), concepto: "Encuesta pagada", puntos: 90},
-            { fecha: parsearFecha("01 dic 2025, 11:56 a. m."), concepto: "Encuesta pagada", puntos: 65},
+            { fecha: parsearFecha("01 dic 2025, 01:51 p. m."), concepto: "Encuesta pagada", puntos: 90 },
+            { fecha: parsearFecha("01 dic 2025, 11:56 a. m."), concepto: "Encuesta pagada", puntos: 65 },
             { fecha: parsearFecha("01 dic 2025, 9:11 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
             { fecha: parsearFecha("30 nov 2025, 3:23 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("28 nov 2025, 11:58 p. m."), concepto: "Encuesta pagada", puntos: 65},
+            { fecha: parsearFecha("28 nov 2025, 11:58 p. m."), concepto: "Encuesta pagada", puntos: 65 },
             { fecha: parsearFecha("28 nov 2025, 7:54 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
             { fecha: parsearFecha("28 nov 2025, 7:54 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
             { fecha: parsearFecha("28 nov 2025, 4:46 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("27 nov 2025, 1:39 p. m."), concepto: "Encuesta pagada", puntos: 90},
-            { fecha: parsearFecha("27 nov 2025, 12:56 p. m."), concepto: "Encuesta pagada", puntos: 1},
-            { fecha: parsearFecha("27 nov 2025, 12:56 p. m."), concepto: "Encuesta pagada", puntos: 65},
-            { fecha: parsearFecha("26 nov 2025, 2:56 p. m."), concepto: "Encuesta pagada", puntos: 65},
-            { fecha: parsearFecha("25 nov 2025, 9:20 p. m."), concepto: "Encuesta pagada", puntos: 90},
-            { fecha: parsearFecha("25 nov 2025, 3:21 p. m."), concepto: "Encuesta pagada", puntos: 40},
+            { fecha: parsearFecha("27 nov 2025, 1:39 p. m."), concepto: "Encuesta pagada", puntos: 90 },
+            { fecha: parsearFecha("27 nov 2025, 12:56 p. m."), concepto: "Encuesta pagada", puntos: 1 },
+            { fecha: parsearFecha("27 nov 2025, 12:56 p. m."), concepto: "Encuesta pagada", puntos: 65 },
+            { fecha: parsearFecha("26 nov 2025, 2:56 p. m."), concepto: "Encuesta pagada", puntos: 65 },
+            { fecha: parsearFecha("25 nov 2025, 9:20 p. m."), concepto: "Encuesta pagada", puntos: 90 },
+            { fecha: parsearFecha("25 nov 2025, 3:21 p. m."), concepto: "Encuesta pagada", puntos: 40 },
             { fecha: parsearFecha("25 nov 2025, 1:56 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
             { fecha: parsearFecha("25 nov 2025, 9:05 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
             { fecha: parsearFecha("21 nov 2025, 3:36 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("21 nov 2025, 3:35 p. m."), concepto: "Encuesta pagada", puntos: 40},
-            { fecha: parsearFecha("20 nov 2025, 7:13 p. m."), concepto: "Encuesta pagada", puntos: 90},
-            { fecha: parsearFecha("20 nov 2025, 8:21 a. m."), concepto: "Encuesta pagada", puntos: 65},
+            { fecha: parsearFecha("21 nov 2025, 3:35 p. m."), concepto: "Encuesta pagada", puntos: 40 },
+            { fecha: parsearFecha("20 nov 2025, 7:13 p. m."), concepto: "Encuesta pagada", puntos: 90 },
+            { fecha: parsearFecha("20 nov 2025, 8:21 a. m."), concepto: "Encuesta pagada", puntos: 65 },
             { fecha: parsearFecha("19 nov 2025, 5:32 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("19 nov 2025, 3:13 p. m."), concepto: "Encuesta pagada", puntos: 65},
-            { fecha: parsearFecha("19 nov 2025, 8:24 a. m."), concepto: "Encuesta pagada", puntos: 25},
-            { fecha: parsearFecha("18 nov 2025, 3:17 p. m."), concepto: "Encuesta pagada", puntos: 90},
+            { fecha: parsearFecha("19 nov 2025, 3:13 p. m."), concepto: "Encuesta pagada", puntos: 65 },
+            { fecha: parsearFecha("19 nov 2025, 8:24 a. m."), concepto: "Encuesta pagada", puntos: 25 },
+            { fecha: parsearFecha("18 nov 2025, 3:17 p. m."), concepto: "Encuesta pagada", puntos: 90 },
             { fecha: parsearFecha("18 nov 2025, 3:01 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("18 nov 2025, 2:23 p. m."), concepto: "Encuesta pagada", puntos: 65},
-            { fecha: parsearFecha("17 nov 2025, 5:24 p. m."), concepto: "Encuesta pagada", puntos: 90},
+            { fecha: parsearFecha("18 nov 2025, 2:23 p. m."), concepto: "Encuesta pagada", puntos: 65 },
+            { fecha: parsearFecha("17 nov 2025, 5:24 p. m."), concepto: "Encuesta pagada", puntos: 90 },
             { fecha: parsearFecha("17 nov 2025, 3:23 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("17 nov 2025, 3:23 p. m."), concepto: "Encuesta pagada", puntos: 90},
+            { fecha: parsearFecha("17 nov 2025, 3:23 p. m."), concepto: "Encuesta pagada", puntos: 90 },
             { fecha: parsearFecha("17 nov 2025, 2:15 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("15 nov 2025, 12:05 p. m."), concepto: "Encuesta pagada", puntos: 40},
-            { fecha: parsearFecha("14 nov 2025, 9:39 a. m."), concepto: "Encuesta pagada", puntos: 90},
-            { fecha: parsearFecha("14 nov 2025, 12:33 a. m."), concepto: "Encuesta pagada", puntos: 65},
-            { fecha: parsearFecha("13 nov 2025, 8:29 p. m."), concepto: "Encuesta pagada", puntos: 40},
-            { fecha: parsearFecha("12 nov 2025, 5:07 p. m."), concepto: "Encuesta pagada", puntos: 90},
+            { fecha: parsearFecha("15 nov 2025, 12:05 p. m."), concepto: "Encuesta pagada", puntos: 40 },
+            { fecha: parsearFecha("14 nov 2025, 9:39 a. m."), concepto: "Encuesta pagada", puntos: 90 },
+            { fecha: parsearFecha("14 nov 2025, 12:33 a. m."), concepto: "Encuesta pagada", puntos: 65 },
+            { fecha: parsearFecha("13 nov 2025, 8:29 p. m."), concepto: "Encuesta pagada", puntos: 40 },
+            { fecha: parsearFecha("12 nov 2025, 5:07 p. m."), concepto: "Encuesta pagada", puntos: 90 },
             { fecha: parsearFecha("12 nov 2025, 12:46 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("12 nov 2025, 12:09 p. m."), concepto: "Encuesta pagada", puntos: 90},
-            { fecha: parsearFecha("11 nov 2025, 4:58 p. m."), concepto: "Encuesta pagada", puntos: 90},
+            { fecha: parsearFecha("12 nov 2025, 12:09 p. m."), concepto: "Encuesta pagada", puntos: 90 },
+            { fecha: parsearFecha("11 nov 2025, 4:58 p. m."), concepto: "Encuesta pagada", puntos: 90 },
             { fecha: parsearFecha("11 nov 2025, 2:36 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("11 nov 2025, 2:36 a. m."), concepto: "Encuesta pagada", puntos: 65},
+            { fecha: parsearFecha("11 nov 2025, 2:36 a. m."), concepto: "Encuesta pagada", puntos: 65 },
             { fecha: parsearFecha("11 nov 2025, 10:13 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("10 nov 2025, 11:00 p. m."), concepto: "Encuesta pagada", puntos: 140},
+            { fecha: parsearFecha("10 nov 2025, 11:00 p. m."), concepto: "Encuesta pagada", puntos: 140 },
             { fecha: parsearFecha("10 nov 2025, 6:05 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
             { fecha: parsearFecha("10 nov 2025, 5:50 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("10 nov 2025, 1:01 p. m."), concepto: "Encuesta pagada", puntos: 90},
-            { fecha: parsearFecha("10 nov 2025, 12:31 p. m."), concepto: "Encuesta pagada", puntos: 65},
+            { fecha: parsearFecha("10 nov 2025, 1:01 p. m."), concepto: "Encuesta pagada", puntos: 90 },
+            { fecha: parsearFecha("10 nov 2025, 12:31 p. m."), concepto: "Encuesta pagada", puntos: 65 },
             { fecha: parsearFecha("10 nov 2025, 12:24 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 1 },
-            { fecha: parsearFecha("5 nov 2025, 6:44 p. m."), concepto: "Encuesta pagada", puntos: 90},
-            { fecha: parsearFecha("5 nov 2025, 5:56 p. m."), concepto: "Encuesta pagada", puntos: 1},
-            { fecha: parsearFecha("5 nov 2025, 5:09 p. m."), concepto: "Encuesta pagada", puntos: 90},
+            { fecha: parsearFecha("5 nov 2025, 6:44 p. m."), concepto: "Encuesta pagada", puntos: 90 },
+            { fecha: parsearFecha("5 nov 2025, 5:56 p. m."), concepto: "Encuesta pagada", puntos: 1 },
+            { fecha: parsearFecha("5 nov 2025, 5:09 p. m."), concepto: "Encuesta pagada", puntos: 90 },
             { fecha: parsearFecha("5 nov 2025, 4:07 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("5 nov 2025, 2:49 p. m."), concepto: "Encuesta pagada", puntos: 65},
+            { fecha: parsearFecha("5 nov 2025, 2:49 p. m."), concepto: "Encuesta pagada", puntos: 65 },
             { fecha: parsearFecha("5 nov 2025, 11:27 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
             { fecha: parsearFecha("4 nov 2025, 3:18 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("4 nov 2025, 3:18 p. m."), concepto: "Encuesta pagada", puntos: 65},
-            { fecha: parsearFecha("4 nov 2025, 3:11 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2},
-            { fecha: parsearFecha("3 nov 2025, 10:20 p. m."), concepto: "Encuesta pagada", puntos: 40},
-            { fecha: parsearFecha("3 nov 2025, 6:20 p. m."), concepto: "Encuesta pagada", puntos: 65},
+            { fecha: parsearFecha("4 nov 2025, 3:18 p. m."), concepto: "Encuesta pagada", puntos: 65 },
+            { fecha: parsearFecha("4 nov 2025, 3:11 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
+            { fecha: parsearFecha("3 nov 2025, 10:20 p. m."), concepto: "Encuesta pagada", puntos: 40 },
+            { fecha: parsearFecha("3 nov 2025, 6:20 p. m."), concepto: "Encuesta pagada", puntos: 65 },
             { fecha: parsearFecha("3 nov 2025, 5:43 p. m."), concepto: "Encuesta pagada", puntos: 40 },
             { fecha: parsearFecha("3 nov 2025, 5:37 p. m."), concepto: "Encuesta pagada", puntos: 65 },
             { fecha: parsearFecha("3 nov 2025, 4:55 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
@@ -493,294 +635,159 @@
             { fecha: parsearFecha("24 jun 2025, 1:15 p. m."), concepto: "Tu regalo de bienvenida", puntos: 10 }
         ];
 
-        // Procesar datos
         function procesarDatos() {
-            // Ordenar por fecha (más reciente primero)
-            historial.sort((a, b) => {
-                return b.fecha - a.fecha;
+            historial.sort((a, b) => b.fecha - a.fecha);
+
+            let totalLifepoints = 0, totalWithdrawn = 0, currentBalance = 0;
+            historial.forEach(t => {
+                totalLifepoints += Math.max(0, t.puntos);
+                if (t.puntos < 0) totalWithdrawn += Math.abs(t.puntos);
+                currentBalance += t.puntos;
             });
-            
-            // Calcular totales
-            let totalLifepoints = 0;
-            let totalWithdrawn = 0;
-            let currentBalance = 0;
-            
-            historial.forEach(transaccion => {
-                totalLifepoints += Math.max(0, transaccion.puntos);
-                if (transaccion.puntos < 0) {
-                    totalWithdrawn += Math.abs(transaccion.puntos);
-                }
-                currentBalance += transaccion.puntos;
-            });
-            
-            // Actualizar resumen
+
             document.getElementById('total-lifepoints').textContent = totalLifepoints.toLocaleString();
             document.getElementById('total-euros').textContent = (totalLifepoints / 115).toFixed(2);
-            
             document.getElementById('current-lifepoints').textContent = currentBalance.toLocaleString();
             document.getElementById('current-euros').textContent = (currentBalance / 115).toFixed(2);
-            
             document.getElementById('withdrawn-lifepoints').textContent = totalWithdrawn.toLocaleString();
             document.getElementById('withdrawn-euros').textContent = (totalWithdrawn / 115).toFixed(2);
-            
-            // Crear resumen mensual
+
             const resumenMensual = {};
-            historial.forEach(transaccion => {
-                if (transaccion.puntos > 0) {
-                    const fecha = transaccion.fecha;
-                    const mesAnio = `${fecha.getMonth() + 1}/${fecha.getFullYear()}`;
-                    
-                    if (!resumenMensual[mesAnio]) {
-                        resumenMensual[mesAnio] = 0;
-                    }
-                    
-                    resumenMensual[mesAnio] += transaccion.puntos;
+            historial.forEach(t => {
+                if (t.puntos > 0) {
+                    const mesAnio = `${t.fecha.getMonth() + 1}/${t.fecha.getFullYear()}`;
+                    resumenMensual[mesAnio] = (resumenMensual[mesAnio] || 0) + t.puntos;
                 }
             });
-            
-            // Llenar tabla de resumen mensual
+
             const tablaBody = document.querySelector('#monthly-summary tbody');
             for (const [mes, puntos] of Object.entries(resumenMensual)) {
-                const fila = document.createElement('tr');
-                fila.innerHTML = `
-                    <td>${mes}</td>
-                    <td>${puntos.toLocaleString()}</td>
-                    <td>${(puntos / 115).toFixed(2)} €</td>
-                `;
-                tablaBody.appendChild(fila);
+                tablaBody.innerHTML += `<tr><td>${mes}</td><td>${puntos.toLocaleString()}</td><td>${(puntos / 115).toFixed(2)} €</td></tr>`;
             }
-            
-            // Preparar datos para la gráfica
+
             const datosGrafica = [];
             let acumulado = 0;
-            
-            // Ordenar por fecha (más antigua primero)
-            const historialOrdenado = [...historial].sort((a, b) => a.fecha - b.fecha);
-            
-            historialOrdenado.forEach(transaccion => {
-                acumulado += transaccion.puntos;
-                datosGrafica.push({
-                    fecha: transaccion.fecha,
-                    puntos: acumulado
-                });
+            [...historial].sort((a, b) => a.fecha - b.fecha).forEach(t => {
+                acumulado += t.puntos;
+                datosGrafica.push({ fecha: t.fecha, puntos: acumulado });
             });
-            
-            // Crear gráfica
+
             const ctx = document.getElementById('lifepointsChart').getContext('2d');
             new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: datosGrafica.map(d => {
-                        const fecha = d.fecha;
-                        return `${fecha.getDate()}/${fecha.getMonth() + 1}/${fecha.getFullYear()}`;
-                    }),
+                    labels: datosGrafica.map(d => `${d.fecha.getDate()}/${d.fecha.getMonth() + 1}`),
                     datasets: [{
                         label: 'Lifepoints Acumulados',
                         data: datosGrafica.map(d => d.puntos),
-                        borderColor: '#3498db',
-                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                        borderWidth: 2,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 3,
                         fill: true,
-                        tension: 0.4
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 5
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Lifepoints'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Fecha'
-                            },
-                            ticks: {
-                                maxTicksLimit: 10
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            padding: 12,
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            callbacks: {
+                                label: ctx => `Lifepoints: ${ctx.parsed.y.toLocaleString()}`
                             }
                         }
                     },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `Lifepoints: ${context.parsed.y.toLocaleString()}`;
-                                }
-                            }
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { maxTicksLimit: 12 }
                         }
                     }
                 }
             });
-            
-            // Análisis de horarios de encuestas
+
             analizarHorariosEncuestas();
         }
 
-        // Función para analizar los horarios de encuestas
         function analizarHorariosEncuestas() {
-            // Filtrar solo las encuestas pagadas
-            const encuestas = historial.filter(t => 
-                t.concepto === "Encuesta pagada" && t.puntos > 0
-            );
-            
-            // Analizar por día de la semana y hora del día
-            const actividadPorDia = Array(7).fill(0); // 0=Domingo, 1=Lunes, ..., 6=Sábado
-            const actividadPorHora = Array(24).fill(0); // 0-23 horas
-            
-            encuestas.forEach(encuesta => {
-                const dia = encuesta.fecha.getDay(); // 0=Domingo, 1=Lunes, ..., 6=Sábado
-                const hora = encuesta.fecha.getHours();
-                
-                actividadPorDia[dia]++;
-                actividadPorHora[hora]++;
+            const encuestas = historial.filter(t => t.concepto === "Encuesta pagada" && t.puntos > 0);
+            const actividadPorDia = Array(7).fill(0);
+            const actividadPorHora = Array(24).fill(0);
+
+            encuestas.forEach(e => {
+                actividadPorDia[e.fecha.getDay()]++;
+                actividadPorHora[e.fecha.getHours()]++;
             });
-            
-            // Encontrar los días y horas con más actividad
-            const maxActividadDia = Math.max(...actividadPorDia);
-            const maxActividadHora = Math.max(...actividadPorHora);
-            
-            // Crear la cuadrícula de horarios
-            const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-            const horasDia = Array.from({length: 24}, (_, i) => i);
-            
+
+            const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
             const scheduleGrid = document.getElementById('schedule-grid');
-            
-            // Crear encabezados
-            scheduleGrid.innerHTML = '<div class="schedule-header">Hora/Día</div>';
+
+            scheduleGrid.innerHTML = '<div class="schedule-header">Hora</div>';
             diasSemana.forEach(dia => {
                 scheduleGrid.innerHTML += `<div class="schedule-header">${dia}</div>`;
             });
-            
-            // Crear filas para cada hora
-            horasDia.forEach(hora => {
-                // Formatear hora para mostrar en formato 12 horas
-                const horaFormateada = hora === 0 ? '12 a.m.' : 
-                                     hora < 12 ? `${hora} a.m.` :
-                                     hora === 12 ? '12 p.m.' : 
-                                     `${hora - 12} p.m.`;
-                
-                scheduleGrid.innerHTML += `<div class="schedule-header">${horaFormateada}</div>`;
-                
-                diasSemana.forEach((_, diaIndex) => {
-                    // Contar encuestas para esta hora y día
-                    const encuestasEnHorario = encuestas.filter(e => 
-                        e.fecha.getDay() === diaIndex && e.fecha.getHours() === hora
-                    ).length;
-                    
-                    let claseActividad = 'no-data';
-                    if (encuestasEnHorario > 0) {
-                        if (encuestasEnHorario >= 3) {
-                            claseActividad = 'high-activity';
-                        } else if (encuestasEnHorario >= 2) {
-                            claseActividad = 'medium-activity';
-                        } else {
-                            claseActividad = 'low-activity';
-                        }
-                    }
-                    
-                    scheduleGrid.innerHTML += `
-                        <div class="schedule-cell ${claseActividad}">
-                            ${encuestasEnHorario > 0 ? encuestasEnHorario : ''}
-                        </div>
-                    `;
+
+            for (let hora = 0; hora < 24; hora++) {
+                const horaF = hora === 0 ? '12a' : hora < 12 ? `${hora}a` : hora === 12 ? '12p' : `${hora - 12}p`;
+                scheduleGrid.innerHTML += `<div class="schedule-header">${horaF}</div>`;
+
+                diasSemana.forEach((_, diaIdx) => {
+                    const count = encuestas.filter(e => e.fecha.getDay() === diaIdx && e.fecha.getHours() === hora).length;
+                    const clase = count === 0 ? 'no-data' : count >= 3 ? 'high-activity' : count >= 2 ? 'medium-activity' : 'low-activity';
+                    scheduleGrid.innerHTML += `<div class="schedule-cell ${clase}">${count > 0 ? count : ''}</div>`;
                 });
-            });
-            
-            // Generar recomendaciones
+            }
+
             generarRecomendaciones(actividadPorDia, actividadPorHora, diasSemana);
         }
 
-        // Función para generar recomendaciones basadas en los datos
-        function generarRecomendaciones(actividadPorDia, actividadPorHora, diasSemana) {
-            const recommendationsList = document.getElementById('recommendations-list');
-            
-            // Encontrar los días con más actividad
-            const maxActividadDia = Math.max(...actividadPorDia);
-            const mejoresDias = actividadPorDia
-                .map((actividad, index) => ({ dia: diasSemana[index], actividad }))
-                .filter(item => item.actividad === maxActividadDia)
-                .map(item => item.dia);
-            
-            // Encontrar las horas con más actividad
-            const maxActividadHora = Math.max(...actividadPorHora);
-            const mejoresHoras = actividadPorHora
-                .map((actividad, index) => ({ hora: index, actividad }))
-                .filter(item => item.actividad === maxActividadHora)
-                .map(item => {
-                    // Formatear hora para mostrar en formato 12 horas
-                    const hora = item.hora;
-                    return hora === 0 ? '12 a.m.' : 
-                           hora < 12 ? `${hora} a.m.` :
-                           hora === 12 ? '12 p.m.' : 
-                           `${hora - 12} p.m.`;
-                });
-            
-            // Generar recomendaciones
-            let recomendacionesHTML = '';
-            
-            if (mejoresDias.length > 0) {
-                recomendacionesHTML += `
-                    <div class="recommendation-item">
-                        Días con más encuestas: ${mejoresDias.join(', ')}.
-                    </div>
-                `;
-            }
-            
-            if (mejoresHoras.length > 0) {
-                recomendacionesHTML += `
-                    <div class="recommendation-item">
-                        Hora con más encuestas: ${mejoresHoras.join(', ')}
-                    </div>
-                `;
-            }
-            
-            // Recomendación general basada en el total de encuestas
-            const totalEncuestas = historial.filter(t => 
-                t.concepto === "Encuesta pagada" && t.puntos > 0
-            ).length;
-            
-            if (totalEncuestas > 50) {
-                recomendacionesHTML += `
-                    <div class="recommendation-item">
-                    Considera establecer horarios fijos para revisar la plataforma.
-                    </div>
-                `;
-            } else {
-                recomendacionesHTML += `
-                    <div class="recommendation-item">
-                    Cuantas mas encuestas realizadas el análisis será mas precisa.
-                    </div>
-                `;
-            }
-            
-            // Recomendación sobre días laborables vs fines de semana
-            const actividadLaborables = actividadPorDia.slice(1, 6).reduce((a, b) => a + b, 0);
-            const actividadFinSemana = actividadPorDia[0] + actividadPorDia[6];
-            
-            if (actividadLaborables > actividadFinSemana * 2) {
-                recomendacionesHTML += `
-                    <div class="recommendation-item">
-                        Hay muchas más encuestas durante los días laborables.
-                    </div>
-                `;
-            } else if (actividadFinSemana > actividadLaborables) {
-                recomendacionesHTML += `
-                    <div class="recommendation-item">
-                        Hay mucha más actividad durante los fines de semana.
-                    </div>
-                `;
-            }
-            
-            recommendationsList.innerHTML = recomendacionesHTML;
+        function generarRecomendaciones(actPorDia, actPorHora, diasSemana) {
+            const recList = document.getElementById('recommendations-list');
+            let html = '';
+
+            const maxDia = Math.max(...actPorDia);
+            const mejoresDias = actPorDia.map((a, i) => ({ dia: diasSemana[i], act: a })).filter(x => x.act === maxDia).map(x => x.dia);
+
+            const maxHora = Math.max(...actPorHora);
+            const mejoresHoras = actPorHora.map((a, i) => ({ h: i, a })).filter(x => x.a === maxHora).map(x => {
+                const h = x.h;
+                return h === 0 ? '12 a.m.' : h < 12 ? `${h} a.m.` : h === 12 ? '12 p.m.' : `${h - 12} p.m.`;
+            });
+
+            if (mejoresDias.length) html += `<div class="recommendation-item">Días con más encuestas: <strong>${mejoresDias.join(', ')}</strong></div>`;
+            if (mejoresHoras.length) html += `<div class="recommendation-item">Horas con más encuestas: <strong>${mejoresHoras.join(', ')}</strong></div>`;
+
+            const actLab = actPorDia.slice(1, 6).reduce((a, b) => a + b, 0);
+            const actFin = actPorDia[0] + actPorDia[6];
+
+            if (actLab > actFin * 2) html += '<div class="recommendation-item">Hay muchas más encuestas durante los <strong>días laborables</strong></div>';
+            else if (actFin > actLab) html += '<div class="recommendation-item">Hay más actividad durante los <strong>fines de semana</strong></div>';
+
+            recList.innerHTML = html;
         }
 
-        // Inicializar cuando se carga la página
+        function toggleTheme() {
+            const body = document.body;
+            const current = body.getAttribute('data-theme');
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            document.getElementById('theme-icon').textContent = newTheme === 'light' ? '🌙' : '☀️';
+            document.getElementById('theme-text').textContent = newTheme === 'light' ? 'Modo Oscuro' : 'Modo Claro';
+        }
+
         window.onload = procesarDatos;
     </script>
 </body>
+
 </html>
