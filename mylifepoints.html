@@ -1000,6 +1000,7 @@
         let lifepointsData = [];
         let currentTheme = 'dark';
         let chartExpanded = false;
+        let distributionData = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             loadLifepointsData();
@@ -1079,7 +1080,7 @@
             let totalLifepoints = 0, totalWithdrawn = 0, currentBalance = 0;
             let totalSurveys = 0, successfulSurveys = 0;
             let monthlyData = {};
-            let distribution = {
+            distributionData = {
                 'Encuestas': 0,
                 'Retiros': 0,
                 'Bonificaciones': 0,
@@ -1094,13 +1095,13 @@
                 if (t.concepto === "Encuesta pagada" && t.puntos > 0) {
                     totalSurveys++;
                     successfulSurveys++;
-                    distribution['Encuestas'] += t.puntos;
+                    distributionData['Encuestas'] += t.puntos;
                 } else if (t.puntos < 0) {
-                    distribution['Retiros'] += Math.abs(t.puntos);
+                    distributionData['Retiros'] += Math.abs(t.puntos);
                 } else if (t.concepto.includes("Bonificación")) {
-                    distribution['Bonificaciones'] += t.puntos;
+                    distributionData['Bonificaciones'] += t.puntos;
                 } else {
-                    distribution['Otros'] += t.puntos;
+                    distributionData['Otros'] += t.puntos;
                 }
 
                 const mesAnio = `${t.fecha.getFullYear()}-${String(t.fecha.getMonth() + 1).padStart(2, '0')}`;
@@ -1122,9 +1123,9 @@
             });
 
             updateStatistics(totalLifepoints, totalWithdrawn, currentBalance, totalSurveys, successfulSurveys);
-            updateDistribution(distribution);
+            updateDistribution(distributionData);
             updateMonthlySummary(monthlyData);
-            createCharts(lifepointsData);
+            createCharts(lifepointsData, distributionData);
             analizarHorariosEncuestas(lifepointsData);
             generarRecomendaciones(lifepointsData);
             updateRecentActivity(lifepointsData);
@@ -1179,7 +1180,7 @@
                 });
         }
 
-        function createCharts(data) {
+        function createCharts(data, distribution) {
             const evolutionData = [];
             let acumulado = 0;
             const sortedData = [...data].sort((a, b) => a.fecha - b.fecha);
@@ -1436,7 +1437,6 @@
             
             chartExpanded = !chartExpanded;
             
-            // Re-render chart with new size
             setTimeout(() => {
                 const chart = Chart.getChart('distributionChart');
                 if (chart) {
