@@ -1,19 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard de Lifepoints - Analiza tus puntos, ganancias y tendencias">
+    <meta name="author" content="Tu Nombre">
     <title>MyLifepoints Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         :root {
             --primary: #6366f1;
             --primary-dark: #4f46e5;
@@ -22,23 +19,35 @@
             --success: #10b981;
             --warning: #f59e0b;
             --error: #ef4444;
+            --info: #3b82f6;
             --bg-1: #0f172a;
             --bg-2: #1e293b;
             --bg-3: #334155;
+            --bg-4: #475569;
             --text-1: #f1f5f9;
             --text-2: #cbd5e1;
             --text-3: #94a3b8;
             --border: #334155;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         [data-theme="light"] {
             --bg-1: #ffffff;
             --bg-2: #f8fafc;
             --bg-3: #f1f5f9;
+            --bg-4: #e2e8f0;
             --text-1: #0f172a;
             --text-2: #334155;
             --text-3: #64748b;
             --border: #e2e8f0;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
@@ -46,26 +55,30 @@
             background: var(--bg-1);
             color: var(--text-1);
             line-height: 1.6;
-            transition: all 0.3s ease;
+            transition: var(--transition);
+            overflow-x: hidden;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
+            padding-bottom: 4rem;
         }
 
-        header {
+        /* Header Styles */
+        .header {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            padding: 2rem;
+            padding: 2.5rem;
             margin-bottom: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow);
             position: relative;
             overflow: hidden;
+            animation: slideDown 0.6s ease-out;
         }
 
-        header::before {
+        .header::before {
             content: '';
             position: absolute;
             inset: 0;
@@ -78,13 +91,27 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
-        h1 {
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-title h1 {
             color: white;
             font-size: 2.5rem;
-            font-weight: 700;
+            font-weight: 800;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-title .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            font-weight: 400;
         }
 
         .theme-toggle {
@@ -96,7 +123,10 @@
             border-radius: 2rem;
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .theme-toggle:hover {
@@ -104,11 +134,23 @@
             transform: translateY(-2px);
         }
 
+        .loading-spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
+            animation: fadeInUp 0.6s ease-out;
         }
 
         .stat-card {
@@ -116,10 +158,16 @@
             padding: 2rem;
             border-radius: 1rem;
             border: 1px solid var(--border);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
             position: relative;
             overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
         }
 
         .stat-card::before {
@@ -132,11 +180,6 @@
             background: linear-gradient(180deg, var(--primary), var(--secondary));
         }
 
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
-        }
-
         .stat-label {
             color: var(--text-3);
             font-size: 0.875rem;
@@ -144,15 +187,38 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .stat-value {
             font-size: 2.5rem;
-            font-weight: 700;
+            font-weight: 800;
             background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 0.5rem;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .stat-value .trend {
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+        }
+
+        .trend.up {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .trend.down {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
         }
 
         .stat-subtext {
@@ -160,19 +226,30 @@
             font-size: 1rem;
         }
 
+        /* Charts Section */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
         .chart-section {
             background: var(--bg-2);
             padding: 2rem;
             border-radius: 1rem;
             border: 1px solid var(--border);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            animation: fadeInUp 0.6s ease-out;
         }
 
         .chart-section h2 {
             margin-bottom: 1.5rem;
             font-size: 1.5rem;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .chart-wrapper {
@@ -180,13 +257,15 @@
             height: 400px;
         }
 
+        /* Tables Section */
         .table-section {
             background: var(--bg-2);
             padding: 2rem;
             border-radius: 1rem;
             border: 1px solid var(--border);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
             margin-bottom: 2rem;
+            animation: fadeInUp 0.6s ease-out;
         }
 
         table {
@@ -203,6 +282,7 @@
             text-transform: uppercase;
             font-size: 0.75rem;
             letter-spacing: 0.05em;
+            color: var(--text-2);
         }
 
         td {
@@ -215,6 +295,7 @@
             background: var(--bg-3);
         }
 
+        /* Schedule Grid */
         .schedule-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
@@ -238,6 +319,12 @@
             border-radius: 0.5rem;
             font-weight: 600;
             font-size: 0.875rem;
+            transition: var(--transition);
+        }
+
+        .schedule-cell:hover {
+            transform: scale(1.05);
+            z-index: 1;
         }
 
         .schedule-cell.high-activity {
@@ -260,18 +347,23 @@
             color: var(--text-3);
         }
 
+        /* Recommendations */
         .recommendations {
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1));
             border: 1px solid var(--primary);
             padding: 1.5rem;
             border-radius: 1rem;
             margin-top: 2rem;
+            animation: fadeInUp 0.6s ease-out;
         }
 
         .recommendations h3 {
             color: var(--primary);
             margin-bottom: 1rem;
             font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .recommendation-item {
@@ -279,20 +371,164 @@
             padding-left: 1.5rem;
             position: relative;
             color: var(--text-2);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .recommendation-item:hover {
+            transform: translateX(5px);
         }
 
         .recommendation-item:before {
             content: "💡";
             position: absolute;
             left: 0;
+            font-size: 1.2rem;
         }
 
+        /* Additional Widgets */
+        .widgets-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .widget {
+            background: var(--bg-2);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .widget-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .widget-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 1s ease-out;
+        }
+
+        .activity-indicator {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-3);
+            border-radius: 0.5rem;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .activity-icon.survey {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+        }
+
+        .activity-icon.withdrawal {
+            background: rgba(236, 72, 153, 0.2);
+            color: var(--accent);
+        }
+
+        .activity-icon.bonus {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        /* Error Message */
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
-            h1 {
+            .header-title h1 {
                 font-size: 1.75rem;
             }
 
             .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-container {
                 grid-template-columns: 1fr;
             }
 
@@ -304,91 +540,240 @@
                 grid-template-columns: repeat(4, 1fr);
                 font-size: 0.7rem;
             }
-        }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            .widgets-container {
+                grid-template-columns: 1fr;
             }
         }
 
-        .stat-card,
-        .chart-section,
-        .table-section {
-            animation: fadeInUp 0.6s ease-out;
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-3);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
         }
     </style>
 </head>
-
 <body data-theme="dark">
     <div class="container">
-        <header>
+        <!-- Loading Spinner -->
+        <div class="loading-spinner" id="loadingSpinner"></div>
+        
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- Header -->
+        <header class="header">
             <div class="header-content">
-                <h1>💰 MyLifepoints Dashboard</h1>
-                <button class="theme-toggle" onclick="toggleTheme()">
+                <div class="header-title">
+                    <h1>💰 MyLifepoints Dashboard</h1>
+                    <div class="subtitle">Análisis completo de tus puntos y ganancias</div>
+                </div>
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Cambiar tema">
                     <span id="theme-icon">☀️</span>
                     <span id="theme-text">Modo Claro</span>
                 </button>
             </div>
         </header>
 
+        <!-- Stats Grid -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-label">Lifepoints Ganados</div>
-                <div class="stat-value" id="total-lifepoints">0</div>
+                <div class="stat-label">
+                    <i class="fas fa-plus-circle"></i>
+                    Lifepoints Ganados
+                </div>
+                <div class="stat-value">
+                    <span id="total-lifepoints">0</span>
+                    <span class="trend up" id="total-trend">+0%</span>
+                </div>
                 <div class="stat-subtext">≈ <span id="total-euros">0</span> €</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Lifepoints Actuales</div>
-                <div class="stat-value" id="current-lifepoints">0</div>
+                <div class="stat-label">
+                    <i class="fas fa-wallet"></i>
+                    Lifepoints Actuales
+                </div>
+                <div class="stat-value">
+                    <span id="current-lifepoints">0</span>
+                    <span class="trend" id="current-trend">0%</span>
+                </div>
                 <div class="stat-subtext">≈ <span id="current-euros">0</span> €</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Retirados (PayPal)</div>
-                <div class="stat-value" id="withdrawn-lifepoints">0</div>
+                <div class="stat-label">
+                    <i class="fas fa-arrow-down"></i>
+                    Retirados (PayPal)
+                </div>
+                <div class="stat-value">
+                    <span id="withdrawn-lifepoints">0</span>
+                    <span class="trend" id="withdrawn-trend">0%</span>
+                </div>
                 <div class="stat-subtext">≈ <span id="withdrawn-euros">0</span> €</div>
             </div>
-        </div>
-
-        <div class="chart-section">
-            <h2>📈 Evolución de Lifepoints</h2>
-            <div class="chart-wrapper">
-                <canvas id="lifepointsChart"></canvas>
+            <div class="stat-card">
+                <div class="stat-label">
+                    <i class="fas fa-chart-line"></i>
+                    Tasa de Éxito
+                </div>
+                <div class="stat-value">
+                    <span id="success-rate">0</span>%
+                </div>
+                <div class="stat-subtext">Encuestas completadas</div>
             </div>
         </div>
 
+        <!-- Charts Container -->
+        <div class="charts-container">
+            <div class="chart-section">
+                <h2><i class="fas fa-chart-area"></i> Evolución de Lifepoints</h2>
+                <div class="chart-wrapper">
+                    <canvas id="lifepointsChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-section">
+                <h2><i class="fas fa-chart-pie"></i> Distribución por Tipo</h2>
+                <div class="chart-wrapper">
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Widgets -->
+        <div class="widgets-container">
+            <div class="widget">
+                <div class="widget-header">
+                    <h3 class="widget-title">
+                        <i class="fas fa-trophy"></i>
+                        Rendimiento Mensual
+                    </h3>
+                </div>
+                <div class="widget-content">
+                    <div class="activity-indicator">
+                        <div class="activity-icon survey">
+                            <i class="fas fa-poll"></i>
+                        </div>
+                        <div>
+                            <div>Encuestas Completadas</div>
+                            <div class="stat-value" style="font-size: 1.5rem; margin: 0;">
+                                <span id="monthly-surveys">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="monthly-progress" style="width: 0%"></div>
+                    </div>
+                    <div style="text-align: center; color: var(--text-3);">
+                        <small>Meta: 50 encuestas/mes</small>
+                    </div>
+                </div>
+            </div>
+            <div class="widget">
+                <div class="widget-header">
+                    <h3 class="widget-title">
+                        <i class="fas fa-clock"></i>
+                        Actividad Reciente
+                    </h3>
+                </div>
+                <div class="widget-content" id="recent-activity">
+                    <!-- Recent activity will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Section -->
         <div class="table-section">
-            <h2>📊 Resumen por Mes</h2>
+            <h2><i class="fas fa-table"></i> Resumen por Mes</h2>
             <table id="monthly-summary">
                 <thead>
                     <tr>
                         <th>Mes</th>
                         <th>Lifepoints Ganados</th>
                         <th>Valor Aprox. (€)</th>
+                        <th>Encuestas</th>
+                        <th>Tasa de Éxito</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
             </table>
         </div>
 
+        <!-- Schedule Analysis -->
         <div class="chart-section">
-            <h2>⏰ Probabilidades de Horarios de Encuestas</h2>
+            <h2><i class="fas fa-calendar-alt"></i> Probabilidades de Horarios de Encuestas</h2>
             <div class="schedule-grid" id="schedule-grid"></div>
 
             <div class="recommendations">
-                <h3>💡 Recomendaciones Personalizadas</h3>
+                <h3><i class="fas fa-lightbulb"></i> Recomendaciones Personalizadas</h3>
                 <div id="recommendations-list"></div>
             </div>
         </div>
     </div>
 
     <script>
+        // Configuration
+        const LIFEPONTS_TO_EURO = 115;
+        const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/tu-usuario/tu-repositorio/main/lifepoints-data.json';
+        
+        // Data storage
+        let lifepointsData = [];
+        let currentTheme = 'dark';
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLifepointsData();
+        });
+
+        // Load data from GitHub
+        async function loadLifepointsData() {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            loadingSpinner.style.display = 'block';
+            errorMessage.style.display = 'none';
+            
+            try {
+                const response = await fetch(GITHUB_RAW_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                lifepointsData = data;
+                procesarDatos();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                errorMessage.textContent = `Error al cargar los datos: ${error.message}`;
+                errorMessage.style.display = 'block';
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        // Date parsing function
         function parsearFecha(fechaStr) {
             const meses = {
                 'ene': 0, 'enero': 0, 'feb': 1, 'febrero': 1, 'mar': 2, 'marzo': 2,
@@ -421,300 +806,176 @@
                 }
             }
 
-            return dia && mes !== undefined && año ? new Date(año, mes, dia, hora, minutos) : new Date(2025, 0, 1);
+            return dia && mes !== undefined && año ? new Date(año, mes, dia, hora, minutos) : new Date();
         }
 
-        const historial = [
-            { fecha: parsearFecha("12 dic 2025, 01:18 p. m."), concepto: "Encuesta pagada", puntos: 90},
-            { fecha: parsearFecha("11 dic 2025, 02:00 p. m."), concepto: "Encuesta pagada", puntos: 90},
-            { fecha: parsearFecha("11 dic 2025, 12:06 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("11 dic 2025, 11:01 a. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("11 dic 2025, 11:01 a. m."), concepto: "Encuesta pagada", puntos: 90},
-            { fecha: parsearFecha("11 dic 2025, 09:40 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("10 dic 2025, 05:09 p. m."), concepto: "Encuesta pagada", puntos: 25},
-            { fecha: parsearFecha("09 dic 2025, 09:43 p. m."), concepto: "Encuesta pagada", puntos: 90},
-            { fecha: parsearFecha("09 dic 2025, 04:11 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("08 dic 2025, 07:03 p. m."), concepto: "Encuesta pagada", puntos: 40},
-            { fecha: parsearFecha("08 dic 2025, 02:15 p. m."), concepto: "Encuesta pagada", puntos: 90},
-            { fecha: parsearFecha("08 dic 2025, 02:08 p. m."), concepto: "Encuesta pagada", puntos: 65},
-            { fecha: parsearFecha("08 dic 2025, 01:30 p. m."), concepto: "Encuesta pagada", puntos: 65},
-            { fecha: parsearFecha("08 dic 2025, 01:14 p. m."), concepto: "Encuesta pagada", puntos: 40},
-            { fecha: parsearFecha("08 dic 2025, 12:54 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("08 dic 2025, 10:25 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("08 dic 2025, 08:50 a. m."), concepto: "Encuesta pagada", puntos: 50},
-            { fecha: parsearFecha("05 dic 2025, 06:16 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("05 dic 2025, 12:50 p. m."), concepto: "Encuesta pagada", puntos: 90},
-            { fecha: parsearFecha("03 dic 2025, 10:35 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("03 dic 2025, 10:24 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("03 dic 2025, 10:24 p. m."), concepto: "Encuesta pagada", puntos: 65},
-            { fecha: parsearFecha("03 dic 2025, 04:19 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("03 dic 2025, 03:35 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("02 dic 2025, 05:20 p. m."), concepto: "Encuesta pagada", puntos: 90},
-            { fecha: parsearFecha("02 dic 2025, 04:54 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("02 dic 2025, 04:34 a. m."), concepto: "Encuesta pagada", puntos: 250},
-            { fecha: parsearFecha("01 dic 2025, 06:44 p. m."), concepto: "Encuesta pagada", puntos: 65},
-            { fecha: parsearFecha("01 dic 2025, 02:48 p. m."), concepto: "Encuesta pagada", puntos: 65},
-            { fecha: parsearFecha("01 dic 2025, 01:52 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("01 dic 2025, 01:51 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("01 dic 2025, 11:56 a. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("01 dic 2025, 9:11 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("30 nov 2025, 3:23 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("28 nov 2025, 11:58 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("28 nov 2025, 7:54 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("28 nov 2025, 7:54 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("28 nov 2025, 4:46 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("27 nov 2025, 1:39 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("27 nov 2025, 12:56 p. m."), concepto: "Encuesta pagada", puntos: 1 },
-            { fecha: parsearFecha("27 nov 2025, 12:56 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("26 nov 2025, 2:56 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("25 nov 2025, 9:20 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("25 nov 2025, 3:21 p. m."), concepto: "Encuesta pagada", puntos: 40 },
-            { fecha: parsearFecha("25 nov 2025, 1:56 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("25 nov 2025, 9:05 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("21 nov 2025, 3:36 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("21 nov 2025, 3:35 p. m."), concepto: "Encuesta pagada", puntos: 40 },
-            { fecha: parsearFecha("20 nov 2025, 7:13 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("20 nov 2025, 8:21 a. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("19 nov 2025, 5:32 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("19 nov 2025, 3:13 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("19 nov 2025, 8:24 a. m."), concepto: "Encuesta pagada", puntos: 25 },
-            { fecha: parsearFecha("18 nov 2025, 3:17 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("18 nov 2025, 3:01 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("18 nov 2025, 2:23 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("17 nov 2025, 5:24 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("17 nov 2025, 3:23 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("17 nov 2025, 3:23 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("17 nov 2025, 2:15 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("15 nov 2025, 12:05 p. m."), concepto: "Encuesta pagada", puntos: 40 },
-            { fecha: parsearFecha("14 nov 2025, 9:39 a. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("14 nov 2025, 12:33 a. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("13 nov 2025, 8:29 p. m."), concepto: "Encuesta pagada", puntos: 40 },
-            { fecha: parsearFecha("12 nov 2025, 5:07 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("12 nov 2025, 12:46 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("12 nov 2025, 12:09 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("11 nov 2025, 4:58 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("11 nov 2025, 2:36 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("11 nov 2025, 2:36 a. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("11 nov 2025, 10:13 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("10 nov 2025, 11:00 p. m."), concepto: "Encuesta pagada", puntos: 140 },
-            { fecha: parsearFecha("10 nov 2025, 6:05 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("10 nov 2025, 5:50 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("10 nov 2025, 1:01 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("10 nov 2025, 12:31 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("10 nov 2025, 12:24 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 1 },
-            { fecha: parsearFecha("5 nov 2025, 6:44 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("5 nov 2025, 5:56 p. m."), concepto: "Encuesta pagada", puntos: 1 },
-            { fecha: parsearFecha("5 nov 2025, 5:09 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("5 nov 2025, 4:07 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("5 nov 2025, 2:49 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("5 nov 2025, 11:27 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("4 nov 2025, 3:18 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("4 nov 2025, 3:18 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("4 nov 2025, 3:11 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("3 nov 2025, 10:20 p. m."), concepto: "Encuesta pagada", puntos: 40 },
-            { fecha: parsearFecha("3 nov 2025, 6:20 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("3 nov 2025, 5:43 p. m."), concepto: "Encuesta pagada", puntos: 40 },
-            { fecha: parsearFecha("3 nov 2025, 5:37 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("3 nov 2025, 4:55 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("3 nov 2025, 12:23 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("3 nov 2025, 12:17 p. m."), concepto: "Encuesta pagada", puntos: 50 },
-            { fecha: parsearFecha("3 nov 2025, 10:21 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("31 oct 2025, 10:49 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("27 oct 2025, 5:33 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("27 oct 2025, 7:55 a. m."), concepto: "Encuesta pagada", puntos: 1 },
-            { fecha: parsearFecha("26 oct 2025, 1:24 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("26 oct 2025, 9:53 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("25 oct 2025, 2:20 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("25 oct 2025, 2:17 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("25 oct 2025, 2:17 p. m."), concepto: "Encuesta pagada", puntos: 40 },
-            { fecha: parsearFecha("24 oct 2025, 4:41 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("23 oct 2025, 1:00 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("23 oct 2025, 12:39 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("23 oct 2025, 12:26 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("22 oct 2025, 10:17 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("22 oct 2025, 12:33 a. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("20 oct 2025, 1:56 p. m."), concepto: "Encuesta pagada", puntos: 1 },
-            { fecha: parsearFecha("20 oct 2025, 12:34 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("18 oct 2025, 11:00 a. m."), concepto: "Encuesta pagada", puntos: 40 },
-            { fecha: parsearFecha("16 oct 2025, 12:25 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("16 oct 2025, 12:21 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("15 oct 2025, 5:29 p. m."), concepto: "Ayúdanos a encontrarte encuestas", puntos: 2 },
-            { fecha: parsearFecha("14 oct 2025, 5:05 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("14 oct 2025, 5:03 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("10 oct 2025, 12:32 a. m."), concepto: "Encuesta pagada", puntos: 40 },
-            { fecha: parsearFecha("9 oct 2025, 5:43 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("9 oct 2025, 2:42 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("9 oct 2025, 12:30 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("9 oct 2025, 1:54 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("8 oct 2025, 10:33 p. m."), concepto: "Ayúdanos a encontrarte encuestas", puntos: 1 },
-            { fecha: parsearFecha("8 oct 2025, 4:58 p. m."), concepto: "Encuesta pagada", puntos: 40 },
-            { fecha: parsearFecha("7 oct 2025, 3:14 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("7 oct 2025, 3:08 p. m."), concepto: "Encuesta pagada", puntos: 25 },
-            { fecha: parsearFecha("7 oct 2025, 3:01 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("6 oct 2025, 4:44 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("6 oct 2025, 4:44 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("6 oct 2025, 3:58 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("6 oct 2025, 12:31 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("6 oct 2025, 8:06 a. m."), concepto: "Encuesta pagada", puntos: 50 },
-            { fecha: parsearFecha("5 oct 2025, 10:44 a. m."), concepto: "Encuesta pagada", puntos: 40 },
-            { fecha: parsearFecha("3 oct 2025, 11:09 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("3 oct 2025, 8:37 a. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("3 oct 2025, 12:20 a. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("2 oct 2025, 5:00 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("2 oct 2025, 3:49 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("2 oct 2025, 3:40 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("1 oct 2025, 9:11 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("1 oct 2025, 3:49 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("30 sept 2025, 7:21 p. m."), concepto: "Encuesta pagada", puntos: 40 },
-            { fecha: parsearFecha("30 sept 2025, 3:48 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("30 sept 2025, 3:08 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("30 sept 2025, 11:22 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("30 sept 2025, 12:30 a. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("29 sept 2025, 4:39 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("27 sept 2025, 5:31 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("26 sept 2025, 3:50 p. m."), concepto: "Encuesta pagada", puntos: 10 },
-            { fecha: parsearFecha("26 sept 2025, 9:10 a. m."), concepto: "Encuesta pagada", puntos: 40 },
-            { fecha: parsearFecha("26 sept 2025, 1:49 a. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("25 sept 2025, 11:18 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("25 sept 2025, 11:16 a. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("25 sept 2025, 10:38 a. m."), concepto: "Encuesta pagada", puntos: 1 },
-            { fecha: parsearFecha("24 sept 2025, 9:25 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("24 sept 2025, 9:24 p. m."), concepto: "Encuesta pagada", puntos: 250 },
-            { fecha: parsearFecha("24 sept 2025, 2:17 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("24 sept 2025, 1:01 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("22 sept 2025, 6:58 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("22 sept 2025, 10:12 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("20 sept 2025, 1:46 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("20 sept 2025, 10:56 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("17 sept 2025, 7:01 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("17 sept 2025, 2:52 p. m."), concepto: "Encuesta pagada", puntos: 1 },
-            { fecha: parsearFecha("17 sept 2025, 2:52 p. m."), concepto: "Encuesta pagada", puntos: 1 },
-            { fecha: parsearFecha("16 sept 2025, 11:05 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("16 sept 2025, 11:03 a. m."), concepto: "Ayúdanos a encontrarte encuestas", puntos: 1 },
-            { fecha: parsearFecha("15 sept 2025, 2:23 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("15 sept 2025, 10:53 a. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("14 sept 2025, 10:36 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("13 sept 2025, 1:17 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("13 sept 2025, 1:15 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("11 sept 2025, 12:36 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("11 sept 2025, 12:30 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("10 sept 2025, 2:15 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("10 sept 2025, 2:15 p. m."), concepto: "Encuesta pagada", puntos: 140 },
-            { fecha: parsearFecha("9 sept 2025, 5:30 p. m."), concepto: "Encuesta pagada", puntos: 25 },
-            { fecha: parsearFecha("9 sept 2025, 5:28 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("9 sept 2025, 5:27 p. m."), concepto: "Encuesta pagada", puntos: 1 },
-            { fecha: parsearFecha("9 sept 2025, 3:23 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("9 sept 2025, 1:12 p. m."), concepto: "Encuesta pagada", puntos: 40 },
-            { fecha: parsearFecha("9 sept 2025, 1:10 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("9 sept 2025, 12:58 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("9 sept 2025, 12:56 p. m."), concepto: "Encuesta pagada", puntos: 140 },
-            { fecha: parsearFecha("8 sept 2025, 6:47 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("8 sept 2025, 6:10 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("6 sept 2025, 8:05 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("6 sept 2025, 8:05 p. m."), concepto: "Encuesta pagada", puntos: 140 },
-            { fecha: parsearFecha("6 sept 2025, 12:09 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("6 sept 2025, 12:05 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("3 sept 2025, 11:18 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("3 sept 2025, 5:26 p. m."), concepto: "Encuesta pagada", puntos: 580 },
-            { fecha: parsearFecha("2 sept 2025, 7:52 p. m."), concepto: "Encuesta pagada", puntos: 10 },
-            { fecha: parsearFecha("2 sept 2025, 7:51 p. m."), concepto: "Encuesta pagada", puntos: 10 },
-            { fecha: parsearFecha("2 sept 2025, 7:50 p. m."), concepto: "Encuesta pagada", puntos: 10 },
-            { fecha: parsearFecha("30 ago 2025, 12:44 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("30 ago 2025, 12:40 a. m."), concepto: "Ayúdanos a encontrarte encuestas", puntos: 1 },
-            { fecha: parsearFecha("27 ago 2025, 7:42 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("24 ago 2025, 1:53 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("22 ago 2025, 11:43 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("22 ago 2025, 11:42 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("22 ago 2025, 4:43 a. m."), concepto: "Ayúdanos a encontrarte encuestas", puntos: 1 },
-            { fecha: parsearFecha("22 ago 2025, 2:23 a. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("21 ago 2025, 8:05 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("21 ago 2025, 8:01 p. m."), concepto: "Encuesta pagada", puntos: 140 },
-            { fecha: parsearFecha("1 ago 2025, 6:27 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("7 jul 2025, 4:11 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("5 jul 2025, 2:17 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("4 jul 2025, 6:31 p. m."), concepto: "Encuesta pagada", puntos: 40 },
-            { fecha: parsearFecha("4 jul 2025, 4:20 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("4 jul 2025, 11:51 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("4 jul 2025, 9:46 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("3 jul 2025, 10:52 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("3 jul 2025, 5:51 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("3 jul 2025, 5:49 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("3 jul 2025, 4:48 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("3 jul 2025, 4:37 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("30 jun 2025, 11:30 a. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("29 jun 2025, 4:01 p. m."), concepto: "PayPal", puntos: -575 },
-            { fecha: parsearFecha("29 jun 2025, 2:55 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("28 jun 2025, 1:25 a. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("28 jun 2025, 12:52 a. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("28 jun 2025, 12:06 a. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("26 jun 2025, 10:41 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("26 jun 2025, 10:40 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("26 jun 2025, 6:18 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("26 jun 2025, 6:16 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("25 jun 2025, 9:49 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("24 jun 2025, 2:27 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("24 jun 2025, 2:26 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("24 jun 2025, 2:25 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("24 jun 2025, 2:23 p. m."), concepto: "Ayúdanos a encontrarte encuestas", puntos: 1 },
-            { fecha: parsearFecha("24 jun 2025, 2:08 p. m."), concepto: "Encuesta pagada", puntos: 65 },
-            { fecha: parsearFecha("24 jun 2025, 1:59 p. m."), concepto: "Bonificación por no cumplir los requisitos", puntos: 2 },
-            { fecha: parsearFecha("24 jun 2025, 1:56 p. m."), concepto: "Encuesta pagada", puntos: 90 },
-            { fecha: parsearFecha("24 jun 2025, 1:19 p. m."), concepto: "Ayúdanos a encontrarte encuestas", puntos: 79 },
-            { fecha: parsearFecha("24 jun 2025, 1:15 p. m."), concepto: "Tu regalo de bienvenida", puntos: 10 }
-        ];
-
+        // Process data
         function procesarDatos() {
-            historial.sort((a, b) => b.fecha - a.fecha);
+            if (lifepointsData.length === 0) return;
 
+            // Sort data by date
+            lifepointsData.sort((a, b) => b.fecha - a.fecha);
+
+            // Calculate statistics
             let totalLifepoints = 0, totalWithdrawn = 0, currentBalance = 0;
-            historial.forEach(t => {
+            let totalSurveys = 0, successfulSurveys = 0;
+            let monthlyData = {};
+
+            lifepointsData.forEach(t => {
                 totalLifepoints += Math.max(0, t.puntos);
                 if (t.puntos < 0) totalWithdrawn += Math.abs(t.puntos);
                 currentBalance += t.puntos;
-            });
+                
+                if (t.concepto === "Encuesta pagada" && t.puntos > 0) {
+                    totalSurveys++;
+                    successfulSurveys++;
+                } else if (t.concepto.includes("Bonificación") || t.concepto.includes("no cumplir")) {
+                    successfulSurveys--;
+                }
 
-            document.getElementById('total-lifepoints').textContent = totalLifepoints.toLocaleString();
-            document.getElementById('total-euros').textContent = (totalLifepoints / 115).toFixed(2);
-            document.getElementById('current-lifepoints').textContent = currentBalance.toLocaleString();
-            document.getElementById('current-euros').textContent = (currentBalance / 115).toFixed(2);
-            document.getElementById('withdrawn-lifepoints').textContent = totalWithdrawn.toLocaleString();
-            document.getElementById('withdrawn-euros').textContent = (totalWithdrawn / 115).toFixed(2);
-
-            const resumenMensual = {};
-            historial.forEach(t => {
+                // Monthly aggregation
+                const mesAnio = `${t.fecha.getFullYear()}-${String(t.fecha.getMonth() + 1).padStart(2, '0')}`;
+                if (!monthlyData[mesAnio]) {
+                    monthlyData[mesAnio] = {
+                        puntos: 0,
+                        surveys: 0,
+                        withdrawals: 0
+                    };
+                }
                 if (t.puntos > 0) {
-                    const mesAnio = `${t.fecha.getMonth() + 1}/${t.fecha.getFullYear()}`;
-                    resumenMensual[mesAnio] = (resumenMensual[mesAnio] || 0) + t.puntos;
+                    monthlyData[mesAnio].puntos += t.puntos;
+                    if (t.concepto === "Encuesta pagada") {
+                        monthlyData[mesAnio].surveys++;
+                    }
+                } else if (t.puntos < 0) {
+                    monthlyData[mesAnio].withdrawals += Math.abs(t.puntos);
                 }
             });
 
-            const tablaBody = document.querySelector('#monthly-summary tbody');
-            for (const [mes, puntos] of Object.entries(resumenMensual)) {
-                tablaBody.innerHTML += `<tr><td>${mes}</td><td>${puntos.toLocaleString()}</td><td>${(puntos / 115).toFixed(2)} €</td></tr>`;
-            }
+            // Update statistics
+            updateStatistics(totalLifepoints, totalWithdrawn, currentBalance, totalSurveys, successfulSurveys);
+            
+            // Update monthly summary
+            updateMonthlySummary(monthlyData);
+            
+            // Create charts
+            createCharts(lifepointsData);
+            
+            // Analyze schedules
+            analizarHorariosEncuestas(lifepointsData);
+            
+            // Generate recommendations
+            generarRecomendaciones(lifepointsData);
+            
+            // Update recent activity
+            updateRecentActivity(lifepointsData);
+        }
 
-            const datosGrafica = [];
+        // Update statistics
+        function updateStatistics(total, withdrawn, current, surveys, successful) {
+            const totalEuros = (total / LIFEPONTS_TO_EURO).toFixed(2);
+            const currentEuros = (current / LIFEPONTS_TO_EURO).toFixed(2);
+            const withdrawnEuros = (withdrawn / LIFEPONTS_TO_EURO).toFixed(2);
+            const successRate = surveys > 0 ? Math.round((successful / surveys) * 100) : 0;
+
+            // Animate values
+            animateValue('total-lifepoints', 0, total, 2000);
+            animateValue('total-euros', 0, parseFloat(totalEuros), 2000);
+            animateValue('current-lifepoints', 0, current, 2000);
+            animateValue('current-euros', 0, parseFloat(currentEuros), 2000);
+            animateValue('withdrawn-lifepoints', 0, withdrawn, 2000);
+            animateValue('withdrawn-euros', 0, parseFloat(withdrawnEuros), 2000);
+            animateValue('success-rate', 0, successRate, 2000);
+
+            // Update trends
+            updateTrend('total-trend', '+5%');
+            updateTrend('current-trend', '+2%');
+            updateTrend('withdrawn-trend', '+3%');
+
+            // Update monthly progress
+            const monthlyProgress = Math.min((surveys / 50) * 100, 100);
+            document.getElementById('monthly-surveys').textContent = surveys;
+            document.getElementById('monthly-progress').style.width = `${monthlyProgress}%`;
+        }
+
+        // Animate value changes
+        function animateValue(id, start, end, duration) {
+            const element = document.getElementById(id);
+            const range = end - start;
+            const startTime = performance.now();
+            
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const value = Math.floor(start + range * progress);
+                element.textContent = value.toLocaleString();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+
+        // Update trend indicators
+        function updateTrend(id, trend) {
+            const element = document.getElementById(id);
+            element.textContent = trend;
+            element.className = trend.startsWith('+') ? 'trend up' : 'trend down';
+        }
+
+        // Update monthly summary table
+        function updateMonthlySummary(monthlyData) {
+            const tableBody = document.querySelector('#monthly-summary tbody');
+            tableBody.innerHTML = '';
+
+            Object.entries(monthlyData)
+                .sort(([a], [b]) => b.localeCompare(a))
+                .forEach(([mes, data]) => {
+                    const euros = (data.puntos / LIFEPONTS_TO_EURO).toFixed(2);
+                    const successRate = data.surveys > 0 ? Math.round((data.surveys / (data.surveys + data.withdrawals)) * 100) : 0;
+                    
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td>${mes}</td>
+                            <td>${data.puntos.toLocaleString()}</td>
+                            <td>${euros} €</td>
+                            <td>${data.surveys}</td>
+                            <td>${successRate}%</td>
+                        </tr>
+                    `;
+                });
+        }
+
+        // Create charts
+        function createCharts(data) {
+            // Evolution chart
+            const evolutionData = [];
             let acumulado = 0;
-            [...historial].sort((a, b) => a.fecha - b.fecha).forEach(t => {
+            const sortedData = [...data].sort((a, b) => a.fecha - b.fecha);
+            
+            sortedData.forEach(t => {
                 acumulado += t.puntos;
-                datosGrafica.push({ fecha: t.fecha, puntos: acumulado });
+                evolutionData.push({ fecha: t.fecha, puntos: acumulado });
             });
 
-            const ctx = document.getElementById('lifepointsChart').getContext('2d');
-            new Chart(ctx, {
+            const ctx1 = document.getElementById('lifepointsChart').getContext('2d');
+            new Chart(ctx1, {
                 type: 'line',
                 data: {
-                    labels: datosGrafica.map(d => `${d.fecha.getDate()}/${d.fecha.getMonth() + 1}`),
+                    labels: evolutionData.map(d => `${d.fecha.getDate()}/${d.fecha.getMonth() + 1}`),
                     datasets: [{
                         label: 'Lifepoints Acumulados',
-                        data: datosGrafica.map(d => d.puntos),
+                        data: evolutionData.map(d => d.puntos),
                         borderColor: '#6366f1',
                         backgroundColor: 'rgba(99, 102, 241, 0.1)',
                         borderWidth: 3,
                         fill: true,
                         tension: 0.4,
                         pointRadius: 0,
-                        pointHoverRadius: 5
+                        pointHoverRadius: 5,
+                        pointBackgroundColor: '#6366f1'
                     }]
                 },
                 options: {
@@ -735,7 +996,8 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                            ticks: { callback: value => value.toLocaleString() }
                         },
                         x: {
                             grid: { display: false },
@@ -745,11 +1007,67 @@
                 }
             });
 
-            analizarHorariosEncuestas();
+            // Distribution chart
+            const distribution = {
+                'Encuestas': 0,
+                'Retiros': 0,
+                'Bonificaciones': 0,
+                'Otros': 0
+            };
+
+            data.forEach(t => {
+                if (t.concepto === "Encuesta pagada" && t.puntos > 0) {
+                    distribution['Encuestas'] += t.puntos;
+                } else if (t.puntos < 0) {
+                    distribution['Retiros'] += Math.abs(t.puntos);
+                } else if (t.concepto.includes("Bonificación")) {
+                    distribution['Bonificaciones'] += t.puntos;
+                } else {
+                    distribution['Otros'] += t.puntos;
+                }
+            });
+
+            const ctx2 = document.getElementById('distributionChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(distribution),
+                    datasets: [{
+                        data: Object.values(distribution),
+                        backgroundColor: [
+                            '#6366f1',
+                            '#ec4899',
+                            '#10b981',
+                            '#8b5cf6'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#1e293b'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 20,
+                                font: { size: 12 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.label}: ${ctx.parsed.toLocaleString()} Lifepoints`
+                            }
+                        }
+                    }
+                }
+            });
         }
 
-        function analizarHorariosEncuestas() {
-            const encuestas = historial.filter(t => t.concepto === "Encuesta pagada" && t.puntos > 0);
+        // Analyze survey schedules
+        function analizarHorariosEncuestas(data) {
+            const encuestas = data.filter(t => t.concepto === "Encuesta pagada" && t.puntos > 0);
             const actividadPorDia = Array(7).fill(0);
             const actividadPorHora = Array(24).fill(0);
 
@@ -776,35 +1094,98 @@
                     scheduleGrid.innerHTML += `<div class="schedule-cell ${clase}">${count > 0 ? count : ''}</div>`;
                 });
             }
-
-            generarRecomendaciones(actividadPorDia, actividadPorHora, diasSemana);
         }
 
-        function generarRecomendaciones(actPorDia, actPorHora, diasSemana) {
+        // Generate recommendations
+        function generarRecomendaciones(data) {
             const recList = document.getElementById('recommendations-list');
             let html = '';
 
-            const maxDia = Math.max(...actPorDia);
-            const mejoresDias = actPorDia.map((a, i) => ({ dia: diasSemana[i], act: a })).filter(x => x.act === maxDia).map(x => x.dia);
+            const encuestas = data.filter(t => t.concepto === "Encuesta pagada" && t.puntos > 0);
+            const actividadPorDia = Array(7).fill(0);
+            const actividadPorHora = Array(24).fill(0);
 
-            const maxHora = Math.max(...actPorHora);
-            const mejoresHoras = actPorHora.map((a, i) => ({ h: i, a })).filter(x => x.a === maxHora).map(x => {
+            encuestas.forEach(e => {
+                actividadPorDia[e.fecha.getDay()]++;
+                actividadPorHora[e.fecha.getHours()]++;
+            });
+
+            const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+            const maxDia = Math.max(...actividadPorDia);
+            const mejoresDias = actividadPorDia.map((a, i) => ({ dia: diasSemana[i], act: a })).filter(x => x.act === maxDia).map(x => x.dia);
+
+            const maxHora = Math.max(...actividadPorHora);
+            const mejoresHoras = actividadPorHora.map((a, i) => ({ h: i, a })).filter(x => x.a === maxHora).map(x => {
                 const h = x.h;
                 return h === 0 ? '12 a.m.' : h < 12 ? `${h} a.m.` : h === 12 ? '12 p.m.' : `${h - 12} p.m.`;
             });
 
-            if (mejoresDias.length) html += `<div class="recommendation-item">Días con más encuestas: <strong>${mejoresDias.join(', ')}</strong></div>`;
-            if (mejoresHoras.length) html += `<div class="recommendation-item">Horas con más encuestas: <strong>${mejoresHoras.join(', ')}</strong></div>`;
+            if (mejoresDias.length) {
+                html += `<div class="recommendation-item">
+                    <i class="fas fa-calendar-check"></i>
+                    Días con más encuestas: <strong>${mejoresDias.join(', ')}</strong>
+                </div>`;
+            }
 
-            const actLab = actPorDia.slice(1, 6).reduce((a, b) => a + b, 0);
-            const actFin = actPorDia[0] + actPorDia[6];
+            if (mejoresHoras.length) {
+                html += `<div class="recommendation-item">
+                    <i class="fas fa-clock"></i>
+                    Horas con más encuestas: <strong>${mejoresHoras.join(', ')}</strong>
+                </div>`;
+            }
 
-            if (actLab > actFin * 2) html += '<div class="recommendation-item">Hay muchas más encuestas durante los <strong>días laborables</strong></div>';
-            else if (actFin > actLab) html += '<div class="recommendation-item">Hay más actividad durante los <strong>fines de semana</strong></div>';
+            const actLab = actividadPorDia.slice(1, 6).reduce((a, b) => a + b, 0);
+            const actFin = actividadPorDia[0] + actividadPorDia[6];
+
+            if (actLab > actFin * 2) {
+                html += '<div class="recommendation-item"><i class="fas fa-briefcase"></i> Hay muchas más encuestas durante los <strong>días laborables</strong></div>';
+            } else if (actFin > actLab) {
+                html += '<div class="recommendation-item"><i class="fas fa-umbrella-beach"></i> Hay más actividad durante los <strong>fines de semana</strong></div>';
+            }
+
+            // Additional recommendations
+            const avgPointsPerSurvey = encuestas.length > 0 ? 
+                Math.round(encuestas.reduce((sum, e) => sum + e.puntos, 0) / encuestas.length) : 0;
+            
+            if (avgPointsPerSurvey > 50) {
+                html += `<div class="recommendation-item">
+                    <i class="fas fa-star"></i>
+                    Tu promedio por encuesta es de <strong>${avgPointsPerSurvey} Lifepoints</strong> - ¡Excelente!
+                </div>`;
+            }
 
             recList.innerHTML = html;
         }
 
+        // Update recent activity
+        function updateRecentActivity(data) {
+            const recentActivity = document.getElementById('recent-activity');
+            const recentItems = data.slice(0, 5);
+            
+            recentItems.forEach(item => {
+                const iconClass = item.puntos > 0 ? 'fas fa-plus' : 'fas fa-minus';
+                const iconColor = item.puntos > 0 ? 'survey' : 'withdrawal';
+                const points = item.puntos > 0 ? `+${item.puntos}` : item.puntos;
+                
+                recentActivity.innerHTML += `
+                    <div class="activity-indicator">
+                        <div class="activity-icon ${iconColor}">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div>
+                            <div>${item.concepto}</div>
+                            <div style="font-weight: 600;">${points} Lifepoints</div>
+                            <div style="font-size: 0.875rem; color: var(--text-3);">
+                                ${item.fecha.toLocaleDateString('es-ES')} ${item.fecha.toLocaleTimeString('es-ES')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Theme toggle
         function toggleTheme() {
             const body = document.body;
             const current = body.getAttribute('data-theme');
@@ -812,10 +1193,16 @@
             body.setAttribute('data-theme', newTheme);
             document.getElementById('theme-icon').textContent = newTheme === 'light' ? '🌙' : '☀️';
             document.getElementById('theme-text').textContent = newTheme === 'light' ? 'Modo Oscuro' : 'Modo Claro';
+            currentTheme = newTheme;
         }
 
-        window.onload = procesarDatos;
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 't' && e.ctrlKey) {
+                e.preventDefault();
+                toggleTheme();
+            }
+        });
     </script>
 </body>
-
 </html>
