@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Dashboard de Lifepoints - Analiza tus puntos, ganancias y tendencias">
+    <meta name="description" content="Dashboard de Lifepoints - Analiza tus puntos y ganancias">
     <meta name="author" content="Tu Nombre">
     <title>MyLifepoints Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -66,7 +66,6 @@
             padding-bottom: 4rem;
         }
 
-        /* Header Styles */
         .header {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             padding: 2.5rem;
@@ -144,7 +143,16 @@
             animation: spin 1s linear infinite;
         }
 
-        /* Stats Grid */
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            display: none;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -226,7 +234,6 @@
             font-size: 1rem;
         }
 
-        /* Charts Section */
         .charts-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
@@ -257,7 +264,6 @@
             height: 400px;
         }
 
-        /* Tables Section */
         .table-section {
             background: var(--bg-2);
             padding: 2rem;
@@ -295,7 +301,6 @@
             background: var(--bg-3);
         }
 
-        /* Schedule Grid */
         .schedule-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
@@ -347,7 +352,6 @@
             color: var(--text-3);
         }
 
-        /* Recommendations */
         .recommendations {
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1));
             border: 1px solid var(--primary);
@@ -388,7 +392,6 @@
             font-size: 1.2rem;
         }
 
-        /* Additional Widgets */
         .widgets-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -474,18 +477,6 @@
             color: var(--success);
         }
 
-        /* Error Message */
-        .error-message {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid var(--error);
-            color: var(--error);
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin: 1rem 0;
-            display: none;
-        }
-
-        /* Animations */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -518,7 +509,6 @@
             50% { transform: scale(1.05); }
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .header-title h1 {
                 font-size: 1.75rem;
@@ -546,7 +536,6 @@
             }
         }
 
-        /* Accessibility */
         .sr-only {
             position: absolute;
             width: 1px;
@@ -559,7 +548,6 @@
             border-width: 0;
         }
 
-        /* Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -580,13 +568,10 @@
 </head>
 <body data-theme="dark">
     <div class="container">
-        <!-- Loading Spinner -->
         <div class="loading-spinner" id="loadingSpinner"></div>
         
-        <!-- Error Message -->
         <div class="error-message" id="errorMessage"></div>
 
-        <!-- Header -->
         <header class="header">
             <div class="header-content">
                 <div class="header-title">
@@ -600,7 +585,6 @@
             </div>
         </header>
 
-        <!-- Stats Grid -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-label">
@@ -647,7 +631,6 @@
             </div>
         </div>
 
-        <!-- Charts Container -->
         <div class="charts-container">
             <div class="chart-section">
                 <h2><i class="fas fa-chart-area"></i> Evolución de Lifepoints</h2>
@@ -663,7 +646,6 @@
             </div>
         </div>
 
-        <!-- Additional Widgets -->
         <div class="widgets-container">
             <div class="widget">
                 <div class="widget-header">
@@ -700,12 +682,10 @@
                     </h3>
                 </div>
                 <div class="widget-content" id="recent-activity">
-                    <!-- Recent activity will be populated here -->
                 </div>
             </div>
         </div>
 
-        <!-- Table Section -->
         <div class="table-section">
             <h2><i class="fas fa-table"></i> Resumen por Mes</h2>
             <table id="monthly-summary">
@@ -722,7 +702,6 @@
             </table>
         </div>
 
-        <!-- Schedule Analysis -->
         <div class="chart-section">
             <h2><i class="fas fa-calendar-alt"></i> Probabilidades de Horarios de Encuestas</h2>
             <div class="schedule-grid" id="schedule-grid"></div>
@@ -735,20 +714,16 @@
     </div>
 
     <script>
-        // Configuration
         const LIFEPONTS_TO_EURO = 115;
         const GITHUB_RAW_URL = 'https://trabalonp.github.io/lifepoints-data.json';
         
-        // Data storage
         let lifepointsData = [];
         let currentTheme = 'dark';
 
-        // Initialize the application
         document.addEventListener('DOMContentLoaded', () => {
             loadLifepointsData();
         });
 
-        // Load data from GitHub
         async function loadLifepointsData() {
             const loadingSpinner = document.getElementById('loadingSpinner');
             const errorMessage = document.getElementById('errorMessage');
@@ -762,7 +737,13 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                lifepointsData = data;
+                
+                // Parse dates after loading
+                lifepointsData = data.map(item => ({
+                    ...item,
+                    fecha: parsearFecha(item.fecha)
+                }));
+                
                 procesarDatos();
             } catch (error) {
                 console.error('Error loading data:', error);
@@ -773,7 +754,6 @@
             }
         }
 
-        // Date parsing function
         function parsearFecha(fechaStr) {
             const meses = {
                 'ene': 0, 'enero': 0, 'feb': 1, 'febrero': 1, 'mar': 2, 'marzo': 2,
@@ -806,10 +786,12 @@
                 }
             }
 
+            // If year is not found, use current year or a default
+            if (!año) año = new Date().getFullYear();
+            
             return dia && mes !== undefined && año ? new Date(año, mes, dia, hora, minutos) : new Date();
         }
 
-        // Process data
         function procesarDatos() {
             if (lifepointsData.length === 0) return;
 
@@ -871,14 +853,12 @@
             updateRecentActivity(lifepointsData);
         }
 
-        // Update statistics
         function updateStatistics(total, withdrawn, current, surveys, successful) {
             const totalEuros = (total / LIFEPONTS_TO_EURO).toFixed(2);
             const currentEuros = (current / LIFEPONTS_TO_EURO).toFixed(2);
             const withdrawnEuros = (withdrawn / LIFEPONTS_TO_EURO).toFixed(2);
             const successRate = surveys > 0 ? Math.round((successful / surveys) * 100) : 0;
 
-            // Animate values
             animateValue('total-lifepoints', 0, total, 2000);
             animateValue('total-euros', 0, parseFloat(totalEuros), 2000);
             animateValue('current-lifepoints', 0, current, 2000);
@@ -887,18 +867,15 @@
             animateValue('withdrawn-euros', 0, parseFloat(withdrawnEuros), 2000);
             animateValue('success-rate', 0, successRate, 2000);
 
-            // Update trends
             updateTrend('total-trend', '+5%');
             updateTrend('current-trend', '+2%');
             updateTrend('withdrawn-trend', '+3%');
 
-            // Update monthly progress
             const monthlyProgress = Math.min((surveys / 50) * 100, 100);
             document.getElementById('monthly-surveys').textContent = surveys;
             document.getElementById('monthly-progress').style.width = `${monthlyProgress}%`;
         }
 
-        // Animate value changes
         function animateValue(id, start, end, duration) {
             const element = document.getElementById(id);
             const range = end - start;
@@ -918,14 +895,12 @@
             requestAnimationFrame(update);
         }
 
-        // Update trend indicators
         function updateTrend(id, trend) {
             const element = document.getElementById(id);
             element.textContent = trend;
             element.className = trend.startsWith('+') ? 'trend up' : 'trend down';
         }
 
-        // Update monthly summary table
         function updateMonthlySummary(monthlyData) {
             const tableBody = document.querySelector('#monthly-summary tbody');
             tableBody.innerHTML = '';
@@ -948,9 +923,7 @@
                 });
         }
 
-        // Create charts
         function createCharts(data) {
-            // Evolution chart
             const evolutionData = [];
             let acumulado = 0;
             const sortedData = [...data].sort((a, b) => a.fecha - b.fecha);
@@ -1007,7 +980,6 @@
                 }
             });
 
-            // Distribution chart
             const distribution = {
                 'Encuestas': 0,
                 'Retiros': 0,
@@ -1065,7 +1037,6 @@
             });
         }
 
-        // Analyze survey schedules
         function analizarHorariosEncuestas(data) {
             const encuestas = data.filter(t => t.concepto === "Encuesta pagada" && t.puntos > 0);
             const actividadPorDia = Array(7).fill(0);
@@ -1096,7 +1067,6 @@
             }
         }
 
-        // Generate recommendations
         function generarRecomendaciones(data) {
             const recList = document.getElementById('recommendations-list');
             let html = '';
@@ -1139,12 +1109,14 @@
             const actFin = actividadPorDia[0] + actividadPorDia[6];
 
             if (actLab > actFin * 2) {
-                html += '<div class="recommendation-item"><i class="fas fa-briefcase"></i> Hay muchas más encuestas durante los <strong>días laborables</strong></div>';
+                html += `<div class="recommendation-item">
+                    <i class="fas fa-briefcase"></i>
+                    Hay muchas más encuestas durante los <strong>días laborables</strong>
+                </div>`;
             } else if (actFin > actLab) {
                 html += '<div class="recommendation-item"><i class="fas fa-umbrella-beach"></i> Hay más actividad durante los <strong>fines de semana</strong></div>';
             }
 
-            // Additional recommendations
             const avgPointsPerSurvey = encuestas.length > 0 ? 
                 Math.round(encuestas.reduce((sum, e) => sum + e.puntos, 0) / encuestas.length) : 0;
             
@@ -1158,7 +1130,6 @@
             recList.innerHTML = html;
         }
 
-        // Update recent activity
         function updateRecentActivity(data) {
             const recentActivity = document.getElementById('recent-activity');
             const recentItems = data.slice(0, 5);
@@ -1185,7 +1156,6 @@
             });
         }
 
-        // Theme toggle
         function toggleTheme() {
             const body = document.body;
             const current = body.getAttribute('data-theme');
@@ -1196,7 +1166,6 @@
             currentTheme = newTheme;
         }
 
-        // Add keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.key === 't' && e.ctrlKey) {
                 e.preventDefault();
