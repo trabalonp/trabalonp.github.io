@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <style>
         :root {
             --primary: #6366f1;
@@ -102,26 +101,27 @@
 
         .header-title h1 {
             color: white;
-            font-size: 2.5rem;
-            font-weight: 800;
+            font-size: 1.75rem;
+            font-weight: 600;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .header-title .subtitle {
             color: rgba(255, 255, 255, 0.9);
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             font-weight: 400;
         }
 
         .theme-toggle {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 1.5rem;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 500;
+            font-size: 0.9rem;
             transition: var(--transition);
             display: flex;
             align-items: center;
@@ -129,7 +129,7 @@
         }
 
         .theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.25);
             transform: translateY(-2px);
         }
 
@@ -151,6 +151,7 @@
             border-radius: 0.5rem;
             margin: 1rem 0;
             display: none;
+            animation: fadeIn 0.3s ease-out;
         }
 
         .stats-grid {
@@ -252,7 +253,7 @@
 
         .chart-section h2 {
             margin-bottom: 1.5rem;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -262,6 +263,29 @@
         .chart-wrapper {
             position: relative;
             height: 400px;
+        }
+
+        .chart-controls {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: var(--transition);
+        }
+
+        .chart-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .table-section {
@@ -325,11 +349,13 @@
             font-weight: 600;
             font-size: 0.875rem;
             transition: var(--transition);
+            cursor: pointer;
         }
 
         .schedule-cell:hover {
             transform: scale(1.05);
             z-index: 1;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .schedule-cell.high-activity {
@@ -371,25 +397,43 @@
         }
 
         .recommendation-item {
-            margin-bottom: 0.75rem;
-            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.75rem;
             position: relative;
             color: var(--text-2);
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
             transition: var(--transition);
+            animation: slideIn 0.5s ease-out;
         }
 
         .recommendation-item:hover {
             transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .recommendation-item:before {
             content: "💡";
             position: absolute;
-            left: 0;
+            left: 1rem;
             font-size: 1.2rem;
+        }
+
+        .recommendation-content {
+            flex: 1;
+        }
+
+        .recommendation-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .recommendation-desc {
+            font-size: 0.875rem;
+            opacity: 0.8;
         }
 
         .widgets-container {
@@ -426,7 +470,7 @@
         .widget-content {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.5rem;
         }
 
         .progress-bar {
@@ -434,6 +478,7 @@
             background: var(--bg-3);
             border-radius: 4px;
             overflow: hidden;
+            position: relative;
         }
 
         .progress-fill {
@@ -441,6 +486,37 @@
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             border-radius: 4px;
             transition: width 1s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-3);
+        }
+
+        .progress-value {
+            font-weight: 600;
+            color: var(--text-1);
+        }
+
+        .progress-goal {
+            font-size: 0.75rem;
+            color: var(--text-3);
         }
 
         .activity-indicator {
@@ -450,6 +526,11 @@
             padding: 1rem;
             background: var(--bg-3);
             border-radius: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .activity-indicator:hover {
+            transform: translateX(5px);
         }
 
         .activity-icon {
@@ -475,6 +556,121 @@
         .activity-icon.bonus {
             background: rgba(16, 185, 129, 0.2);
             color: var(--success);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-details {
+            font-size: 0.875rem;
+            color: var(--text-3);
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: var(--text-3);
+            margin-top: 0.25rem;
+        }
+
+        .goal-achievement {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            animation: bounceIn 0.5s ease-out;
+        }
+
+        .goal-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        .goal-content {
+            flex: 1;
+        }
+
+        .goal-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .goal-desc {
+            font-size: 0.875rem;
+            color: var(--text-2);
+        }
+
+        .distribution-section {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .distribution-info {
+            background: var(--bg-2);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .distribution-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .distribution-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .distribution-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--bg-3);
+            border-radius: 0.5rem;
+        }
+
+        .distribution-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .distribution-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         @keyframes fadeInUp {
@@ -509,9 +705,32 @@
             50% { transform: scale(1.05); }
         }
 
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
         @media (max-width: 768px) {
             .header-title h1 {
-                font-size: 1.75rem;
+                font-size: 1.5rem;
             }
 
             .stats-grid {
@@ -532,6 +751,10 @@
             }
 
             .widgets-container {
+                grid-template-columns: 1fr;
+            }
+
+            .distribution-section {
                 grid-template-columns: 1fr;
             }
         }
@@ -575,8 +798,8 @@
         <header class="header">
             <div class="header-content">
                 <div class="header-title">
-                    <h1>💰 MyLifepoints Dashboard</h1>
-                    <div class="subtitle">Análisis completo de tus puntos y ganancias</div>
+                    <h1>MyLifepoints</h1>
+                    <div class="subtitle">Dashboard</div>
                 </div>
                 <button class="theme-toggle" onclick="toggleTheme()" aria-label="Cambiar tema">
                     <span id="theme-icon">☀️</span>
@@ -595,7 +818,7 @@
                     <span id="total-lifepoints">0</span>
                     <span class="trend up" id="total-trend">+0%</span>
                 </div>
-                <div class="stat-subtext">≈ <span id="total-euros">0</span> €</div>
+                <div class="stat-subtext">≈ <span id="total-euros">0.00</span> €</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">
@@ -606,7 +829,7 @@
                     <span id="current-lifepoints">0</span>
                     <span class="trend" id="current-trend">0%</span>
                 </div>
-                <div class="stat-subtext">≈ <span id="current-euros">0</span> €</div>
+                <div class="stat-subtext">≈ <span id="current-euros">0.00</span> €</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">
@@ -617,7 +840,7 @@
                     <span id="withdrawn-lifepoints">0</span>
                     <span class="trend" id="withdrawn-trend">0%</span>
                 </div>
-                <div class="stat-subtext">≈ <span id="withdrawn-euros">0</span> €</div>
+                <div class="stat-subtext">≈ <span id="withdrawn-euros">0.00</span> €</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">
@@ -631,17 +854,61 @@
             </div>
         </div>
 
+        <div class="distribution-section">
+            <div class="distribution-info">
+                <h3 class="distribution-title">
+                    <i class="fas fa-chart-pie"></i>
+                    Distribución por Tipo
+                </h3>
+                <div class="distribution-stats">
+                    <div class="distribution-stat">
+                        <div class="distribution-label">
+                            <i class="fas fa-poll" style="color: var(--primary);"></i>
+                            Encuestas
+                        </div>
+                        <div class="distribution-value" id="survey-points">0</div>
+                    </div>
+                    <div class="distribution-stat">
+                        <div class="distribution-label">
+                            <i class="fas fa-arrow-down" style="color: var(--accent);"></i>
+                            Retiros
+                        </div>
+                        <div class="distribution-value" id="withdrawal-points">0</div>
+                    </div>
+                    <div class="distribution-stat">
+                        <div class="distribution-label">
+                            <i class="fas fa-gift" style="color: var(--success);"></i>
+                            Bonificaciones
+                        </div>
+                        <div class="distribution-value" id="bonus-points">0</div>
+                    </div>
+                    <div class="distribution-stat">
+                        <div class="distribution-label">
+                            <i class="fas fa-ellipsis-h" style="color: var(--secondary);"></i>
+                            Otros
+                        </div>
+                        <div class="distribution-value" id="other-points">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-section">
+                <h2><i class="fas fa-chart-pie"></i> Distribución de Puntos</h2>
+                <div class="chart-controls">
+                    <button class="chart-btn" onclick="toggleChartSize()">
+                        <i class="fas fa-expand"></i> Ampliar
+                    </button>
+                </div>
+                <div class="chart-wrapper" id="chartWrapper">
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
         <div class="charts-container">
             <div class="chart-section">
                 <h2><i class="fas fa-chart-area"></i> Evolución de Lifepoints</h2>
                 <div class="chart-wrapper">
                     <canvas id="lifepointsChart"></canvas>
-                </div>
-            </div>
-            <div class="chart-section">
-                <h2><i class="fas fa-chart-pie"></i> Distribución por Tipo</h2>
-                <div class="chart-wrapper">
-                    <canvas id="distributionChart"></canvas>
                 </div>
             </div>
         </div>
@@ -659,18 +926,31 @@
                         <div class="activity-icon survey">
                             <i class="fas fa-poll"></i>
                         </div>
-                        <div>
-                            <div>Encuestas Completadas</div>
-                            <div class="stat-value" style="font-size: 1.5rem; margin: 0;">
-                                <span id="monthly-surveys">0</span>
+                        <div class="activity-content">
+                            <div class="activity-title">Encuestas Completadas</div>
+                            <div class="activity-details">
+                                <span id="monthly-surveys">0</span> de 50
+                            </div>
+                            <div class="activity-time">
+                                Último registro: <span id="last-survey-date">--</span>
                             </div>
                         </div>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="monthly-progress" style="width: 0%"></div>
                     </div>
-                    <div style="text-align: center; color: var(--text-3);">
-                        <small>Meta: 50 encuestas/mes</small>
+                    <div class="progress-label">
+                        <span class="progress-value" id="progress-percentage">0%</span>
+                        <span class="progress-goal">Meta: 50 encuestas/mes</span>
+                    </div>
+                    <div id="goal-achievement" class="goal-achievement" style="display: none;">
+                        <div class="goal-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="goal-content">
+                            <div class="goal-title">¡Meta Alcanzada! 🎉</div>
+                            <div class="goal-desc">Has completado el objetivo mensual de encuestas</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -719,6 +999,7 @@
         
         let lifepointsData = [];
         let currentTheme = 'dark';
+        let chartExpanded = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             loadLifepointsData();
@@ -738,7 +1019,6 @@
                 }
                 const data = await response.json();
                 
-                // Parse dates after loading
                 lifepointsData = data.map(item => ({
                     ...item,
                     fecha: parsearFecha(item.fecha)
@@ -786,7 +1066,6 @@
                 }
             }
 
-            // If year is not found, use current year or a default
             if (!año) año = new Date().getFullYear();
             
             return dia && mes !== undefined && año ? new Date(año, mes, dia, hora, minutos) : new Date();
@@ -795,13 +1074,17 @@
         function procesarDatos() {
             if (lifepointsData.length === 0) return;
 
-            // Sort data by date
             lifepointsData.sort((a, b) => b.fecha - a.fecha);
 
-            // Calculate statistics
             let totalLifepoints = 0, totalWithdrawn = 0, currentBalance = 0;
             let totalSurveys = 0, successfulSurveys = 0;
             let monthlyData = {};
+            let distribution = {
+                'Encuestas': 0,
+                'Retiros': 0,
+                'Bonificaciones': 0,
+                'Otros': 0
+            };
 
             lifepointsData.forEach(t => {
                 totalLifepoints += Math.max(0, t.puntos);
@@ -811,11 +1094,15 @@
                 if (t.concepto === "Encuesta pagada" && t.puntos > 0) {
                     totalSurveys++;
                     successfulSurveys++;
-                } else if (t.concepto.includes("Bonificación") || t.concepto.includes("no cumplir")) {
-                    successfulSurveys--;
+                    distribution['Encuestas'] += t.puntos;
+                } else if (t.puntos < 0) {
+                    distribution['Retiros'] += Math.abs(t.puntos);
+                } else if (t.concepto.includes("Bonificación")) {
+                    distribution['Bonificaciones'] += t.puntos;
+                } else {
+                    distribution['Otros'] += t.puntos;
                 }
 
-                // Monthly aggregation
                 const mesAnio = `${t.fecha.getFullYear()}-${String(t.fecha.getMonth() + 1).padStart(2, '0')}`;
                 if (!monthlyData[mesAnio]) {
                     monthlyData[mesAnio] = {
@@ -834,23 +1121,14 @@
                 }
             });
 
-            // Update statistics
             updateStatistics(totalLifepoints, totalWithdrawn, currentBalance, totalSurveys, successfulSurveys);
-            
-            // Update monthly summary
+            updateDistribution(distribution);
             updateMonthlySummary(monthlyData);
-            
-            // Create charts
             createCharts(lifepointsData);
-            
-            // Analyze schedules
             analizarHorariosEncuestas(lifepointsData);
-            
-            // Generate recommendations
             generarRecomendaciones(lifepointsData);
-            
-            // Update recent activity
             updateRecentActivity(lifepointsData);
+            checkGoalAchievement(totalSurveys);
         }
 
         function updateStatistics(total, withdrawn, current, surveys, successful) {
@@ -870,35 +1148,13 @@
             updateTrend('total-trend', '+5%');
             updateTrend('current-trend', '+2%');
             updateTrend('withdrawn-trend', '+3%');
-
-            const monthlyProgress = Math.min((surveys / 50) * 100, 100);
-            document.getElementById('monthly-surveys').textContent = surveys;
-            document.getElementById('monthly-progress').style.width = `${monthlyProgress}%`;
         }
 
-        function animateValue(id, start, end, duration) {
-            const element = document.getElementById(id);
-            const range = end - start;
-            const startTime = performance.now();
-            
-            function update(currentTime) {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const value = Math.floor(start + range * progress);
-                element.textContent = value.toLocaleString();
-                
-                if (progress < 1) {
-                    requestAnimationFrame(update);
-                }
-            }
-            
-            requestAnimationFrame(update);
-        }
-
-        function updateTrend(id, trend) {
-            const element = document.getElementById(id);
-            element.textContent = trend;
-            element.className = trend.startsWith('+') ? 'trend up' : 'trend down';
+        function updateDistribution(distribution) {
+            animateValue('survey-points', 0, distribution['Encuestas'], 1500);
+            animateValue('withdrawal-points', 0, distribution['Retiros'], 1500);
+            animateValue('bonus-points', 0, distribution['Bonificaciones'], 1500);
+            animateValue('other-points', 0, distribution['Otros'], 1500);
         }
 
         function updateMonthlySummary(monthlyData) {
@@ -977,25 +1233,6 @@
                             ticks: { maxTicksLimit: 12 }
                         }
                     }
-                }
-            });
-
-            const distribution = {
-                'Encuestas': 0,
-                'Retiros': 0,
-                'Bonificaciones': 0,
-                'Otros': 0
-            };
-
-            data.forEach(t => {
-                if (t.concepto === "Encuesta pagada" && t.puntos > 0) {
-                    distribution['Encuestas'] += t.puntos;
-                } else if (t.puntos < 0) {
-                    distribution['Retiros'] += Math.abs(t.puntos);
-                } else if (t.concepto.includes("Bonificación")) {
-                    distribution['Bonificaciones'] += t.puntos;
-                } else {
-                    distribution['Otros'] += t.puntos;
                 }
             });
 
@@ -1093,15 +1330,19 @@
 
             if (mejoresDias.length) {
                 html += `<div class="recommendation-item">
-                    <i class="fas fa-calendar-check"></i>
-                    Días con más encuestas: <strong>${mejoresDias.join(', ')}</strong>
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">Días con más encuestas</div>
+                        <div class="recommendation-desc">Los mejores días para completar encuestas son: <strong>${mejoresDias.join(', ')}</strong></div>
+                    </div>
                 </div>`;
             }
 
             if (mejoresHoras.length) {
                 html += `<div class="recommendation-item">
-                    <i class="fas fa-clock"></i>
-                    Horas con más encuestas: <strong>${mejoresHoras.join(', ')}</strong>
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">Horas con más encuestas</div>
+                        <div class="recommendation-desc">Las mejores horas son: <strong>${mejoresHoras.join(', ')}</strong></div>
+                    </div>
                 </div>`;
             }
 
@@ -1110,11 +1351,18 @@
 
             if (actLab > actFin * 2) {
                 html += `<div class="recommendation-item">
-                    <i class="fas fa-briefcase"></i>
-                    Hay muchas más encuestas durante los <strong>días laborables</strong>
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">Patrón de actividad</div>
+                        <div class="recommendation-desc">Hay muchas más encuestas durante los <strong>días laborables</strong></div>
+                    </div>
                 </div>`;
             } else if (actFin > actLab) {
-                html += '<div class="recommendation-item"><i class="fas fa-umbrella-beach"></i> Hay más actividad durante los <strong>fines de semana</strong></div>';
+                html += `<div class="recommendation-item">
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">Patrón de actividad</div>
+                        <div class="recommendation-desc">Hay más actividad durante los <strong>fines de semana</strong></div>
+                    </div>
+                </div>`;
             }
 
             const avgPointsPerSurvey = encuestas.length > 0 ? 
@@ -1122,8 +1370,10 @@
             
             if (avgPointsPerSurvey > 50) {
                 html += `<div class="recommendation-item">
-                    <i class="fas fa-star"></i>
-                    Tu promedio por encuesta es de <strong>${avgPointsPerSurvey} Lifepoints</strong> - ¡Excelente!
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">Rendimiento</div>
+                        <div class="recommendation-desc">Tu promedio por encuesta es de <strong>${avgPointsPerSurvey} Lifepoints</strong> - ¡Excelente!</div>
+                    </div>
                 </div>`;
             }
 
@@ -1144,16 +1394,55 @@
                         <div class="activity-icon ${iconColor}">
                             <i class="${iconClass}"></i>
                         </div>
-                        <div>
-                            <div>${item.concepto}</div>
-                            <div style="font-weight: 600;">${points} Lifepoints</div>
-                            <div style="font-size: 0.875rem; color: var(--text-3);">
-                                ${item.fecha.toLocaleDateString('es-ES')} ${item.fecha.toLocaleTimeString('es-ES')}
-                            </div>
+                        <div class="activity-content">
+                            <div class="activity-title">${item.concepto}</div>
+                            <div class="activity-details">${points} Lifepoints</div>
+                            <div class="activity-time">${item.fecha.toLocaleDateString('es-ES')} ${item.fecha.toLocaleTimeString('es-ES')}</div>
                         </div>
                     </div>
                 `;
             });
+        }
+
+        function checkGoalAchievement(surveys) {
+            const progress = Math.min((surveys / 50) * 100, 100);
+            document.getElementById('monthly-surveys').textContent = surveys;
+            document.getElementById('monthly-progress').style.width = `${progress}%`;
+            document.getElementById('progress-percentage').textContent = `${Math.round(progress)}%`;
+            
+            const lastSurvey = lifepointsData.find(item => item.concepto === "Encuesta pagada" && item.puntos > 0);
+            if (lastSurvey) {
+                document.getElementById('last-survey-date').textContent = lastSurvey.fecha.toLocaleDateString('es-ES');
+            }
+
+            if (surveys >= 50) {
+                document.getElementById('goal-achievement').style.display = 'flex';
+            } else {
+                document.getElementById('goal-achievement').style.display = 'none';
+            }
+        }
+
+        function toggleChartSize() {
+            const chartWrapper = document.getElementById('chartWrapper');
+            const chartBtn = event.target.closest('.chart-btn');
+            
+            if (chartExpanded) {
+                chartWrapper.style.height = '400px';
+                chartBtn.innerHTML = '<i class="fas fa-expand"></i> Ampliar';
+            } else {
+                chartWrapper.style.height = '600px';
+                chartBtn.innerHTML = '<i class="fas fa-compress"></i> Reducir';
+            }
+            
+            chartExpanded = !chartExpanded;
+            
+            // Re-render chart with new size
+            setTimeout(() => {
+                const chart = Chart.getChart('distributionChart');
+                if (chart) {
+                    chart.resize();
+                }
+            }, 100);
         }
 
         function toggleTheme() {
@@ -1164,6 +1453,31 @@
             document.getElementById('theme-icon').textContent = newTheme === 'light' ? '🌙' : '☀️';
             document.getElementById('theme-text').textContent = newTheme === 'light' ? 'Modo Oscuro' : 'Modo Claro';
             currentTheme = newTheme;
+        }
+
+        function animateValue(id, start, end, duration) {
+            const element = document.getElementById(id);
+            const range = end - start;
+            const startTime = performance.now();
+            
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const value = Math.floor(start + range * progress);
+                element.textContent = value.toLocaleString();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+
+        function updateTrend(id, trend) {
+            const element = document.getElementById(id);
+            element.textContent = trend;
+            element.className = trend.startsWith('+') ? 'trend up' : 'trend down';
         }
 
         document.addEventListener('keydown', (e) => {
