@@ -670,6 +670,21 @@
             color: var(--text-2);
         }
 
+        .adaptive-goal {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-3);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .adaptive-goal-label {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -878,7 +893,7 @@
                         <div class="activity-content">
                             <div class="activity-title">Encuestas Completadas</div>
                             <div class="activity-details">
-                                <span id="monthly-surveys">0</span> de 50
+                                <span id="monthly-surveys">0</span> de <span id="monthly-goal">50</span>
                             </div>
                             <div class="activity-time">
                                 Último registro: <span id="last-survey-date">--</span>
@@ -890,7 +905,7 @@
                     </div>
                     <div class="progress-label">
                         <span class="progress-value" id="progress-percentage">0%</span>
-                        <span class="progress-goal">Meta: 50 encuestas/mes</span>
+                        <span class="progress-goal">Meta: <span id="goal-display">50</span> encuestas/mes</span>
                     </div>
                     <div id="goal-achievement" class="goal-achievement" style="display: none;">
                         <div class="goal-icon">
@@ -900,6 +915,10 @@
                             <div class="goal-title">¡Meta Alcanzada! 🎉</div>
                             <div class="goal-desc">Has completado el objetivo mensual de encuestas</div>
                         </div>
+                    </div>
+                    <div class="adaptive-goal">
+                        <span class="adaptive-goal-label">Meta adaptativa:</span>
+                        <span id="adaptive-goal-info">Basada en rendimiento del mes anterior</span>
                     </div>
                 </div>
             </div>
@@ -961,6 +980,8 @@
         
         let lifepointsData = [];
         let currentTheme = 'dark';
+        let monthlyGoal = 50;
+        let lastMonthSurveys = 0;
 
         document.addEventListener('DOMContentLoaded', () => {
             loadLifepointsData();
@@ -1040,6 +1061,9 @@
             let totalLifepoints = 0, totalWithdrawn = 0, currentBalance = 0;
             let totalSurveys = 0, successfulSurveys = 0;
             let monthlyData = {};
+            let currentMonth = new Date().getMonth();
+            let currentYear = new Date().getFullYear();
+            let lastMonthData = null;
 
             lifepointsData.forEach(t => {
                 totalLifepoints += Math.max(0, t.puntos);
@@ -1069,7 +1093,19 @@
                 } else if (t.puntos < 0) {
                     monthlyData[mesAnio].withdrawals += Math.abs(t.puntos);
                 }
+
+                // Guardar datos del mes anterior
+                if (t.fecha.getMonth() === (currentMonth - 1) && t.fecha.getFullYear() === currentYear) {
+                    lastMonthData = monthlyData[mesAnio];
+                }
             });
+
+            // Calcular meta adaptativa basada en el mes anterior
+            if (lastMonthData) {
+                lastMonthSurveys = lastMonthData.surveys;
+                monthlyGoal = calculateAdaptiveGoal(lastMonthSurveys);
+                updateAdaptiveGoalDisplay();
+            }
 
             updateStatistics(totalLifepoints, totalWithdrawn, currentBalance, totalSurveys, successfulSurveys);
             updateMonthlySummary(monthlyData);
@@ -1077,6 +1113,36 @@
             analizarHorariosEncuestas(lifepointsData);
             updateRecentActivity(lifepointsData);
             checkGoalAchievement(totalSurveys);
+        }
+
+        function calculateAdaptiveGoal(lastMonthSurveys) {
+            let newGoal = 50; // Meta base
+            
+            if (lastMonthSurveys > 60) {
+                // Si tuvo muchas encuestas, aumentar la meta
+                newGoal = Math.min(80, lastMonthSurveys + 10);
+            } else if (lastMonthSurveys > 50) {
+                // Si estuvo por encima, mantener o aumentar ligeramente
+                newGoal = lastMonthSurveys + 5;
+            } else if (lastMonthSurveys > 40) {
+                // Si estuvo cerca, mantener similar
+                newGoal = lastMonthSurveys + 2;
+            } else if (lastMonthSurveys > 30) {
+                // Si estuvo un poco bajo, disminuir ligeramente
+                newGoal = lastMonthSurveys - 2;
+            } else {
+                // Si estuvo muy bajo, disminuir más
+                newGoal = Math.max(25, lastMonthSurveys - 5);
+            }
+            
+            return Math.round(newGoal);
+        }
+
+        function updateAdaptiveGoalDisplay() {
+            document.getElementById('monthly-goal').textContent = monthlyGoal;
+            document.getElementById('goal-display').textContent = monthlyGoal;
+            document.getElementById('adaptive-goal-info').textContent = 
+                `Basada en ${lastMonthSurveys} encuestas el mes anterior`;
         }
 
         function updateStatistics(total, withdrawn, current, surveys, successful) {
@@ -1233,7 +1299,7 @@
         }
 
         function checkGoalAchievement(surveys) {
-            const progress = Math.min((surveys / 50) * 100, 100);
+            const progress = Math.min((surveys / monthlyGoal) * 100, 100);
             document.getElementById('monthly-surveys').textContent = surveys;
             document.getElementById('monthly-progress').style.width = `${progress}%`;
             document.getElementById('progress-percentage').textContent = `${Math.round(progress)}%`;
@@ -1243,7 +1309,7 @@
                 document.getElementById('last-survey-date').textContent = lastSurvey.fecha.toLocaleDateString('es-ES');
             }
 
-            if (surveys >= 50) {
+            if (surveys >= monthlyGoal) {
                 document.getElementById('goal-achievement').style.display = 'flex';
             } else {
                 document.getElementById('goal-achievement').style.display = 'none';
