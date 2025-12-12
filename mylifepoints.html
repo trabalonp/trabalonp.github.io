@@ -29,6 +29,8 @@
             --border: #334155;
             --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
 
         [data-theme="light"] {
@@ -41,6 +43,8 @@
             --text-3: #64748b;
             --border: #e2e8f0;
             --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            --glass-bg: rgba(0, 0, 0, 0.05);
+            --glass-border: rgba(0, 0, 0, 0.1);
         }
 
         * {
@@ -74,6 +78,7 @@
             position: relative;
             overflow: hidden;
             animation: slideDown 0.6s ease-out;
+            backdrop-filter: blur(10px);
         }
 
         .header::before {
@@ -91,6 +96,7 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 1rem;
+            z-index: 1;
         }
 
         .header-title {
@@ -113,9 +119,9 @@
         }
 
         .theme-toggle {
-            background: rgba(255, 255, 255, 0.15);
+            background: var(--glass-bg);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--glass-border);
             color: white;
             width: 40px;
             height: 40px;
@@ -127,10 +133,11 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1;
         }
 
         .theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.15);
             transform: scale(1.1);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
@@ -174,11 +181,7 @@
             position: relative;
             overflow: hidden;
             animation: fadeInUp 0.6s ease-out;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(5px);
         }
 
         .stat-card::before {
@@ -189,6 +192,16 @@
             width: 4px;
             height: 100%;
             background: linear-gradient(180deg, var(--primary), var(--secondary));
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-card:hover::before {
+            width: 6px;
         }
 
         .stat-label {
@@ -213,6 +226,7 @@
             display: flex;
             align-items: baseline;
             gap: 0.5rem;
+            transition: var(--transition);
         }
 
         .stat-value .trend {
@@ -220,6 +234,7 @@
             font-weight: 600;
             padding: 0.25rem 0.5rem;
             border-radius: 0.5rem;
+            transition: var(--transition);
         }
 
         .trend.up {
@@ -235,13 +250,7 @@
         .stat-subtext {
             color: var(--text-3);
             font-size: 1rem;
-        }
-
-        .charts-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
+            transition: var(--transition);
         }
 
         .chart-section {
@@ -250,7 +259,9 @@
             border-radius: 1rem;
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
+            margin-bottom: 2rem;
             animation: fadeInUp 0.6s ease-out;
+            backdrop-filter: blur(5px);
         }
 
         .chart-section h2 {
@@ -265,29 +276,11 @@
         .chart-wrapper {
             position: relative;
             height: 400px;
-        }
-
-        .chart-controls {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .chart-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-size: 0.875rem;
             transition: var(--transition);
         }
 
-        .chart-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+        .chart-wrapper:hover {
+            transform: scale(1.01);
         }
 
         .table-section {
@@ -298,6 +291,7 @@
             box-shadow: var(--shadow);
             margin-bottom: 2rem;
             animation: fadeInUp 0.6s ease-out;
+            backdrop-filter: blur(5px);
         }
 
         table {
@@ -321,10 +315,32 @@
             padding: 1rem;
             border-bottom: 1px solid var(--border);
             color: var(--text-2);
+            transition: var(--transition);
         }
 
         tr:hover {
             background: var(--bg-3);
+            transform: translateX(4px);
+        }
+
+        .schedule-section {
+            background: var(--bg-2);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.6s ease-out;
+            backdrop-filter: blur(5px);
+        }
+
+        .schedule-section h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .schedule-grid {
@@ -342,6 +358,12 @@
             color: white;
             border-radius: 0.5rem;
             font-size: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .schedule-header:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .schedule-cell {
@@ -352,12 +374,32 @@
             font-size: 0.875rem;
             transition: var(--transition);
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .schedule-cell::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .schedule-cell:hover::after {
+            width: 100px;
+            height: 100px;
         }
 
         .schedule-cell:hover {
             transform: scale(1.05);
             z-index: 1;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .schedule-cell.high-activity {
@@ -380,44 +422,32 @@
             color: var(--text-3);
         }
 
-        .schedule-section {
-            background: var(--bg-2);
-            padding: 2rem;
-            border-radius: 1rem;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            margin-bottom: 2rem;
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        .schedule-section h2 {
-            margin-bottom: 1.5rem;
-            font-size: 1.25rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
         .schedule-legend {
             display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
             flex-wrap: wrap;
+            justify-content: center;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
             font-size: 0.875rem;
             color: var(--text-3);
+            transition: var(--transition);
+        }
+
+        .legend-item:hover {
+            transform: translateY(-2px);
         }
 
         .legend-color {
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             border-radius: 0.25rem;
+            transition: var(--transition);
         }
 
         .legend-color.high {
@@ -450,6 +480,7 @@
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
             animation: fadeInUp 0.6s ease-out;
+            backdrop-filter: blur(5px);
         }
 
         .widget-header {
@@ -479,6 +510,11 @@
             border-radius: 4px;
             overflow: hidden;
             position: relative;
+            transition: var(--transition);
+        }
+
+        .progress-bar:hover {
+            transform: scaleY(1.1);
         }
 
         .progress-fill {
@@ -498,7 +534,7 @@
             right: 0;
             bottom: 0;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: shimmer 2s infinite;
+            animation: shimmer 3s infinite;
         }
 
         .progress-label {
@@ -507,6 +543,11 @@
             margin-top: 0.5rem;
             font-size: 0.875rem;
             color: var(--text-3);
+            transition: var(--transition);
+        }
+
+        .progress-label:hover {
+            transform: translateX(2px);
         }
 
         .progress-value {
@@ -530,7 +571,8 @@
         }
 
         .activity-indicator:hover {
-            transform: translateX(5px);
+            transform: translateX(8px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .activity-icon {
@@ -541,6 +583,11 @@
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .activity-icon:hover {
+            transform: scale(1.1);
         }
 
         .activity-icon.survey {
@@ -565,17 +612,20 @@
         .activity-title {
             font-weight: 600;
             margin-bottom: 0.25rem;
+            transition: var(--transition);
         }
 
         .activity-details {
             font-size: 0.875rem;
             color: var(--text-3);
+            transition: var(--transition);
         }
 
         .activity-time {
             font-size: 0.75rem;
             color: var(--text-3);
             margin-top: 0.25rem;
+            transition: var(--transition);
         }
 
         .goal-achievement {
@@ -588,6 +638,7 @@
             border-radius: 0.75rem;
             margin-top: 1rem;
             animation: bounceIn 0.5s ease-out;
+            backdrop-filter: blur(5px);
         }
 
         .goal-icon {
@@ -601,6 +652,7 @@
             color: white;
             font-size: 1.5rem;
             animation: pulse 2s infinite;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
 
         .goal-content {
@@ -678,16 +730,17 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
         @media (max-width: 768px) {
             .header-title h1 {
                 font-size: 1.5rem;
             }
 
             .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .charts-container {
                 grid-template-columns: 1fr;
             }
 
@@ -719,6 +772,7 @@
 
         ::-webkit-scrollbar {
             width: 8px;
+            transition: var(--transition);
         }
 
         ::-webkit-scrollbar-track {
@@ -728,10 +782,12 @@
         ::-webkit-scrollbar-thumb {
             background: var(--primary);
             border-radius: 4px;
+            transition: var(--transition);
         }
 
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-dark);
+            transform: scale(1.1);
         }
     </style>
 </head>
@@ -799,17 +855,10 @@
             </div>
         </div>
 
-        <div class="charts-container">
-            <div class="chart-section">
-                <h2><i class="fas fa-chart-area"></i> Evolución de Lifepoints</h2>
-                <div class="chart-controls">
-                    <button class="chart-btn" onclick="toggleFullscreen('lifepointsChart')">
-                        <i class="fas fa-expand"></i> Pantalla Completa
-                    </button>
-                </div>
-                <div class="chart-wrapper" id="chartWrapper">
-                    <canvas id="lifepointsChart"></canvas>
-                </div>
+        <div class="chart-section">
+            <h2><i class="fas fa-chart-area"></i> Evolución de Lifepoints</h2>
+            <div class="chart-wrapper" id="chartWrapper">
+                <canvas id="lifepointsChart"></canvas>
             </div>
         </div>
 
@@ -912,7 +961,6 @@
         
         let lifepointsData = [];
         let currentTheme = 'dark';
-        let isFullscreen = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             loadLifepointsData();
@@ -1200,30 +1248,6 @@
             } else {
                 document.getElementById('goal-achievement').style.display = 'none';
             }
-        }
-
-        function toggleFullscreen(chartId) {
-            const chartWrapper = document.getElementById('chartWrapper');
-            const chartBtn = event.target.closest('.chart-btn');
-            
-            if (isFullscreen) {
-                chartWrapper.style.height = '400px';
-                chartBtn.innerHTML = '<i class="fas fa-expand"></i> Pantalla Completa';
-                document.exitFullscreen();
-            } else {
-                chartWrapper.style.height = '80vh';
-                chartBtn.innerHTML = '<i class="fas fa-compress"></i> Salir Pantalla Completa';
-                chartWrapper.requestFullscreen();
-            }
-            
-            isFullscreen = !isFullscreen;
-            
-            setTimeout(() => {
-                const chart = Chart.getChart(chartId);
-                if (chart) {
-                    chart.resize();
-                }
-            }, 100);
         }
 
         function toggleTheme() {
