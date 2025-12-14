@@ -9,6 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- SDKs de Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    
     <style>
         :root {
             --primary: #6366f1;
@@ -143,13 +148,14 @@
         }
 
         .loading-spinner {
-            display: none;
+            display: block;
             width: 40px;
             height: 40px;
             border: 4px solid rgba(255, 255, 255, 0.3);
             border-top: 4px solid white;
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            margin: 0 auto;
         }
 
         .error-message {
@@ -975,9 +981,24 @@
     </div>
 
     <script>
-        const LIFEPONTS_TO_EURO = 115;
-        const GITHUB_RAW_URL = 'https://trabalonp.github.io/lifepoints-data.json';
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9sBTTe9PFQct9Ym9tkiVBr8wYDMl4SI0",
+            authDomain: "lifepointsdashboard.firebaseapp.com",
+            databaseURL: "https://lifepointsdashboard-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "lifepointsdashboard",
+            storageBucket: "lifepointsdashboard.firebasestorage.app",
+            messagingSenderId: "70452481394",
+            appId: "1:70452481394:web:60e497d37b8b74c2d8a1eb",
+            measurementId: "G-P6ZDXEFCDX"
+        };
         
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const lifepointsRef = database.ref('lifepoints');
+
+        const LIFEPONTS_TO_EURO = 115;
         let lifepointsData = [];
         let currentTheme = 'dark';
         let monthlyGoal = 50;
@@ -987,33 +1008,36 @@
             loadLifepointsData();
         });
 
-        async function loadLifepointsData() {
+        function loadLifepointsData() {
             const loadingSpinner = document.getElementById('loadingSpinner');
             const errorMessage = document.getElementById('errorMessage');
             
             loadingSpinner.style.display = 'block';
             errorMessage.style.display = 'none';
             
-            try {
-                const response = await fetch(GITHUB_RAW_URL);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                
-                lifepointsData = data.map(item => ({
-                    ...item,
-                    fecha: parsearFecha(item.fecha)
-                }));
-                
-                procesarDatos();
-            } catch (error) {
-                console.error('Error loading data:', error);
-                errorMessage.textContent = `Error al cargar los datos: ${error.message}`;
-                errorMessage.style.display = 'block';
-            } finally {
-                loadingSpinner.style.display = 'none';
-            }
+            // Leer datos de Firebase
+            lifepointsRef.once('value')
+                .then((snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        // Convertir objeto a array y ordenar por fecha
+                        lifepointsData = Object.entries(data)
+                            .map(([key, value]) => ({ ...value, id: key }))
+                            .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+                        
+                        procesarDatos();
+                    } else {
+                        errorMessage.textContent = 'No hay datos disponibles en Firebase';
+                        errorMessage.style.display = 'block';
+                    }
+                    loadingSpinner.style.display = 'none';
+                })
+                .catch((error) => {
+                    console.error('Error loading data:', error);
+                    errorMessage.textContent = `Error al cargar los datos: ${error.message}`;
+                    errorMessage.style.display = 'block';
+                    loadingSpinner.style.display = 'none';
+                });
         }
 
         function parsearFecha(fechaStr) {
@@ -1277,6 +1301,8 @@
         function updateRecentActivity(data) {
             const recentActivity = document.getElementById('recent-activity');
             const recentItems = data.slice(0, 5);
+            
+            recentActivity.innerHTML = '';
             
             recentItems.forEach(item => {
                 const iconClass = item.puntos > 0 ? 'fas fa-plus' : 'fas fa-minus';
