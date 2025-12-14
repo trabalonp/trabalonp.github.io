@@ -1020,10 +1020,14 @@
                 .then((snapshot) => {
                     const data = snapshot.val();
                     if (data) {
-                        // Convertir objeto a array y ordenar por fecha
+                        // Convertir objeto a array y parsear fechas
                         lifepointsData = Object.entries(data)
-                            .map(([key, value]) => ({ ...value, id: key }))
-                            .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+                            .map(([key, value]) => ({ 
+                                ...value, 
+                                id: key,
+                                fecha: parsearFecha(value.fecha) // Parsear la fecha aquí
+                            }))
+                            .sort((a, b) => b.fecha - a.fecha);
                         
                         procesarDatos();
                     } else {
@@ -1041,40 +1045,58 @@
         }
 
         function parsearFecha(fechaStr) {
-            const meses = {
-                'ene': 0, 'enero': 0, 'feb': 1, 'febrero': 1, 'mar': 2, 'marzo': 2,
-                'abr': 3, 'abril': 3, 'may': 4, 'mayo': 4, 'jun': 5, 'junio': 5,
-                'jul': 6, 'julio': 6, 'ago': 7, 'agosto': 7, 'sep': 8, 'sept': 8, 'septiembre': 8,
-                'oct': 9, 'octubre': 9, 'nov': 10, 'noviembre': 10, 'dic': 11, 'diciembre': 11
-            };
+            // Si ya es un objeto Date, devolverlo directamente
+            if (fechaStr instanceof Date) {
+                return fechaStr;
+            }
+            
+            // Si es una cadena, intentar parsearla
+            if (typeof fechaStr === 'string') {
+                // Intentar parsear fechas en formato ISO (2025-12-14T10:00:00.000Z)
+                const date = new Date(fechaStr);
+                if (!isNaN(date.getTime())) {
+                    return date;
+                }
+                
+                // Si no es ISO, intentar con el formato original
+                const meses = {
+                    'ene': 0, 'enero': 0, 'feb': 1, 'febrero': 1, 'mar': 2, 'marzo': 2,
+                    'abr': 3, 'abril': 3, 'may': 4, 'mayo': 4, 'jun': 5, 'junio': 5,
+                    'jul': 6, 'julio': 6, 'ago': 7, 'agosto': 7, 'sep': 8, 'sept': 8, 'septiembre': 8,
+                    'oct': 9, 'octubre': 9, 'nov': 10, 'noviembre': 10, 'dic': 11, 'diciembre': 11
+                };
 
-            const fechaLimpia = fechaStr.replace(',', '').toLowerCase();
-            const partes = fechaLimpia.split(' ');
-            let dia, mes, año, hora = 0, minutos = 0;
+                const fechaLimpia = fechaStr.replace(',', '').toLowerCase();
+                const partes = fechaLimpia.split(' ');
+                let dia, mes, año, hora = 0, minutos = 0;
 
-            for (let i = 0; i < partes.length; i++) {
-                const parte = partes[i];
-                if (!isNaN(parte) && parte.length <= 2 && !dia) {
-                    dia = parseInt(parte);
-                } else if (meses[parte] !== undefined && mes === undefined) {
-                    mes = meses[parte];
-                } else if (!isNaN(parte) && parte.length === 4 && !año) {
-                    año = parseInt(parte);
-                } else if (parte.includes(':')) {
-                    const [h, m] = parte.split(':');
-                    hora = parseInt(h);
-                    minutos = parseInt(m);
-                    if (i + 1 < partes.length) {
-                        const sig = partes[i + 1];
-                        if ((sig === 'p.' || sig === 'p.m.') && hora < 12) hora += 12;
-                        else if ((sig === 'a.' || sig === 'a.m.') && hora === 12) hora = 0;
+                for (let i = 0; i < partes.length; i++) {
+                    const parte = partes[i];
+                    if (!isNaN(parte) && parte.length <= 2 && !dia) {
+                        dia = parseInt(parte);
+                    } else if (meses[parte] !== undefined && mes === undefined) {
+                        mes = meses[parte];
+                    } else if (!isNaN(parte) && parte.length === 4 && !año) {
+                        año = parseInt(parte);
+                    } else if (parte.includes(':')) {
+                        const [h, m] = parte.split(':');
+                        hora = parseInt(h);
+                        minutos = parseInt(m);
+                        if (i + 1 < partes.length) {
+                            const sig = partes[i + 1];
+                            if ((sig === 'p.' || sig === 'p.m.') && hora < 12) hora += 12;
+                            else if ((sig === 'a.' || sig === 'a.m.') && hora === 12) hora = 0;
+                        }
                     }
                 }
-            }
 
-            if (!año) año = new Date().getFullYear();
+                if (!año) año = new Date().getFullYear();
+                
+                return dia && mes !== undefined && año ? new Date(año, mes, dia, hora, minutos) : new Date();
+            }
             
-            return dia && mes !== undefined && año ? new Date(año, mes, dia, hora, minutos) : new Date();
+            // Si no se puede parsear, devolver fecha actual
+            return new Date();
         }
 
         function procesarDatos() {
