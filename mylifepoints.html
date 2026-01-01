@@ -1109,6 +1109,7 @@
             let monthlyData = {};
             let currentMonth = new Date().getMonth();
             let currentYear = new Date().getFullYear();
+            let currentMonthSurveys = 0;
             let lastMonthData = null;
 
             lifepointsData.forEach(t => {
@@ -1116,12 +1117,6 @@
                 if (t.puntos < 0) totalWithdrawn += Math.abs(t.puntos);
                 currentBalance += t.puntos;
                 
-//                if (t.concepto === "Encuesta pagada" && t.puntos > 0) {
-//                    totalSurveys++;
-//                    successfulSurveys++;
-//                } else if (t.concepto.includes("Bonificación") || t.concepto.includes("no cumplir")) {
-//                    successfulSurveys--;
-//                }
                 if (t.concepto === "Encuesta pagada" && t.puntos > 0) {
                     successfulSurveys++;
                 } else if (
@@ -1203,7 +1198,6 @@
             const totalEuros = (total / LIFEPONTS_TO_EURO).toFixed(2);
             const currentEuros = (current / LIFEPONTS_TO_EURO).toFixed(2);
             const withdrawnEuros = (withdrawn / LIFEPONTS_TO_EURO).toFixed(2);
-//            const successRate = surveys > 0 ? Math.round((successful / surveys) * 100) : 0;
             const totalAttempts = successful + claimedSurveys;
             const successRate = totalAttempts > 0
                 ? Math.round((successful / totalAttempts) * 100)
@@ -1358,7 +1352,7 @@
             });
         }
 
-        function checkGoalAchievement(surveys) {
+        function checkGoalAchievement(currentMonthSurveys) {
             const progress = Math.min((surveys / monthlyGoal) * 100, 100);
             document.getElementById('monthly-surveys').textContent = surveys;
             document.getElementById('monthly-progress').style.width = `${progress}%`;
