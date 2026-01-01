@@ -1105,7 +1105,7 @@
             lifepointsData.sort((a, b) => b.fecha - a.fecha);
 
             let totalLifepoints = 0, totalWithdrawn = 0, currentBalance = 0;
-            let totalSurveys = 0, successfulSurveys = 0;
+            let successfulSurveys = 0, claimedSurveys = 0;
             let monthlyData = {};
             let currentMonth = new Date().getMonth();
             let currentYear = new Date().getFullYear();
@@ -1116,11 +1116,19 @@
                 if (t.puntos < 0) totalWithdrawn += Math.abs(t.puntos);
                 currentBalance += t.puntos;
                 
+//                if (t.concepto === "Encuesta pagada" && t.puntos > 0) {
+//                    totalSurveys++;
+//                    successfulSurveys++;
+//                } else if (t.concepto.includes("Bonificación") || t.concepto.includes("no cumplir")) {
+//                    successfulSurveys--;
+//                }
                 if (t.concepto === "Encuesta pagada" && t.puntos > 0) {
-                    totalSurveys++;
                     successfulSurveys++;
-                } else if (t.concepto.includes("Bonificación") || t.concepto.includes("no cumplir")) {
-                    successfulSurveys--;
+                } else if (
+                    t.concepto.includes("Bonificación") ||
+                    t.concepto.toLowerCase().includes("no cumplir")
+                ) {
+                    claimedSurveys++;
                 }
 
                 const mesAnio = `${t.fecha.getFullYear()}-${String(t.fecha.getMonth() + 1).padStart(2, '0')}`;
@@ -1191,11 +1199,15 @@
                 `Basada en ${lastMonthSurveys} encuestas el mes anterior`;
         }
 
-        function updateStatistics(total, withdrawn, current, surveys, successful) {
+        function updateStatistics(total, withdrawn, current, successful, claimedSurveys) {
             const totalEuros = (total / LIFEPONTS_TO_EURO).toFixed(2);
             const currentEuros = (current / LIFEPONTS_TO_EURO).toFixed(2);
             const withdrawnEuros = (withdrawn / LIFEPONTS_TO_EURO).toFixed(2);
-            const successRate = surveys > 0 ? Math.round((successful / surveys) * 100) : 0;
+//            const successRate = surveys > 0 ? Math.round((successful / surveys) * 100) : 0;
+            const totalAttempts = successful + claimedSurveys;
+            const successRate = totalAttempts > 0
+                ? Math.round((successful / totalAttempts) * 100)
+                : 0;
 
             animateValue('total-lifepoints', 0, total, 2000);
             animateValue('total-euros', 0, parseFloat(totalEuros), 2000);
