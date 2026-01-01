@@ -1121,6 +1121,13 @@
                 if (t.concepto === "Encuesta pagada" && t.puntos > 0) {
                     successfulSurveys++;
                     totalSurveys++;
+
+                    if (
+                        t.fecha.getMonth() === currentMonth &&
+                        t.fecha.getFullYear() === currentYear
+                    ) {
+                        currentMonthSurveys++;
+                    }
                 } else if (
                     t.concepto.includes("Bonificación") ||
                     t.concepto.toLowerCase().includes("no cumplir")
@@ -1158,12 +1165,12 @@
                 updateAdaptiveGoalDisplay();
             }
 
-            updateStatistics(totalLifepoints, totalWithdrawn, currentBalance, totalSurveys, successfulSurveys);
+            updateStatistics(totalLifepoints, totalWithdrawn, currentBalance, successfulSurveys, claimedSurveys);
             updateMonthlySummary(monthlyData);
             createEvolutionChart(lifepointsData);
             analizarHorariosEncuestas(lifepointsData);
             updateRecentActivity(lifepointsData);
-            checkGoalAchievement(totalSurveys);
+            checkGoalAchievement(currentMonthSurveys);
         }
 
         function calculateAdaptiveGoal(lastMonthSurveys) {
