@@ -1140,16 +1140,30 @@
                 if (!monthlyData[mesAnio]) {
                     monthlyData[mesAnio] = {
                         puntos: 0,
-                        surveys: 0,
+                        surveysSuccess: 0,
+                        surveysFailed: 0,
                         withdrawals: 0
                     };
                 }
+
                 if (t.puntos > 0) {
                     monthlyData[mesAnio].puntos += t.puntos;
+                
                     if (t.concepto === "Encuesta pagada") {
-                        monthlyData[mesAnio].surveys++;
+                        monthlyData[mesAnio].surveysSuccess++;
                     }
-                } else if (t.puntos < 0) {
+                }
+                
+                // Encuestas fallidas (screenout, no cumplir, etc.)
+                if (
+                    t.concepto.toLowerCase().includes("no cumplir") ||
+                    t.concepto.toLowerCase().includes("screen")
+                ) {
+                    monthlyData[mesAnio].surveysFailed++;
+                }
+                
+                // Retiros PayPal
+                if (t.puntos < 0) {
                     monthlyData[mesAnio].withdrawals += Math.abs(t.puntos);
                 }
 
@@ -1234,14 +1248,17 @@
                 .sort(([a], [b]) => b.localeCompare(a))
                 .forEach(([mes, data]) => {
                     const euros = (data.puntos / LIFEPONTS_TO_EURO).toFixed(2);
-                    const successRate = data.surveys > 0 ? Math.round((data.surveys / (data.surveys + data.withdrawals)) * 100) : 0;
+                    const totalAttempts = data.surveysSuccess + data.surveysFailed;
+                    const successRate = totalAttempts > 0
+                        ? ((data.surveysSuccess / totalAttempts) * 100).toFixed(2)
+                        : '0.00';
                     
                     tableBody.innerHTML += `
                         <tr>
                             <td>${mes}</td>
                             <td>${data.puntos.toLocaleString()}</td>
                             <td>${euros} €</td>
-                            <td>${data.surveys}</td>
+                            <td>${data.surveysSuccess}</td>
                             <td>${successRate}%</td>
                         </tr>
                     `;
