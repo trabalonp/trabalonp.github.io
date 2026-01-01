@@ -1105,7 +1105,8 @@
             lifepointsData.sort((a, b) => b.fecha - a.fecha);
 
             let totalLifepoints = 0, totalWithdrawn = 0, currentBalance = 0;
-            let successfulSurveys = 0, claimedSurveys = 0;
+            let successfulSurveys = 0;
+            let failedSurveys = 0;
             let totalSurveys = 0;
             let monthlyData = {};
             let currentMonth = new Date().getMonth();
@@ -1129,10 +1130,10 @@
                         currentMonthSurveys++;
                     }
                 } else if (
-                    t.concepto.includes("Bonificación") ||
-                    t.concepto.toLowerCase().includes("no cumplir")
+                    t.concepto.toLowerCase().includes("no cumplir") ||
+                    t.concepto.toLowerCase().includes("screen")
                 ) {
-                    claimedSurveys++;
+                    failedSurveys++;
                 }
 
                 const mesAnio = `${t.fecha.getFullYear()}-${String(t.fecha.getMonth() + 1).padStart(2, '0')}`;
@@ -1165,7 +1166,7 @@
                 updateAdaptiveGoalDisplay();
             }
 
-            updateStatistics(totalLifepoints, totalWithdrawn, currentBalance, successfulSurveys, claimedSurveys);
+            updateStatistics(totalLifepoints, totalWithdrawn, currentBalance, successfulSurveys, failedSurveys);
             updateMonthlySummary(monthlyData);
             createEvolutionChart(lifepointsData);
             analizarHorariosEncuestas(lifepointsData);
@@ -1209,7 +1210,7 @@
             const withdrawnEuros = (withdrawn / LIFEPONTS_TO_EURO).toFixed(2);
             const totalAttempts = successful + claimedSurveys;
             const successRate = totalAttempts > 0
-                ? Math.round((successful / totalAttempts) * 100)
+                ? ((successful / totalAttempts) * 100).toFixed(2)
                 : 0;
 
             animateValue('total-lifepoints', 0, total, 2000);
@@ -1218,7 +1219,7 @@
             animateValue('current-euros', 0, parseFloat(currentEuros), 2000);
             animateValue('withdrawn-lifepoints', 0, withdrawn, 2000);
             animateValue('withdrawn-euros', 0, parseFloat(withdrawnEuros), 2000);
-            animateValue('success-rate', 0, successRate, 2000);
+            document.getElementById('success-rate').textContent = successRate;
 
             updateTrend('total-trend', '+5%');
             updateTrend('current-trend', '+2%');
