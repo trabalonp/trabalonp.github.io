@@ -1106,6 +1106,7 @@
 
             let totalLifepoints = 0, totalWithdrawn = 0, currentBalance = 0;
             let successfulSurveys = 0, claimedSurveys = 0;
+            let totalSurveys = 0;
             let monthlyData = {};
             let currentMonth = new Date().getMonth();
             let currentYear = new Date().getFullYear();
@@ -1119,6 +1120,7 @@
                 
                 if (t.concepto === "Encuesta pagada" && t.puntos > 0) {
                     successfulSurveys++;
+                    totalSurveys++;
                 } else if (
                     t.concepto.includes("Bonificación") ||
                     t.concepto.toLowerCase().includes("no cumplir")
@@ -1353,22 +1355,25 @@
         }
 
         function checkGoalAchievement(currentMonthSurveys) {
-            const progress = Math.min((surveys / monthlyGoal) * 100, 100);
-            document.getElementById('monthly-surveys').textContent = surveys;
+            const progress = Math.min((currentMonthSurveys / monthlyGoal) * 100, 100);
+        
+            document.getElementById('monthly-surveys').textContent = currentMonthSurveys;
             document.getElementById('monthly-progress').style.width = `${progress}%`;
             document.getElementById('progress-percentage').textContent = `${Math.round(progress)}%`;
             
-            const lastSurvey = lifepointsData.find(item => item.concepto === "Encuesta pagada" && item.puntos > 0);
+            const lastSurvey = lifepointsData.find(
+                item => item.concepto === "Encuesta pagada" && item.puntos > 0
+            );
+        
             if (lastSurvey) {
-                document.getElementById('last-survey-date').textContent = lastSurvey.fecha.toLocaleDateString('es-ES');
+                document.getElementById('last-survey-date').textContent =
+                    lastSurvey.fecha.toLocaleDateString('es-ES');
             }
-
-            if (surveys >= monthlyGoal) {
-                document.getElementById('goal-achievement').style.display = 'flex';
-            } else {
-                document.getElementById('goal-achievement').style.display = 'none';
-            }
+        
+            document.getElementById('goal-achievement').style.display =
+                currentMonthSurveys >= monthlyGoal ? 'flex' : 'none';
         }
+
 
         function toggleTheme() {
             const body = document.body;
