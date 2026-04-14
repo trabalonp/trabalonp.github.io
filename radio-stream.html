@@ -354,6 +354,9 @@
         .genre-eclectic { background: linear-gradient(135deg, #0f766e, #134e4a); }
         .genre-sports { background: linear-gradient(135deg, #15803d, #14532d); }
         .genre-electronic { background: linear-gradient(135deg, #8b5cf6, #4c1d95); }
+        .genre-hiphop { background: linear-gradient(135deg, #f97316, #b45309); }
+        .genre-ambient { background: linear-gradient(135deg, #0891b2, #164e63); }
+        .genre-jazz { background: linear-gradient(135deg, #ca8a04, #713f12); }
         .genre-default {background: linear-gradient(135deg, #374151, #111827); }
 
         .play-overlay {
@@ -561,13 +564,13 @@
         // --- CONFIGURACIÓN DE FIREBASE ---
         // REEMPLAZA ESTO CON LA CONFIGURACIÓN DE TU PROYECTO DE FIREBASE
         const firebaseConfig = {
-            apiKey: "AIzaSyDCm1pFZLRXk34UIGU3UY0ltLkyHkElsIg",
-            authDomain: "onelife-cec55.firebaseapp.com",
-            databaseURL: "https://onelife-cec55-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "onelife-cec55",
-            storageBucket: "onelife-cec55.firebasestorage.app",
-            messagingSenderId: "599128086819",
-            appId: "1:599128086819:web:af149214fe5b68a12ad496"
+            apiKey: "TU_API_KEY",
+            authDomain: "TU_AUTH_DOMAIN",
+            databaseURL: "TU_DATABASE_URL",
+            projectId: "TU_PROJECT_ID",
+            storageBucket: "TU_STORAGE_BUCKET",
+            messagingSenderId: "TU_MESSAGING_SENDER_ID",
+            appId: "TU_APP_ID"
         };
 
         // --- INICIALIZACIÓN DE SERVICIOS ---
@@ -580,15 +583,66 @@
         const radioStations = [
             { id: 1, name: "Radio Caroline", location: "Maidstone, UK", genre: ["rock"], streamUrl: "https://radio.caroline.stream/radio-caroline" },
             { id: 2, name: "BBC World Service", location: "London, UK", genre: ["news"], streamUrl: "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service" },
-            { id: 3, name: "NPR News", location: "Washington, DC, USA", genre: ["news"], streamUrl: "https://npr-ice.streamguys1.com/live.mp3" },
+            { id: 3, name: "NPR News and Talk", location: "Washington, DC, USA", genre: ["news"], streamUrl: "https://npr-ice.streamguys1.com/live.mp3" },
+            { id: 4, name: "WNYC New York Public Radio", location: "New York, NY, USA", genre: ["news"], streamUrl: "https://fm939.wnyc.org/wnycfm" },
+            { id: 5, name: "BBC Radio 4", location: "London, UK", genre: ["news"], streamUrl: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_fourfm" },
             { id: 6, name: "BBC Radio 1", location: "London, UK", genre: ["pop"], streamUrl: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one" },
-            { id: 11, name: "Haarlem 105", location: "Haarlem, NL", genre: ["pop"], streamUrl: "https://stream.haarlem105.nl/haarlem105" },
-            { id: 13, name: "rbb Radio Eins", location: "Berlin, DE", genre: ["eclectic"], streamUrl: "https://rbb-radioeins-live.sslcast.addradio.de/rbb/radioeins/live/mp3/128/stream.mp3" },
             { id: 18, name: "RNE Radio 5", location: "Madrid, ES", genre: ["news"], streamUrl: "https://crtve-ice-edge-2001-fra-eco-cdn.cast.addradio.de/crtve/rne/5/mp3/128/stream.mp3" },
             { id: 19, name: "RNE Radio Clásica", location: "Madrid, ES", genre: ["classical"], streamUrl: "https://crtve-ice-edge-2001-fra-eco-cdn.cast.addradio.de/crtve/rne/2/mp3/128/stream.mp3" },
+            { id: 22, name: "Cadena SER", location: "Madrid, ES", genre: ["news"], streamUrl: "https://playerservices.streamtheworld.com/api/livestream-redirect/CADENASER_SC" },
             { id: 26, name: "Los 40", location: "Madrid, ES", genre: ["pop"], streamUrl: "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_SC" },
+            { id: 27, name: "Cadena 100", location: "Madrid, ES", genre: ["pop"], streamUrl: "https://cadena100-cope-rrcast.flumotion.com/cope/cadena100.mp3" },
+            { id: 28, name: "Kiss FM", location: "Madrid, ES", genre: ["pop"], streamUrl: "https://kissfm.ondacero.es/kissfm.mp3" },
+            { id: 36, name: "Rock FM", location: "Madrid, ES", genre: ["rock"], streamUrl: "https://rockfm-cope-rrcast.flumotion.com/cope/rockfm.mp3" },
+            { id: 43, name: "Hit FM", location: "Palma de Mallorca, ES", genre: ["pop"], streamUrl: "https://str.radionomy.com/hitfm" },
+            { id: 44, name: "Europa FM", location: "Madrid, ES", genre: ["pop"], streamUrl: "https://europa-cope-rrcast.flumotion.com/cope/europafm.mp3" },
             { id: 52, name: "Loca FM", location: "Madrid, ES", genre: ["electronic"], streamUrl: "https://streaming.locafm.com:8443/locafm" },
-            // ... puedes añadir más emisoras aquí
+            
+            // Emisoras añadidas de tu nueva lista
+            { id: 55, name: "Classic FM UK", location: "London, UK", genre: ["classical"], streamUrl: "http://media-ice.musicradio.com/ClassicFMMP3" },
+            { id: 56, name: "Heart London", location: "London, UK", genre: ["pop"], streamUrl: "http://media-ice.musicradio.com/HeartLondonMP3" },
+            { id: 57, name: "Capital FM", location: "London, UK", genre: ["pop"], streamUrl: "http://media-ice.musicradio.com/CapitalMP3" },
+            { id: 58, name: "Sky Radio", location: "Netherlands", genre: ["pop"], streamUrl: "http://playerservices.streamtheworld.com/api/livestream-redirect/SKYRADIO.mp3" },
+            { id: 59, name: "Radio 538", location: "Netherlands", genre: ["pop"], streamUrl: "http://playerservices.streamtheworld.com/api/livestream-redirect/RADIO538.mp3" },
+            { id: 60, name: "NRJ France", location: "Paris, France", genre: ["pop"], streamUrl: "http://cdn.nrjaudio.fm/audio1/fr/30001/mp3_128.mp3" },
+            { id: 61, name: "Skyrock", location: "Paris, France", genre: ["hiphop"], streamUrl: "http://icecast.skyrock.net/s/natio_mp3_128k" },
+            { id: 62, name: "Radio FG", location: "Paris, France", genre: ["electronic"], streamUrl: "http://radiofg.impek.com/fg.mp3" },
+            { id: 63, name: "Deutschlandfunk", location: "Germany", genre: ["news"], streamUrl: "http://st01.dlf.de/dlf/01/128/mp3/stream.mp3" },
+            { id: 64, name: "Antenne Bayern", location: "Germany", genre: ["pop"], streamUrl: "http://stream.antenne.de/antenne" },
+            { id: 65, name: "Energy Berlin", location: "Germany", genre: ["pop"], streamUrl: "http://energyberlin.stream.laut.fm/energyberlin" },
+            { id: 66, name: "Radio Italia", location: "Italy", genre: ["pop"], streamUrl: "http://radioitalia.stream.laut.fm/radioitalia" },
+            { id: 67, name: "RDS Radio", location: "Italy", genre: ["pop"], streamUrl: "http://stream.rds.it:8000/rds" },
+            { id: 68, name: "Radio Deejay", location: "Italy", genre: ["pop"], streamUrl: "http://radiodeejay.stream.laut.fm/radiodeejay" },
+            { id: 69, name: "KEXP 90.3 FM", location: "Seattle, USA", genre: ["rock"], streamUrl: "http://live-mp3-128.kexp.org/kexp128.mp3" },
+            { id: 70, name: "WFMU", location: "New Jersey, USA", genre: ["eclectic"], streamUrl: "http://stream0.wfmu.org/freeform-128k" },
+            { id: 71, name: "SomaFM Groove Salad", location: "USA", genre: ["electronic"], streamUrl: "http://ice1.somafm.com/groovesalad-128-mp3" },
+            { id: 72, name: "SomaFM Drone Zone", location: "USA", genre: ["ambient"], streamUrl: "http://ice1.somafm.com/dronezone-128-mp3" },
+            { id: 73, name: "Radio Swiss Jazz", location: "Switzerland", genre: ["jazz"], streamUrl: "http://stream.srg-ssr.ch/m/rsj/mp3_128" },
+            { id: 74, name: "Radio Swiss Pop", location: "Switzerland", genre: ["pop"], streamUrl: "http://stream.srg-ssr.ch/m/rsp/mp3_128" },
+            { id: 75, name: "Radio Swiss Classic", location: "Switzerland", genre: ["classical"], streamUrl: "http://stream.srg-ssr.ch/m/rsc_de/mp3_128" },
+            { id: 76, name: "ABC Jazz", location: "Australia", genre: ["jazz"], streamUrl: "http://live-radio01.mediahubaustralia.com/JAZW/mp3/" },
+            { id: 77, name: "ABC Classic", location: "Australia", genre: ["classical"], streamUrl: "http://live-radio01.mediahubaustralia.com/2FMW/mp3/" },
+            { id: 78, name: "Tokyo FM", location: "Japan", genre: ["pop"], streamUrl: "http://tokyofmworld.stream.laut.fm/tokyofmworld" },
+            { id: 79, name: "Radio Nova", location: "France", genre: ["eclectic"], streamUrl: "http://novazz.ice.infomaniak.ch/novazz-128.mp3" },
+            { id: 80, name: "Deep House Radio", location: "Netherlands", genre: ["electronic"], streamUrl: "http://stream.deep.house/house.mp3" },
+            { id: 81, name: "Ibiza Global Radio", location: "Spain", genre: ["electronic"], streamUrl: "http://ibizaglobalradio.streaming-pro.com:8024/stream" },
+            { id: 82, name: "Maxima FM", location: "Spain", genre: ["electronic"], streamUrl: "http://playerservices.streamtheworld.com/api/livestream-redirect/MAXIMAFM.mp3" },
+            { id: 83, name: "Radio Paradise", location: "USA", genre: ["eclectic"], streamUrl: "http://stream.radioparadise.com/mp3-128" },
+            { id: 84, name: "Jazz24", location: "USA", genre: ["jazz"], streamUrl: "http://icy1.abacast.com/kplu-jazz24mp3-128" },
+            { id: 85, name: "Classic Rock Florida", location: "USA", genre: ["rock"], streamUrl: "http://streaming.live365.com/a25279" },
+            { id: 86, name: "Hot 108 Jamz", location: "USA", genre: ["hiphop"], streamUrl: "http://sc.hot108.com:4000/stream" },
+            { id: 87, name: "181.FM The Beat", location: "USA", genre: ["hiphop"], streamUrl: "http://listen.181fm.com/181-beat_128k.mp3" },
+            { id: 88, name: "181.FM Power 181", location: "USA", genre: ["pop"], streamUrl: "http://listen.181fm.com/181-power_128k.mp3" },
+            { id: 89, name: "181.FM Rock 40", location: "USA", genre: ["rock"], streamUrl: "http://listen.181fm.com/181-rock40_128k.mp3" },
+            { id: 90, name: "Radio ZET", location: "Poland", genre: ["pop"], streamUrl: "http://zet090-02.cdn.eurozet.pl:8404/stream" },
+            { id: 91, name: "RMF FM", location: "Poland", genre: ["pop"], streamUrl: "http://rmfstream1.interia.pl:8000/rmf_fm" },
+            { id: 92, name: "Radio Record", location: "Russia", genre: ["electronic"], streamUrl: "http://air.radiorecord.ru:805/rr_320" },
+            { id: 93, name: "NRK P1", location: "Norway", genre: ["news"], streamUrl: "http://lyd.nrk.no/nrk_radio_p1_oslo_mp3_h" },
+            { id: 94, name: "Radio 10", location: "Netherlands", genre: ["pop"], streamUrl: "http://playerservices.streamtheworld.com/api/livestream-redirect/RADIO10.mp3" },
+            { id: 95, name: "Qmusic", location: "Belgium", genre: ["pop"], streamUrl: "http://icecast-qmusic.cdp.triple-it.nl/Qmusic_be_live_128.mp3" },
+            { id: 96, name: "Studio Brussel", location: "Belgium", genre: ["rock"], streamUrl: "http://icecast.vrtcdn.be/stubru-high.mp3" },
+            { id: 97, name: "Radio Caprice Rock", location: "Russia", genre: ["rock"], streamUrl: "http://79.111.119.111:8002/rock" },
+            { id: 98, name: "Radio Caprice Jazz", location: "Russia", genre: ["jazz"], streamUrl: "http://79.111.119.111:8002/jazz" },
         ];
 
         // --- ESTADO DE LA APLICACIÓN ---
