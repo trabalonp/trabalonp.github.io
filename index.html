@@ -47,22 +47,21 @@
       color: var(--day-text);
     }
 
-    /* ── Fondo ── */
     .bg-grid {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
       background:
-        linear-gradient(rgba(0, 247, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 247, 255, 0.05) 1px, transparent 1px);
+        linear-gradient(rgba(0,247,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,247,255,0.05) 1px, transparent 1px);
       background-size: 40px 40px;
       z-index: -1;
     }
 
     .light-mode .bg-grid {
       background:
-        linear-gradient(rgba(93, 138, 168, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(93, 138, 168, 0.03) 1px, transparent 1px);
+        linear-gradient(rgba(93,138,168,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(93,138,168,0.03) 1px, transparent 1px);
       background-size: 40px 40px;
     }
 
@@ -130,9 +129,9 @@
        HEADER
     ══════════════════════════════════ */
     header {
-      background: rgba(10, 10, 24, 0.85);
+      background: rgba(10,10,24,0.85);
       backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(0, 247, 255, 0.2);
+      border-bottom: 1px solid rgba(0,247,255,0.2);
       position: sticky;
       top: 0;
       z-index: 1000;
@@ -142,7 +141,7 @@
     }
 
     .light-mode header {
-      background: rgba(248, 249, 250, 0.92);
+      background: rgba(248,249,250,0.92);
       border-bottom: 1px solid var(--day-border);
     }
 
@@ -209,7 +208,6 @@
       }
     }
 
-    /* Nav */
     .header-right {
       display: flex;
       align-items: center;
@@ -233,7 +231,6 @@
     }
 
     .light-mode nav ul li a { color: #6c757d; }
-
     nav ul li a:hover { color: var(--primary); }
     .light-mode nav ul li a:hover { color: var(--day-primary); }
 
@@ -279,7 +276,7 @@
 
     .light-mode .menu-toggle { color: var(--day-primary); }
 
-    /* ── AUTH en header ── */
+    /* ── Auth header ── */
     .auth-area {
       display: flex;
       align-items: center;
@@ -292,9 +289,9 @@
       gap: 0.5rem;
       padding: 0.45rem 1.1rem;
       border-radius: 50px;
-      background: rgba(0, 247, 255, 0.1);
+      background: rgba(0,247,255,0.1);
       color: var(--primary);
-      border: 1px solid rgba(0, 247, 255, 0.35);
+      border: 1px solid rgba(0,247,255,0.35);
       font-size: 0.87rem;
       font-weight: 600;
       cursor: pointer;
@@ -304,7 +301,7 @@
     }
 
     #loginBtn:hover {
-      background: rgba(0, 247, 255, 0.22);
+      background: rgba(0,247,255,0.22);
       transform: translateY(-2px);
       box-shadow: 0 0 18px rgba(0,247,255,0.35);
     }
@@ -315,9 +312,7 @@
       border-color: var(--day-border);
     }
 
-    .light-mode #loginBtn:hover {
-      background: rgba(93,138,168,0.2);
-    }
+    .light-mode #loginBtn:hover { background: rgba(93,138,168,0.2); }
 
     #userAvatar {
       width: 36px; height: 36px;
@@ -351,13 +346,10 @@
       backdrop-filter: blur(3px);
     }
 
-    #overlay.open {
-      opacity: 1;
-      pointer-events: all;
-    }
+    #overlay.open { opacity: 1; pointer-events: all; }
 
     /* ══════════════════════════════════
-       SIDEBAR PERFIL
+       SIDEBAR
     ══════════════════════════════════ */
     #sidebar {
       position: fixed;
@@ -365,7 +357,7 @@
       width: 320px;
       max-width: 90vw;
       height: 100%;
-      background: rgba(10, 10, 30, 0.97);
+      background: rgba(10,10,30,0.97);
       border-left: 1px solid rgba(0,247,255,0.25);
       backdrop-filter: blur(18px);
       z-index: 1999;
@@ -437,13 +429,13 @@
       border-radius: 2px;
     }
 
-    /* Bloque de perfil */
+    /* ── Bloque de perfil ── */
     .profile-block {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 0.85rem;
-      padding: 1.5rem;
+      padding: 1.5rem 1.5rem 1.2rem;
       background: rgba(0,247,255,0.04);
       border: 1px solid rgba(0,247,255,0.12);
       border-radius: var(--radius);
@@ -454,6 +446,13 @@
       border-color: var(--day-border);
     }
 
+    /* Contenedor del avatar con botón lápiz */
+    .avatar-wrapper {
+      position: relative;
+      width: 82px; height: 82px;
+      flex-shrink: 0;
+    }
+
     #sidebarAvatar {
       width: 82px; height: 82px;
       border-radius: 50%;
@@ -461,9 +460,39 @@
       object-fit: cover;
       box-shadow: 0 0 20px rgba(0,247,255,0.4);
       background: rgba(0,247,255,0.05);
+      display: block;
     }
 
     .light-mode #sidebarAvatar { border-color: var(--day-primary); }
+
+    /* Botón lápiz sobre el avatar */
+    #editAvatarBtn {
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 2px solid rgba(10,10,30,0.9);
+      color: #000;
+      font-size: 0.65rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      box-shadow: 0 0 8px rgba(0,247,255,0.5);
+    }
+
+    .light-mode #editAvatarBtn {
+      background: var(--day-primary);
+      border-color: rgba(248,249,250,0.9);
+      color: #fff;
+    }
+
+    #editAvatarBtn:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 14px rgba(0,247,255,0.7);
+    }
 
     .profile-name {
       font-size: 1.05rem;
@@ -478,119 +507,88 @@
       word-break: break-all;
     }
 
-    /* Sección avatar URL */
-    .avatar-section {
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-    }
-
-    .avatar-section > label {
-      font-size: 0.78rem;
-      color: var(--gray);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    .light-mode .avatar-section > label { color: #6c757d; }
-
-    .avatar-input-row {
-      display: flex;
+    /* ── Barra flotante para introducir URL ── */
+    #avatarBar {
+      display: none;                 /* oculta por defecto */
+      align-items: center;
       gap: 0.5rem;
+      padding: 0.7rem 0.9rem;
+      background: rgba(10,10,30,0.97);
+      border: 1px solid rgba(0,247,255,0.35);
+      border-radius: 50px;
+      box-shadow: 0 0 24px rgba(0,247,255,0.25);
+      animation: slideUp 0.25s ease-out;
     }
 
-    .avatar-input-row input {
+    .light-mode #avatarBar {
+      background: rgba(248,249,250,0.98);
+      border-color: var(--day-border);
+      box-shadow: var(--day-shadow);
+    }
+
+    #avatarBar.visible { display: flex; }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #avatarBar i {
+      color: var(--primary);
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .light-mode #avatarBar i { color: var(--day-primary); }
+
+    #avatarUrlInput {
       flex: 1;
-      background: rgba(0,247,255,0.05);
-      border: 1px solid rgba(0,247,255,0.2);
-      border-radius: 8px;
-      padding: 0.6rem 0.85rem;
+      background: transparent;
+      border: none;
+      outline: none;
       color: #fff;
       font-size: 0.83rem;
-      outline: none;
-      transition: var(--transition);
       font-family: 'Segoe UI', Tahoma, sans-serif;
+      min-width: 0;
     }
 
-    .light-mode .avatar-input-row input {
-      background: rgba(93,138,168,0.07);
-      border-color: var(--day-border);
-      color: var(--day-text);
-    }
+    .light-mode #avatarUrlInput { color: var(--day-text); }
+    #avatarUrlInput::placeholder { color: #555; }
+    .light-mode #avatarUrlInput::placeholder { color: #aaa; }
 
-    .avatar-input-row input::placeholder { color: #555; }
-    .light-mode .avatar-input-row input::placeholder { color: #aaa; }
-
-    .avatar-input-row input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(0,247,255,0.15);
-    }
-
-    .light-mode .avatar-input-row input:focus {
-      border-color: var(--day-primary);
-      box-shadow: 0 0 0 2px rgba(93,138,168,0.15);
-    }
-
-    /* Botón pequeño */
-    .btn-sm {
-      padding: 0.6rem 1rem;
-      border-radius: 8px;
-      font-size: 0.82rem;
-      font-weight: 700;
+    /* Botones dentro de la barra */
+    .bar-btn {
+      width: 28px; height: 28px;
+      border-radius: 50%;
       border: none;
       cursor: pointer;
-      transition: var(--transition);
-      white-space: nowrap;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-    }
-
-    .btn-cyan {
-      background: rgba(0,247,255,0.15);
-      color: var(--primary);
-      border: 1px solid rgba(0,247,255,0.3);
-    }
-
-    .btn-cyan:hover {
-      background: rgba(0,247,255,0.28);
-      box-shadow: 0 0 12px rgba(0,247,255,0.3);
-    }
-
-    .light-mode .btn-cyan {
-      background: rgba(93,138,168,0.12);
-      color: var(--day-primary);
-      border-color: var(--day-border);
-    }
-
-    /* Vista previa */
-    #avatarPreview {
-      display: none;
-      flex-direction: column;
+      display: flex;
       align-items: center;
-      gap: 0.4rem;
-      padding: 0.75rem;
-      background: rgba(0,247,255,0.04);
-      border: 1px dashed rgba(0,247,255,0.2);
-      border-radius: 8px;
+      justify-content: center;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+      transition: var(--transition);
     }
 
-    .light-mode #avatarPreview {
-      background: rgba(93,138,168,0.05);
-      border-color: var(--day-border);
+    #applyAvatarBtn {
+      background: var(--primary);
+      color: #000;
     }
 
-    #avatarPreviewImg {
-      width: 56px; height: 56px;
-      border-radius: 50%;
-      border: 2px solid var(--primary);
-      object-fit: cover;
+    #applyAvatarBtn:hover {
+      background: #00d4dc;
+      transform: scale(1.1);
     }
 
-    .light-mode #avatarPreviewImg { border-color: var(--day-primary); }
+    #cancelAvatarBtn {
+      background: rgba(255,60,60,0.15);
+      color: #ff6b6b;
+      border: 1px solid rgba(255,60,60,0.3);
+    }
 
-    #avatarPreview span {
-      font-size: 0.72rem;
-      color: var(--gray);
+    #cancelAvatarBtn:hover {
+      background: rgba(255,60,60,0.3);
+      transform: scale(1.1);
     }
 
     /* Info card */
@@ -648,9 +646,9 @@
       width: 100%;
       padding: 0.75rem;
       border-radius: var(--radius);
-      background: rgba(255, 60, 60, 0.1);
+      background: rgba(255,60,60,0.1);
       color: #ff6b6b;
-      border: 1px solid rgba(255, 60, 60, 0.3);
+      border: 1px solid rgba(255,60,60,0.3);
       font-size: 0.9rem;
       font-weight: 700;
       cursor: pointer;
@@ -663,8 +661,8 @@
     }
 
     #logoutBtn:hover {
-      background: rgba(255, 60, 60, 0.22);
-      box-shadow: 0 0 15px rgba(255, 60, 60, 0.3);
+      background: rgba(255,60,60,0.22);
+      box-shadow: 0 0 15px rgba(255,60,60,0.3);
       transform: translateY(-1px);
     }
 
@@ -724,28 +722,28 @@
     }
 
     .btn-primary {
-      background: rgba(0, 247, 255, 0.1);
+      background: rgba(0,247,255,0.1);
       color: var(--primary);
-      border: 1px solid rgba(0, 247, 255, 0.3);
+      border: 1px solid rgba(0,247,255,0.3);
       box-shadow: var(--shadow);
     }
 
     .light-mode .btn-primary {
-      background: rgba(93, 138, 168, 0.08);
+      background: rgba(93,138,168,0.08);
       color: var(--day-primary);
       border: 1px solid var(--day-border);
       box-shadow: var(--day-shadow);
     }
 
     .btn-primary:hover {
-      background: rgba(0, 247, 255, 0.2);
+      background: rgba(0,247,255,0.2);
       transform: translateY(-3px);
-      box-shadow: 0 10px 25px rgba(0, 247, 255, 0.4);
+      box-shadow: 0 10px 25px rgba(0,247,255,0.4);
     }
 
     .light-mode .btn-primary:hover {
-      background: rgba(93, 138, 168, 0.15);
-      box-shadow: 0 8px 20px rgba(93, 138, 168, 0.2);
+      background: rgba(93,138,168,0.15);
+      box-shadow: 0 8px 20px rgba(93,138,168,0.2);
     }
 
     .btn-primary::before {
@@ -766,7 +764,7 @@
       border-radius: var(--radius);
       overflow: hidden;
       box-shadow: var(--shadow);
-      border: 1px solid rgba(0, 247, 255, 0.3);
+      border: 1px solid rgba(0,247,255,0.3);
       background: rgba(0,0,0,0.3);
     }
 
@@ -789,8 +787,8 @@
       position: fixed;
       bottom: 2rem; left: 50%;
       transform: translateX(-50%) translateY(20px);
-      background: rgba(0, 247, 255, 0.12);
-      border: 1px solid rgba(0, 247, 255, 0.35);
+      background: rgba(0,247,255,0.12);
+      border: 1px solid rgba(0,247,255,0.35);
       color: var(--primary);
       padding: 0.7rem 1.6rem;
       border-radius: 50px;
@@ -804,10 +802,7 @@
       white-space: nowrap;
     }
 
-    #toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     #toast.error {
       background: rgba(255,60,60,0.12);
@@ -848,21 +843,19 @@
 
       nav ul.active { display: flex; }
       .menu-toggle  { display: block; }
-
       .header-right { gap: 0.75rem; }
     }
 
     @media (max-width: 600px) {
-      .hero-content h1 { font-size: 2.4rem; }
+      .hero-content h1  { font-size: 2.4rem; }
       .header-container { padding: 0 1rem; }
-      .logo { font-size: 1.5rem; }
-      #loginBtn span { display: none; }
+      .logo             { font-size: 1.5rem; }
+      #loginBtn span    { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Fondos decorativos -->
   <div class="bg-grid"></div>
   <div class="floating-shapes">
     <div class="shape shape-1"></div>
@@ -899,7 +892,6 @@
           </ul>
         </nav>
 
-        <!-- Zona de autenticación -->
         <div class="auth-area">
           <button id="loginBtn">
             <i class="fab fa-google"></i>
@@ -911,11 +903,10 @@
     </div>
   </header>
 
-  <!-- Overlay para el sidebar -->
   <div id="overlay"></div>
 
   <!-- ══════════════════════════════════
-       SIDEBAR DE PERFIL
+       SIDEBAR
   ══════════════════════════════════ -->
   <div id="sidebar">
 
@@ -928,34 +919,37 @@
 
     <div class="sidebar-body">
 
-      <!-- Foto, nombre y email -->
+      <!-- Bloque de perfil: avatar con lápiz + nombre + email -->
       <div class="profile-block">
-        <img id="sidebarAvatar" src="" alt="Avatar">
+
+        <div class="avatar-wrapper">
+          <img id="sidebarAvatar" src="" alt="Avatar">
+          <!-- Botón lápiz -->
+          <button id="editAvatarBtn" title="Cambiar foto de perfil">
+            <i class="fas fa-pen"></i>
+          </button>
+        </div>
+
         <div class="profile-name"  id="sidebarName">—</div>
         <div class="profile-email" id="sidebarEmail">—</div>
-      </div>
 
-      <!-- Cambiar foto por URL -->
-      <div class="avatar-section">
-        <label>
-          <i class="fas fa-image"></i>&nbsp; Foto de perfil (URL)
-        </label>
-        <div class="avatar-input-row">
+        <!-- Barra de URL (oculta hasta que se pulse el lápiz) -->
+        <div id="avatarBar">
+          <i class="fas fa-link"></i>
           <input
             type="url"
             id="avatarUrlInput"
             placeholder="https://i.imgur.com/tu-imagen.jpg"
+            autocomplete="off"
           >
-          <button class="btn-sm btn-cyan" id="applyAvatarBtn" title="Aplicar">
+          <button class="bar-btn" id="applyAvatarBtn"  title="Confirmar">
             <i class="fas fa-check"></i>
+          </button>
+          <button class="bar-btn" id="cancelAvatarBtn" title="Cancelar">
+            <i class="fas fa-times"></i>
           </button>
         </div>
 
-        <!-- Vista previa -->
-        <div id="avatarPreview">
-          <img id="avatarPreviewImg" src="" alt="Vista previa">
-          <span>Vista previa</span>
-        </div>
       </div>
 
       <!-- Info de cuenta -->
@@ -975,7 +969,7 @@
         </div>
       </div>
 
-    </div><!-- /sidebar-body -->
+    </div>
 
     <div class="sidebar-footer">
       <button id="logoutBtn">
@@ -983,7 +977,7 @@
       </button>
     </div>
 
-  </div><!-- /sidebar -->
+  </div>
 
   <!-- ══════════════════════════════════
        HERO
@@ -1017,11 +1011,10 @@
     </div>
   </section>
 
-  <!-- Toast de notificaciones -->
   <div id="toast"></div>
 
   <!-- ══════════════════════════════════
-       FIREBASE — Realtime Database
+       FIREBASE
   ══════════════════════════════════ -->
   <script type="module">
     import { initializeApp }
@@ -1033,7 +1026,6 @@
     import { getDatabase, ref, get, set }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    /* ── Configuración Firebase ── */
     const firebaseConfig = {
       apiKey:            "AIzaSyDCm1pFZLRXk34UIGU3UY0ltLkyHkElsIg",
       authDomain:        "onelife-cec55.firebaseapp.com",
@@ -1049,7 +1041,7 @@
     const db       = getDatabase(app);
     const provider = new GoogleAuthProvider();
 
-    /* ── Referencias DOM ── */
+    /* ── Elementos ── */
     const loginBtn         = document.getElementById('loginBtn');
     const logoutBtn        = document.getElementById('logoutBtn');
     const userAvatar       = document.getElementById('userAvatar');
@@ -1059,10 +1051,11 @@
     const sidebarAvatar    = document.getElementById('sidebarAvatar');
     const sidebarName      = document.getElementById('sidebarName');
     const sidebarEmail     = document.getElementById('sidebarEmail');
+    const editAvatarBtn    = document.getElementById('editAvatarBtn');
+    const avatarBar        = document.getElementById('avatarBar');
     const avatarUrlInput   = document.getElementById('avatarUrlInput');
     const applyAvatarBtn   = document.getElementById('applyAvatarBtn');
-    const avatarPreview    = document.getElementById('avatarPreview');
-    const avatarPreviewImg = document.getElementById('avatarPreviewImg');
+    const cancelAvatarBtn  = document.getElementById('cancelAvatarBtn');
     const toast            = document.getElementById('toast');
 
     /* ── Toast ── */
@@ -1073,90 +1066,66 @@
       toast._t = setTimeout(() => { toast.className = ''; }, 3000);
     }
 
-    /* ── Sidebar abrir / cerrar ── */
-    function openSidebar()  {
+    /* ── Sidebar ── */
+    function openSidebar() {
       sidebar.classList.add('open');
       overlay.classList.add('open');
     }
+
     function closeSidebar() {
       sidebar.classList.remove('open');
       overlay.classList.remove('open');
+      hideAvatarBar();
     }
 
     userAvatar.addEventListener('click', openSidebar);
     sidebarClose.addEventListener('click', closeSidebar);
     overlay.addEventListener('click', closeSidebar);
 
-    /* ── Cargar perfil desde Realtime Database ── */
-    async function loadProfile(user) {
-      try {
-        const snapshot = await get(ref(db, 'users/' + user.uid));
-
-        // Prioridad: DB → foto Google → vacío
-        let avatarUrl = user.photoURL || '';
-        if (snapshot.exists() && snapshot.val().avatarUrl) {
-          avatarUrl = snapshot.val().avatarUrl;
-        }
-
-        applyAvatarToUI(avatarUrl);
-
-      } catch (err) {
-        // Si falla la DB se usa la foto de Google
-        applyAvatarToUI(user.photoURL || '');
-        console.warn('No se pudo cargar el perfil:', err.message);
-      }
-
-      sidebarName.textContent  = user.displayName || 'Usuario';
-      sidebarEmail.textContent = user.email || '';
+    /* ── Barra de URL ── */
+    function showAvatarBar() {
+      avatarBar.classList.add('visible');
+      avatarUrlInput.value = '';
+      avatarUrlInput.focus();
     }
 
-    /* ── Aplicar URL de avatar a ambos elementos ── */
-    function applyAvatarToUI(url) {
-      if (!url) return;
-      userAvatar.src    = url;
-      sidebarAvatar.src = url;
+    function hideAvatarBar() {
+      avatarBar.classList.remove('visible');
+      avatarUrlInput.value = '';
     }
 
-    /* ── Vista previa en tiempo real al escribir la URL ── */
-    avatarUrlInput.addEventListener('input', () => {
-      const url = avatarUrlInput.value.trim();
-      if (url) {
-        avatarPreviewImg.src        = url;
-        avatarPreview.style.display = 'flex';
-      } else {
-        avatarPreview.style.display = 'none';
-      }
+    editAvatarBtn.addEventListener('click', () => {
+      avatarBar.classList.contains('visible')
+        ? hideAvatarBar()
+        : showAvatarBar();
     });
 
-    /* ── Guardar avatar URL en Realtime Database ── */
+    cancelAvatarBtn.addEventListener('click', hideAvatarBar);
+
+    /* Enter confirma */
+    avatarUrlInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') applyAvatarBtn.click();
+      if (e.key === 'Escape') hideAvatarBar();
+    });
+
+    /* ── Aplicar avatar ── */
     applyAvatarBtn.addEventListener('click', async () => {
       const user = auth.currentUser;
-      if (!user) {
-        showToast('Inicia sesión primero.', true);
-        return;
-      }
+      if (!user) { showToast('Inicia sesión primero.', true); return; }
 
       const url = avatarUrlInput.value.trim();
-      if (!url) {
-        showToast('Pega una URL de imagen válida.', true);
-        return;
-      }
+      if (!url)  { showToast('Pega una URL de imagen válida.', true); return; }
 
-      // Verificar que la URL carga una imagen antes de guardar
+      /* Verificar que la URL carga una imagen real */
       const testImg   = new Image();
       testImg.onload  = async () => {
         try {
-          // Guardar en  users/{uid}/avatarUrl
           await set(ref(db, 'users/' + user.uid + '/avatarUrl'), url);
-
           applyAvatarToUI(url);
-          avatarUrlInput.value        = '';
-          avatarPreview.style.display = 'none';
+          hideAvatarBar();
           showToast('✓ Foto de perfil actualizada');
-
         } catch (err) {
           showToast('Error al guardar: ' + err.message, true);
-          console.error(err);
         }
       };
       testImg.onerror = () => {
@@ -1165,7 +1134,30 @@
       testImg.src = url;
     });
 
-    /* ── Iniciar sesión con Google ── */
+    /* ── Helpers ── */
+    function applyAvatarToUI(url) {
+      if (!url) return;
+      userAvatar.src    = url;
+      sidebarAvatar.src = url;
+    }
+
+    async function loadProfile(user) {
+      try {
+        const snap = await get(ref(db, 'users/' + user.uid));
+        let avatarUrl = user.photoURL || '';
+        if (snap.exists() && snap.val().avatarUrl) {
+          avatarUrl = snap.val().avatarUrl;
+        }
+        applyAvatarToUI(avatarUrl);
+      } catch (err) {
+        applyAvatarToUI(user.photoURL || '');
+        console.warn('No se pudo cargar el perfil:', err.message);
+      }
+      sidebarName.textContent  = user.displayName || 'Usuario';
+      sidebarEmail.textContent = user.email || '';
+    }
+
+    /* ── Login / Logout ── */
     loginBtn.addEventListener('click', async () => {
       try {
         await signInWithPopup(auth, provider);
@@ -1175,14 +1167,13 @@
       }
     });
 
-    /* ── Cerrar sesión ── */
     logoutBtn.addEventListener('click', async () => {
       await signOut(auth);
       closeSidebar();
       showToast('Sesión cerrada correctamente');
     });
 
-    /* ── Escuchar cambios de sesión ── */
+    /* ── Estado de sesión ── */
     onAuthStateChanged(auth, async user => {
       if (user) {
         loginBtn.style.display   = 'none';
@@ -1191,26 +1182,24 @@
       } else {
         loginBtn.style.display   = 'inline-flex';
         userAvatar.style.display = 'none';
-        // Limpiar UI del perfil
         sidebarName.textContent  = '—';
         sidebarEmail.textContent = '—';
         sidebarAvatar.src        = '';
         userAvatar.src           = '';
       }
     });
-
   </script>
 
   <!-- ══════════════════════════════════
-       JS ORIGINAL — Partículas, menú, tema
+       JS — Partículas, menú, tema
   ══════════════════════════════════ -->
   <script>
-    /* ── Menú móvil ── */
+    /* Menú móvil */
     document.getElementById('menuToggle').addEventListener('click', () => {
       document.getElementById('navMenu').classList.toggle('active');
     });
 
-    /* ── Canvas de partículas ── */
+    /* Canvas partículas */
     const canvas = document.getElementById('particles');
     const ctx    = canvas.getContext('2d');
 
@@ -1220,11 +1209,11 @@
     }
     resizeCanvas();
 
-    const NUM_PARTICLES      = 80;
-    const CONNECTION_DIST    = 120;
-    let   particlesArray     = [];
+    const NUM_PARTICLES   = 80;
+    const CONNECTION_DIST = 120;
+    let   particlesArray  = [];
 
-    const darkColors = [
+    const darkColors  = [
       { r:0,   g:247, b:255 },
       { r:119, g:0,   b:255 },
       { r:255, g:0,   b:200 }
@@ -1298,8 +1287,8 @@
 
           if (dist < CONNECTION_DIST) {
             const op = (1 - dist / CONNECTION_DIST) * lineOp;
-            const { r:r1, g:g1, b:b1 } = particlesArray[a].color;
-            const { r:r2, g:g2, b:b2 } = particlesArray[b].color;
+            const { r:r1,g:g1,b:b1 } = particlesArray[a].color;
+            const { r:r2,g:g2,b:b2 } = particlesArray[b].color;
 
             const grad = ctx.createLinearGradient(
               particlesArray[a].x, particlesArray[a].y,
@@ -1331,7 +1320,7 @@
 
     window.addEventListener('resize', () => { resizeCanvas(); init(); });
 
-    /* ── Cascada neon en el header ── */
+    /* Cascada neon */
     const neonCascade = document.getElementById('neonCascade');
 
     function createCascadeParticle() {
@@ -1346,9 +1335,9 @@
       const del = Math.random() * 2;
 
       p.animate([
-        { transform: 'translateY(-20px)',              opacity: 0   },
-        { transform: 'translateY(0)',                  opacity: 0.7 },
-        { transform: `translateY(${window.innerHeight}px)`, opacity: 0 }
+        { transform: 'translateY(-20px)',                    opacity: 0   },
+        { transform: 'translateY(0)',                        opacity: 0.7 },
+        { transform: `translateY(${window.innerHeight}px)`,  opacity: 0   }
       ], {
         duration: dur * 1000,
         delay:    del * 1000,
@@ -1363,27 +1352,26 @@
       setTimeout(cascade, 100 + Math.random() * 200);
     })();
 
-    /* ── Cambio de tema ── */
+    /* Tema */
     const themeToggle = document.getElementById('themeToggle');
     const themeIcon   = themeToggle.querySelector('i');
 
     function updateThemeIcon() {
-      const isDay     = document.body.classList.contains('light-mode');
-      themeIcon.className = isDay ? 'fas fa-sun' : 'fas fa-moon';
+      themeIcon.className = document.body.classList.contains('light-mode')
+        ? 'fas fa-sun' : 'fas fa-moon';
     }
 
-    // Restaurar tema guardado
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       document.body.classList.toggle('light-mode', savedTheme === 'light');
       updateThemeIcon();
-      init(); // Reiniciar partículas con los colores correctos
+      init();
     }
 
     themeToggle.addEventListener('click', () => {
       document.body.classList.toggle('light-mode');
-      const current = document.body.classList.contains('light-mode') ? 'light' : 'dark';
-      localStorage.setItem('theme', current);
+      localStorage.setItem('theme',
+        document.body.classList.contains('light-mode') ? 'light' : 'dark');
       updateThemeIcon();
       init();
     });
