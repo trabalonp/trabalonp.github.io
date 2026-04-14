@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Dashboard de Lifepoints - Analiza tus puntos y ganancias">
+    <meta name="description" content="Dashboard de Encuestas - Analiza tus ganancias en euros">
     <meta name="author" content="Tu Nombre">
-    <title>MyLifepoints Dashboard</title>
+    <title>Survey Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -52,11 +52,7 @@
             --glass-border: rgba(0, 0, 0, 0.1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -83,7 +79,6 @@
             position: relative;
             overflow: hidden;
             animation: slideDown 0.6s ease-out;
-            backdrop-filter: blur(10px);
         }
 
         .header::before {
@@ -104,23 +99,32 @@
             z-index: 1;
         }
 
-        .header-title {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
         .header-title h1 {
             color: white;
             font-size: 1.75rem;
             font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .header-title .subtitle {
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255,255,255,0.9);
             font-size: 0.9rem;
-            font-weight: 400;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .last-update {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.8rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 0.4rem 0.85rem;
+            border-radius: 2rem;
+            backdrop-filter: blur(10px);
         }
 
         .theme-toggle {
@@ -137,29 +141,26 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 1;
         }
 
         .theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255,255,255,0.15);
             transform: scale(1.1);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
         .loading-spinner {
             display: block;
             width: 40px;
             height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
+            border: 4px solid rgba(255,255,255,0.3);
             border-top: 4px solid white;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto;
+            margin: 3rem auto;
         }
 
         .error-message {
-            background: rgba(239, 68, 68, 0.1);
+            background: rgba(239,68,68,0.1);
             border: 1px solid var(--error);
             color: var(--error);
             padding: 1rem;
@@ -169,9 +170,10 @@
             animation: fadeIn 0.3s ease-out;
         }
 
+        /* ── STATS GRID ── */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
             animation: fadeInUp 0.6s ease-out;
@@ -186,29 +188,19 @@
             transition: var(--transition);
             position: relative;
             overflow: hidden;
-            animation: fadeInUp 0.6s ease-out;
-            backdrop-filter: blur(5px);
         }
 
         .stat-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
+            top: 0; left: 0;
+            width: 4px; height: 100%;
             background: linear-gradient(180deg, var(--primary), var(--secondary));
             transition: var(--transition);
         }
 
-        .stat-card:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
-        }
-
-        .stat-card:hover::before {
-            width: 6px;
-        }
+        .stat-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2); }
+        .stat-card:hover::before { width: 6px; }
 
         .stat-label {
             color: var(--text-3);
@@ -232,33 +224,27 @@
             display: flex;
             align-items: baseline;
             gap: 0.5rem;
-            transition: var(--transition);
         }
 
-        .stat-value .trend {
-            font-size: 1rem;
+        .stat-value .currency {
+            font-size: 1.5rem;
             font-weight: 600;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.5rem;
-            transition: var(--transition);
         }
 
-        .trend.up {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--success);
+        .trend {
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.4rem;
         }
 
-        .trend.down {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--error);
-        }
+        .trend.up   { background: rgba(16,185,129,0.2); color: var(--success); }
+        .trend.down { background: rgba(239,68,68,0.2);  color: var(--error);   }
+        .trend.neutral { background: rgba(148,163,184,0.2); color: var(--text-3); }
 
-        .stat-subtext {
-            color: var(--text-3);
-            font-size: 1rem;
-            transition: var(--transition);
-        }
+        .stat-subtext { color: var(--text-3); font-size: 0.9rem; }
 
+        /* ── CHART ── */
         .chart-section {
             background: var(--bg-2);
             padding: 2rem;
@@ -267,214 +253,58 @@
             box-shadow: var(--shadow);
             margin-bottom: 2rem;
             animation: fadeInUp 0.6s ease-out;
-            backdrop-filter: blur(5px);
         }
 
-        .chart-section h2 {
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .section-header h2 {
             font-size: 1.25rem;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+        }
+
+        .chart-tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-tab {
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-3);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .chart-tab.active,
+        .chart-tab:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
         }
 
         .chart-wrapper {
             position: relative;
-            height: 400px;
-            transition: var(--transition);
+            height: 380px;
         }
 
-        .chart-wrapper:hover {
-            transform: scale(1.01);
-        }
-
-        .table-section {
-            background: var(--bg-2);
-            padding: 2rem;
-            border-radius: 1rem;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            margin-bottom: 2rem;
-            animation: fadeInUp 0.6s ease-out;
-            backdrop-filter: blur(5px);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        th {
-            background: var(--bg-3);
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
-            color: var(--text-2);
-        }
-
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-2);
-            transition: var(--transition);
-        }
-
-        tr:hover {
-            background: var(--bg-3);
-            transform: translateX(4px);
-        }
-
-        .schedule-section {
-            background: var(--bg-2);
-            padding: 2rem;
-            border-radius: 1rem;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            margin-bottom: 2rem;
-            animation: fadeInUp 0.6s ease-out;
-            backdrop-filter: blur(5px);
-        }
-
-        .schedule-section h2 {
-            margin-bottom: 1.5rem;
-            font-size: 1.25rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .schedule-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 4px;
-            margin-top: 1.5rem;
-        }
-
-        .schedule-header {
-            font-weight: 600;
-            text-align: center;
-            padding: 0.75rem;
-            background: var(--primary);
-            color: white;
-            border-radius: 0.5rem;
-            font-size: 0.75rem;
-            transition: var(--transition);
-        }
-
-        .schedule-header:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .schedule-cell {
-            padding: 0.75rem;
-            text-align: center;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            font-size: 0.875rem;
-            transition: var(--transition);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .schedule-cell::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .schedule-cell:hover::after {
-            width: 100px;
-            height: 100px;
-        }
-
-        .schedule-cell:hover {
-            transform: scale(1.05);
-            z-index: 1;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .schedule-cell.high-activity {
-            background: var(--success);
-            color: white;
-        }
-
-        .schedule-cell.medium-activity {
-            background: var(--warning);
-            color: white;
-        }
-
-        .schedule-cell.low-activity {
-            background: var(--error);
-            color: white;
-        }
-
-        .schedule-cell.no-data {
-            background: var(--bg-3);
-            color: var(--text-3);
-        }
-
-        .schedule-legend {
-            display: flex;
-            gap: 1.5rem;
-            margin-top: 1.5rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 0.875rem;
-            color: var(--text-3);
-            transition: var(--transition);
-        }
-
-        .legend-item:hover {
-            transform: translateY(-2px);
-        }
-
-        .legend-color {
-            width: 14px;
-            height: 14px;
-            border-radius: 0.25rem;
-            transition: var(--transition);
-        }
-
-        .legend-color.high {
-            background: var(--success);
-        }
-
-        .legend-color.medium {
-            background: var(--warning);
-        }
-
-        .legend-color.low {
-            background: var(--error);
-        }
-
-        .legend-color.none {
-            background: var(--bg-3);
-        }
-
+        /* ── WIDGETS ── */
         .widgets-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
             gap: 2rem;
             margin-bottom: 2rem;
         }
@@ -486,47 +316,55 @@
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
             animation: fadeInUp 0.6s ease-out;
-            backdrop-filter: blur(5px);
         }
 
         .widget-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 1.25rem;
         }
 
         .widget-title {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .widget-content {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
+        .widget-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 2rem;
+            background: rgba(99,102,241,0.15);
+            color: var(--primary);
+            font-weight: 600;
         }
+
+        /* Progress */
+        .progress-block { display: flex; flex-direction: column; gap: 0.5rem; }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+        }
+
+        .progress-meta .label { color: var(--text-3); }
+        .progress-meta .value { font-weight: 700; color: var(--text-1); }
 
         .progress-bar {
-            height: 8px;
+            height: 10px;
             background: var(--bg-3);
-            border-radius: 4px;
+            border-radius: 5px;
             overflow: hidden;
-            position: relative;
-            transition: var(--transition);
-        }
-
-        .progress-bar:hover {
-            transform: scaleY(1.1);
         }
 
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: 4px;
+            border-radius: 5px;
             transition: width 1s ease-out;
             position: relative;
             overflow: hidden;
@@ -535,911 +373,872 @@
         .progress-fill::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: shimmer 3s infinite;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2.5s infinite;
         }
 
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 0.5rem;
-            font-size: 0.875rem;
-            color: var(--text-3);
-            transition: var(--transition);
-        }
-
-        .progress-label:hover {
-            transform: translateX(2px);
-        }
-
-        .progress-value {
-            font-weight: 600;
-            color: var(--text-1);
-        }
-
-        .progress-goal {
-            font-size: 0.75rem;
-            color: var(--text-3);
-        }
-
-        .activity-indicator {
+        /* Activity items */
+        .activity-item {
             display: flex;
             align-items: center;
             gap: 1rem;
-            padding: 1rem;
+            padding: 0.85rem 1rem;
             background: var(--bg-3);
-            border-radius: 0.5rem;
+            border-radius: 0.65rem;
+            margin-bottom: 0.65rem;
             transition: var(--transition);
         }
 
-        .activity-indicator:hover {
-            transform: translateX(8px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
+        .activity-item:last-child { margin-bottom: 0; }
+
+        .activity-item:hover { transform: translateX(6px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
         .activity-icon {
-            width: 40px;
-            height: 40px;
+            width: 38px; height: 38px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            transition: var(--transition);
+            font-size: 1rem;
+            flex-shrink: 0;
         }
 
-        .activity-icon:hover {
-            transform: scale(1.1);
+        .activity-icon.earned    { background: rgba(16,185,129,0.2);  color: var(--success); }
+        .activity-icon.withdrawn { background: rgba(236,72,153,0.2);  color: var(--accent);  }
+        .activity-icon.failed    { background: rgba(239,68,68,0.15);  color: var(--error);   }
+        .activity-icon.bonus     { background: rgba(245,158,11,0.2);  color: var(--warning); }
+
+        .activity-content { flex: 1; min-width: 0; }
+        .activity-title   { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .activity-details { font-size: 0.8rem; color: var(--text-3); margin-top: 0.1rem; }
+
+        .activity-amount {
+            font-weight: 700;
+            font-size: 0.95rem;
+            white-space: nowrap;
         }
 
-        .activity-icon.survey {
-            background: rgba(99, 102, 241, 0.2);
-            color: var(--primary);
-        }
+        .activity-amount.positive { color: var(--success); }
+        .activity-amount.negative { color: var(--error); }
+        .activity-amount.neutral  { color: var(--text-3); }
 
-        .activity-icon.withdrawal {
-            background: rgba(236, 72, 153, 0.2);
-            color: var(--accent);
-        }
-
-        .activity-icon.bonus {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--success);
-        }
-
-        .activity-content {
-            flex: 1;
-        }
-
-        .activity-title {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            transition: var(--transition);
-        }
-
-        .activity-details {
-            font-size: 0.875rem;
-            color: var(--text-3);
-            transition: var(--transition);
-        }
-
-        .activity-time {
-            font-size: 0.75rem;
-            color: var(--text-3);
-            margin-top: 0.25rem;
-            transition: var(--transition);
-        }
-
+        /* Goal achievement */
         .goal-achievement {
             display: flex;
             align-items: center;
             gap: 1rem;
             padding: 1rem;
-            background: rgba(16, 185, 129, 0.1);
+            background: rgba(16,185,129,0.1);
             border: 1px solid var(--success);
             border-radius: 0.75rem;
             margin-top: 1rem;
             animation: bounceIn 0.5s ease-out;
-            backdrop-filter: blur(5px);
         }
 
         .goal-icon {
-            width: 48px;
-            height: 48px;
+            width: 44px; height: 44px;
             border-radius: 50%;
             background: var(--success);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             animation: pulse 2s infinite;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
 
-        .goal-content {
-            flex: 1;
+        .goal-title { font-weight: 700; font-size: 1rem; }
+        .goal-desc  { font-size: 0.85rem; color: var(--text-2); margin-top: 0.2rem; }
+
+        .adaptive-info {
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            color: var(--text-3);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
         }
 
-        .goal-title {
+        .adaptive-info strong { color: var(--primary); }
+
+        /* ── TABLE ── */
+        .table-section {
+            background: var(--bg-2);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.6s ease-out;
+            overflow-x: auto;
+        }
+
+        .table-section h2 {
+            font-size: 1.25rem;
             font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .goal-desc {
-            font-size: 0.875rem;
-            color: var(--text-2);
-        }
-
-        .adaptive-goal {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            margin-top: 0.5rem;
-            font-size: 0.875rem;
-            color: var(--text-3);
-            animation: slideIn 0.5s ease-out;
+            margin-bottom: 1.25rem;
         }
 
-        .adaptive-goal-label {
-            font-weight: 600;
-            color: var(--primary);
-        }
+        table { width: 100%; border-collapse: collapse; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes bounceIn {
-            0% { transform: scale(0.3); opacity: 0; }
-            50% { transform: scale(1.05); }
-            70% { transform: scale(0.9); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @media (max-width: 768px) {
-            .header-title h1 {
-                font-size: 1.5rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .chart-wrapper {
-                height: 300px;
-            }
-
-            .schedule-grid {
-                grid-template-columns: repeat(4, 1fr);
-                font-size: 0.7rem;
-            }
-
-            .widgets-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border-width: 0;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-            transition: var(--transition);
-        }
-
-        ::-webkit-scrollbar-track {
+        th {
             background: var(--bg-3);
+            padding: 0.85rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.05em;
+            color: var(--text-2);
+            white-space: nowrap;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 4px;
+        td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-2);
+            font-size: 0.9rem;
             transition: var(--transition);
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-dark);
-            transform: scale(1.1);
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--bg-3); }
+
+        td.positive { color: var(--success); font-weight: 700; }
+        td.negative { color: var(--error);   font-weight: 700; }
+
+        /* ── SCHEDULE ── */
+        .schedule-section {
+            background: var(--bg-2);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.6s ease-out;
         }
+
+        .schedule-section h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .schedule-scroll { overflow-x: auto; }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 3px;
+            min-width: 560px;
+        }
+
+        .schedule-header {
+            font-weight: 600;
+            text-align: center;
+            padding: 0.6rem 0.4rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 0.4rem;
+            font-size: 0.72rem;
+        }
+
+        .schedule-cell {
+            padding: 0.55rem 0.3rem;
+            text-align: center;
+            border-radius: 0.4rem;
+            font-weight: 600;
+            font-size: 0.75rem;
+            cursor: default;
+            transition: var(--transition);
+        }
+
+        .schedule-cell:hover { transform: scale(1.15); z-index: 1; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .schedule-cell.high-activity   { background: var(--success); color: white; }
+        .schedule-cell.medium-activity { background: var(--warning); color: white; }
+        .schedule-cell.low-activity    { background: var(--error);   color: white; }
+        .schedule-cell.no-data         { background: var(--bg-3);    color: var(--text-3); }
+
+        .schedule-legend {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1.25rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--text-3); }
+        .legend-color { width: 12px; height: 12px; border-radius: 3px; }
+        .legend-color.high   { background: var(--success); }
+        .legend-color.medium { background: var(--warning); }
+        .legend-color.low    { background: var(--error);   }
+        .legend-color.none   { background: var(--bg-3);    }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeIn    { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInUp  { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin      { to { transform: rotate(360deg); } }
+        @keyframes pulse     { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+        @keyframes shimmer   { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+        @keyframes bounceIn  { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 70% { transform: scale(0.95); } 100% { transform: scale(1); opacity: 1; } }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .header-title h1 { font-size: 1.35rem; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .chart-wrapper { height: 280px; }
+            .widgets-container { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .stat-value { font-size: 2rem; }
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-3); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); }
     </style>
 </head>
 <body data-theme="dark">
-    <div class="container">
-        <div class="loading-spinner" id="loadingSpinner"></div>
-        
-        <div class="error-message" id="errorMessage"></div>
+<div class="container">
 
-        <header class="header">
-            <div class="header-content">
-                <div class="header-title">
-                    <h1>MyLifepoints</h1>
-                    <div class="subtitle">Dashboard</div>
-                </div>
+    <div class="loading-spinner" id="loadingSpinner"></div>
+    <div class="error-message"  id="errorMessage"></div>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <h1><i class="fas fa-poll-h" style="margin-right:.5rem"></i>Survey Dashboard</h1>
+                <div class="subtitle">Seguimiento de ganancias en tiempo real</div>
+            </div>
+            <div class="header-actions">
+                <span class="last-update" id="lastUpdate">Cargando…</span>
                 <button class="theme-toggle" onclick="toggleTheme()" aria-label="Cambiar tema">
                     <i class="fas fa-sun" id="theme-icon"></i>
                 </button>
             </div>
-        </header>
+        </div>
+    </header>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">
-                    <i class="fas fa-plus-circle"></i>
-                    Lifepoints Ganados
-                </div>
-                <div class="stat-value">
-                    <span id="total-lifepoints">0</span>
-                    <span class="trend up" id="total-trend">+0%</span>
-                </div>
-                <div class="stat-subtext">≈ <span id="total-euros">0.00</span> €</div>
+    <!-- STATS -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label"><i class="fas fa-euro-sign"></i> Total Ganado</div>
+            <div class="stat-value">
+                <span class="currency">€</span>
+                <span id="total-earned">0.00</span>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">
-                    <i class="fas fa-wallet"></i>
-                    Lifepoints Actuales
-                </div>
-                <div class="stat-value">
-                    <span id="current-lifepoints">0</span>
-                    <span class="trend" id="current-trend">0%</span>
-                </div>
-                <div class="stat-subtext">≈ <span id="current-euros">0.00</span> €</div>
+            <div class="stat-subtext">Suma de todas las encuestas</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label"><i class="fas fa-piggy-bank"></i> Saldo Actual</div>
+            <div class="stat-value">
+                <span class="currency">€</span>
+                <span id="current-balance">0.00</span>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">
-                    <i class="fas fa-arrow-down"></i>
-                    Retirados (PayPal)
-                </div>
-                <div class="stat-value">
-                    <span id="withdrawn-lifepoints">0</span>
-                    <span class="trend" id="withdrawn-trend">0%</span>
-                </div>
-                <div class="stat-subtext">≈ <span id="withdrawn-euros">0.00</span> €</div>
+            <div class="stat-subtext">Pendiente de retirar</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label"><i class="fab fa-paypal"></i> Retirado (PayPal)</div>
+            <div class="stat-value">
+                <span class="currency">€</span>
+                <span id="total-withdrawn">0.00</span>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">
-                    <i class="fas fa-chart-line"></i>
-                    Tasa de Éxito
-                </div>
-                <div class="stat-value">
-                    <span id="success-rate">0</span>%
-                </div>
-                <div class="stat-subtext">Encuestas completadas</div>
+            <div class="stat-subtext">Transferido a tu cuenta</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label"><i class="fas fa-check-circle"></i> Tasa de Éxito</div>
+            <div class="stat-value">
+                <span id="success-rate">0</span>
+                <span class="currency" style="font-size:1.4rem">%</span>
+            </div>
+            <div class="stat-subtext">
+                <span id="success-counts">0 completadas / 0 intentos</span>
             </div>
         </div>
 
-        <div class="chart-section">
-            <h2><i class="fas fa-chart-area"></i> Evolución de Lifepoints</h2>
-            <div class="chart-wrapper" id="chartWrapper">
-                <canvas id="lifepointsChart"></canvas>
+        <div class="stat-card">
+            <div class="stat-label"><i class="fas fa-coins"></i> Media por Encuesta</div>
+            <div class="stat-value">
+                <span class="currency">€</span>
+                <span id="avg-per-survey">0.00</span>
             </div>
+            <div class="stat-subtext">Encuestas completadas</div>
         </div>
 
-        <div class="widgets-container">
-            <div class="widget">
-                <div class="widget-header">
-                    <h3 class="widget-title">
-                        <i class="fas fa-trophy"></i>
-                        Rendimiento Mensual
-                    </h3>
-                </div>
-                <div class="widget-content">
-                    <div class="activity-indicator">
-                        <div class="activity-icon survey">
-                            <i class="fas fa-poll"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-title">Encuestas Completadas</div>
-                            <div class="activity-details">
-                                <span id="monthly-surveys">0</span> de <span id="monthly-goal">50</span>
-                            </div>
-                            <div class="activity-time">
-                                Último registro: <span id="last-survey-date">--</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="monthly-progress" style="width: 0%"></div>
-                    </div>
-                    <div class="progress-label">
-                        <span class="progress-value" id="progress-percentage">0%</span>
-                        <span class="progress-goal">Meta: <span id="goal-display">50</span> encuestas/mes</span>
-                    </div>
-                    <div id="goal-achievement" class="goal-achievement" style="display: none;">
-                        <div class="goal-icon">
-                            <i class="fas fa-check"></i>
-                        </div>
-                        <div class="goal-content">
-                            <div class="goal-title">¡Meta Alcanzada! 🎉</div>
-                            <div class="goal-desc">Has completado el objetivo mensual de encuestas</div>
-                        </div>
-                    </div>
-                    <div class="adaptive-goal">
-                        <span class="adaptive-goal-label">Meta adaptativa:</span>
-                        <span id="adaptive-goal-info">Basada en rendimiento del mes anterior</span>
-                    </div>
-                </div>
+        <div class="stat-card">
+            <div class="stat-label"><i class="fas fa-calendar-day"></i> Este Mes</div>
+            <div class="stat-value">
+                <span class="currency">€</span>
+                <span id="this-month-earned">0.00</span>
             </div>
-            <div class="widget">
-                <div class="widget-header">
-                    <h3 class="widget-title">
-                        <i class="fas fa-clock"></i>
-                        Actividad Reciente
-                    </h3>
-                </div>
-                <div class="widget-content" id="recent-activity">
-                </div>
-            </div>
-        </div>
-
-        <div class="table-section">
-            <h2><i class="fas fa-table"></i> Resumen por Mes</h2>
-            <table id="monthly-summary">
-                <thead>
-                    <tr>
-                        <th>Mes</th>
-                        <th>Lifepoints Ganados</th>
-                        <th>Valor Aprox. (€)</th>
-                        <th>Encuestas Exitosas</th>
-                        <th>Tasa de Éxito</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <div class="schedule-section">
-            <h2><i class="fas fa-calendar-alt"></i> Probabilidades de Horarios de Encuestas</h2>
-            <div class="schedule-grid" id="schedule-grid"></div>
-            <div class="schedule-legend">
-                <div class="legend-item">
-                    <div class="legend-color high"></div>
-                    <span>Alta actividad</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color medium"></div>
-                    <span>Media actividad</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color low"></div>
-                    <span>Baja actividad</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color none"></div>
-                    <span>Sin datos</span>
-                </div>
+            <div class="stat-subtext">
+                <span id="this-month-surveys">0</span> encuestas completadas
             </div>
         </div>
     </div>
 
-    <script>
-        // Configuración de Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyD9sBTTe9PFQct9Ym9tkiVBr8wYDMl4SI0",
-            authDomain: "lifepointsdashboard.firebaseapp.com",
-            databaseURL: "https://lifepointsdashboard-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "lifepointsdashboard",
-            storageBucket: "lifepointsdashboard.firebasestorage.app",
-            messagingSenderId: "70452481394",
-            appId: "1:70452481394:web:60e497d37b8b74c2d8a1eb",
-            measurementId: "G-P6ZDXEFCDX"
-        };
-        
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const lifepointsRef = database.ref('lifepoints');
+    <!-- CHART -->
+    <div class="chart-section">
+        <div class="section-header">
+            <h2><i class="fas fa-chart-area"></i> Evolución de Ganancias</h2>
+            <div class="chart-tabs">
+                <button class="chart-tab active" onclick="switchChart('accumulated', this)">Acumulado</button>
+                <button class="chart-tab"        onclick="switchChart('monthly', this)">Por Mes</button>
+                <button class="chart-tab"        onclick="switchChart('daily', this)">Diario</button>
+            </div>
+        </div>
+        <div class="chart-wrapper">
+            <canvas id="mainChart"></canvas>
+        </div>
+    </div>
 
-        const LIFEPONTS_TO_EURO = 115;
-        let lifepointsData = [];
-        let currentTheme = 'dark';
-        let monthlyGoal = 50;
-        let lastMonthSurveys = 0;
+    <!-- WIDGETS -->
+    <div class="widgets-container">
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadLifepointsData();
+        <!-- Objetivo mensual -->
+        <div class="widget">
+            <div class="widget-header">
+                <h3 class="widget-title"><i class="fas fa-trophy"></i> Objetivo Mensual</h3>
+                <span class="widget-badge" id="month-label">Este mes</span>
+            </div>
+
+            <div class="progress-block">
+                <div class="progress-meta">
+                    <span class="label">Ganado este mes</span>
+                    <span class="value">€<span id="goal-current">0.00</span> / €<span id="goal-target">10.00</span></span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="monthly-progress" style="width:0%"></div>
+                </div>
+                <div class="progress-meta" style="margin-top:.25rem">
+                    <span class="label" id="progress-pct">0% completado</span>
+                    <span class="label">Meta: €<span id="goal-display">10.00</span>/mes</span>
+                </div>
+            </div>
+
+            <div id="goal-achievement" class="goal-achievement" style="display:none">
+                <div class="goal-icon"><i class="fas fa-check"></i></div>
+                <div>
+                    <div class="goal-title">¡Objetivo alcanzado! 🎉</div>
+                    <div class="goal-desc">Has superado la meta mensual de ganancias.</div>
+                </div>
+            </div>
+
+            <div class="adaptive-info">
+                <i class="fas fa-magic"></i>
+                <span>Meta adaptativa: <strong id="adaptive-goal-info">basada en mes anterior</strong></span>
+            </div>
+        </div>
+
+        <!-- Actividad reciente -->
+        <div class="widget">
+            <div class="widget-header">
+                <h3 class="widget-title"><i class="fas fa-clock"></i> Actividad Reciente</h3>
+                <span class="widget-badge" id="recent-count">0 registros</span>
+            </div>
+            <div id="recent-activity"></div>
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-section">
+        <h2><i class="fas fa-table"></i> Resumen por Mes</h2>
+        <table id="monthly-summary">
+            <thead>
+                <tr>
+                    <th>Mes</th>
+                    <th>Ganado (€)</th>
+                    <th>Retirado (€)</th>
+                    <th>Encuestas ✓</th>
+                    <th>Intentos</th>
+                    <th>Tasa Éxito</th>
+                    <th>Media/Encuesta</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="schedule-section">
+        <h2><i class="fas fa-calendar-alt"></i> Mapa de Actividad por Hora y Día</h2>
+        <div class="schedule-scroll">
+            <div class="schedule-grid" id="schedule-grid"></div>
+        </div>
+        <div class="schedule-legend">
+            <div class="legend-item"><div class="legend-color high"></div><span>Alta actividad (≥3)</span></div>
+            <div class="legend-item"><div class="legend-color medium"></div><span>Media (2)</span></div>
+            <div class="legend-item"><div class="legend-color low"></div><span>Baja (1)</span></div>
+            <div class="legend-item"><div class="legend-color none"></div><span>Sin datos</span></div>
+        </div>
+    </div>
+
+</div><!-- /container -->
+
+<script>
+// ══════════════════════════════════════════════
+//  CONFIGURACIÓN FIREBASE
+// ══════════════════════════════════════════════
+const firebaseConfig = {
+    apiKey: "AIzaSyD9sBTTe9PFQct9Ym9tkiVBr8wYDMl4SI0",
+    authDomain: "lifepointsdashboard.firebaseapp.com",
+    databaseURL: "https://lifepointsdashboard-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "lifepointsdashboard",
+    storageBucket: "lifepointsdashboard.firebasestorage.app",
+    messagingSenderId: "70452481394",
+    appId: "1:70452481394:web:60e497d37b8b74c2d8a1eb"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db  = firebase.database();
+const ref = db.ref('surveys');   // ← nueva colección
+
+// ══════════════════════════════════════════════
+//  ESTADO GLOBAL
+// ══════════════════════════════════════════════
+let surveyData   = [];
+let mainChart    = null;
+let currentMode  = 'accumulated';
+let monthlyGoal  = 10.00;   // € — se recalcula adaptativamente
+let lastMonthEarned = 0;
+
+// ══════════════════════════════════════════════
+//  ARRANQUE
+// ══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', loadData);
+
+function loadData() {
+    show('loadingSpinner');
+    hide('errorMessage');
+
+    ref.once('value')
+        .then(snap => {
+            const raw = snap.val();
+            if (!raw) {
+                showError('No hay datos en Firebase todavía.');
+                hide('loadingSpinner');
+                return;
+            }
+
+            // Convertir a array y parsear fechas
+            surveyData = Object.entries(raw).map(([id, v]) => ({
+                ...v,
+                id,
+                fecha: parseDate(v.fecha)
+            })).sort((a, b) => b.fecha - a.fecha);
+
+            processData();
+            hide('loadingSpinner');
+
+            // Actualizar timestamp header
+            document.getElementById('lastUpdate').textContent =
+                'Actualizado: ' + new Date().toLocaleTimeString('es-ES');
+        })
+        .catch(err => {
+            showError('Error al cargar datos: ' + err.message);
+            hide('loadingSpinner');
         });
+}
 
-        function loadLifepointsData() {
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            const errorMessage = document.getElementById('errorMessage');
-            
-            loadingSpinner.style.display = 'block';
-            errorMessage.style.display = 'none';
-            
-            // Leer datos de Firebase
-            lifepointsRef.once('value')
-                .then((snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        // Convertir objeto a array y parsear fechas
-                        lifepointsData = Object.entries(data)
-                            .map(([key, value]) => ({ 
-                                ...value, 
-                                id: key,
-                                fecha: parsearFecha(value.fecha) // Parsear la fecha aquí
-                            }))
-                            .sort((a, b) => b.fecha - a.fecha);
-                        
-                        procesarDatos();
-                    } else {
-                        errorMessage.textContent = 'No hay datos disponibles en Firebase';
-                        errorMessage.style.display = 'block';
+// ══════════════════════════════════════════════
+//  PARSEO DE FECHA
+//  Espera strings ISO  o  "DD/MM/YYYY HH:MM"
+// ══════════════════════════════════════════════
+function parseDate(v) {
+    if (v instanceof Date) return v;
+    if (!v) return new Date();
+
+    // ISO 8601
+    const iso = new Date(v);
+    if (!isNaN(iso)) return iso;
+
+    // DD/MM/YYYY HH:MM  (formato que usará el nuevo bot)
+    const m = String(v).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})/);
+    if (m) return new Date(+m[3], +m[2]-1, +m[1], +m[4], +m[5]);
+
+    return new Date();
+}
+
+// ══════════════════════════════════════════════
+//  PROCESADO PRINCIPAL
+// ══════════════════════════════════════════════
+function processData() {
+    const now          = new Date();
+    const thisMonth    = now.getMonth();
+    const thisYear     = now.getFullYear();
+
+    let totalEarned    = 0;
+    let totalWithdrawn = 0;
+    let successCount   = 0;
+    let attemptCount   = 0;
+    let thisMonthEarned   = 0;
+    let thisMonthSurveys  = 0;
+
+    const monthly = {};   // "YYYY-MM" → { earned, withdrawn, success, attempts }
+
+    surveyData.forEach(item => {
+        const key = monthKey(item.fecha);
+
+        if (!monthly[key]) monthly[key] = { earned:0, withdrawn:0, success:0, attempts:0 };
+
+        switch (item.tipo) {
+            case 'encuesta':          // encuesta completada → importe positivo
+                totalEarned += item.importe;
+                monthly[key].earned  += item.importe;
+                monthly[key].success += 1;
+                monthly[key].attempts+= 1;
+                successCount++;
+                attemptCount++;
+                if (item.fecha.getMonth()===thisMonth && item.fecha.getFullYear()===thisYear) {
+                    thisMonthEarned  += item.importe;
+                    thisMonthSurveys += 1;
+                }
+                break;
+
+            case 'screener':          // screener / descalificado → no suma dinero
+            case 'descalificado':
+                monthly[key].attempts += 1;
+                attemptCount++;
+                break;
+
+            case 'retiro':            // retirada a PayPal → importe positivo guardado
+                totalWithdrawn += item.importe;
+                monthly[key].withdrawn += item.importe;
+                break;
+
+            case 'bonus':             // bonus / bono extra
+                totalEarned += item.importe;
+                monthly[key].earned += item.importe;
+                if (item.fecha.getMonth()===thisMonth && item.fecha.getFullYear()===thisYear) {
+                    thisMonthEarned += item.importe;
+                }
+                break;
+        }
+    });
+
+    const currentBalance = totalEarned - totalWithdrawn;
+    const avgPerSurvey   = successCount > 0 ? (totalEarned / successCount) : 0;
+    const successRate    = attemptCount  > 0 ? (successCount / attemptCount * 100) : 0;
+
+    // Meta adaptativa basada en el mes anterior
+    const prevKey = prevMonthKey(now);
+    lastMonthEarned = monthly[prevKey] ? monthly[prevKey].earned : 0;
+    monthlyGoal = calcAdaptiveGoal(lastMonthEarned);
+
+    // ── Actualizar DOM ──
+    setTxt('total-earned',      fmt(totalEarned));
+    setTxt('current-balance',   fmt(currentBalance));
+    setTxt('total-withdrawn',   fmt(totalWithdrawn));
+    setTxt('success-rate',      successRate.toFixed(1));
+    setTxt('success-counts',    `${successCount} completadas / ${attemptCount} intentos`);
+    setTxt('avg-per-survey',    fmt(avgPerSurvey));
+    setTxt('this-month-earned', fmt(thisMonthEarned));
+    setTxt('this-month-surveys',thisMonthSurveys);
+
+    updateGoalWidget(thisMonthEarned);
+    updateMonthlySummary(monthly);
+    buildChart(surveyData, 'accumulated');
+    buildSchedule(surveyData);
+    updateRecentActivity(surveyData.slice(0, 6));
+
+    // Etiqueta del mes en el widget
+    setTxt('month-label', now.toLocaleDateString('es-ES',{month:'long', year:'numeric'}));
+    setTxt('recent-count', `${Math.min(surveyData.length,6)} registros`);
+}
+
+// ══════════════════════════════════════════════
+//  WIDGET OBJETIVO
+// ══════════════════════════════════════════════
+function updateGoalWidget(thisMonthEarned) {
+    const pct = Math.min((thisMonthEarned / monthlyGoal) * 100, 100);
+
+    setTxt('goal-current',  fmt(thisMonthEarned));
+    setTxt('goal-target',   fmt(monthlyGoal));
+    setTxt('goal-display',  fmt(monthlyGoal));
+    setTxt('progress-pct',  pct.toFixed(1) + '% completado');
+    document.getElementById('monthly-progress').style.width = pct + '%';
+
+    document.getElementById('goal-achievement').style.display =
+        thisMonthEarned >= monthlyGoal ? 'flex' : 'none';
+
+    setTxt('adaptive-goal-info',
+        lastMonthEarned > 0
+            ? `${fmt(lastMonthEarned)} € ganados el mes anterior`
+            : 'meta base de €10.00');
+}
+
+// ══════════════════════════════════════════════
+//  TABLA MENSUAL
+// ══════════════════════════════════════════════
+function updateMonthlySummary(monthly) {
+    const tbody = document.querySelector('#monthly-summary tbody');
+    tbody.innerHTML = '';
+
+    Object.entries(monthly)
+        .sort(([a],[b]) => b.localeCompare(a))
+        .forEach(([key, d]) => {
+            const rate = d.attempts > 0 ? (d.success/d.attempts*100).toFixed(1) : '—';
+            const avg  = d.success  > 0 ? fmt(d.earned/d.success) : '—';
+            tbody.innerHTML += `
+                <tr>
+                    <td>${formatMonthLabel(key)}</td>
+                    <td class="positive">€${fmt(d.earned)}</td>
+                    <td class="${d.withdrawn>0?'negative':''}">€${fmt(d.withdrawn)}</td>
+                    <td>${d.success}</td>
+                    <td>${d.attempts}</td>
+                    <td>${rate}%</td>
+                    <td>€${avg}</td>
+                </tr>`;
+        });
+}
+
+// ══════════════════════════════════════════════
+//  GRÁFICA PRINCIPAL  (3 modos)
+// ══════════════════════════════════════════════
+function buildChart(data, mode) {
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    if (mainChart) mainChart.destroy();
+
+    let labels, values, label, color;
+
+    const sorted = [...data].sort((a,b) => a.fecha - b.fecha);
+
+    if (mode === 'accumulated') {
+        let acc = 0;
+        const points = sorted
+            .filter(d => d.tipo === 'encuesta' || d.tipo === 'bonus')
+            .map(d => { acc += d.importe; return { x: d.fecha, y: acc }; });
+
+        labels = points.map(p => fmtDateShort(p.x));
+        values = points.map(p => p.y);
+        label  = 'Ganancias acumuladas (€)';
+        color  = '#6366f1';
+    }
+    else if (mode === 'monthly') {
+        const monthly = {};
+        sorted.filter(d => d.tipo==='encuesta'||d.tipo==='bonus')
+              .forEach(d => {
+                  const k = monthKey(d.fecha);
+                  monthly[k] = (monthly[k]||0) + d.importe;
+              });
+        labels = Object.keys(monthly).sort().map(formatMonthLabel);
+        values = Object.keys(monthly).sort().map(k => monthly[k]);
+        label  = 'Ganancias por mes (€)';
+        color  = '#10b981';
+    }
+    else { // daily
+        const daily = {};
+        sorted.filter(d => d.tipo==='encuesta'||d.tipo==='bonus')
+              .forEach(d => {
+                  const k = d.fecha.toISOString().slice(0,10);
+                  daily[k] = (daily[k]||0) + d.importe;
+              });
+        labels = Object.keys(daily).sort().map(k => {
+            const [y,m,d] = k.split('-');
+            return `${d}/${m}`;
+        });
+        values = Object.keys(daily).sort().map(k => daily[k]);
+        label  = 'Ganancias diarias (€)';
+        color  = '#ec4899';
+    }
+
+    mainChart = new Chart(ctx, {
+        type: mode === 'accumulated' ? 'line' : 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label,
+                data: values,
+                borderColor: color,
+                backgroundColor: mode === 'accumulated'
+                    ? hexAlpha(color, 0.12)
+                    : hexAlpha(color, 0.7),
+                borderWidth: 2.5,
+                fill: mode === 'accumulated',
+                tension: 0.4,
+                pointRadius: mode === 'accumulated' ? 0 : undefined,
+                pointHoverRadius: 5,
+                borderRadius: mode !== 'accumulated' ? 6 : undefined
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.85)',
+                    padding: 12,
+                    callbacks: {
+                        label: c => ` €${c.parsed.y.toFixed(2)}`
                     }
-                    loadingSpinner.style.display = 'none';
-                })
-                .catch((error) => {
-                    console.error('Error loading data:', error);
-                    errorMessage.textContent = `Error al cargar los datos: ${error.message}`;
-                    errorMessage.style.display = 'block';
-                    loadingSpinner.style.display = 'none';
-                });
-        }
-
-        function parsearFecha(fechaStr) {
-            // Si ya es un objeto Date, devolverlo directamente
-            if (fechaStr instanceof Date) {
-                return fechaStr;
-            }
-            
-            // Si es una cadena, intentar parsearla
-            if (typeof fechaStr === 'string') {
-                // Intentar parsear fechas en formato ISO (2025-12-14T10:00:00.000Z)
-                const date = new Date(fechaStr);
-                if (!isNaN(date.getTime())) {
-                    return date;
                 }
-                
-                // Si no es ISO, intentar con el formato original
-                const meses = {
-                    'ene': 0, 'enero': 0, 'feb': 1, 'febrero': 1, 'mar': 2, 'marzo': 2,
-                    'abr': 3, 'abril': 3, 'may': 4, 'mayo': 4, 'jun': 5, 'junio': 5,
-                    'jul': 6, 'julio': 6, 'ago': 7, 'agosto': 7, 'sep': 8, 'sept': 8, 'septiembre': 8,
-                    'oct': 9, 'octubre': 9, 'nov': 10, 'noviembre': 10, 'dic': 11, 'diciembre': 11
-                };
-
-                const fechaLimpia = fechaStr.replace(',', '').toLowerCase();
-                const partes = fechaLimpia.split(' ');
-                let dia, mes, año, hora = 0, minutos = 0;
-
-                for (let i = 0; i < partes.length; i++) {
-                    const parte = partes[i];
-                    if (!isNaN(parte) && parte.length <= 2 && !dia) {
-                        dia = parseInt(parte);
-                    } else if (meses[parte] !== undefined && mes === undefined) {
-                        mes = meses[parte];
-                    } else if (!isNaN(parte) && parte.length === 4 && !año) {
-                        año = parseInt(parte);
-                    } else if (parte.includes(':')) {
-                        const [h, m] = parte.split(':');
-                        hora = parseInt(h);
-                        minutos = parseInt(m);
-                        if (i + 1 < partes.length) {
-                            const sig = partes[i + 1];
-                            if ((sig === 'p.' || sig === 'p.m.') && hora < 12) hora += 12;
-                            else if ((sig === 'a.' || sig === 'a.m.') && hora === 12) hora = 0;
-                        }
-                    }
-                }
-
-                if (!año) año = new Date().getFullYear();
-                
-                return dia && mes !== undefined && año ? new Date(año, mes, dia, hora, minutos) : new Date();
-            }
-            
-            // Si no se puede parsear, devolver fecha actual
-            return new Date();
-        }
-
-        function procesarDatos() {
-            if (lifepointsData.length === 0) return;
-
-            lifepointsData.sort((a, b) => b.fecha - a.fecha);
-
-            let totalLifepoints = 0, totalWithdrawn = 0, currentBalance = 0;
-            let successfulSurveys = 0;
-            let failedSurveys = 0;
-            let totalSurveys = 0;
-            let monthlyData = {};
-            let currentMonth = new Date().getMonth();
-            let currentYear = new Date().getFullYear();
-            let currentMonthSurveys = 0;
-            let lastMonthData = null;
-
-            lifepointsData.forEach(t => {
-                totalLifepoints += Math.max(0, t.puntos);
-                if (t.puntos < 0) totalWithdrawn += Math.abs(t.puntos);
-                currentBalance += t.puntos;
-                
-                if (t.concepto === "Encuesta pagada" && t.puntos > 0) {
-                    successfulSurveys++;
-                    totalSurveys++;
-
-                    if (
-                        t.fecha.getMonth() === currentMonth &&
-                        t.fecha.getFullYear() === currentYear
-                    ) {
-                        currentMonthSurveys++;
-                    }
-                } else if (
-                    t.concepto.toLowerCase().includes("no cumplir") ||
-                    t.concepto.toLowerCase().includes("screen")
-                ) {
-                    failedSurveys++;
-                }
-
-                const mesAnio = `${t.fecha.getFullYear()}-${String(t.fecha.getMonth() + 1).padStart(2, '0')}`;
-                if (!monthlyData[mesAnio]) {
-                    monthlyData[mesAnio] = {
-                        puntos: 0,
-                        surveysSuccess: 0,
-                        surveysFailed: 0,
-                        withdrawals: 0
-                    };
-                }
-
-                if (t.puntos > 0) {
-                    monthlyData[mesAnio].puntos += t.puntos;
-                
-                    if (t.concepto === "Encuesta pagada") {
-                        monthlyData[mesAnio].surveysSuccess++;
-                    }
-                }
-                
-                // Encuestas fallidas (screenout, no cumplir, etc.)
-                if (
-                    t.concepto.toLowerCase().includes("no cumplir") ||
-                    t.concepto.toLowerCase().includes("screen")
-                ) {
-                    monthlyData[mesAnio].surveysFailed++;
-                }
-                
-                // Retiros PayPal
-                if (t.puntos < 0) {
-                    monthlyData[mesAnio].withdrawals += Math.abs(t.puntos);
-                }
-
-                // Guardar datos del mes anterior
-                if (t.fecha.getMonth() === (currentMonth - 1) && t.fecha.getFullYear() === currentYear) {
-                    lastMonthData = monthlyData[mesAnio];
-                }
-            });
-
-            // Calcular meta adaptativa basada en el mes anterior
-            if (lastMonthData) {
-                lastMonthSurveys = lastMonthData.surveys;
-                monthlyGoal = calculateAdaptiveGoal(lastMonthSurveys);
-                updateAdaptiveGoalDisplay();
-            }
-
-            updateStatistics(totalLifepoints, totalWithdrawn, currentBalance, successfulSurveys, failedSurveys);
-            updateMonthlySummary(monthlyData);
-            createEvolutionChart(lifepointsData);
-            analizarHorariosEncuestas(lifepointsData);
-            updateRecentActivity(lifepointsData);
-            checkGoalAchievement(currentMonthSurveys);
-        }
-
-        function calculateAdaptiveGoal(lastMonthSurveys) {
-            let newGoal = 50; // Meta base
-            
-            if (lastMonthSurveys > 60) {
-                // Si tuvo muchas encuestas, aumentar la meta
-                newGoal = Math.min(80, lastMonthSurveys + 10);
-            } else if (lastMonthSurveys > 50) {
-                // Si estuvo por encima, mantener o aumentar ligeramente
-                newGoal = lastMonthSurveys + 5;
-            } else if (lastMonthSurveys > 40) {
-                // Si estuvo cerca, mantener similar
-                newGoal = lastMonthSurveys + 2;
-            } else if (lastMonthSurveys > 30) {
-                // Si estuvo un poco bajo, disminuir ligeramente
-                newGoal = lastMonthSurveys - 2;
-            } else {
-                // Si estuvo muy bajo, disminuir más
-                newGoal = Math.max(25, lastMonthSurveys - 5);
-            }
-            
-            return Math.round(newGoal);
-        }
-
-        function updateAdaptiveGoalDisplay() {
-            document.getElementById('monthly-goal').textContent = monthlyGoal;
-            document.getElementById('goal-display').textContent = monthlyGoal;
-            document.getElementById('adaptive-goal-info').textContent = 
-                `Basada en ${lastMonthSurveys} encuestas el mes anterior`;
-        }
-
-        function updateStatistics(total, withdrawn, current, successful, claimedSurveys) {
-            const totalEuros = (total / LIFEPONTS_TO_EURO).toFixed(2);
-            const currentEuros = (current / LIFEPONTS_TO_EURO).toFixed(2);
-            const withdrawnEuros = (withdrawn / LIFEPONTS_TO_EURO).toFixed(2);
-            const totalAttempts = successful + claimedSurveys;
-            const successRate = totalAttempts > 0
-                ? ((successful / totalAttempts) * 100).toFixed(2)
-                : 0;
-
-            animateValue('total-lifepoints', 0, total, 2000);
-            animateValue('total-euros', 0, parseFloat(totalEuros), 2000);
-            animateValue('current-lifepoints', 0, current, 2000);
-            animateValue('current-euros', 0, parseFloat(currentEuros), 2000);
-            animateValue('withdrawn-lifepoints', 0, withdrawn, 2000);
-            animateValue('withdrawn-euros', 0, parseFloat(withdrawnEuros), 2000);
-            document.getElementById('success-rate').textContent = successRate;
-
-            updateTrend('total-trend', '+5%');
-            updateTrend('current-trend', '+2%');
-            updateTrend('withdrawn-trend', '+3%');
-        }
-
-        function updateMonthlySummary(monthlyData) {
-            const tableBody = document.querySelector('#monthly-summary tbody');
-            tableBody.innerHTML = '';
-
-            Object.entries(monthlyData)
-                .sort(([a], [b]) => b.localeCompare(a))
-                .forEach(([mes, data]) => {
-                    const euros = (data.puntos / LIFEPONTS_TO_EURO).toFixed(2);
-                    const totalAttempts = data.surveysSuccess + data.surveysFailed;
-                    const successRate = totalAttempts > 0
-                        ? ((data.surveysSuccess / totalAttempts) * 100).toFixed(2)
-                        : '0.00';
-                    
-                    tableBody.innerHTML += `
-                        <tr>
-                            <td>${mes}</td>
-                            <td>${data.puntos.toLocaleString()}</td>
-                            <td>${euros} €</td>
-                            <td>${data.surveysSuccess}</td>
-                            <td>${successRate}%</td>
-                        </tr>
-                    `;
-                });
-        }
-
-        function createEvolutionChart(data) {
-            const evolutionData = [];
-            let acumulado = 0;
-            const sortedData = [...data].sort((a, b) => a.fecha - b.fecha);
-            
-            sortedData.forEach(t => {
-                acumulado += t.puntos;
-                evolutionData.push({ fecha: t.fecha, puntos: acumulado });
-            });
-
-            const ctx = document.getElementById('lifepointsChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: evolutionData.map(d => `${d.fecha.getDate()}/${d.fecha.getMonth() + 1}`),
-                    datasets: [{
-                        label: 'Lifepoints Acumulados',
-                        data: evolutionData.map(d => d.puntos),
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        pointHoverRadius: 5,
-                        pointBackgroundColor: '#6366f1'
-                    }]
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(148,163,184,0.08)' },
+                    ticks: { callback: v => '€'+v.toFixed(2) }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(0,0,0,0.8)',
-                            padding: 12,
-                            titleColor: '#fff',
-                            bodyColor: '#fff',
-                            callbacks: {
-                                label: ctx => `Lifepoints: ${ctx.parsed.y.toLocaleString()}`
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(148, 163, 184, 0.1)' },
-                            ticks: { callback: value => value.toLocaleString() }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { maxTicksLimit: 12 }
-                        }
-                    }
-                }
-            });
-        }
-
-        function analizarHorariosEncuestas(data) {
-            const encuestas = data.filter(t => t.concepto === "Encuesta pagada" && t.puntos > 0);
-            const actividadPorDia = Array(7).fill(0);
-            const actividadPorHora = Array(24).fill(0);
-
-            encuestas.forEach(e => {
-                actividadPorDia[e.fecha.getDay()]++;
-                actividadPorHora[e.fecha.getHours()]++;
-            });
-
-            const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            const scheduleGrid = document.getElementById('schedule-grid');
-
-            scheduleGrid.innerHTML = '<div class="schedule-header">Hora</div>';
-            diasSemana.forEach(dia => {
-                scheduleGrid.innerHTML += `<div class="schedule-header">${dia}</div>`;
-            });
-
-            for (let hora = 0; hora < 24; hora++) {
-                const horaF = hora === 0 ? '12a' : hora < 12 ? `${hora}a` : hora === 12 ? '12p' : `${hora - 12}p`;
-                scheduleGrid.innerHTML += `<div class="schedule-header">${horaF}</div>`;
-
-                diasSemana.forEach((_, diaIdx) => {
-                    const count = encuestas.filter(e => e.fecha.getDay() === diaIdx && e.fecha.getHours() === hora).length;
-                    const clase = count === 0 ? 'no-data' : count >= 3 ? 'high-activity' : count >= 2 ? 'medium-activity' : 'low-activity';
-                    scheduleGrid.innerHTML += `<div class="schedule-cell ${clase}">${count > 0 ? count : ''}</div>`;
-                });
-            }
-        }
-
-        function updateRecentActivity(data) {
-            const recentActivity = document.getElementById('recent-activity');
-            const recentItems = data.slice(0, 5);
-            
-            recentActivity.innerHTML = '';
-            
-            recentItems.forEach(item => {
-                const iconClass = item.puntos > 0 ? 'fas fa-plus' : 'fas fa-minus';
-                const iconColor = item.puntos > 0 ? 'survey' : 'withdrawal';
-                const points = item.puntos > 0 ? `+${item.puntos}` : item.puntos;
-                
-                recentActivity.innerHTML += `
-                    <div class="activity-indicator">
-                        <div class="activity-icon ${iconColor}">
-                            <i class="${iconClass}"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-title">${item.concepto}</div>
-                            <div class="activity-details">${points} Lifepoints</div>
-                            <div class="activity-time">${item.fecha.toLocaleDateString('es-ES')} ${item.fecha.toLocaleTimeString('es-ES')}</div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function checkGoalAchievement(currentMonthSurveys) {
-            const progress = Math.min((currentMonthSurveys / monthlyGoal) * 100, 100);
-        
-            document.getElementById('monthly-surveys').textContent = currentMonthSurveys;
-            document.getElementById('monthly-progress').style.width = `${progress}%`;
-            document.getElementById('progress-percentage').textContent = `${Math.round(progress)}%`;
-            
-            const lastSurvey = lifepointsData.find(
-                item => item.concepto === "Encuesta pagada" && item.puntos > 0
-            );
-        
-            if (lastSurvey) {
-                document.getElementById('last-survey-date').textContent =
-                    lastSurvey.fecha.toLocaleDateString('es-ES');
-            }
-        
-            document.getElementById('goal-achievement').style.display =
-                currentMonthSurveys >= monthlyGoal ? 'flex' : 'none';
-        }
-
-
-        function toggleTheme() {
-            const body = document.body;
-            const current = body.getAttribute('data-theme');
-            const newTheme = current === 'dark' ? 'light' : 'dark';
-            body.setAttribute('data-theme', newTheme);
-            document.getElementById('theme-icon').className = newTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
-            currentTheme = newTheme;
-        }
-
-        function animateValue(id, start, end, duration) {
-            const element = document.getElementById(id);
-            const range = end - start;
-            const startTime = performance.now();
-            
-            function update(currentTime) {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const value = Math.floor(start + range * progress);
-                element.textContent = value.toLocaleString();
-                
-                if (progress < 1) {
-                    requestAnimationFrame(update);
+                x: {
+                    grid: { display: false },
+                    ticks: { maxTicksLimit: 14, maxRotation: 45 }
                 }
             }
-            
-            requestAnimationFrame(update);
         }
+    });
+}
 
-        function updateTrend(id, trend) {
-            const element = document.getElementById(id);
-            element.textContent = trend;
-            element.className = trend.startsWith('+') ? 'trend up' : 'trend down';
-        }
+function switchChart(mode, btn) {
+    document.querySelectorAll('.chart-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMode = mode;
+    buildChart(surveyData, mode);
+}
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 't' && e.ctrlKey) {
-                e.preventDefault();
-                toggleTheme();
-            }
+// ══════════════════════════════════════════════
+//  MAPA HORARIO
+// ══════════════════════════════════════════════
+function buildSchedule(data) {
+    const encuestas = data.filter(d => d.tipo === 'encuesta');
+    const grid = document.getElementById('schedule-grid');
+    const dias  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+    grid.innerHTML = '<div class="schedule-header">Hora</div>';
+    dias.forEach(d => grid.innerHTML += `<div class="schedule-header">${d}</div>`);
+
+    for (let h = 0; h < 24; h++) {
+        const label = h === 0 ? '12am' : h < 12 ? `${h}am` : h === 12 ? '12pm' : `${h-12}pm`;
+        grid.innerHTML += `<div class="schedule-header">${label}</div>`;
+        dias.forEach((_, di) => {
+            const cnt = encuestas.filter(e => e.fecha.getDay()===di && e.fecha.getHours()===h).length;
+            const cls = cnt===0?'no-data':cnt>=3?'high-activity':cnt>=2?'medium-activity':'low-activity';
+            grid.innerHTML += `<div class="schedule-cell ${cls}">${cnt||''}</div>`;
         });
-    </script>
+    }
+}
+
+// ══════════════════════════════════════════════
+//  ACTIVIDAD RECIENTE
+// ══════════════════════════════════════════════
+function updateRecentActivity(items) {
+    const container = document.getElementById('recent-activity');
+    if (!items.length) { container.innerHTML = '<p style="color:var(--text-3);font-size:.9rem">Sin actividad registrada.</p>'; return; }
+
+    container.innerHTML = items.map(item => {
+        let iconCls, iconI, amountCls, amountTxt;
+
+        switch(item.tipo) {
+            case 'encuesta':
+                iconCls='earned'; iconI='fa-check';
+                amountCls='positive'; amountTxt=`+€${fmt(item.importe)}`;
+                break;
+            case 'retiro':
+                iconCls='withdrawn'; iconI='fa-paper-plane';
+                amountCls='negative'; amountTxt=`-€${fmt(item.importe)}`;
+                break;
+            case 'screener':
+            case 'descalificado':
+                iconCls='failed'; iconI='fa-times';
+                amountCls='neutral'; amountTxt='€0.00';
+                break;
+            case 'bonus':
+                iconCls='bonus'; iconI='fa-star';
+                amountCls='positive'; amountTxt=`+€${fmt(item.importe)}`;
+                break;
+            default:
+                iconCls='earned'; iconI='fa-circle';
+                amountCls='neutral'; amountTxt=`€${fmt(item.importe||0)}`;
+        }
+
+        return `
+        <div class="activity-item">
+            <div class="activity-icon ${iconCls}"><i class="fas ${iconI}"></i></div>
+            <div class="activity-content">
+                <div class="activity-title">${item.concepto || item.tipo}</div>
+                <div class="activity-details">${fmtDateFull(item.fecha)}</div>
+            </div>
+            <span class="activity-amount ${amountCls}">${amountTxt}</span>
+        </div>`;
+    }).join('');
+}
+
+// ══════════════════════════════════════════════
+//  META ADAPTATIVA
+// ══════════════════════════════════════════════
+function calcAdaptiveGoal(lastEarned) {
+    if (lastEarned <= 0)  return 10.00;
+    if (lastEarned > 30)  return +(lastEarned * 1.10).toFixed(2);
+    if (lastEarned > 20)  return +(lastEarned * 1.08).toFixed(2);
+    if (lastEarned > 10)  return +(lastEarned * 1.05).toFixed(2);
+    return +(lastEarned   * 1.03).toFixed(2);
+}
+
+// ══════════════════════════════════════════════
+//  UTILIDADES
+// ══════════════════════════════════════════════
+const fmt  = v => parseFloat(v||0).toFixed(2);
+const setTxt = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+const show = id => { const el=document.getElementById(id); if(el) el.style.display='block'; };
+const hide = id => { const el=document.getElementById(id); if(el) el.style.display='none';  };
+
+function showError(msg) {
+    const el = document.getElementById('errorMessage');
+    el.textContent = msg;
+    el.style.display = 'block';
+}
+
+function monthKey(d)    { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+function prevMonthKey(d){ const p=new Date(d.getFullYear(),d.getMonth()-1,1); return monthKey(p); }
+
+function formatMonthLabel(key) {
+    const [y,m] = key.split('-');
+    return new Date(+y,+m-1,1).toLocaleDateString('es-ES',{month:'short',year:'numeric'});
+}
+
+function fmtDateShort(d) { return `${d.getDate()}/${d.getMonth()+1}`; }
+function fmtDateFull(d)  {
+    return d.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}) +
+           ' ' + d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+}
+
+function hexAlpha(hex, a) {
+    const r=parseInt(hex.slice(1,3),16);
+    const g=parseInt(hex.slice(3,5),16);
+    const b=parseInt(hex.slice(5,7),16);
+    return `rgba(${r},${g},${b},${a})`;
+}
+
+// ══════════════════════════════════════════════
+//  TEMA
+// ══════════════════════════════════════════════
+function toggleTheme() {
+    const body = document.body;
+    const next = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    body.setAttribute('data-theme', next);
+    document.getElementById('theme-icon').className = next==='light' ? 'fas fa-moon' : 'fas fa-sun';
+}
+
+document.addEventListener('keydown', e => {
+    if (e.ctrlKey && e.key==='t') { e.preventDefault(); toggleTheme(); }
+});
+</script>
 </body>
 </html>
