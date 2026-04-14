@@ -6,92 +6,35 @@
     <title>RadioStream Global</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* [INICIO] CSS */
         :root {
-            --bg-base: #0a0a0a;
-            --bg-sidebar: #111111;
-            --bg-card: #181818;
-            --bg-hover: #282828;
-            --bg-player: #181818;
-            --accent: #1db954;
-            --accent-dim: #1aa34a;
-            --text-1: #ffffff;
-            --text-2: #b3b3b3;
-            --text-3: #6a6a6a;
-            --border: #282828;
-            --red: #e63946;
-            --radius-sm: 6px;
-            --radius-md: 12px;
-            --radius-lg: 20px;
-            --transition: all 0.2s ease;
+            --bg-base: #0a0a0a; --bg-sidebar: #111111; --bg-card: #181818;
+            --bg-hover: #282828; --bg-player: #181818; --accent: #1db954;
+            --text-1: #ffffff; --text-2: #b3b3b3; --text-3: #6a6a6a;
+            --border: #282828; --red: #e63946; --radius-sm: 6px;
+            --radius-md: 12px; --radius-lg: 20px; --transition: all 0.2s ease;
             --player-h: 90px;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: 'Circular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background: var(--bg-base);
-            color: var(--text-1);
-            height: 100vh;
+            background: var(--bg-base); color: var(--text-1); height: 100vh;
             display: grid;
             grid-template-rows: 1fr var(--player-h);
             grid-template-columns: 280px 1fr;
-            grid-template-areas:
-                "sidebar main"
-                "player player";
+            grid-template-areas: "sidebar main" "player player";
             overflow: hidden;
         }
-        
-        /* --- ESTILOS PARA LOGIN/PERFIL --- */
         .topbar-profile { display: flex; align-items: center; gap: 16px; }
-        
-        #login-btn {
-            background-color: var(--text-1);
-            color: #000;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 500px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition);
-            display: none;
-        }
+        #login-btn { background-color: var(--text-1); color: #000; border: none; padding: 8px 16px; border-radius: 500px; font-weight: 700; cursor: pointer; transition: var(--transition); display: none; }
         #login-btn:hover { transform: scale(1.05); }
-        
-        .user-profile {
-            display: none;
-            align-items: center;
-            gap: 8px;
-            background: var(--bg-card);
-            padding: 4px;
-            border-radius: 500px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
+        .user-profile { display: none; align-items: center; gap: 8px; background: var(--bg-card); padding: 4px; border-radius: 500px; cursor: pointer; transition: var(--transition); }
         .user-profile:hover { background: var(--bg-hover); }
-
         #user-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
         #user-name { font-weight: 700; font-size: 0.85rem; padding-right: 8px; }
-
-        #logout-btn {
-            background: var(--red);
-            color: var(--text-1);
-            border: none;
-            padding: 8px 16px;
-            border-radius: 500px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-left: 8px;
-            transition: var(--transition);
-            display: none;
-        }
+        #logout-btn { background: var(--red); color: var(--text-1); border: none; padding: 8px 16px; border-radius: 500px; font-weight: 700; cursor: pointer; margin-left: 8px; transition: var(--transition); display: none; }
         #logout-btn:hover { opacity: 0.8; }
-        
         .logged-out .sidebar-library { opacity: 0.5; pointer-events: none; }
         .logged-out .fav-empty p { content: 'Inicia sesión para guardar tus favoritas.'; }
-        
-        /* SIDEBAR */
         .sidebar { grid-area: sidebar; background: var(--bg-base); display: flex; flex-direction: column; gap: 8px; overflow: hidden; padding: 8px; }
         .sidebar-top { background: var(--bg-sidebar); border-radius: var(--radius-md); padding: 16px; }
         .logo { display: flex; align-items: center; gap: 10px; padding: 8px 0 20px; }
@@ -110,7 +53,7 @@
         .favorites-scroll::-webkit-scrollbar-thumb { background: var(--text-3); border-radius: 2px; }
         .fav-item { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); }
         .fav-item:hover, .fav-item.playing { background: var(--bg-hover); }
-        .fav-thumb { width: 44px; height: 44px; border-radius: var(--radius-sm); background: linear-gradient(135deg, #1db954, #0d6832); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; position: relative; }
+        .fav-thumb { width: 44px; height: 44px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; position: relative; }
         .fav-item.playing .playing-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: var(--accent); }
         .fav-info { overflow: hidden; flex: 1; }
         .fav-name { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow:ellipsis; }
@@ -118,8 +61,6 @@
         .fav-empty { text-align: center; padding: 30px 10px; color: var(--text-3); }
         .fav-empty i { font-size: 2rem; margin-bottom: 10px; display: block; }
         .fav-empty p { font-size: 0.82rem; line-height: 1.5; }
-
-        /* MAIN */
         .main { grid-area: main; background: var(--bg-card); overflow: hidden; display: flex; flex-direction: column; border-radius: var(--radius-md) var(--radius-md) 0 0; margin: 8px 8px 0 0; }
         .topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; gap: 16px; background: rgba(10,10,10,0.7); backdrop-filter: blur(20px); flex-shrink: 0; border-radius: var(--radius-md) var(--radius-md) 0 0; }
         .topbar-left { display: flex; align-items: center; gap: 16px; flex: 1; }
@@ -139,17 +80,7 @@
         .station-card:hover, .station-card.active { background: var(--bg-hover); }
         .station-art { width: 100%; aspect-ratio: 1; border-radius: var(--radius-sm); margin-bottom: 14px; position: relative; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
         .station-art-bg { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
-        .genre-rock { background: linear-gradient(135deg, #b91c1c, #7f1d1d); }
-        .genre-pop { background: linear-gradient(135deg, #7c3aed, #4c1d95); }
-        .genre-news { background: linear-gradient(135deg, #1d4ed8, #1e3a5f); }
-        .genre-classical { background: linear-gradient(135deg, #b45309, #78350f); }
-        .genre-eclectic { background: linear-gradient(135deg, #0f766e, #134e4a); }
-        .genre-sports { background: linear-gradient(135deg, #15803d, #14532d); }
-        .genre-electronic { background: linear-gradient(135deg, #8b5cf6, #4c1d95); }
-        .genre-hiphop { background: linear-gradient(135deg, #f97316, #b45309); }
-        .genre-ambient { background: linear-gradient(135deg, #0891b2, #164e63); }
-        .genre-jazz { background: linear-gradient(135deg, #ca8a04, #713f12); }
-        .genre-default { background: linear-gradient(135deg, #374151, #111827); }
+        .genre-rock { background: linear-gradient(135deg, #b91c1c, #7f1d1d); } .genre-pop { background: linear-gradient(135deg, #7c3aed, #4c1d95); } .genre-news { background: linear-gradient(135deg, #1d4ed8, #1e3a5f); } .genre-classical { background: linear-gradient(135deg, #b45309, #78350f); } .genre-eclectic { background: linear-gradient(135deg, #0f766e, #134e4a); } .genre-sports { background: linear-gradient(135deg, #15803d, #14532d); } .genre-electronic { background: linear-gradient(135deg, #8b5cf6, #4c1d95); } .genre-hiphop { background: linear-gradient(135deg, #f97316, #b45309); } .genre-ambient { background: linear-gradient(135deg, #0891b2, #164e63); } .genre-jazz { background: linear-gradient(135deg, #ca8a04, #713f12); } .genre-default { background: linear-gradient(135deg, #374151, #111827); } .fav-thumb { background: var(--genre-color); } /* Asignar color dinamicamente */
         .play-overlay { position: absolute; bottom: 8px; right: 8px; width: 44px; height: 44px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1rem; color: #000; opacity: 0; transform: translateY(8px); transition: all 0.2s ease; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
         .station-card:hover .play-overlay, .station-card.active .play-overlay { opacity: 1; transform: translateY(0); }
         .station-card-name { font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow:ellipsis; }
@@ -163,8 +94,6 @@
         .no-results i { font-size: 3rem; margin-bottom: 20px; color: var(--text-3); }
         .no-results h3 { font-size: 1.2rem; margin-bottom: 8px; }
         .no-results p { font-size: 0.9rem; color: var(--text-3); }
-        
-        /* PLAYER BAR */
         .player { grid-area: player; background: var(--bg-player); border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center; padding: 0 24px; gap: 16px; }
         .player-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
         .player-art { width: 56px; height: 56px; border-radius: var(--radius-sm); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
@@ -187,21 +116,37 @@
         .player-right { display: flex; align-items: center; gap: 10px; justify-content: flex-end; }
         .vol-icon { background: none; border: none; color: var(--text-2); font-size: 0.9rem; cursor: pointer; padding: 4px; transition: var(--transition); }
         .vol-icon:hover { color: var(--text-1); }
-        
-        .vol-slider {
-            width: 100px; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
-            outline: none; cursor: pointer;
-            background: linear-gradient(to right, var(--text-1) 0%, var(--text-1) var(--volume-progress, 80%), #535353 var(--volume-progress, 80%), #535353 100%);
-        }
+        .vol-slider { width: 100px; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; outline: none; cursor: pointer; background: linear-gradient(to right, var(--text-1) 0%, var(--text-1) var(--volume-progress, 80%), #535353 var(--volume-progress, 80%), #535353 100%); }
         .vol-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--text-1); cursor: pointer; opacity: 0; transition: opacity 0.15s; }
         .vol-slider:hover::-webkit-slider-thumb { opacity: 1; }
         
-        /* RESPONSIVE */
-        @media (max-width: 1024px) { body { grid-template-columns: 240px 1fr; } .stations-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); } }
-        @media (max-width: 768px) { body { grid-template-columns: 1fr; grid-template-rows: auto 1fr var(--player-h); grid-template-areas: "sidebar" "main" "player"; } .sidebar { flex-direction: row; overflow-x: auto; padding: 8px; height: auto; } .sidebar-top { display: flex; align-items: center; gap: 16px; padding: 12px; flex-shrink: 0; } .sidebar-library { display: none; } .logo { padding: 0; } .main { margin: 0 8px; border-radius: 0; } .topbar { flex-wrap: wrap; gap: 10px; padding: 12px; } .search-bar { max-width: 100%; flex: 1; } .player { grid-template-columns: auto 1fr auto; padding: 0 12px; } .player-loc { display: none; } .player-right { gap: 6px; } .vol-slider { width: 70px; } }
-        @media (max-width: 480px) { .stations-grid { grid-template-columns: repeat(2, 1fr); } .player-right { display: none; } }
-        
-        /* SCROLLBAR GLOBAL */
+        /* === NUEVO CSS RESPONSIVO === */
+        @media (max-width: 1024px) {
+            body { grid-template-columns: 240px 1fr; }
+            .stations-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+        }
+        @media (max-width: 768px) {
+            body {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr var(--player-h);
+                grid-template-areas: "sidebar" "main" "player";
+            }
+            .sidebar { flex-direction: row; overflow-x: auto; height: auto; padding: 8px; }
+            .sidebar-top { display: flex; align-items: center; gap: 16px; padding: 12px; flex-shrink: 0; }
+            .sidebar-library { display: none; }
+            .logo { padding: 0; }
+            .main { margin: 0 8px; border-radius: 0; }
+            .topbar { flex-wrap: wrap; gap: 10px; padding: 12px; }
+            .search-bar { max-width: 100%; flex: 1; }
+            .player { grid-template-columns: auto 1fr auto; padding: 0 12px; }
+            .player-loc { display: none; }
+            .player-right { gap: 6px; }
+            .vol-slider { width: 70px; }
+        }
+        @media (max-width: 480px) {
+            .stations-grid { grid-template-columns: repeat(2, 1fr); }
+            .player-right { display: none; }
+        }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--text-3); border-radius: 3px; }
@@ -241,36 +186,20 @@
             appId: "1:599128086819:web:af149214fe5b68a12ad496"
         };
 
-        // --- INICIALIZACIÓN DE SERVICIOS ---
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-        const provider = new GoogleAuthProvider();
-
-        // --- DATOS ---
-        const radioStations = [
-            { id: 1, name: "Radio Caroline", location: "Maidstone, UK", genre: ["rock"], streamUrl: "https://radio.caroline.stream/radio-caroline" }, { id: 2, name: "BBC World Service", location: "London, UK", genre: ["news"], streamUrl: "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service" }, { id: 3, name: "NPR News and Talk", location: "Washington, DC, USA", genre: ["news"], streamUrl: "https://npr-ice.streamguys1.com/live.mp3" }, { id: 4, name: "WNYC New York Public Radio", location: "New York, NY, USA", genre: ["news"], streamUrl: "https://fm939.wnyc.org/wnycfm" }, { id: 5, name: "BBC Radio 4", location: "London, UK", genre: ["news"], streamUrl: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_fourfm" }, { id: 6, name: "BBC Radio 1", location: "London, UK", genre: ["pop"], streamUrl: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one" }, { id: 18, name: "RNE Radio 5", location: "Madrid, ES", genre: ["news"], streamUrl: "https://crtve-ice-edge-2001-fra-eco-cdn.cast.addradio.de/crtve/rne/5/mp3/128/stream.mp3" }, { id: 19, name: "RNE Radio Clásica", location: "Madrid, ES", genre: ["classical"], streamUrl: "https://crtve-ice-edge-2001-fra-eco-cdn.cast.addradio.de/crtve/rne/2/mp3/128/stream.mp3" }, { id: 22, name: "Cadena SER", location: "Madrid, ES", genre: ["news"], streamUrl: "https://playerservices.streamtheworld.com/api/livestream-redirect/CADENASER_SC" }, { id: 26, name: "Los 40", location: "Madrid, ES", genre: ["pop"], streamUrl: "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_SC" }, { id: 27, name: "Cadena 100", location: "Madrid, ES", genre: ["pop"], streamUrl: "https://cadena100-cope-rrcast.flumotion.com/cope/cadena100.mp3" }, { id: 28, name: "Kiss FM", location: "Madrid, ES", genre: ["pop"], streamUrl: "https://kissfm.ondacero.es/kissfm.mp3" }, { id: 36, name: "Rock FM", location: "Madrid, ES", genre: ["rock"], streamUrl: "https://rockfm-cope-rrcast.flumotion.com/cope/rockfm.mp3" }, { id: 43, name: "Hit FM", location: "Palma de Mallorca, ES", genre: ["pop"], streamUrl: "https://str.radionomy.com/hitfm" }, { id: 44, name: "Europa FM", location: "Madrid, ES", genre: ["pop"], streamUrl: "https://europa-cope-rrcast.flumotion.com/cope/europafm.mp3" }, { id: 52, name: "Loca FM", location: "Madrid, ES", genre: ["electronic"], streamUrl: "https://streaming.locafm.com:8443/locafm" }, { id: 55, name: "Classic FM UK", location: "London, UK", genre: ["classical"], streamUrl: "http://media-ice.musicradio.com/ClassicFMMP3" }, { id: 56, name: "Heart London", location: "London, UK", genre: ["pop"], streamUrl: "http://media-ice.musicradio.com/HeartLondonMP3" }, { id: 57, name: "Capital FM", location: "London, UK", genre: ["pop"], streamUrl: "http://media-ice.musicradio.com/CapitalMP3" }, { id: 58, name: "Sky Radio", location: "Netherlands", genre: ["pop"], streamUrl: "http://playerservices.streamtheworld.com/api/livestream-redirect/SKYRADIO.mp3" }, { id: 59, name: "Radio 538", location: "Netherlands", genre: ["pop"], streamUrl: "http://playerservices.streamtheworld.com/api/livestream-redirect/RADIO538.mp3" }, { id: 60, name: "NRJ France", location: "Paris, France", genre: ["pop"], streamUrl: "http://cdn.nrjaudio.fm/audio1/fr/30001/mp3_128.mp3" }, { id: 61, name: "Skyrock", location: "Paris, France", genre: ["hiphop"], streamUrl: "http://icecast.skyrock.net/s/natio_mp3_128k" }, { id: 62, name: "Radio FG", location: "Paris, France", genre: ["electronic"], streamUrl: "http://radiofg.impek.com/fg.mp3" }, { id: 63, name: "Deutschlandfunk", location: "Germany", genre: ["news"], streamUrl: "http://st01.dlf.de/dlf/01/128/mp3/stream.mp3" }, { id: 64, name: "Antenne Bayern", location: "Germany", genre: ["pop"], streamUrl: "http://stream.antenne.de/antenne" }, { id: 65, name: "Energy Berlin", location: "Germany", genre: ["pop"], streamUrl: "http://energyberlin.stream.laut.fm/energyberlin" }, { id: 66, name: "Radio Italia", location: "Italy", genre: ["pop"], streamUrl: "http://radioitalia.stream.laut.fm/radioitalia" }, { id: 67, name: "RDS Radio", location: "Italy", genre: ["pop"], streamUrl: "http://stream.rds.it:8000/rds" }, { id: 68, name: "Radio Deejay", location: "Italy", genre: ["pop"], streamUrl: "http://radiodeejay.stream.laut.fm/radiodeejay" }, { id: 69, name: "KEXP 90.3 FM", location: "Seattle, USA", genre: ["rock"], streamUrl: "http://live-mp3-128.kexp.org/kexp128.mp3" }, { id: 70, name: "WFMU", location: "New Jersey, USA", genre: ["eclectic"], streamUrl: "http://stream0.wfmu.org/freeform-128k" }, { id: 71, name: "SomaFM Groove Salad", location: "USA", genre: ["electronic"], streamUrl: "http://ice1.somafm.com/groovesalad-128-mp3" }, { id: 72, name: "SomaFM Drone Zone", location: "USA", genre: ["ambient"], streamUrl: "http://ice1.somafm.com/dronezone-128-mp3" }, { id: 73, name: "Radio Swiss Jazz", location: "Switzerland", genre: ["jazz"], streamUrl: "http://stream.srg-ssr.ch/m/rsj/mp3_128" }, { id: 74, name: "Radio Swiss Pop", location: "Switzerland", genre: ["pop"], streamUrl: "http://stream.srg-ssr.ch/m/rsp/mp3_128" }, { id: 75, name: "Radio Swiss Classic", location: "Switzerland", genre: ["classical"], streamUrl: "http://stream.srg-ssr.ch/m/rsc_de/mp3_128" }, { id: 76, name: "ABC Jazz", location: "Australia", genre: ["jazz"], streamUrl: "http://live-radio01.mediahubaustralia.com/JAZW/mp3/" }, { id: 77, name: "ABC Classic", location: "Australia", genre: ["classical"], streamUrl: "http://live-radio01.mediahubaustralia.com/2FMW/mp3/" }, { id: 78, name: "Tokyo FM", location: "Japan", genre: ["pop"], streamUrl: "http://tokyofmworld.stream.laut.fm/tokyofmworld" }, { id: 79, name: "Radio Nova", location: "France", genre: ["eclectic"], streamUrl: "http://novazz.ice.infomaniak.ch/novazz-128.mp3" }, { id: 80, name: "Deep House Radio", location: "Netherlands", genre: ["electronic"], streamUrl: "http://stream.deep.house/house.mp3" }, { id: 81, name: "Ibiza Global Radio", location: "Spain", genre: ["electronic"], streamUrl: "http://ibizaglobalradio.streaming-pro.com:8024/stream" }, { id: 82, name: "Maxima FM", location: "Spain", genre: ["electronic"], streamUrl: "http://playerservices.streamtheworld.com/api/livestream-redirect/MAXIMAFM.mp3" }, { id: 83, name: "Radio Paradise", location: "USA", genre: ["eclectic"], streamUrl: "http://stream.radioparadise.com/mp3-128" }, { id: 84, name: "Jazz24", location: "USA", genre: ["jazz"], streamUrl: "http://icy1.abacast.com/kplu-jazz24mp3-128" }, { id: 85, name: "Classic Rock Florida", location: "USA", genre: ["rock"], streamUrl: "http://streaming.live365.com/a25279" }, { id: 86, name: "Hot 108 Jamz", location: "USA", genre: ["hiphop"], streamUrl: "http://sc.hot108.com:4000/stream" }, { id: 87, name: "181.FM The Beat", location: "USA", genre: ["hiphop"], streamUrl: "http://listen.181fm.com/181-beat_128k.mp3" }, { id: 88, name: "181.FM Power 181", location: "USA", genre: ["pop"], streamUrl: "http://listen.181fm.com/181-power_128k.mp3" }, { id: 89, name: "181.FM Rock 40", location: "USA", genre: ["rock"], streamUrl: "http://listen.181fm.com/181-rock40_128k.mp3" }, { id: 90, name: "Radio ZET", location: "Poland", genre: ["pop"], streamUrl: "http://zet090-02.cdn.eurozet.pl:8404/stream" }, { id: 91, name: "RMF FM", location: "Poland", genre: ["pop"], streamUrl: "http://rmfstream1.interia.pl:8000/rmf_fm" }, { id: 92, name: "Radio Record", location: "Russia", genre: ["electronic"], streamUrl: "http://air.radiorecord.ru:805/rr_320" }, { id: 93, name: "NRK P1", location: "Norway", genre: ["news"], streamUrl: "http://lyd.nrk.no/nrk_radio_p1_oslo_mp3_h" }, { id: 94, name: "Radio 10", location: "Netherlands", genre: ["pop"], streamUrl: "http://playerservices.streamtheworld.com/api/livestream-redirect/RADIO10.mp3" }, { id: 95, name: "Qmusic", location: "Belgium", genre: ["pop"], streamUrl: "http://icecast-qmusic.cdp.triple-it.nl/Qmusic_be_live_128.mp3" }, { id: 96, name: "Studio Brussel", location: "Belgium", genre: ["rock"], streamUrl: "http://icecast.vrtcdn.be/stubru-high.mp3" }, { id: 97, name: "Radio Caprice Rock", location: "Russia", genre: ["rock"], streamUrl: "http://79.111.119.111:8002/rock" }, { id: 98, name: "Radio Caprice Jazz", location: "Russia", genre: ["jazz"], streamUrl: "http://79.111.119.111:8002/jazz" },
-        ];
-
-        // --- ESTADO DE LA APLICACIÓN ---
+        const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getDatabase(app), provider = new GoogleAuthProvider();
+        const radioStations = [ { id: 1, name: "Radio Caroline", location: "Maidstone, UK", genre: ["rock"], streamUrl: "https://radio.caroline.stream/radio-caroline" }, { id: 2, name: "BBC World Service", location: "London, UK", genre: ["news"], streamUrl: "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service" }, { id: 3, name: "NPR News and Talk", location: "Washington, DC, USA", genre: ["news"], streamUrl: "https://npr-ice.streamguys1.com/live.mp3" }, { id: 4, name: "WNYC New York Public Radio", location: "New York, NY, USA", genre: ["news"], streamUrl: "https://fm939.wnyc.org/wnycfm" }, { id: 5, name: "BBC Radio 4", location: "London, UK", genre: ["news"], streamUrl: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_fourfm" }, { id: 6, name: "BBC Radio 1", location: "London, UK", genre: ["pop"], streamUrl: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one" }, { id: 18, name: "RNE Radio 5", location: "Madrid, ES", genre: ["news"], streamUrl: "https://crtve-ice-edge-2001-fra-eco-cdn.cast.addradio.de/crtve/rne/5/mp3/128/stream.mp3" }, { id: 19, name: "RNE Radio Clásica", location: "Madrid, ES", genre: ["classical"], streamUrl: "https://crtve-ice-edge-2001-fra-eco-cdn.cast.addradio.de/crtve/rne/2/mp3/128/stream.mp3" }, { id: 22, name: "Cadena SER", location: "Madrid, ES", genre: ["news"], streamUrl: "https://playerservices.streamtheworld.com/api/livestream-redirect/CADENASER_SC" }, { id: 26, name: "Los 40", location: "Madrid, ES", genre: ["pop"], streamUrl: "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_SC" }, { id: 27, name: "Cadena 100", location: "Madrid, ES", genre: ["pop"], streamUrl: "https://cadena100-cope-rrcast.flumotion.com/cope/cadena100.mp3" }, { id: 28, name: "Kiss FM", location: "Madrid, ES", genre: ["pop"], streamUrl: "https://kissfm.ondacero.es/kissfm.mp3" }, { id: 36, name: "Rock FM", location: "Madrid, ES", genre: ["rock"], streamUrl: "https://rockfm-cope-rrcast.flumotion.com/cope/rockfm.mp3" }, { id: 43, name: "Hit FM", location: "Palma de Mallorca, ES", genre: ["pop"], streamUrl: "https://str.radionomy.com/hitfm" }, { id: 44, name: "Europa FM", location: "Madrid, ES", genre: ["pop"], streamUrl: "https://europa-cope-rrcast.flumotion.com/cope/europafm.mp3" }, { id: 52, name: "Loca FM", location: "Madrid, ES", genre: ["electronic"], streamUrl: "https://streaming.locafm.com:8443/locafm" }, { id: 55, name: "Classic FM UK", location: "London, UK", genre: ["classical"], streamUrl: "http://media-ice.musicradio.com/ClassicFMMP3" }, { id: 56, name: "Heart London", location: "London, UK", genre: ["pop"], streamUrl: "http://media-ice.musicradio.com/HeartLondonMP3" }, { id: 57, name: "Capital FM", location: "London, UK", genre: ["pop"], streamUrl: "http://media-ice.musicradio.com/CapitalMP3" }, { id: 58, name: "Sky Radio", location: "Netherlands", genre: ["pop"], streamUrl: "http://playerservices.streamtheworld.com/api/livestream-redirect/SKYRADIO.mp3" }, { id: 59, name: "Radio 538", location: "Netherlands", genre: ["pop"], streamUrl: "http://playerservices.streamtheworld.com/api/livestream-redirect/RADIO538.mp3" }, { id: 60, name: "NRJ France", location: "Paris, France", genre: ["pop"], streamUrl: "http://cdn.nrjaudio.fm/audio1/fr/30001/mp3_128.mp3" }, { id: 61, name: "Skyrock", location: "Paris, France", genre: ["hiphop"], streamUrl: "http://icecast.skyrock.net/s/natio_mp3_128k" }, { id: 62, name: "Radio FG", location: "Paris, France", genre: ["electronic"], streamUrl: "http://radiofg.impek.com/fg.mp3" }, { id: 63, name: "Deutschlandfunk", location: "Germany", genre: ["news"], streamUrl: "http://st01.dlf.de/dlf/01/128/mp3/stream.mp3" }, { id: 64, name: "Antenne Bayern", location: "Germany", genre: ["pop"], streamUrl: "http://stream.antenne.de/antenne" }, { id: 65, name: "Energy Berlin", location: "Germany", genre: ["pop"], streamUrl: "http://energyberlin.stream.laut.fm/energyberlin" }, { id: 66, name: "Radio Italia", location: "Italy", genre: ["pop"], streamUrl: "http://radioitalia.stream.laut.fm/radioitalia" }, { id: 67, name: "RDS Radio", location: "Italy", genre: ["pop"], streamUrl: "http://stream.rds.it:8000/rds" }, { id: 68, name: "Radio Deejay", location: "Italy", genre: ["pop"], streamUrl: "http://radiodeejay.stream.laut.fm/radiodeejay" }, { id: 69, name: "KEXP 90.3 FM", location: "Seattle, USA", genre: ["rock"], streamUrl: "http://live-mp3-128.kexp.org/kexp128.mp3" }, { id: 70, name: "WFMU", location: "New Jersey, USA", genre: ["eclectic"], streamUrl: "http://stream0.wfmu.org/freeform-128k" }, { id: 71, name: "SomaFM Groove Salad", location: "USA", genre: ["electronic"], streamUrl: "http://ice1.somafm.com/groovesalad-128-mp3" }, { id: 72, name: "SomaFM Drone Zone", location: "USA", genre: ["ambient"], streamUrl: "http://ice1.somafm.com/dronezone-128-mp3" }, { id: 73, name: "Radio Swiss Jazz", location: "Switzerland", genre: ["jazz"], streamUrl: "http://stream.srg-ssr.ch/m/rsj/mp3_128" }, { id: 74, name: "Radio Swiss Pop", location: "Switzerland", genre: ["pop"], streamUrl: "http://stream.srg-ssr.ch/m/rsp/mp3_128" }, { id: 75, name: "Radio Swiss Classic", location: "Switzerland", genre: ["classical"], streamUrl: "http://stream.srg-ssr.ch/m/rsc_de/mp3_128" }, { id: 76, name: "ABC Jazz", location: "Australia", genre: ["jazz"], streamUrl: "http://live-radio01.mediahubaustralia.com/JAZW/mp3/" }, { id: 77, name: "ABC Classic", location: "Australia", genre: ["classical"], streamUrl: "http://live-radio01.mediahubaustralia.com/2FMW/mp3/" }, { id: 78, name: "Tokyo FM", location: "Japan", genre: ["pop"], streamUrl: "http://tokyofmworld.stream.laut.fm/tokyofmworld" }, { id: 79, name: "Radio Nova", location: "France", genre: ["eclectic"], streamUrl: "http://novazz.ice.infomaniak.ch/novazz-128.mp3" }, { id: 80, name: "Deep House Radio", location: "Netherlands", genre: ["electronic"], streamUrl: "http://stream.deep.house/house.mp3" }, { id: 81, name: "Ibiza Global Radio", location: "Spain", genre: ["electronic"], streamUrl: "http://ibizaglobalradio.streaming-pro.com:8024/stream" }, { id: 82, name: "Maxima FM", location: "Spain", genre: ["electronic"], streamUrl: "http://playerservices.streamtheworld.com/api/livestream-redirect/MAXIMAFM.mp3" }, { id: 83, name: "Radio Paradise", location: "USA", genre: ["eclectic"], streamUrl: "http://stream.radioparadise.com/mp3-128" }, { id: 84, name: "Jazz24", location: "USA", genre: ["jazz"], streamUrl: "http://icy1.abacast.com/kplu-jazz24mp3-128" }, { id: 85, name: "Classic Rock Florida", location: "USA", genre: ["rock"], streamUrl: "http://streaming.live365.com/a25279" }, { id: 86, name: "Hot 108 Jamz", location: "USA", genre: ["hiphop"], streamUrl: "http://sc.hot108.com:4000/stream" }, { id: 87, name: "181.FM The Beat", location: "USA", genre: ["hiphop"], streamUrl: "http://listen.181fm.com/181-beat_128k.mp3" }, { id: 88, name: "181.FM Power 181", location: "USA", genre: ["pop"], streamUrl: "http://listen.181fm.com/181-power_128k.mp3" }, { id: 89, name: "181.FM Rock 40", location: "USA", genre: ["rock"], streamUrl: "http://listen.181fm.com/181-rock40_128k.mp3" }, { id: 90, name: "Radio ZET", location: "Poland", genre: ["pop"], streamUrl: "http://zet090-02.cdn.eurozet.pl:8404/stream" }, { id: 91, name: "RMF FM", location: "Poland", genre: ["pop"], streamUrl: "http://rmfstream1.interia.pl:8000/rmf_fm" }, { id: 92, name: "Radio Record", location: "Russia", genre: ["electronic"], streamUrl: "http://air.radiorecord.ru:805/rr_320" }, { id: 93, name: "NRK P1", location: "Norway", genre: ["news"], streamUrl: "http://lyd.nrk.no/nrk_radio_p1_oslo_mp3_h" }, { id: 94, name: "Radio 10", location: "Netherlands", genre: ["pop"], streamUrl: "http://playerservices.streamtheworld.com/api/livestream-redirect/RADIO10.mp3" }, { id: 95, name: "Qmusic", location: "Belgium", genre: ["pop"], streamUrl: "http://icecast-qmusic.cdp.triple-it.nl/Qmusic_be_live_128.mp3" }, { id: 96, name: "Studio Brussel", location: "Belgium", genre: ["rock"], streamUrl: "http://icecast.vrtcdn.be/stubru-high.mp3" }, { id: 97, name: "Radio Caprice Rock", location: "Russia", genre: ["rock"], streamUrl: "http://79.111.119.111:8002/rock" }, { id: 98, name: "Radio Caprice Jazz", location: "Russia", genre: ["jazz"], streamUrl: "http://79.111.119.111:8002/jazz" }, ];
         let currentAudio = null, currentStation = null, isPlaying = false, currentUser = null;
         let favorites = [], filteredStations = [...radioStations];
         let lastVolume = 80, muted = false;
-
-        // --- DOM ELEMENTS ---
-        const loginBtn = document.getElementById('login-btn'), logoutBtn = document.getElementById('logout-btn');
-        const userProfile = document.getElementById('user-profile'), userAvatar = document.getElementById('user-avatar'), userName = document.getElementById('user-name');
-        const volSlider = document.getElementById('vol-slider'), volIcon = document.getElementById('vol-icon');
+        const loginBtn = document.getElementById('login-btn'), logoutBtn = document.getElementById('logout-btn'), userProfile = document.getElementById('user-profile'), userAvatar = document.getElementById('user-avatar'), userName = document.getElementById('user-name'), volSlider = document.getElementById('vol-slider'), volIcon = document.getElementById('vol-icon');
         
-        // --- AUTENTICACIÓN Y DATOS DE USUARIO ---
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
             if (user) {
                 document.body.classList.remove('logged-out');
                 loginBtn.style.display = 'none'; userProfile.style.display = 'flex'; logoutBtn.style.display = 'inline-block';
                 userAvatar.src = user.photoURL; userName.textContent = user.displayName.split(' ')[0];
-                loadFavoritesFromFirebase(user.uid);
-                loadVolumeFromFirebase(user.uid);
+                loadFavoritesFromFirebase(user.uid); loadVolumeFromFirebase(user.uid);
             } else {
                 document.body.classList.add('logged-out');
                 loginBtn.style.display = 'inline-block'; userProfile.style.display = 'none'; logoutBtn.style.display = 'none';
@@ -278,7 +207,6 @@
                 volSlider.value = 80; updateVolumeUI(80);
             }
         });
-
         loginBtn.addEventListener('click', () => signInWithPopup(auth, provider).catch(e => console.error("Login Error:", e)));
         logoutBtn.addEventListener('click', () => signOut(auth).catch(e => console.error("Logout Error:", e)));
 
@@ -289,122 +217,29 @@
                 if (currentStation) updatePlayerHeart();
             });
         }
-        function toggleFavorite(id) {
-            if (!currentUser) { alert("Por favor, inicia sesión para guardar tus favoritas."); return; }
-            const favRef = ref(db, `users/${currentUser.uid}/favorites/${id}`);
-            if (favorites.includes(id)) remove(favRef); else set(favRef, true);
-        }
+        function toggleFavorite(id) { if (!currentUser) { alert("Inicia sesión para guardar favoritas."); return; } const favRef = ref(db, `users/${currentUser.uid}/favorites/${id}`); if (favorites.includes(id)) remove(favRef); else set(favRef, true); }
         function loadVolumeFromFirebase(uid) {
             onValue(ref(db, `users/${uid}/settings/volume`), (snapshot) => {
-                const savedVolume = snapshot.val();
-                const initialVolume = (savedVolume !== null) ? savedVolume : 80;
-                volSlider.value = initialVolume;
-                lastVolume = initialVolume;
-                muted = initialVolume == 0;
+                const savedVolume = snapshot.val(), initialVolume = (savedVolume !== null) ? savedVolume : 80;
+                volSlider.value = initialVolume; lastVolume = initialVolume; muted = initialVolume == 0;
                 if (currentAudio) currentAudio.volume = initialVolume / 100;
                 updateVolumeUI(initialVolume);
             });
         }
-        function saveVolumeToFirebase(volume) {
-            if (!currentUser) return;
-            set(ref(db, `users/${currentUser.uid}/settings/volume`), parseInt(volume));
-        }
-
-        // --- LÓGICA DE VOLUMEN ---
-        function updateVolumeUI(value) {
-            volIcon.querySelector('i').className = value == 0 ? 'fas fa-volume-mute' : (value < 50 ? 'fas fa-volume-down' : 'fas fa-volume-up');
-            volSlider.style.setProperty('--volume-progress', `${value}%`);
-        }
-
-        volSlider.addEventListener('input', () => {
-            const newVolume = volSlider.value;
-            if (currentAudio) currentAudio.volume = newVolume / 100;
-            lastVolume = newVolume; muted = newVolume == 0;
-            updateVolumeUI(newVolume);
-            saveVolumeToFirebase(newVolume); // Guardar en Firebase
-        });
-
-        volIcon.addEventListener('click', () => {
-            if (muted) {
-                muted = false; volSlider.value = lastVolume > 0 ? lastVolume : 80;
-            } else {
-                muted = true; lastVolume = volSlider.value; volSlider.value = 0;
-            }
-            volSlider.dispatchEvent(new Event('input'));
-        });
-        
-        // --- RENDERIZADO Y LÓGICA DEL REPRODUCTOR ---
-        function renderGrid(stations) {
-            const grid = document.getElementById('stations-grid');
-            document.getElementById('station-count').textContent = `${stations.length} emisora${stations.length !== 1 ? 's' : ''}`;
-            if (!stations.length) { grid.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><h3>Sin resultados</h3><p>Prueba con otro término</p></div>`; return; }
-            grid.innerHTML = stations.map(s => {
-                const fav = favorites.includes(s.id);
-                const active = currentStation && currentStation.id === s.id;
-                return `<div class="station-card ${active ? 'active' : ''}" data-id="${s.id}"><div class="station-art genre-${s.genre[0] || 'default'}"><div class="station-art-bg"><i class="fas fa-music"></i></div><button class="play-overlay"><i class="fas ${active && isPlaying ? 'fa-pause' : 'fa-play'}"></i></button></div><button class="card-fav-btn ${fav ? 'favorited' : ''}" data-id="${s.id}" title="${fav ? 'Quitar' : 'Añadir'}"><i class="fas fa-heart"></i></button><div class="station-card-name">${s.name}</div><div class="station-card-loc">${s.location}</div></div>`;
-            }).join('');
-            grid.querySelectorAll('.station-card').forEach(card => card.addEventListener('click', e => { if (e.target.closest('.card-fav-btn')) return; const station = radioStations.find(s => s.id === parseInt(card.dataset.id)); if (station) handleCardClick(station); }));
-            grid.querySelectorAll('.card-fav-btn').forEach(btn => btn.addEventListener('click', () => toggleFavorite(parseInt(btn.dataset.id))));
-        }
-        function renderFavorites() {
-            const list = document.getElementById('favorites-list');
-            if (!favorites.length) { const msg = currentUser ? 'Añade emisoras a tus favoritas' : 'Inicia sesión para ver<br>tus emisoras favoritas'; list.innerHTML = `<div class="fav-empty"><i class="fas fa-heart"></i><p>${msg}</p></div>`; return; }
-            list.innerHTML = favorites.map(id => {
-                const s = radioStations.find(r => r.id === id); if (!s) return '';
-                const active = currentStation && currentStation.id === s.id;
-                return `<div class="fav-item ${active ? 'playing' : ''}" data-id="${s.id}"><div class="fav-thumb genre-${s.genre[0] || 'default'}"><i class="fas fa-music"></i>${active ? '<div class="playing-overlay"><i class="fas fa-volume-up"></i></div>' : ''}</div><div class="fav-info"><div class="fav-name">${s.name}</div><div class="fav-location">${s.location}</div></div></div>`;
-            }).join('');
-            list.querySelectorAll('.fav-item').forEach(item => item.addEventListener('click', () => { const station = radioStations.find(s => s.id === parseInt(item.dataset.id)); if (station) handleCardClick(station); }));
-        }
+        function saveVolumeToFirebase(volume) { if (!currentUser) return; set(ref(db, `users/${currentUser.uid}/settings/volume`), parseInt(volume)); }
+        function updateVolumeUI(value) { volIcon.querySelector('i').className = value == 0 ? 'fas fa-volume-mute' : (value < 50 ? 'fas fa-volume-down' : 'fas fa-volume-up'); volSlider.style.setProperty('--volume-progress', `${value}%`); }
+        volSlider.addEventListener('input', () => { const newVolume = volSlider.value; if (currentAudio) currentAudio.volume = newVolume / 100; lastVolume = newVolume; muted = newVolume == 0; updateVolumeUI(newVolume); saveVolumeToFirebase(newVolume); });
+        volIcon.addEventListener('click', () => { if (muted) { muted = false; volSlider.value = lastVolume > 0 ? lastVolume : 80; } else { muted = true; lastVolume = volSlider.value; volSlider.value = 0; } volSlider.dispatchEvent(new Event('input')); });
+        function renderGrid(stations) { const grid = document.getElementById('stations-grid'); document.getElementById('station-count').textContent = `${stations.length} emisora${stations.length !== 1 ? 's' : ''}`; if (!stations.length) { grid.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><h3>Sin resultados</h3><p>Prueba con otro término</p></div>`; return; } grid.innerHTML = stations.map(s => { const fav = favorites.includes(s.id), active = currentStation && currentStation.id === s.id; return `<div class="station-card ${active ? 'active' : ''}" data-id="${s.id}"><div class="station-art genre-${s.genre[0] || 'default'}"><div class="station-art-bg"><i class="fas fa-music"></i></div><button class="play-overlay"><i class="fas ${active && isPlaying ? 'fa-pause' : 'fa-play'}"></i></button></div><button class="card-fav-btn ${fav ? 'favorited' : ''}" data-id="${s.id}" title="${fav ? 'Quitar' : 'Añadir'}"><i class="fas fa-heart"></i></button><div class="station-card-name">${s.name}</div><div class="station-card-loc">${s.location}</div></div>`; }).join(''); grid.querySelectorAll('.station-card').forEach(card => card.addEventListener('click', e => { if (e.target.closest('.card-fav-btn')) return; const station = radioStations.find(s => s.id === parseInt(card.dataset.id)); if (station) handleCardClick(station); })); grid.querySelectorAll('.card-fav-btn').forEach(btn => btn.addEventListener('click', () => toggleFavorite(parseInt(btn.dataset.id)))); }
+        function renderFavorites() { const list = document.getElementById('favorites-list'); if (!favorites.length) { const msg = currentUser ? 'Añade emisoras a tus favoritas' : 'Inicia sesión para ver<br>tus emisoras favoritas'; list.innerHTML = `<div class="fav-empty"><i class="fas fa-heart"></i><p>${msg}</p></div>`; return; } list.innerHTML = favorites.map(id => { const s = radioStations.find(r => r.id === id); if (!s) return ''; const active = currentStation && currentStation.id === s.id; return `<div class="fav-item ${active ? 'playing' : ''}" data-id="${s.id}"><div class="fav-thumb genre-${s.genre[0] || 'default'}"><i class="fas fa-music"></i>${active ? '<div class="playing-overlay"><i class="fas fa-volume-up"></i></div>' : ''}</div><div class="fav-info"><div class="fav-name">${s.name}</div><div class="fav-location">${s.location}</div></div></div>`; }).join(''); list.querySelectorAll('.fav-item').forEach(item => item.addEventListener('click', () => { const station = radioStations.find(s => s.id === parseInt(item.dataset.id)); if (station) handleCardClick(station); })); }
         function handleCardClick(station) { (currentStation && currentStation.id === station.id) ? togglePlayPause() : playStation(station); }
-        function playStation(station) {
-            if (currentAudio) currentAudio.pause();
-            currentStation = station; isPlaying = true;
-            document.getElementById('player-art').className = `player-art genre-${station.genre[0] || 'default'}`;
-            document.getElementById('player-art').innerHTML = '<i class="fas fa-music"></i>';
-            document.getElementById('player-name').textContent = station.name; document.getElementById('player-loc').textContent = station.location;
-            document.getElementById('live-badge').style.display = 'inline-flex';
-            updatePlayerHeart(); updatePlayBtn();
-            currentAudio = new Audio(station.streamUrl);
-            currentAudio.volume = volSlider.value / 100;
-            currentAudio.play().catch(() => { isPlaying = false; updatePlayBtn(); });
-            currentAudio.addEventListener('error', () => { isPlaying = false; updatePlayBtn(); });
-            renderGrid(filteredStations); renderFavorites();
-        }
-        function togglePlayPause() {
-            if (!currentStation) return;
-            if (!currentAudio) { playStation(currentStation); return; }
-            isPlaying ? currentAudio.pause() : currentAudio.play().catch(()=>{});
-            isPlaying = !isPlaying;
-            updatePlayBtn(); renderGrid(filteredStations);
-        }
+        function playStation(station) { if (currentAudio) currentAudio.pause(); currentStation = station; isPlaying = true; document.getElementById('player-art').className = `player-art genre-${station.genre[0] || 'default'}`; document.getElementById('player-art').innerHTML = '<i class="fas fa-music"></i>'; document.getElementById('player-name').textContent = station.name; document.getElementById('player-loc').textContent = station.location; document.getElementById('live-badge').style.display = 'inline-flex'; updatePlayerHeart(); updatePlayBtn(); currentAudio = new Audio(station.streamUrl); currentAudio.volume = volSlider.value / 100; currentAudio.play().catch(() => { isPlaying = false; updatePlayBtn(); }); currentAudio.addEventListener('error', () => { isPlaying = false; updatePlayBtn(); }); renderGrid(filteredStations); renderFavorites(); }
+        function togglePlayPause() { if (!currentStation) return; if (!currentAudio) { playStation(currentStation); return; } isPlaying ? currentAudio.pause() : currentAudio.play().catch(()=>{}); isPlaying = !isPlaying; updatePlayBtn(); renderGrid(filteredStations); }
         function updatePlayBtn() { document.getElementById('play-btn').innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>'; }
-        function updatePlayerHeart() {
-            const btn = document.getElementById('player-heart');
-            if (!currentStation) { btn.classList.remove('favorited'); return; };
-            btn.classList.toggle('favorited', favorites.includes(currentStation.id));
-        }
-        function playAdjacent(dir) {
-            if (!currentStation) return;
-            const currentIndex = filteredStations.findIndex(s => s.id === currentStation.id);
-            if (currentIndex === -1) return;
-            const nextIndex = (currentIndex + dir + filteredStations.length) % filteredStations.length;
-            playStation(filteredStations[nextIndex]);
-        }
-        function applyFilters() {
-            const search = document.getElementById('search-input').value.toLowerCase().trim();
-            filteredStations = radioStations.filter(s => s.name.toLowerCase().includes(search) || s.location.toLowerCase().includes(search));
-            renderGrid(filteredStations);
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            renderGrid(filteredStations); updateVolumeUI(volSlider.value);
-            document.getElementById('search-input').addEventListener('input', applyFilters);
-            document.getElementById('play-btn').addEventListener('click', togglePlayPause);
-            document.getElementById('prev-btn').addEventListener('click', () => playAdjacent(-1));
-            document.getElementById('next-btn').addEventListener('click', () => playAdjacent(1));
-            document.getElementById('player-heart').addEventListener('click', () => { if(currentStation) toggleFavorite(currentStation.id); });
-        });
+        function updatePlayerHeart() { const btn = document.getElementById('player-heart'); if (!currentStation) { btn.classList.remove('favorited'); return; }; btn.classList.toggle('favorited', favorites.includes(currentStation.id)); }
+        function playAdjacent(dir) { if (!currentStation) return; const currentIndex = filteredStations.findIndex(s => s.id === currentStation.id); if (currentIndex === -1) return; const nextIndex = (currentIndex + dir + filteredStations.length) % filteredStations.length; playStation(filteredStations[nextIndex]); }
+        function applyFilters() { const search = document.getElementById('search-input').value.toLowerCase().trim(); filteredStations = radioStations.filter(s => s.name.toLowerCase().includes(search) || s.location.toLowerCase().includes(search)); renderGrid(filteredStations); }
+        document.addEventListener('DOMContentLoaded', () => { renderGrid(filteredStations); updateVolumeUI(volSlider.value); document.getElementById('search-input').addEventListener('input', applyFilters); document.getElementById('play-btn').addEventListener('click', togglePlayPause); document.getElementById('prev-btn').addEventListener('click', () => playAdjacent(-1)); document.getElementById('next-btn').addEventListener('click', () => playAdjacent(1)); document.getElementById('player-heart').addEventListener('click', () => { if(currentStation) toggleFavorite(currentStation.id); }); });
     </script>
 </body>
 </html>
