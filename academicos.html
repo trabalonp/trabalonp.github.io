@@ -1,1312 +1,2338 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archivos Académicos</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Contenedor principal de tu aplicación para encapsular estilos */
-        #academic-app {
-            /* Estilos de tu aplicación que deben ser independientes de Blogger */
-            box-sizing: border-box; /* Asegura que padding y border se incluyan en el tamaño */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #212529; /* Color de texto general para tu app */
-            
-            /* Ajustes para el contenedor principal */
-            width: 100%;
-            max-width: 1400px; /* Limita el ancho máximo para tu contenido */
-            margin: 20px auto; /* Centra el contenido y da un pequeño margen superior/inferior */
-            border-radius: 16px;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%); /* Fondo general de tu aplicación */
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archivos Académicos - ONELIFE</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<style>
+:root {
+--primary: #00f7ff;
+--secondary: #7700ff;
+--accent: #ff00c8;
+--success: #00ff9d;
+--dark: #0a0a18;
+--light: #f0f0f0;
+--gray: #a0a0c0;
+--transition: all 0.3s ease;
+--radius: 12px;
+--shadow: 0 0 20px rgba(0,247,255,0.3);
+--day-primary: #5d8aa8;
+--day-secondary: #8a83c2;
+--day-accent: #b19cd9;
+--day-bg: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+--day-text: #495057;
+--day-card: rgba(255,255,255,0.95);
+--day-border: rgba(93,138,168,0.2);
+--day-glow: 0 0 10px rgba(93,138,168,0.2);
+--day-shadow: 0 0 15px rgba(0,0,0,0.05);
+}
 
-        /* Reset básico limitado al scope de #academic-app */
-        #academic-app * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
 
-        /* Variables CSS ahora dentro del scope de #academic-app */
-        #academic-app { /* Aplica variables al propio contenedor o a sus descendientes */
-            --primary: #4361ee;
-            --secondary: #3f37c9;
-            --accent: #4895ef;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --success: #4cc9f0;
-            --card-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-            --transition: all 0.3s ease;
-        }
+body {
+font-family: 'Segoe UI', Tahoma, sans-serif;
+background: linear-gradient(135deg, #0a0a18 0%, #12122e 100%);
+color: #f0f0f0;
+display: flex;
+flex-direction: column;
+min-height: 100vh;
+overflow-x: hidden;
+transition: var(--transition);
+}
 
-        /* Header Styles */
-        #academic-app .app-header {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            color: white;
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            position: relative;
-            z-index: 10;
-        }
+body.light-mode {
+background: var(--day-bg);
+color: var(--day-text);
+}
 
-        #academic-app .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 1.4rem;
-            font-weight: 700;
-        }
+.bg-grid {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background:
+linear-gradient(rgba(0,247,255,0.05) 1px, transparent 1px),
+linear-gradient(90deg, rgba(0,247,255,0.05) 1px, transparent 1px);
+background-size: 40px 40px;
+z-index: -1;
+}
 
-        #academic-app .logo i {
-            font-size: 1.8rem;
-        }
+.light-mode .bg-grid {
+background:
+linear-gradient(rgba(93,138,168,0.03) 1px, transparent 1px),
+linear-gradient(90deg, rgba(93,138,168,0.03) 1px, transparent 1px);
+background-size: 40px 40px;
+}
 
-        #academic-app .nav-controls {
-            display: flex;
-            gap: 15px;
-        }
+.floating-shapes {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: -1;
+overflow: hidden;
+}
 
-        #academic-app .nav-btn {
-            background: rgba(255, 255, 255, 0.15);
-            border: none;
-            color: white;
-            padding: 10px 16px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: var(--transition);
-            backdrop-filter: blur(4px);
-        }
+.shape {
+position: absolute;
+border-radius: 50%;
+opacity: 0.3;
+filter: blur(60px);
+}
 
-        #academic-app .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-2px);
-        }
+.shape-1 {
+width: 300px;
+height: 300px;
+background: var(--primary);
+top: -100px;
+left: -100px;
+animation: float 15s infinite ease-in-out;
+}
 
-        /* Ajuste para el texto dentro de los botones de navegación */
-        #academic-app .nav-btn span {
-            white-space: nowrap; /* Evita el salto de línea */
-            overflow: hidden;     /* Oculta el texto que se desborda */
-            text-overflow: ellipsis; /* Añade puntos suspensivos */
-            /* Opcional: reducir font-size ligeramente si es muy largo, clamp es más avanzado */
-            /* font-size: clamp(0.9rem, 1.8vw, 1.1rem); */
-        }
+.shape-2 {
+width: 500px;
+height: 500px;
+background: var(--secondary);
+bottom: -200px;
+right: -200px;
+animation: float 18s infinite ease-in-out reverse;
+}
 
+.shape-3 {
+width: 200px;
+height: 200px;
+background: var(--accent);
+top: 50%;
+left: 70%;
+animation: float 12s infinite ease-in-out 2s;
+}
 
-        /* Main Content Styles */
-        #academic-app .content {
-            padding: 30px;
-            transition: var(--transition);
-            background-color: white; /* Asegura el fondo blanco para el contenido principal */
-        }
+.light-mode .shape-1 {
+background: var(--day-primary);
+opacity: 0.1;
+}
 
-        #academic-app h1 {
-            color: var(--secondary);
-            margin-bottom: 30px;
-            text-align: center;
-            font-size: 2.2rem;
-            position: relative;
-            padding-bottom: 15px;
-        }
+.light-mode .shape-2 {
+background: var(--day-secondary);
+opacity: 0.08;
+}
 
-        #academic-app h1:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 4px;
-            background: linear-gradient(to right, var(--accent), var(--success));
-            border-radius: 2px;
-        }
+.light-mode .shape-3 {
+background: var(--day-accent);
+opacity: 0.06;
+}
 
-        /* Search Styles */
-        #academic-app .search-container {
-            max-width: 700px;
-            margin: 0 auto 40px;
-            position: relative;
-        }
+@keyframes float {
+0%, 100% { transform: translate(0, 0) rotate(0deg); }
+25% { transform: translate(-30px, 40px) rotate(5deg); }
+50% { transform: translate(20px, -30px) rotate(-5deg); }
+75% { transform: translate(30px, 30px) rotate(5deg); }
+}
 
-        #academic-app .search-box {
-            display: flex;
-            gap: 10px;
-        }
+.scan-lines {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(transparent 50%, rgba(0,0,0,0.1) 50%);
+background-size: 100% 4px;
+z-index: 0;
+pointer-events: none;
+opacity: 0.2;
+}
 
-        #academic-app .search-box input {
-            flex: 1;
-            padding: 16px 24px;
-            border: 2px solid #e0e0e0;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            transition: var(--transition);
-        }
+.light-mode .scan-lines {
+opacity: 0.05;
+}
 
-        #academic-app .search-box input:focus {
-            border-color: var(--accent);
-            outline: none;
-            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.15);
-        }
+/* HEADER */
+header {
+background: rgba(10,10,24,0.85);
+backdrop-filter: blur(12px);
+border-bottom: 1px solid rgba(0,247,255,0.2);
+position: sticky;
+top: 0;
+z-index: 1000;
+padding: 1rem 0;
+overflow: hidden;
+transition: var(--transition);
+}
 
-        #academic-app .search-box button {
-            background: linear-gradient(to right, var(--primary), var(--accent));
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 0 28px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: var(--transition);
-            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
-        }
+.light-mode header {
+background: rgba(248,249,250,0.92);
+border-bottom: 1px solid var(--day-border);
+}
 
-        #academic-app .search-box button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(67, 97, 238, 0.4);
-        }
+.neon-cascade {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+pointer-events: none;
+z-index: -1;
+}
 
-        /* Subjects Grid */
-        #academic-app .subjects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
+.cascade-particle {
+position: absolute;
+width: 2px;
+height: 15px;
+background: var(--primary);
+box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+opacity: 0;
+border-radius: 2px;
+}
 
-        #academic-app .subject-card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: var(--card-shadow);
-            transition: var(--transition);
-            cursor: pointer;
-            position: relative;
-            border: 1px solid #f0f0f0;
-        }
+.header-container {
+max-width: 1200px;
+margin: 0 auto;
+padding: 0 2rem;
+display: flex;
+justify-content: space-between;
+align-items: center;
+position: relative;
+}
 
-        #academic-app .subject-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
-        }
+.logo {
+font-size: 1.8rem;
+font-weight: bold;
+color: var(--primary);
+text-decoration: none;
+font-family: 'Courier New', monospace;
+letter-spacing: 1px;
+text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
+animation: flicker 5s infinite alternate;
+transition: var(--transition);
+}
 
-        #academic-app .subject-icon {
-            height: 160px;
-            background: linear-gradient(135deg, var(--accent), var(--success));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 3.5rem;
-        }
+.light-mode .logo {
+color: var(--day-primary);
+text-shadow: 0 0 5px rgba(93,138,168,0.3);
+animation: none;
+}
 
-        #academic-app .subject-info {
-            padding: 20px;
-        }
+.logo:hover {
+color: #fff;
+animation: none;
+text-shadow: 0 0 15px var(--primary), 0 0 25px var(--primary), 0 0 40px var(--primary);
+}
 
-        /* Ajuste para el título de la asignatura */
-        #academic-app .subject-info h3 {
-            font-size: clamp(1.1rem, 2.5vw, 1.4rem); /* Ajusta el tamaño de la fuente */
-            margin-bottom: 10px;
-            color: var(--secondary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+@keyframes flicker {
+0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+opacity: 1;
+text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
+}
+20%, 24%, 55% {
+opacity: 0.8;
+text-shadow: 0 0 7px var(--primary), 0 0 15px var(--primary), 0 0 25px var(--secondary);
+}
+}
 
-        #academic-app .subject-info p {
-            color: #666;
-            font-size: 0.95rem;
-            margin-bottom: 15px;
-            min-height: 60px; /* Asegura un alto mínimo para la descripción */
-        }
+.header-right {
+display: flex;
+align-items: center;
+gap: 1.5rem;
+}
 
-        #academic-app .file-count {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--primary);
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
+nav ul {
+list-style: none;
+display: flex;
+gap: 2rem;
+align-items: center;
+}
 
-        /* Files List */
-        #academic-app .files-container {
-            display: none; /* Se mostrará con JavaScript */
-            animation: fadeIn 0.4s ease;
-        }
-        /* Ajuste de margen para el buscador de archivos */
-        #academic-app .files-container .search-container {
-            margin-bottom: 30px; /* Un poco menos de margen que el principal */
-            margin-top: 20px; /* Margen superior para separarlo del título */
-        }
+nav ul li a {
+text-decoration: none;
+color: var(--gray);
+font-weight: 600;
+transition: var(--transition);
+position: relative;
+padding: 0.5rem 0;
+}
 
-        #academic-app .files-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-        }
-        /* Nueva cuadrícula para carpetas */
-        #academic-app .folders-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-        /* Estilos para las tarjetas de carpeta */
-        #academic-app .folder-card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: var(--card-shadow);
-            transition: var(--transition);
-            cursor: pointer;
-            position: relative;
-            border: 1px solid #f0f0f0;
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            min-height: 180px;
-        }
-        #academic-app .folder-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
-        }
-        #academic-app .folder-card i {
-            font-size: 3.5rem;
-            color: var(--accent);
-            margin-bottom: 15px;
-        }
-        /* Ajuste para el título de la carpeta */
-        #academic-app .folder-card h3 {
-            font-size: clamp(1rem, 2.2vw, 1.3rem); /* Ajusta el tamaño de la fuente */
-            color: var(--secondary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            width: 100%; /* Asegura que ocupe todo el ancho disponible para el ellipsis */
-        }
+.light-mode nav ul li a {
+color: #6c757d;
+}
 
+nav ul li a:hover {
+color: var(--primary);
+}
 
-        #academic-app .file-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: var(--card-shadow);
-            display: flex;
-            flex-direction: column;
-            transition: var(--transition);
-            border-left: 4px solid var(--accent);
-        }
+.light-mode nav ul li a:hover {
+color: var(--day-primary);
+}
 
-        #academic-app .file-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
+nav ul li a::after {
+content: '';
+position: absolute;
+bottom: 0;
+left: 0;
+width: 0;
+height: 2px;
+background: var(--primary);
+transition: var(--transition);
+}
 
-        #academic-app .file-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
+nav ul li a:hover::after {
+width: 100%;
+}
 
-        /* Ajuste para el título del archivo */
-        #academic-app .file-title {
-            font-size: clamp(1rem, 2vw, 1.2rem); /* Ajusta el tamaño de la fuente */
-            font-weight: 600;
-            color: var(--dark);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            flex: 1; /* Permite que ocupe el espacio disponible y el ellipsis funcione */
-            padding-right: 10px; /* Espacio antes de los botones */
-        }
+.theme-toggle {
+background: transparent;
+border: none;
+color: var(--gray);
+cursor: pointer;
+font-size: 1.2rem;
+width: 40px;
+height: 40px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: var(--transition);
+}
 
-        #academic-app .file-actions {
-            display: flex;
-            gap: 10px;
-        }
+.theme-toggle:hover {
+color: var(--primary);
+transform: rotate(30deg);
+}
 
-        #academic-app .view-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
+.light-mode .theme-toggle:hover {
+color: var(--day-primary);
+}
 
-        #academic-app .view-btn:hover {
-            background: var(--secondary);
-            transform: scale(1.1);
-        }
+.menu-toggle {
+display: none;
+color: var(--primary);
+font-size: 1.5rem;
+cursor: pointer;
+transition: var(--transition);
+}
 
-        /* Estilo para el botón deshabilitado */
-        #academic-app .view-btn.disabled-btn {
-            background: #ccc; /* Color gris */
-            cursor: not-allowed;
-            opacity: 0.6;
-            transform: none; /* Sin transformación al pasar el ratón */
-        }
+.light-mode .menu-toggle {
+color: var(--day-primary);
+}
 
-        #academic-app .view-btn.disabled-btn:hover {
-            background: #ccc; /* Mantiene el color gris al pasar el ratón */
-        }
+/* Auth */
+.auth-area {
+display: flex;
+align-items: center;
+gap: 0.75rem;
+visibility: hidden;
+opacity: 0;
+transition: opacity 0.15s ease;
+}
 
+.auth-area.ready {
+visibility: visible;
+opacity: 1;
+}
 
-        #academic-app .file-description {
-            color: #555;
-            font-size: 0.95rem;
-            margin-bottom: 20px;
-            flex-grow: 1; /* Permite que la descripción ocupe el espacio restante */
-        }
+#loginBtn {
+display: inline-flex;
+align-items: center;
+gap: 0.5rem;
+padding: 0.45rem 1.1rem;
+border-radius: 50px;
+background: rgba(0,247,255,0.1);
+color: var(--primary);
+border: 1px solid rgba(0,247,255,0.35);
+font-size: 0.87rem;
+font-weight: 600;
+cursor: pointer;
+transition: var(--transition);
+white-space: nowrap;
+font-family: 'Segoe UI', Tahoma, sans-serif;
+}
 
-        #academic-app .file-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #777;
-            font-size: 0.85rem;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-        }
+#loginBtn:hover {
+background: rgba(0,247,255,0.22);
+transform: translateY(-2px);
+box-shadow: 0 0 18px rgba(0,247,255,0.35);
+}
 
-        /* PDF Viewer */
-        #academic-app .pdf-viewer-container {
-            position: fixed; /* Ocupa toda la pantalla */
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: white;
-            z-index: 9999; /* Asegura que esté por encima de todo */
-            display: none; /* Oculto por defecto */
-            flex-direction: column;
-        }
+.light-mode #loginBtn {
+background: rgba(93,138,168,0.1);
+color: var(--day-primary);
+border-color: var(--day-border);
+}
 
-        #academic-app .pdf-header {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            color: white;
-            padding: 18px 30px;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            position: relative;
-            z-index: 10;
-        }
+.light-mode #loginBtn:hover {
+background: rgba(93,138,168,0.2);
+}
 
-        #academic-app .back-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.8rem;
-            cursor: pointer;
-            padding: 8px 16px 8px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+#userAvatar {
+width: 36px;
+height: 36px;
+border-radius: 50%;
+border: 2px solid var(--primary);
+object-fit: cover;
+cursor: pointer;
+transition: var(--transition);
+display: none;
+box-shadow: 0 0 10px rgba(0,247,255,0.4);
+}
 
-        #academic-app .back-btn span {
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
+.light-mode #userAvatar {
+border-color: var(--day-primary);
+}
 
-        /* Ajuste para el título del PDF en el visor */
-        #academic-app .pdf-title {
-            flex-grow: 1;
-            text-align: center;
-            font-size: clamp(1rem, 2.5vw, 1.3rem); /* Ajusta el tamaño de la fuente */
-            font-weight: 600;
-            padding: 0 20px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+#userAvatar:hover {
+transform: scale(1.1);
+box-shadow: 0 0 18px rgba(0,247,255,0.6);
+}
 
-        #academic-app .pdf-frame-container {
-            flex: 1; /* Hace que el iframe ocupe todo el espacio restante */
-            position: relative;
-        }
+/* OVERLAY */
+#overlay {
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.55);
+z-index: 1998;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.3s;
+backdrop-filter: blur(3px);
+}
 
-        #academic-app .pdf-viewer {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+#overlay.open {
+opacity: 1;
+pointer-events: all;
+}
 
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+/* SIDEBAR */
+#sidebar {
+position: fixed;
+top: 0;
+right: -360px;
+width: 320px;
+max-width: 90vw;
+height: 100%;
+background: rgba(10,10,30,0.97);
+border-left: 1px solid rgba(0,247,255,0.25);
+backdrop-filter: blur(18px);
+z-index: 1999;
+transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+display: flex;
+flex-direction: column;
+overflow: hidden;
+}
 
-        /* Responsive Design */
-        @media (max-width: 992px) {
-            #academic-app .subjects-grid {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            }
-            
-            #academic-app .files-grid {
-                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            }
-            #academic-app .folders-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            }
-        }
+.light-mode #sidebar {
+background: rgba(248,249,250,0.98);
+border-left-color: var(--day-border);
+}
 
-        @media (max-width: 768px) {
-            #academic-app .app-header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-                padding: 15px;
-            }
-            
-            #academic-app .search-box {
-                flex-direction: column;
-            }
-            
-            #academic-app .search-box button {
-                padding: 14px;
-                justify-content: center;
-            }
-            
-            #academic-app .subjects-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            #academic-app h1 {
-                font-size: 1.8rem;
-            }
-            #academic-app .folder-card {
-                min-height: 150px;
-            }
-        }
+#sidebar.open {
+right: 0;
+}
 
-        @media (max-width: 480px) {
-            #academic-app .content {
-                padding: 20px 15px;
-            }
-            
-            #academic-app .files-grid {
-                grid-template-columns: 1fr;
-            }
-            #academic-app .folders-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            #academic-app .pdf-title {
-                font-size: 1rem;
-                padding: 0 10px;
-            }
-            
-            #academic-app .back-btn span {
-                display: none; /* Oculta el texto "Volver" en pantallas muy pequeñas */
-            }
-        }
-    </style>
+.sidebar-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 1.2rem 1.4rem;
+border-bottom: 1px solid rgba(0,247,255,0.15);
+flex-shrink: 0;
+}
+
+.light-mode .sidebar-header {
+border-bottom-color: var(--day-border);
+}
+
+.sidebar-header h3 {
+font-family: 'Courier New', monospace;
+font-size: 1rem;
+color: var(--primary);
+letter-spacing: 1px;
+}
+
+.light-mode .sidebar-header h3 {
+color: var(--day-primary);
+}
+
+.sidebar-close {
+background: none;
+border: none;
+color: var(--gray);
+font-size: 1.1rem;
+cursor: pointer;
+width: 32px;
+height: 32px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: var(--transition);
+}
+
+.sidebar-close:hover {
+color: var(--primary);
+background: rgba(0,247,255,0.1);
+}
+
+.sidebar-body {
+flex: 1;
+overflow-y: auto;
+padding: 1.5rem 1.4rem;
+display: flex;
+flex-direction: column;
+gap: 1.4rem;
+}
+
+.sidebar-body::-webkit-scrollbar {
+width: 4px;
+}
+
+.sidebar-body::-webkit-scrollbar-track {
+background: transparent;
+}
+
+.sidebar-body::-webkit-scrollbar-thumb {
+background: rgba(0,247,255,0.2);
+border-radius: 2px;
+}
+
+.profile-block {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 0.85rem;
+padding: 1.5rem 1.5rem 1.2rem;
+background: rgba(0,247,255,0.04);
+border: 1px solid rgba(0,247,255,0.12);
+border-radius: var(--radius);
+}
+
+.light-mode .profile-block {
+background: rgba(93,138,168,0.05);
+border-color: var(--day-border);
+}
+
+.avatar-wrapper {
+position: relative;
+width: 82px;
+height: 82px;
+flex-shrink: 0;
+}
+
+#sidebarAvatar {
+width: 82px;
+height: 82px;
+border-radius: 50%;
+border: 3px solid var(--primary);
+object-fit: cover;
+box-shadow: 0 0 20px rgba(0,247,255,0.4);
+background: rgba(0,247,255,0.05);
+display: block;
+}
+
+.light-mode #sidebarAvatar {
+border-color: var(--day-primary);
+}
+
+#editAvatarBtn {
+position: absolute;
+bottom: 0;
+right: 0;
+width: 26px;
+height: 26px;
+border-radius: 50%;
+background: var(--primary);
+border: 2px solid rgba(10,10,30,0.9);
+color: #000;
+font-size: 0.65rem;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: var(--transition);
+box-shadow: 0 0 8px rgba(0,247,255,0.5);
+}
+
+.light-mode #editAvatarBtn {
+background: var(--day-primary);
+border-color: rgba(248,249,250,0.9);
+color: #fff;
+}
+
+#editAvatarBtn:hover {
+transform: scale(1.15);
+box-shadow: 0 0 14px rgba(0,247,255,0.7);
+}
+
+.profile-name {
+font-size: 1.05rem;
+font-weight: 700;
+text-align: center;
+}
+
+.profile-email {
+font-size: 0.78rem;
+color: var(--gray);
+text-align: center;
+word-break: break-all;
+}
+
+#avatarBar {
+display: none;
+align-items: center;
+gap: 0.5rem;
+padding: 0.7rem 0.9rem;
+background: rgba(10,10,30,0.97);
+border: 1px solid rgba(0,247,255,0.35);
+border-radius: 50px;
+box-shadow: 0 0 24px rgba(0,247,255,0.25);
+animation: slideUp 0.25s ease-out;
+width: 100%;
+}
+
+.light-mode #avatarBar {
+background: rgba(248,249,250,0.98);
+border-color: var(--day-border);
+box-shadow: var(--day-shadow);
+}
+
+#avatarBar.visible {
+display: flex;
+}
+
+@keyframes slideUp {
+from {
+opacity: 0;
+transform: translateY(8px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+#avatarBar i {
+color: var(--primary);
+font-size: 0.85rem;
+flex-shrink: 0;
+}
+
+.light-mode #avatarBar i {
+color: var(--day-primary);
+}
+
+#avatarUrlInput {
+flex: 1;
+background: transparent;
+border: none;
+outline: none;
+color: #fff;
+font-size: 0.83rem;
+font-family: 'Segoe UI', Tahoma, sans-serif;
+min-width: 0;
+}
+
+.light-mode #avatarUrlInput {
+color: var(--day-text);
+}
+
+#avatarUrlInput::placeholder {
+color: #555;
+}
+
+.light-mode #avatarUrlInput::placeholder {
+color: #aaa;
+}
+
+.bar-btn {
+width: 28px;
+height: 28px;
+border-radius: 50%;
+border: none;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 0.75rem;
+flex-shrink: 0;
+transition: var(--transition);
+}
+
+#applyAvatarBtn {
+background: var(--primary);
+color: #000;
+}
+
+#applyAvatarBtn:hover {
+background: #00d4dc;
+transform: scale(1.1);
+}
+
+#cancelAvatarBtn {
+background: rgba(255,60,60,0.15);
+color: #ff6b6b;
+border: 1px solid rgba(255,60,60,0.3);
+}
+
+#cancelAvatarBtn:hover {
+background: rgba(255,60,60,0.3);
+transform: scale(1.1);
+}
+
+.info-card {
+background: rgba(0,247,255,0.04);
+border: 1px solid rgba(0,247,255,0.1);
+border-radius: var(--radius);
+padding: 1rem 1.1rem;
+}
+
+.light-mode .info-card {
+background: rgba(93,138,168,0.05);
+border-color: var(--day-border);
+}
+
+.info-card-title {
+font-size: 0.72rem;
+text-transform: uppercase;
+letter-spacing: 0.08em;
+color: var(--gray);
+margin-bottom: 0.65rem;
+font-weight: 600;
+}
+
+.info-row {
+display: flex;
+align-items: center;
+gap: 0.6rem;
+font-size: 0.85rem;
+padding: 0.3rem 0;
+color: var(--light);
+}
+
+.light-mode .info-row {
+color: var(--day-text);
+}
+
+.info-row i {
+color: var(--primary);
+width: 16px;
+text-align: center;
+font-size: 0.9rem;
+}
+
+.light-mode .info-row i {
+color: var(--day-primary);
+}
+
+.sidebar-footer {
+padding: 1rem 1.4rem 1.4rem;
+border-top: 1px solid rgba(0,247,255,0.12);
+flex-shrink: 0;
+}
+
+.light-mode .sidebar-footer {
+border-top-color: var(--day-border);
+}
+
+#logoutBtn {
+width: 100%;
+padding: 0.75rem;
+border-radius: var(--radius);
+background: rgba(255,60,60,0.1);
+color: #ff6b6b;
+border: 1px solid rgba(255,60,60,0.3);
+font-size: 0.9rem;
+font-weight: 700;
+cursor: pointer;
+transition: var(--transition);
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 0.6rem;
+font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+#logoutBtn:hover {
+background: rgba(255,60,60,0.22);
+box-shadow: 0 0 15px rgba(255,60,60,0.3);
+transform: translateY(-1px);
+}
+
+/* CONTENIDO PRINCIPAL */
+.content {
+max-width: 1200px;
+margin: 2rem auto;
+padding: 0 2rem;
+width: 100%;
+flex: 1;
+}
+
+h1 {
+color: var(--primary);
+margin-bottom: 2rem;
+text-align: center;
+font-size: 2.2rem;
+position: relative;
+padding-bottom: 15px;
+font-family: 'Courier New', monospace;
+}
+
+.light-mode h1 {
+color: var(--day-primary);
+}
+
+h1:after {
+content: '';
+position: absolute;
+bottom: 0;
+left: 50%;
+transform: translateX(-50%);
+width: 100px;
+height: 4px;
+background: linear-gradient(to right, var(--primary), var(--secondary));
+border-radius: 2px;
+}
+
+.light-mode h1:after {
+background: linear-gradient(to right, var(--day-primary), var(--day-secondary));
+}
+
+/* Búsqueda */
+.search-container {
+max-width: 700px;
+margin: 0 auto 2rem;
+position: relative;
+}
+
+.search-box {
+display: flex;
+gap: 10px;
+}
+
+.search-box input {
+flex: 1;
+padding: 16px 24px;
+border: 2px solid rgba(0,247,255,0.3);
+border-radius: 50px;
+font-size: 1rem;
+background: rgba(10,10,24,0.4);
+color: var(--light);
+transition: var(--transition);
+}
+
+.light-mode .search-box input {
+background: rgba(255,255,255,0.8);
+border-color: var(--day-border);
+color: var(--day-text);
+}
+
+.search-box input:focus {
+border-color: var(--primary);
+outline: none;
+box-shadow: 0 4px 15px rgba(0,247,255,0.2);
+}
+
+.light-mode .search-box input:focus {
+border-color: var(--day-primary);
+box-shadow: var(--day-shadow);
+}
+
+.search-box button {
+background: linear-gradient(to right, var(--primary), var(--secondary));
+color: #fff;
+border: none;
+border-radius: 50px;
+padding: 0 28px;
+font-size: 1rem;
+font-weight: 600;
+cursor: pointer;
+display: flex;
+align-items: center;
+gap: 8px;
+transition: var(--transition);
+box-shadow: 0 4px 15px rgba(0,247,255,0.3);
+}
+
+.light-mode .search-box button {
+background: linear-gradient(to right, var(--day-primary), var(--day-secondary));
+}
+
+.search-box button:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 18px rgba(0,247,255,0.4);
+}
+
+/* Cuadrícula de asignaturas */
+.subjects-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+gap: 25px;
+margin-bottom: 2rem;
+}
+
+.subject-card {
+background: rgba(10,10,24,0.7);
+backdrop-filter: blur(10px);
+border-radius: var(--radius);
+overflow: hidden;
+box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+transition: var(--transition);
+cursor: pointer;
+position: relative;
+border: 1px solid rgba(0,247,255,0.2);
+}
+
+.light-mode .subject-card {
+background: var(--day-card);
+border-color: var(--day-border);
+box-shadow: var(--day-shadow);
+}
+
+.subject-card:hover {
+transform: translateY(-8px);
+box-shadow: 0 12px 30px rgba(0,247,255,0.4);
+border-color: var(--primary);
+}
+
+.light-mode .subject-card:hover {
+box-shadow: 0 12px 25px rgba(93,138,168,0.3);
+border-color: var(--day-primary);
+}
+
+.subject-icon {
+height: 140px;
+background: linear-gradient(135deg, var(--primary), var(--secondary));
+display: flex;
+align-items: center;
+justify-content: center;
+color: white;
+font-size: 3rem;
+}
+
+.light-mode .subject-icon {
+background: linear-gradient(135deg, var(--day-primary), var(--day-secondary));
+}
+
+.subject-info {
+padding: 20px;
+}
+
+.subject-info h3 {
+font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+margin-bottom: 10px;
+color: var(--light);
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+.light-mode .subject-info h3 {
+color: var(--day-text);
+}
+
+.subject-info p {
+color: var(--gray);
+font-size: 0.95rem;
+margin-bottom: 15px;
+min-height: 60px;
+}
+
+.light-mode .subject-info p {
+color: #6c757d;
+}
+
+.file-count {
+display: flex;
+align-items: center;
+gap: 8px;
+color: var(--primary);
+font-weight: 600;
+font-size: 0.9rem;
+}
+
+.light-mode .file-count {
+color: var(--day-primary);
+}
+
+/* Navegación */
+.nav-btn {
+background: rgba(0,247,255,0.15);
+border: none;
+color: var(--primary);
+padding: 10px 16px;
+border-radius: 50px;
+cursor: pointer;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 8px;
+transition: var(--transition);
+backdrop-filter: blur(4px);
+}
+
+.light-mode .nav-btn {
+background: rgba(93,138,168,0.15);
+color: var(--day-primary);
+}
+
+.nav-btn:hover {
+background: rgba(0,247,255,0.25);
+transform: translateY(-2px);
+}
+
+.light-mode .nav-btn:hover {
+background: rgba(93,138,168,0.25);
+}
+
+/* Cuadrícula de carpetas */
+.folders-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+gap: 25px;
+margin-bottom: 2rem;
+}
+
+.folder-card {
+background: rgba(10,10,24,0.7);
+backdrop-filter: blur(10px);
+border-radius: var(--radius);
+overflow: hidden;
+box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+transition: var(--transition);
+cursor: pointer;
+position: relative;
+border: 1px solid rgba(0,247,255,0.2);
+padding: 25px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+text-align: center;
+min-height: 180px;
+}
+
+.light-mode .folder-card {
+background: var(--day-card);
+border-color: var(--day-border);
+box-shadow: var(--day-shadow);
+}
+
+.folder-card:hover {
+transform: translateY(-8px);
+box-shadow: 0 12px 30px rgba(0,247,255,0.4);
+border-color: var(--primary);
+}
+
+.light-mode .folder-card:hover {
+box-shadow: 0 12px 25px rgba(93,138,168,0.3);
+border-color: var(--day-primary);
+}
+
+.folder-card i {
+font-size: 3.5rem;
+color: var(--primary);
+margin-bottom: 15px;
+}
+
+.light-mode .folder-card i {
+color: var(--day-primary);
+}
+
+.folder-card h3 {
+font-size: clamp(1rem, 2.2vw, 1.3rem);
+color: var(--light);
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+width: 100%;
+}
+
+.light-mode .folder-card h3 {
+color: var(--day-text);
+}
+
+/* Cuadrícula de archivos */
+.files-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+gap: 20px;
+}
+
+.file-card {
+background: rgba(10,10,24,0.7);
+backdrop-filter: blur(10px);
+border-radius: var(--radius);
+padding: 20px;
+box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+display: flex;
+flex-direction: column;
+transition: var(--transition);
+border-left: 4px solid var(--primary);
+border: 1px solid rgba(0,247,255,0.2);
+}
+
+.light-mode .file-card {
+background: var(--day-card);
+border-color: var(--day-border);
+border-left: 4px solid var(--day-primary);
+box-shadow: var(--day-shadow);
+}
+
+.file-card:hover {
+transform: translateY(-5px);
+box-shadow: 0 12px 30px rgba(0,247,255,0.4);
+}
+
+.light-mode .file-card:hover {
+box-shadow: 0 12px 25px rgba(93,138,168,0.3);
+}
+
+.file-header {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+margin-bottom: 15px;
+}
+
+.file-title {
+font-size: clamp(1rem, 2vw, 1.2rem);
+font-weight: 600;
+color: var(--light);
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+flex: 1;
+padding-right: 10px;
+}
+
+.light-mode .file-title {
+color: var(--day-text);
+}
+
+.file-actions {
+display: flex;
+gap: 10px;
+}
+
+.view-btn {
+background: var(--primary);
+color: #000;
+border: none;
+width: 36px;
+height: 36px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+transition: var(--transition);
+font-weight: bold;
+}
+
+.light-mode .view-btn {
+background: var(--day-primary);
+color: #fff;
+}
+
+.view-btn:hover {
+background: var(--secondary);
+transform: scale(1.1);
+box-shadow: 0 4px 12px rgba(0,247,255,0.4);
+}
+
+.view-btn.disabled-btn {
+background: #555;
+cursor: not-allowed;
+opacity: 0.5;
+}
+
+.view-btn.disabled-btn:hover {
+background: #555;
+transform: none;
+}
+
+.file-description {
+color: var(--gray);
+font-size: 0.95rem;
+margin-bottom: 20px;
+flex-grow: 1;
+line-height: 1.5;
+}
+
+.light-mode .file-description {
+color: #6c757d;
+}
+
+.file-meta {
+display: flex;
+justify-content: space-between;
+align-items: center;
+color: var(--gray);
+font-size: 0.85rem;
+border-top: 1px solid rgba(0,247,255,0.1);
+padding-top: 15px;
+}
+
+.light-mode .file-meta {
+border-top-color: var(--day-border);
+color: #6c757d;
+}
+
+/* Visor PDF */
+.pdf-viewer-container {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(10,10,24,0.98);
+z-index: 9999;
+display: none;
+flex-direction: column;
+}
+
+.light-mode .pdf-viewer-container {
+background: rgba(255,255,255,0.98);
+}
+
+.pdf-header {
+background: linear-gradient(to right, var(--primary), var(--secondary));
+color: white;
+padding: 18px 30px;
+display: flex;
+align-items: center;
+box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+position: relative;
+z-index: 10;
+}
+
+.light-mode .pdf-header {
+background: linear-gradient(to right, var(--day-primary), var(--day-secondary));
+}
+
+.back-btn {
+background: none;
+border: none;
+color: white;
+font-size: 1.8rem;
+cursor: pointer;
+padding: 8px 16px 8px 0;
+display: flex;
+align-items: center;
+gap: 10px;
+transition: var(--transition);
+}
+
+.back-btn:hover {
+transform: translateX(-5px);
+}
+
+.back-btn span {
+font-size: 1.1rem;
+font-weight: 500;
+}
+
+.pdf-title {
+flex-grow: 1;
+text-align: center;
+font-size: clamp(1rem, 2.5vw, 1.3rem);
+font-weight: 600;
+padding: 0 20px;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+}
+
+.pdf-frame-container {
+flex: 1;
+position: relative;
+}
+
+.pdf-viewer {
+width: 100%;
+height: 100%;
+border: none;
+background: #fff;
+}
+
+/* Toast */
+#toast {
+position: fixed;
+bottom: 2rem;
+left: 50%;
+transform: translateX(-50%) translateY(20px);
+background: rgba(0,247,255,0.12);
+border: 1px solid rgba(0,247,255,0.35);
+color: var(--primary);
+padding: 0.7rem 1.6rem;
+border-radius: 50px;
+font-size: 0.88rem;
+font-weight: 600;
+z-index: 3000;
+opacity: 0;
+pointer-events: none;
+transition: all 0.35s ease;
+backdrop-filter: blur(10px);
+white-space: nowrap;
+}
+
+#toast.show {
+opacity: 1;
+transform: translateX(-50%) translateY(0);
+}
+
+#toast.error {
+background: rgba(255,60,60,0.12);
+border-color: rgba(255,60,60,0.35);
+color: #ff6b6b;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+from {
+opacity: 0;
+transform: translateY(20px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+.files-container {
+display: none;
+animation: fadeIn 0.4s ease;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+.subjects-grid {
+grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.files-grid {
+grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.folders-grid {
+grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
+nav ul {
+display: none;
+flex-direction: column;
+position: absolute;
+top: 100%;
+left: 0;
+width: 100%;
+background: rgba(10,10,24,0.95);
+backdrop-filter: blur(10px);
+padding: 1rem 0;
+border-top: 1px solid rgba(0,247,255,0.2);
+z-index: 999;
+}
+
+.light-mode nav ul {
+background: rgba(248,249,250,0.95);
+border-top-color: var(--day-border);
+}
+
+nav ul.active {
+display: flex;
+}
+
+.menu-toggle {
+display: block;
+}
+
+.header-right {
+gap: 0.75rem;
+}
+
+.theme-toggle {
+margin-left: 0;
+margin-top: 1rem;
+}
+}
+
+@media (max-width: 768px) {
+.content {
+padding: 0 1rem;
+}
+
+.header-container {
+padding: 0 1rem;
+}
+
+.search-box {
+flex-direction: column;
+}
+
+.search-box button {
+padding: 14px;
+justify-content: center;
+}
+
+h1 {
+font-size: 1.8rem;
+}
+}
+
+@media (max-width: 600px) {
+.subjects-grid,
+.folders-grid,
+.files-grid {
+grid-template-columns: 1fr;
+}
+
+.pdf-title {
+font-size: 1rem;
+padding: 0 10px;
+}
+
+.back-btn span {
+display: none;
+}
+
+#loginBtn span {
+display: none;
+}
+}
+
+@media (max-width: 480px) {
+.content {
+padding: 0 0.5rem;
+margin: 1rem auto;
+}
+}
+</style>
 </head>
 <body>
-    <div id="academic-app">
-        <header class="app-header">
-            <div class="logo">
-                <i class="fas fa-graduation-cap"></i>
-                <span>Archivos Académicos</span>
-            </div>
-            <div class="nav-controls"></div> 
-        </header>
+<div class="bg-grid"></div>
+<div class="floating-shapes">
+<div class="shape shape-1"></div>
+<div class="shape shape-2"></div>
+<div class="shape shape-3"></div>
+</div>
+<div class="scan-lines"></div>
 
-        <div class="content">
-            <div id="main-page">
-                <h1>Explora Mis Asignaturas</h1>
-                
-                <div class="search-container">
-                    <div class="search-box">
-                        <input type="text" id="searchInput" placeholder="Buscar asignatura...">
-                        <button onclick="filterSubjects()">
-                            <i class="fas fa-search"></i>
-                            Buscar
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="subjects-grid" id="subjectsGrid">
-                    </div>
-            </div>
-            
-            <div id="files-page" class="files-container">
-                <h1 id="subject-title">Contenidos de Asignatura</h1>
-                
-                <div class="folders-grid" id="foldersGrid">
-                    </div>
+<header>
+<div class="neon-cascade" id="neonCascade"></div>
+<div class="header-container">
+<a href="https://trabalonp.github.io" class="logo">ONELIFE</a>
+<div class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></div>
+<div class="header-right">
+<nav>
+<ul id="navMenu">
+<li><a href="https://trabalonp.github.io">INICIO</a></li>
+<li><a href="enlaces">ENLACES</a></li>
+<li><a href="inversiones">INVERSIONES</a></li>
+<li><a href="sources">SOURCES</a></li>
+<li>
+<button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">
+<i class="fas fa-moon"></i>
+</button>
+</li>
+</ul>
+</nav>
+<div class="auth-area">
+<button id="loginBtn">
+<i class="fab fa-google"></i>
+<span>Iniciar sesión</span>
+</button>
+<img id="userAvatar" alt="Mi perfil" title="Ver perfil">
+</div>
+</div>
+</div>
+</header>
 
-                <div class="search-container" id="fileSearchContainer" style="display: none;">
-                    <div class="search-box">
-                        <input type="text" id="fileSearchInput" placeholder="Buscar archivo...">
-                        <button onclick="filterFiles()">
-                            <i class="fas fa-search"></i>
-                            Buscar
-                        </button>
-                    </div>
-                </div>
+<div id="overlay"></div>
 
-                <div class="files-grid" id="filesGrid" style="display: none;">
-                    </div>
-            </div>
-        </div>
-        
-        <div class="pdf-viewer-container" id="pdfViewerContainer">
-            <div class="pdf-header">
-                <button class="back-btn" onclick="hidePDF()">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>Volver</span>
-                </button>
-                <div class="pdf-title" id="pdfTitle">Título del Documento</div>
-            </div>
-            <div class="pdf-frame-container">
-                <iframe id="pdfViewer" class="pdf-viewer" src="" allow="autoplay"></iframe>
-            </div>
-        </div>
-    </div>
+<div id="sidebar">
+<div class="sidebar-header">
+<h3>// MI PERFIL</h3>
+<button class="sidebar-close" id="sidebarClose"><i class="fas fa-times"></i></button>
+</div>
+<div class="sidebar-body">
+<div class="profile-block">
+<div class="avatar-wrapper">
+<img id="sidebarAvatar" src="" alt="Avatar">
+<button id="editAvatarBtn" title="Cambiar foto de perfil">
+<i class="fas fa-pen"></i>
+</button>
+</div>
+<div class="profile-name" id="sidebarName">—</div>
+<div class="profile-email" id="sidebarEmail">—</div>
+<div id="avatarBar">
+<i class="fas fa-link"></i>
+<input type="url" id="avatarUrlInput" placeholder="https://i.imgur.com/tu-imagen.jpg" autocomplete="off">
+<button class="bar-btn" id="applyAvatarBtn" title="Confirmar"><i class="fas fa-check"></i></button>
+<button class="bar-btn" id="cancelAvatarBtn" title="Cancelar"><i class="fas fa-times"></i></button>
+</div>
+</div>
+<div class="info-card">
+<div class="info-card-title">Cuenta</div>
+<div class="info-row"><i class="fab fa-google"></i><span>Google Sign-In</span></div>
+<div class="info-row"><i class="fas fa-shield-alt"></i><span>Sesión verificada</span></div>
+<div class="info-row"><i class="fas fa-database"></i><span>Firebase Realtime DB</span></div>
+</div>
+</div>
+<div class="sidebar-footer">
+<button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
+</div>
+</div>
 
-    <script>
-        // Datos de las asignaturas y archivos
-        const subjectsData = [
-            {
-                id: 'calculo-i',
-                title: 'CÁLCULO I',
-                icon: 'fas fa-calculator',
-                description: 'Fundamentos matemáticos para el análisis de funciones y límites.',
-                folders: [
-                    {
-                        name: 'Temas Teóricos',
-                        icon: 'fas fa-book',
-                        files: [
-                            { 
-                                name: 'PDF Completo Ejercicios',
-                                description: 'PDF completo de academia optativa', 
-                                driveId: '1jo-Kbsi5ZcyxtmPMobwItJGodxCbgwli',
-                                date: '11/06/2025',
-                                size: '69.9 MB',
-                                available: true
-                            },
-                            { 
-                                name: 'Tema 2: Resumen Límites y Continuidad de Funciones de una variable',
-                                description: 'Introducción a los límites y continuidad de funciones de una variable.', 
-                                driveId: '1VKtRH1CmTpvGHbgtabE7y437fxkNmHMD',
-                                date: '09/06/2025',
-                                size: '677 KB',
-                                available: true
-                            },
-                            { 
-                                name: 'Tema 2: Teoremas de continuidad y derivabilidad', 
-                                description: 'Teoremas fundamentales de continuidad y derivabilidad.', 
-                                driveId: '1Wjfuz3lNy0f-CY4pWGaSZvNTKrelCv4e',
-                                date: '09/06/2025',
-                                size: '1.1 MB',
-                                available: true
-                            },
-                            { 
-                                name: 'Tema 3: Cálculo integral de funciones de una variable', 
-                                description: 'Introducción al cálculo integral de funciones de una variable.', 
-                                driveId: '1PTWBsQtDzizN9iL_pc2PRJxuGcoLBpyA',
-                                date: '09/06/2025',
-                                size: '2.1 MB',
-                                available: true
-                            },
-                            { 
-                                name: 'Tema 4: Aplicaciones series de potencias, series de Fourier, ecuaciones diferenciales', 
-                                description: 'Aplicaciones de series de potencias, series de Fourier y ecuaciones diferenciales.', 
-                                driveId: '1MHiIdBpMmTWO-thqzYVxBmkCk6pnx0OV',
-                                date: '09/06/2025',
-                                size: '603 KB',
-                                available: true
-                            }
-                        ]
-                    },
-                    {
-                        name: 'Ejercicios',
-                        icon: 'fas fa-pencil-alt',
-                        files: [
-                            { 
-                                name: 'Ejercicios Límites y Continuidad', 
-                                description: 'Colección de ejercicios resueltos y propuestos para practicar límites.', 
-                                driveId: '1VKtRH1CmTpvGHbgtabE7y437fxkNmHMD',
-                                date: '09/06/2025',
-                                size: '677 KB',
-                                available: false
-                            },
-                            { 
-                                name: 'Ejercicios Derivabilidad', 
-                                description: 'Colección de ejercicios resueltos y propuestos para practicar derivabilidad.', 
-                                driveId: '',
-                                date: '09/06/2025',
-                                size: '1.1 MB',
-                                available: false
-                            },
-                            { 
-                                name: 'Ejercicios Integral de funciones de una variable', 
-                                description: 'Colección de ejercicios resueltos y propuestos para practicar el cálculo integral de funciones de una variable.', 
-                                driveId: '',
-                                date: '09/06/2025',
-                                size: '2.1 MB',
-                                available: false
-                            },
-                            { 
-                                name: 'Ejercicios Series de potencias, series de Fourier y ecuaciones diferenciales', 
-                                description: 'Colección de ejercicios resueltos y propuestos para practicar series de potencias, series de Fourier y ecuaciones diferenciales.', 
-                                driveId: '',
-                                date: '09/06/2025',
-                                size: '603 KB',
-                                available: false
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: 'discreta',
-                title: 'MAT. DISCRETA',
-                icon: 'fas fa-calculator',
-                description: 'Matemática discreta',
-                folders: [
-                    {
-                        name: 'Temas Teóricos',
-                        icon: 'fas fa-book',
-                        files: [
-                            { 
-                                name: 'PDF Completo Ejercicios',
-                                description: 'PDF completo de academia optativa', 
-                                driveId: '1FdvWGu_L3uSqOviWrtectWMKbxrGOWVq',
-                                date: '26/12/2025',
-                                size: '26.2 MB',
-                                available: true
-                            }
-                        ]
-                    },
-                    {
-                        name: 'Ejercicios',
-                        icon: 'fas fa-pencil-alt',
-                        files: [
-                            { 
-                                name: 'Ejercicios', 
-                                description: 'Colección de ejercicios resueltos y propuestos para practicar.', 
-                                driveId: '',
-                                date: 'XX/XX/XXXX',
-                                size: 'XXX KB',
-                                available: false
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: 'algebra',
-                title: 'ÁLGEBRA I',
-                icon: 'fas fa-infinity',
-                description: 'Estudio de estructuras algebraicas y sus propiedades.',
-                folders: [
-                    {
-                        name: 'Temas Teóricos',
-                        icon: 'fas fa-book',
-                        files: [
-                            { 
-                                name: 'Tema 1 Números reales y complejos', 
-                                description: 'Apuntes detallados sobre operaciones con números reales y cálculo de complejos.', 
-                                driveId: '1rHsqhLSKxNB54zoeMqL8LVkr8mbfWE6d',
-                                date: '05/06/2025',
-                                size: '311 KB',
-                                available: true
-                            },
-                            { 
-                                name: 'Tema 2 Vectores, matrices y tensores', 
-                                description: 'Apuntes detallados sobre vectores, matrices y tensores.', 
-                                driveId: '1MefpLvEMMFWnxV3kI2hJA4fuLq_duOdo',
-                                date: '05/06/2025',
-                                size: '835 KB',
-                                available: true
-                            },
-                            { 
-                                name: 'Tema 3 Sistemas de ecuaciones y determinantes', 
-                                description: 'Apuntes detallados sobre sistemas de ecuaciones y determinantes.', 
-                                driveId: '1DrgDPO66eqST0t3iTbUSrrXKUpqgOLXH',
-                                date: '05/06/2025',
-                                size: '939 KB',
-                                available: true
-                            },
-                            { 
-                                name: 'Tema 4 Subespacios vectoriales, bases y coordenadas', 
-                                description: 'Apuntes detallados sobre subespacios vectoriales, bases y coordenadas.', 
-                                driveId: '1Pn7J0Lk7xdTNPfizuvZiFPFkxZ6RhoZo', 
-                                date: '05/06/2025',
-                                size: '418 KB',
-                                available: true
-                            },
-                            { 
-                                name: 'Tema 5 Transformaciones lineales', 
-                                description: 'Apuntes detallados sobre transformaciones lineales.', 
-                                driveId: '1Hvc-8CaRwKn2bgk2VWByctIyUYmy3KXC', 
-                                date: '05/06/2025',
-                                size: '672 KB',
-                                available: true
-                            },
-                            { 
-                                name: 'Tema 6 Valores y vectores propios', 
-                                description: 'Apuntes detallados sobre valores y vectores propios.', 
-                                driveId: '1CPZQCeEgHxt2fNIOzl_Ey7FnxoaljRLz', 
-                                date: '05/06/2025',
-                                size: '909 KB',
-                                available: true
-                            },
-                            { 
-                                name: 'Tema 7 Álgebra lineal numérica', 
-                                description: 'Apuntes detallados sobre algebra lineal numérica.', 
-                                driveId: '14T4TgM43089rD7ahD_MRx4LJTBn_ZYK5', 
-                                date: '05/06/2025',
-                                size: '289 KB',
-                                available: true
-                            }
-                        ]
-                    },
-                    {
-                        name: 'Ejercicios Resueltos',
-                        icon: 'fas fa-check-circle',
-                        files: [
-                            { 
-                                name: 'EJERCICIOS Tema 1 Números reales y complejos', 
-                                description: 'Ejercicios resueltos y propuestos para practicar del Tema 1 Números reales y complejos.', 
-                                driveId: '1rHsqhLSKxNB54zoeMqL8LVkr8mbfWE6d',
-                                date: '05/06/2025',
-                                size: '',
-                                available: false
-                            },
-                            { 
-                                name: 'EJERCICIOS Tema 2 Vectores, matrices y tensores', 
-                                description: 'Ejercicios resueltos y propuestos para practicar del Tema 2 Vectores, matrices y tensores.', 
-                                driveId: '1MefpLvEMMFWnxV3kI2hJA4fuLq_duOdo', 
-                                date: '05/06/2025',
-                                size: '',
-                                available: false
-                            },
-                            { 
-                                name: 'EJERCICIOS Tema 3 Sistemas de ecuaciones y determinantes', 
-                                description: 'Ejercicios resueltos y propuestos para practicar del Tema 3 Sistemas de ecuaciones y determinantes.', 
-                                driveId: '1DrgDPO66eqST0t3iTbUSrrXKUpqgOLXH',  
-                                date: '05/06/2025',
-                                size: '',
-                                available: false
-                            },
-                            { 
-                                name: 'EJERCICIOS Tema 4 Subespacios vectoriales, bases y coordenadas', 
-                                description: 'Ejercicios resueltos y propuestos para practicar del Tema 4 Subespacios vectoriales, bases y coordenadas.', 
-                                driveId: '1Pn7J0Lk7xdTNPfizuvZiFPFkxZ6RhoZo', 
-                                date: '05/06/2025',
-                                size: '',
-                                available: false
-                            },
-                            { 
-                                name: 'EJERCICIOS Tema 5 Transformaciones lineales', 
-                                description: 'Ejercicios resueltos y propuestos para practicar del Tema 5 Transformaciones lineales.', 
-                                driveId: '1Hvc-8CaRwKn2bgk2VWByctIyUYmy3KXC', 
-                                date: '05/06/2025',
-                                size: '',
-                                available: false
-                            },
-                            { 
-                                name: 'EJERCICIOS Tema 6 Valores y vectores propios', 
-                                description: 'Ejercicios resueltos y propuestos para practicar del Tema 6 Valores y vectores propios.', 
-                                driveId: '1CPZQCeEgHxt2fNIOzl_Ey7FnxoaljRLz', 
-                                date: '05/06/2025',
-                                size: '',
-                                available: false
-                            },
-                            { 
-                                name: 'EJERCICIOS Tema 7 Álgebra lineal numérica', 
-                                description: 'Ejercicios resueltos y propuestos para practicar del Tema 7 Álgebra lineal numérica.', 
-                                driveId: '14T4TgM43089rD7ahD_MRx4LJTBn_ZYK5', 
-                                date: '05/06/2025',
-                                size: '',
-                                available: false
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: 'probabilidad',
-                title: 'PROBABILIDAD',
-                icon: 'fas fa-dice',
-                description: 'Análisis de eventos aleatorios y modelos probabilísticos.',
-                folders: [
-                    {
-                        name: 'Apuntes',
-                        icon: 'fas fa-clipboard',
-                        files: [
-                            { 
-                                name: 'Conceptos Básicos de Probabilidad', 
-                                description: 'Definiciones fundamentales, espacio muestral y eventos.', 
-                                driveId: '1FCxllhzNUAU7TC1kxMHHQizb_uvSozy4',
-                                date: '12/03/2024',
-                                size: '1.9 MB',
-                                available: true
-                            },
-                            { 
-                                name: 'Variables Aleatorias y Distribuciones', 
-                                description: 'Tipos de variables aleatorias y principales distribuciones de probabilidad.', 
-                                driveId: '1FCxllhzNUAU7TC1kxMHHQizb_uvSozy4',
-                                date: '19/03/2024',
-                                size: '2.5 MB',
-                                available: false
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: 'estructuras-de-datos',
-                title: 'ESTRUCTURAS DE DATOS',
-                icon: 'fas fa-database',
-                description: 'Estructuras de datos y algoritmos de ordenamiento.',
-                folders: [
-                    {
-                        name: 'Temas Teóricos',
-                        icon: 'fas fa-book',
-                        files: [
-                            { 
-                                name: 'Tema 1 Introducción', 
-                                description: 'Apuntes detallados sobre estructuras de datos y algoritmos de ordenamiento.', 
-                                driveId: '1NKMDySBCeGKN7bVqz3AHSCNlpNXwQEBf',
-                                date: '05/06/2025',
-                                size: '4.7 MB',
-                                available: true
-                            }
-                        ]
-                    },
-                    {
-                        name: 'Ejercicios Resueltos',
-                        icon: 'fas fa-check-circle',
-                        files: [
-                            { 
-                                name: 'EJERCICIOS Tema 1 Introducción', 
-                                description: 'Ejercicios resueltos y propuestos para practicar del Tema 1 Introducción.', 
-                                driveId: '1NKMDySBCeGKN7bVqz3AHSCNlpNXwQEBf',
-                                date: '05/06/2025',
-                                size: '',
-                                available: false
-                            }
-                            
-                        ]
-                    }
-                ]
-            },
-            {
-                id: 'fundamento-computadores',
-                title: 'FUNDAMENTOS DE COMPUTADORES',
-                icon: 'fas fa-microchip',
-                description: 'Principios de arquitectura de computadores y sistemas digitales.',
-                folders: [
-                    {
-                        name: 'Exámenes años anteriores',
-                        icon: 'fas fa-lightbulb',
-                        files: [
-                            { 
-                                name: 'Examen Junio 2024', 
-                                description: '', 
-                                driveId: '10Lz9gxl-vZIYwTfn7QGOiqf-ZCpnVO4S',
-                                date: '08/06/2024',
-                                size: '158 KB',
-                                available: true
-                            },
-                            { 
-                                name: 'Examen Mayo 2024', 
-                                description: '', 
-                                driveId: '16b60CH5o-O-XL-etfHXBPif7NGOTtQiq',
-                                date: '08/06/2024',
-                                size: '168 KB',
-                                available: true
-                            },
-                            { 
-                                name: 'Examen Enero 2023', 
-                                description: '', 
-                                driveId: '1M5aOym_FUwuxrZqA5g6EcSJZ85Fsugw8',
-                                date: '08/06/2024',
-                                size: '71 KB',
-                                available: true
-                            },
-                            { 
-                                name: 'Examen Enero 2024', 
-                                description: '', 
-                                driveId: '1eirAgBdAwmt3yubOmIFon8COPGugROIS',
-                                date: '08/06/2024',
-                                size: '279 KB',
-                                available: true
-                            },
-                            { 
-                                name: 'Examen Juino 2023', 
-                                description: '', 
-                                driveId: '1G40sYwMq8Q3Xxd7SzMKzMhpsCspq2qSX',
-                                date: '08/06/2024',
-                                size: '121 KB',
-                                available: true
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: 'calculo-ii',
-                title: 'CÁLCULO II',
-                icon: 'fas fa-chart-line',
-                description: 'Profundización en cálculo diferencial e integral multivariable.',
-                folders: [
-                    {
-                        name: 'Integración',
-                        icon: 'fas fa-calculator',
-                        files: [
-                            { 
-                                name: 'Integrales Indefinidas y Definidas', 
-                                description: 'Técnicas de integración y el Teorema Fundamental del Cálculo.', 
-                                driveId: '1FCxllhzNUAU7TC1kxMHHQizb_uvSozy4',
-                                date: '07/03/2024',
-                                size: '2.3 MB',
-                                available: true
-                            }
-                        ]
-                    },
-                    {
-                        name: 'Series y Otros',
-                        icon: 'fas fa-stream',
-                        files: [
-                            { 
-                                name: 'Series y Sucesiones', 
-                                description: 'Convergencia y propiedades de series y sucesiones numéricas.', 
-                                driveId: '1FCxllhzNUAU7TC1kxMHHQizb_uvSozy4',
-                                date: '21/03/2024',
-                                size: '2.6 MB',
-                                available: true
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: 'optimizacion-i',
-                title: 'OPTIMIZACIÓN I',
-                icon: 'fas fa-bullseye',
-                description: 'Métodos para encontrar soluciones óptimas a problemas complejos.',
-                folders: [
-                    {
-                        name: 'Programación',
-                        icon: 'fas fa-cogs',
-                        files: [
-                            { 
-                                name: 'Programación Lineal', 
-                                description: 'Introducción a la optimización lineal, método simplex.', 
-                                driveId: '1FCxllhzNUAU7TC1kxMHHQizb_uvSozy4',
-                                date: '14/02/2024',
-                                size: '2.4 MB',
-                                available: true
-                            }
-                        ]
-                    },
-                    {
-                        name: 'Temas Avanzados',
-                        icon: 'fas fa-flask',
-                        files: [
-                            { 
-                                name: 'Optimización no Lineal', 
-                                description: 'Fundamentos de optimización sin restricciones.', 
-                                driveId: '1FCxllhzNUAU7TC1kxMHHQizb_uvSozy4',
-                                date: '28/02/2024',
-                                size: '2.8 MB',
-                                available: false
-                            }
-                        ]
-                    }
-                ]
-            }
-        ];
+<div class="content">
+<div id="main-page">
+<h1>Archivos Académicos</h1>
+<div class="search-container">
+<div class="search-box">
+<input type="text" id="searchInput" placeholder="Buscar asignatura...">
+<button onclick="filterSubjects()">
+<i class="fas fa-search"></i>
+Buscar
+</button>
+</div>
+</div>
+<div class="subjects-grid" id="subjectsGrid"></div>
+</div>
 
-        let currentSubjectFolders = []; // Almacena las carpetas de la asignatura actual
-        let currentFolderFiles = [];    // Almacena los archivos de la carpeta actual que se está viendo
-        let currentSubjectId = null;    // Almacena el ID de la asignatura actual
+<div id="files-page" class="files-container">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+<button class="nav-btn" id="backToSubjectsBtn" style="display: none;" onclick="showMainPage()">
+<i class="fas fa-arrow-left"></i>
+<span>Asignaturas</span>
+</button>
+<h1 id="subject-title" style="margin: 0; flex: 1;">Contenidos</h1>
+<button class="nav-btn" id="backToFoldersBtn" style="display: none;">
+<i class="fas fa-folder-open"></i>
+<span>Carpetas</span>
+</button>
+</div>
 
-        // Inicializar la página
-        document.addEventListener('DOMContentLoaded', () => {
-            renderSubjects();
-            
-            // Permitir búsqueda de asignaturas con Enter
-            document.getElementById('searchInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    filterSubjects();
-                }
-            });
+<div class="folders-grid" id="foldersGrid"></div>
 
-            // Permitir búsqueda de archivos con Enter
-            document.getElementById('fileSearchInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    filterFiles();
-                }
-            });
+<div class="search-container" id="fileSearchContainer" style="display: none;">
+<div class="search-box">
+<input type="text" id="fileSearchInput" placeholder="Buscar archivo...">
+<button onclick="filterFiles()">
+<i class="fas fa-search"></i>
+Buscar
+</button>
+</div>
+</div>
 
-            // Añadir un botón "Volver a Asignaturas"
-            const backToSubjectsBtn = document.createElement('button');
-            backToSubjectsBtn.className = 'nav-btn';
-            backToSubjectsBtn.id = 'backToSubjectsBtn';
-            backToSubjectsBtn.innerHTML = '<i class="fas fa-arrow-left"></i> <span>Asignaturas</span>';
-            backToSubjectsBtn.style.display = 'none';
-            backToSubjectsBtn.onclick = showMainPage;
-            document.querySelector('#academic-app .nav-controls').prepend(backToSubjectsBtn); 
+<div class="files-grid" id="filesGrid" style="display: none;"></div>
+</div>
+</div>
 
-            // Añadir un botón "Volver a Carpetas"
-            const backToFoldersBtn = document.createElement('button');
-            backToFoldersBtn.className = 'nav-btn';
-            backToFoldersBtn.id = 'backToFoldersBtn';
-            backToFoldersBtn.innerHTML = '<i class="fas fa-folder-open"></i> <span>Carpetas</span>';
-            backToFoldersBtn.style.display = 'none';
-            backToFoldersBtn.onclick = () => showFilesPage(currentSubjectId); // Vuelve a la vista de carpetas de la asignatura actual
-            document.querySelector('#academic-app .nav-controls').prepend(backToFoldersBtn); 
-        });
+<div class="pdf-viewer-container" id="pdfViewerContainer">
+<div class="pdf-header">
+<button class="back-btn" onclick="hidePDF()">
+<i class="fas fa-arrow-left"></i>
+<span>Volver</span>
+</button>
+<div class="pdf-title" id="pdfTitle">Documento</div>
+</div>
+<div class="pdf-frame-container">
+<iframe id="pdfViewer" class="pdf-viewer" src="" allow="autoplay"></iframe>
+</div>
+</div>
 
-        // Renderizar las asignaturas
-        function renderSubjects() {
-            const grid = document.getElementById('subjectsGrid');
-            grid.innerHTML = '';
-            
-            subjectsData.forEach(subject => {
-                const totalFiles = subject.folders.reduce((count, folder) => count + folder.files.length, 0);
-                const card = document.createElement('div');
-                card.className = 'subject-card';
-                card.innerHTML = `
-                    <div class="subject-icon">
-                        <i class="${subject.icon}"></i>
-                    </div>
-                    <div class="subject-info">
-                        <h3>${subject.title}</h3>
-                        <p>${subject.description}</p>
-                        <div class="file-count">
-                            <i class="fas fa-file-pdf"></i>
-                            <span>${totalFiles} archivos en ${subject.folders.length} carpetas</span>
-                        </div>
-                    </div>
-                `;
-                card.addEventListener('click', () => showFilesPage(subject.id));
-                grid.appendChild(card);
-            });
-        }
+<div id="toast"></div>
 
-        // Filtrar asignaturas
-        function filterSubjects() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const grid = document.getElementById('subjectsGrid');
-            const cards = grid.getElementsByClassName('subject-card');
-            let found = false;
-            
-            for (let card of cards) {
-                const title = card.querySelector('h3').textContent.toLowerCase();
-                if (title.includes(searchTerm)) {
-                    card.style.display = '';
-                    found = true;
-                } else {
-                    card.style.display = 'none';
-                }
-            }
-            
-            if (!found && searchTerm) {
-                alert('No se encontraron asignaturas que coincidan con su búsqueda.');
-            }
-        }
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        // Mostrar la página de archivos (que ahora muestra carpetas) de una asignatura
-        function showFilesPage(subjectId) {
-            const subject = subjectsData.find(s => s.id === subjectId);
-            if (!subject) return;
-            
-            currentSubjectId = subjectId; // Guarda el ID de la asignatura actual
-            currentSubjectFolders = subject.folders; // Almacena las carpetas de la asignatura actual
-            currentFolderFiles = []; // Reinicia los archivos de la carpeta actual
-            
-            // Ocultar página principal
-            document.getElementById('main-page').style.display = 'none';
-            
-            // Mostrar página de archivos
-            const filesPage = document.getElementById('files-page');
-            filesPage.style.display = 'block';
-            filesPage.style.animation = 'fadeIn 0.4s ease';
+const firebaseConfig = {
+apiKey: "AIzaSyDCm1pFZLRXk34UIGU3UY0ltLkyHkElsIg",
+authDomain: "onelife-cec55.firebaseapp.com",
+projectId: "onelife-cec55",
+storageBucket: "onelife-cec55.firebasestorage.app",
+messagingSenderId: "599128086819",
+appId: "1:599128086819:web:af149214fe5b68a12ad496",
+databaseURL: "https://onelife-cec55-default-rtdb.europe-west1.firebasedatabase.app"
+};
 
-            // Mostrar el botón de "Volver a Asignaturas" y ocultar "Volver a Carpetas"
-            document.getElementById('backToSubjectsBtn').style.display = 'flex';
-            document.getElementById('backToFoldersBtn').style.display = 'none'; // Ocultar al mostrar carpetas
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const provider = new GoogleAuthProvider();
 
-            // Actualizar título
-            document.getElementById('subject-title').textContent = `Contenidos de ${subject.title}`;
-            
-            // Ocultar el buscador de archivos y la cuadrícula de archivos
-            document.getElementById('fileSearchContainer').style.display = 'none';
-            document.getElementById('filesGrid').style.display = 'none';
-            document.getElementById('filesGrid').innerHTML = ''; // Limpiar la cuadrícula de archivos
-            
-            // Renderizar las carpetas
-            renderFolders(currentSubjectFolders);
-        }
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const userAvatar = document.getElementById('userAvatar');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+const sidebarClose = document.getElementById('sidebarClose');
+const sidebarAvatar = document.getElementById('sidebarAvatar');
+const sidebarName = document.getElementById('sidebarName');
+const sidebarEmail = document.getElementById('sidebarEmail');
+const editAvatarBtn = document.getElementById('editAvatarBtn');
+const avatarBar = document.getElementById('avatarBar');
+const avatarUrlInput = document.getElementById('avatarUrlInput');
+const applyAvatarBtn = document.getElementById('applyAvatarBtn');
+const cancelAvatarBtn = document.getElementById('cancelAvatarBtn');
+const authArea = document.querySelector('.auth-area');
+const toast = document.getElementById('toast');
 
-        // Renderizar las carpetas
-        function renderFolders(foldersToRender) {
-            const grid = document.getElementById('foldersGrid');
-            grid.innerHTML = '';
-            grid.style.display = 'grid'; // Asegúrate de que la cuadrícula de carpetas esté visible
+const CK_LOGGED = 'ol_logged';
+const CK_AVATAR = 'ol_avatar';
+const CK_NAME = 'ol_name';
+const CK_EMAIL = 'ol_email';
 
-            if (foldersToRender.length === 0) {
-                grid.innerHTML = '<p style="text-align: center; color: #666; margin-top: 30px;">No se encontraron carpetas en esta asignatura.</p>';
-                return;
-            }
+const cachedLogged = localStorage.getItem(CK_LOGGED);
+if (cachedLogged === 'true') {
+loginBtn.style.display = 'none';
+userAvatar.style.display = 'inline-block';
+const cv = localStorage.getItem(CK_AVATAR);
+const cn = localStorage.getItem(CK_NAME);
+const ce = localStorage.getItem(CK_EMAIL);
+if (cv) { userAvatar.src = cv; sidebarAvatar.src = cv; }
+if (cn) sidebarName.textContent = cn;
+if (ce) sidebarEmail.textContent = ce;
+} else if (cachedLogged === 'false') {
+loginBtn.style.display = 'inline-flex';
+userAvatar.style.display = 'none';
+}
+authArea.classList.add('ready');
 
-            foldersToRender.forEach(folder => {
-                const card = document.createElement('div');
-                card.className = 'folder-card';
-                card.innerHTML = `
-                    <i class="${folder.icon}"></i>
-                    <h3>${folder.name}</h3>
-                    <p style="font-size: 0.9em; color: #888;">${folder.files.length} archivos</p>
-                `;
-                card.addEventListener('click', () => showFolderContents(folder));
-                grid.appendChild(card);
-            });
-        }
+function showToast(msg, isError = false) {
+toast.textContent = msg;
+toast.className = 'show' + (isError ? ' error' : '');
+clearTimeout(toast._t);
+toast._t = setTimeout(() => { toast.className = ''; }, 3000);
+}
 
-        // Mostrar el contenido (archivos) de una carpeta
-        function showFolderContents(folder) {
-            currentFolderFiles = folder.files; // Almacena los archivos de la carpeta actual
-            
-            // Ocultar la cuadrícula de carpetas
-            document.getElementById('foldersGrid').style.display = 'none';
+function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); }
+function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); hideAvatarBar(); }
 
-            // Mostrar el buscador de archivos y la cuadrícula de archivos
-            document.getElementById('fileSearchContainer').style.display = 'block';
-            document.getElementById('filesGrid').style.display = 'grid';
-            document.getElementById('fileSearchInput').value = ''; // Limpiar el input de búsqueda de archivos
-            
-            // Mostrar el botón "Volver a Carpetas"
-            document.getElementById('backToFoldersBtn').style.display = 'flex';
-            document.getElementById('backToSubjectsBtn').style.display = 'flex'; // Asegurarse que "Volver a Asignaturas" también esté visible
-            
-            // Actualizar el título para mostrar la carpeta actual
-            const subjectTitle = subjectsData.find(s => s.id === currentSubjectId).title;
-            document.getElementById('subject-title').textContent = `${folder.name} (${subjectTitle})`;
+userAvatar.addEventListener('click', openSidebar);
+sidebarClose.addEventListener('click', closeSidebar);
+overlay.addEventListener('click', closeSidebar);
 
-            // Renderizar los archivos de esta carpeta
-            renderFiles(currentFolderFiles);
-        }
+function showAvatarBar() { avatarBar.classList.add('visible'); avatarUrlInput.value = ''; avatarUrlInput.focus(); }
+function hideAvatarBar() { avatarBar.classList.remove('visible'); avatarUrlInput.value = ''; }
 
+editAvatarBtn.addEventListener('click', () => {
+avatarBar.classList.contains('visible') ? hideAvatarBar() : showAvatarBar();
+});
 
-        // Renderizar archivos (reutilizable por el filtro)
-        function renderFiles(filesToRender) {
-            const grid = document.getElementById('filesGrid');
-            grid.innerHTML = '';
-            
-            if (filesToRender.length === 0) {
-                grid.innerHTML = '<p style="text-align: center; color: #666; margin-top: 30px;">No se encontraron archivos en esta carpeta.</p>';
-                return;
-            }
+cancelAvatarBtn.addEventListener('click', hideAvatarBar);
 
-            filesToRender.forEach(file => {
-                const card = document.createElement('div');
-                card.className = 'file-card';
-                card.innerHTML = `
-                    <div class="file-header">
-                        <div class="file-title">${file.name}</div>
-                        <div class="file-actions">
-                            <button class="view-btn ${file.available ? '' : 'disabled-btn'}" 
-                                    title="${file.available ? 'Ver PDF' : 'No disponible'}">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="file-description">${file.description}</div>
-                    <div class="file-meta">
-                        <div class="file-date"><i class="far fa-calendar"></i> ${file.date}</div>
-                        <div class="file-size"><i class="fas fa-weight-hanging"></i> ${file.size}</div>
-                    </div>
-                `;
-                
-                // Agregar evento para ver el PDF SOLO si el archivo está disponible
-                if (file.available) {
-                    card.querySelector('.view-btn').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        showPDF(file.driveId, file.name);
-                    });
-                }
-                
-                grid.appendChild(card);
-            });
-        }
+avatarUrlInput.addEventListener('keydown', e => {
+if (e.key === 'Enter') applyAvatarBtn.click();
+if (e.key === 'Escape') hideAvatarBar();
+});
 
-        // Función para filtrar archivos dentro de una asignatura
-        function filterFiles() {
-            const searchTerm = document.getElementById('fileSearchInput').value.toLowerCase();
-            
-            const filtered = currentFolderFiles.filter(file => 
-                file.name.toLowerCase().includes(searchTerm)
-            );
-            
-            renderFiles(filtered); // Renderiza solo los archivos filtrados
-        }
+applyAvatarBtn.addEventListener('click', async () => {
+const user = auth.currentUser;
+if (!user) { showToast('Inicia sesión primero.', true); return; }
+const url = avatarUrlInput.value.trim();
+if (!url) { showToast('Pega una URL de imagen válida.', true); return; }
 
-        // Mostrar PDF en pantalla completa
-        function showPDF(driveId, fileName) {
-            const container = document.getElementById('pdfViewerContainer');
-            const viewer = document.getElementById('pdfViewer');
-            const title = document.getElementById('pdfTitle');
-            
-            // Configurar el título
-            title.textContent = fileName;
-            
-            // Configurar el visor PDF
-            viewer.src = `https://drive.google.com/file/d/${driveId}/preview`;
-            
-            // Mostrar el contenedor
-            container.style.display = 'flex';
-        }
+const testImg = new Image();
+testImg.onload = async () => {
+try {
+await set(ref(db, 'users/' + user.uid + '/avatarUrl'), url);
+applyAvatarToUI(url);
+localStorage.setItem(CK_AVATAR, url);
+hideAvatarBar();
+showToast('✓ Foto de perfil actualizada');
+} catch (err) { showToast('Error al guardar: ' + err.message, true); }
+};
+testImg.onerror = () => showToast('La URL no es una imagen válida.', true);
+testImg.src = url;
+});
 
-        // Ocultar el visor de PDF
-        function hidePDF() {
-            document.getElementById('pdfViewerContainer').style.display = 'none';
-            document.getElementById('pdfViewer').src = ''; // Limpiar el src para detener la carga
-        }
+function applyAvatarToUI(url) {
+if (!url) return;
+userAvatar.src = url;
+sidebarAvatar.src = url;
+}
 
-        // Volver a la página principal desde los archivos
-        function showMainPage() {
-            document.getElementById('files-page').style.display = 'none';
-            document.getElementById('main-page').style.display = 'block';
-            document.getElementById('main-page').style.animation = 'fadeIn 0.4s ease';
-            document.getElementById('backToSubjectsBtn').style.display = 'none';
-            document.getElementById('backToFoldersBtn').style.display = 'none'; // Asegurarse que también se oculte
-            currentSubjectId = null; // Reiniciar el ID de la asignatura actual
-        }
-    </script>
+function saveCache(user, avatarUrl) {
+localStorage.setItem(CK_LOGGED, 'true');
+localStorage.setItem(CK_NAME, user.displayName || '');
+localStorage.setItem(CK_EMAIL, user.email || '');
+if (avatarUrl) localStorage.setItem(CK_AVATAR, avatarUrl);
+}
+
+function clearCache() {
+localStorage.setItem(CK_LOGGED, 'false');
+localStorage.removeItem(CK_AVATAR);
+localStorage.removeItem(CK_NAME);
+localStorage.removeItem(CK_EMAIL);
+}
+
+async function loadProfile(user) {
+sidebarName.textContent = user.displayName || 'Usuario';
+sidebarEmail.textContent = user.email || '';
+const cached = localStorage.getItem(CK_AVATAR);
+const initial = cached || user.photoURL || '';
+applyAvatarToUI(initial);
+
+try {
+const snap = await get(ref(db, 'users/' + user.uid));
+const dbAvatar = snap.exists() && snap.val().avatarUrl ? snap.val().avatarUrl : null;
+if (dbAvatar && dbAvatar !== initial) {
+applyAvatarToUI(dbAvatar);
+localStorage.setItem(CK_AVATAR, dbAvatar);
+}
+saveCache(user, dbAvatar || initial);
+} catch (err) {
+saveCache(user, initial);
+console.warn('DB no disponible:', err.message);
+}
+}
+
+loginBtn.addEventListener('click', async () => {
+try { await signInWithPopup(auth, provider); }
+catch (err) { showToast('Error al iniciar sesión.', true); console.error(err); }
+});
+
+logoutBtn.addEventListener('click', async () => {
+await signOut(auth);
+clearCache();
+closeSidebar();
+showToast('Sesión cerrada correctamente');
+});
+
+onAuthStateChanged(auth, async user => {
+if (user) {
+loginBtn.style.display = 'none';
+userAvatar.style.display = 'inline-block';
+await loadProfile(user);
+} else {
+loginBtn.style.display = 'inline-flex';
+userAvatar.style.display = 'none';
+sidebarName.textContent = '—';
+sidebarEmail.textContent = '—';
+sidebarAvatar.src = '';
+userAvatar.src = '';
+if (localStorage.getItem(CK_LOGGED) === 'true') clearCache();
+else localStorage.setItem(CK_LOGGED, 'false');
+}
+});
+</script>
+
+<script>
+// Menu móvil
+document.getElementById('menuToggle').addEventListener('click', () => {
+document.getElementById('navMenu').classList.toggle('active');
+});
+
+// Efecto cascada neon
+const neonCascade = document.getElementById('neonCascade');
+function createCascadeParticle() {
+const particle = document.createElement('div');
+particle.classList.add('cascade-particle');
+const posX = Math.random() * 100;
+particle.style.left = `${posX}%`;
+const size = 1 + Math.random() * 2;
+const height = 10 + Math.random() * 20;
+particle.style.width = `${size}px`;
+particle.style.height = `${height}px`;
+
+const isLightMode = document.body.classList.contains('light-mode');
+if (isLightMode) {
+particle.style.background = 'var(--day-primary)';
+particle.style.boxShadow = '0 0 8px var(--day-primary), 0 0 15px var(--day-primary)';
+} else {
+particle.style.background = 'var(--primary)';
+particle.style.boxShadow = '0 0 10px var(--primary), 0 0 20px var(--primary)';
+}
+
+particle.style.opacity = '0';
+neonCascade.appendChild(particle);
+
+const animationDuration = 3 + Math.random() * 4;
+const animationDelay = Math.random() * 2;
+
+particle.animate([
+{ transform: 'translateY(-20px)', opacity: 0 },
+{ transform: 'translateY(0)', opacity: isLightMode ? 0.6 : 0.7 },
+{ transform: `translateY(${window.innerHeight}px)`, opacity: 0 }
+], {
+duration: animationDuration * 1000,
+delay: animationDelay * 1000,
+easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+});
+
+setTimeout(() => {
+particle.remove();
+}, (animationDuration + animationDelay) * 1000);
+}
+
+function generateCascadeParticles() {
+createCascadeParticle();
+setTimeout(generateCascadeParticles, 100 + Math.random() * 200);
+}
+generateCascadeParticles();
+
+// Tema
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = themeToggle.querySelector('i');
+
+function updateThemeIcon() {
+themeIcon.className = document.body.classList.contains('light-mode') ? 'fas fa-sun' : 'fas fa-moon';
+}
+
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme) {
+document.body.classList.toggle('light-mode', savedTheme === 'light');
+updateThemeIcon();
+}
+
+themeToggle.addEventListener('click', () => {
+document.body.classList.toggle('light-mode');
+localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+updateThemeIcon();
+});
+
+// DATOS DE ASIGNATURAS
+const subjectsData = [
+{
+id: 'calculo-i',
+title: 'CÁLCULO I',
+icon: 'fas fa-calculator',
+description: 'Fundamentos matemáticos para el análisis de funciones y límites.',
+folders: [
+{
+name: 'Temas Teóricos',
+icon: 'fas fa-book',
+files: [
+{
+name: 'PDF Completo Ejercicios',
+description: 'PDF completo de academia optativa',
+driveId: '1jo-Kbsi5ZcyxtmPMobwItJGodxCbgwli',
+date: '11/06/2025',
+size: '69.9 MB',
+available: true
+},
+{
+name: 'Tema 2: Resumen Límites y Continuidad',
+description: 'Introducción a límites y continuidad de funciones.',
+driveId: '1VKtRH1CmTpvGHbgtabE7y437fxkNmHMD',
+date: '09/06/2025',
+size: '677 KB',
+available: true
+},
+{
+name: 'Tema 2: Teoremas de continuidad y derivabilidad',
+description: 'Teoremas fundamentales de continuidad y derivabilidad.',
+driveId: '1Wjfuz3lNy0f-CY4pWGaSZvNTKrelCv4e',
+date: '09/06/2025',
+size: '1.1 MB',
+available: true
+},
+{
+name: 'Tema 3: Cálculo integral',
+description: 'Introducción al cálculo integral de funciones.',
+driveId: '1PTWBsQtDzizN9iL_pc2PRJxuGcoLBpyA',
+date: '09/06/2025',
+size: '2.1 MB',
+available: true
+},
+{
+name: 'Tema 4: Aplicaciones series de potencias',
+description: 'Aplicaciones de series de potencias y Fourier.',
+driveId: '1MHiIdBpMmTWO-thqzYVxBmkCk6pnx0OV',
+date: '09/06/2025',
+size: '603 KB',
+available: true
+}
+]
+},
+{
+name: 'Ejercicios',
+icon: 'fas fa-pencil-alt',
+files: [
+{
+name: 'Ejercicios Límites y Continuidad',
+description: 'Colección de ejercicios resueltos y propuestos.',
+driveId: '',
+date: '09/06/2025',
+size: '677 KB',
+available: false
+}
+]
+}
+]
+},
+{
+id: 'discreta',
+title: 'MAT. DISCRETA',
+icon: 'fas fa-calculator',
+description: 'Matemática discreta',
+folders: [
+{
+name: 'Temas Teóricos',
+icon: 'fas fa-book',
+files: [
+{
+name: 'PDF Completo Ejercicios',
+description: 'PDF completo de academia optativa',
+driveId: '1FdvWGu_L3uSqOviWrtectWMKbxrGOWVq',
+date: '26/12/2025',
+size: '26.2 MB',
+available: true
+}
+]
+}
+]
+},
+{
+id: 'algebra',
+title: 'ÁLGEBRA I',
+icon: 'fas fa-infinity',
+description: 'Estudio de estructuras algebraicas y sus propiedades.',
+folders: [
+{
+name: 'Temas Teóricos',
+icon: 'fas fa-book',
+files: [
+{
+name: 'Tema 1 Números reales y complejos',
+description: 'Apuntes detallados sobre números reales y complejos.',
+driveId: '1rHsqhLSKxNB54zoeMqL8LVkr8mbfWE6d',
+date: '05/06/2025',
+size: '311 KB',
+available: true
+},
+{
+name: 'Tema 2 Vectores, matrices y tensores',
+description: 'Apuntes detallados sobre vectores y matrices.',
+driveId: '1MefpLvEMMFWnxV3kI2hJA4fuLq_duOdo',
+date: '05/06/2025',
+size: '835 KB',
+available: true
+},
+{
+name: 'Tema 3 Sistemas de ecuaciones',
+description: 'Apuntes sobre sistemas de ecuaciones.',
+driveId: '1DrgDPO66eqST0t3iTbUSrrXKUpqgOLXH',
+date: '05/06/2025',
+size: '939 KB',
+available: true
+},
+{
+name: 'Tema 4 Subespacios vectoriales',
+description: 'Apuntes sobre subespacios vectoriales.',
+driveId: '1Pn7J0Lk7xdTNPfizuvZiFPFkxZ6RhoZo',
+date: '05/06/2025',
+size: '418 KB',
+available: true
+},
+{
+name: 'Tema 5 Transformaciones lineales',
+description: 'Apuntes sobre transformaciones lineales.',
+driveId: '1Hvc-8CaRwKn2bgk2VWByctIyUYmy3KXC',
+date: '05/06/2025',
+size: '672 KB',
+available: true
+},
+{
+name: 'Tema 6 Valores y vectores propios',
+description: 'Apuntes sobre valores y vectores propios.',
+driveId: '1CPZQCeEgHxt2fNIOzl_Ey7FnxoaljRLz',
+date: '05/06/2025',
+size: '909 KB',
+available: true
+},
+{
+name: 'Tema 7 Álgebra lineal numérica',
+description: 'Apuntes sobre álgebra lineal numérica.',
+driveId: '14T4TgM43089rD7ahD_MRx4LJTBn_ZYK5',
+date: '05/06/2025',
+size: '289 KB',
+available: true
+}
+]
+}
+]
+},
+{
+id: 'probabilidad',
+title: 'PROBABILIDAD',
+icon: 'fas fa-dice',
+description: 'Análisis de eventos aleatorios y modelos probabilísticos.',
+folders: [
+{
+name: 'Apuntes',
+icon: 'fas fa-clipboard',
+files: [
+{
+name: 'Conceptos Básicos de Probabilidad',
+description: 'Definiciones fundamentales y espacio muestral.',
+driveId: '1FCxllhzNUAU7TC1kxMHHQizb_uvSozy4',
+date: '12/03/2024',
+size: '1.9 MB',
+available: true
+}
+]
+}
+]
+},
+{
+id: 'estructuras-de-datos',
+title: 'ESTRUCTURAS DE DATOS',
+icon: 'fas fa-database',
+description: 'Estructuras de datos y algoritmos de ordenamiento.',
+folders: [
+{
+name: 'Temas Teóricos',
+icon: 'fas fa-book',
+files: [
+{
+name: 'Tema 1 Introducción',
+description: 'Apuntes sobre estructuras de datos.',
+driveId: '1NKMDySBCeGKN7bVqz3AHSCNlpNXwQEBf',
+date: '05/06/2025',
+size: '4.7 MB',
+available: true
+}
+]
+}
+]
+},
+{
+id: 'fundamento-computadores',
+title: 'FUNDAMENTOS DE COMPUTADORES',
+icon: 'fas fa-microchip',
+description: 'Principios de arquitectura de computadores.',
+folders: [
+{
+name: 'Exámenes años anteriores',
+icon: 'fas fa-lightbulb',
+files: [
+{
+name: 'Examen Junio 2024',
+description: '',
+driveId: '10Lz9gxl-vZIYwTfn7QGOiqf-ZCpnVO4S',
+date: '08/06/2024',
+size: '158 KB',
+available: true
+},
+{
+name: 'Examen Mayo 2024',
+description: '',
+driveId: '16b60CH5o-O-XL-etfHXBPif7NGOTtQiq',
+date: '08/06/2024',
+size: '168 KB',
+available: true
+},
+{
+name: 'Examen Enero 2023',
+description: '',
+driveId: '1M5aOym_FUwuxrZqA5g6EcSJZ85Fsugw8',
+date: '08/06/2024',
+size: '71 KB',
+available: true
+},
+{
+name: 'Examen Enero 2024',
+description: '',
+driveId: '1eirAgBdAwmt3yubOmIFon8COPGugROIS',
+date: '08/06/2024',
+size: '279 KB',
+available: true
+},
+{
+name: 'Examen Junio 2023',
+description: '',
+driveId: '1G40sYwMq8Q3Xxd7SzMKzMhpsCspq2qSX',
+date: '08/06/2024',
+size: '121 KB',
+available: true
+}
+]
+}
+]
+},
+{
+id: 'calculo-ii',
+title: 'CÁLCULO II',
+icon: 'fas fa-chart-line',
+description: 'Profundización en cálculo diferencial e integral.',
+folders: [
+{
+name: 'Integración',
+icon: 'fas fa-calculator',
+files: [
+{
+name: 'Integrales Indefinidas y Definidas',
+description: 'Técnicas de integración.',
+driveId: '1FCxllhzNUAU7TC1kxMHHQizb_uvSozy4',
+date: '07/03/2024',
+size: '2.3 MB',
+available: true
+}
+]
+},
+{
+name: 'Series y Otros',
+icon: 'fas fa-stream',
+files: [
+{
+name: 'Series y Sucesiones',
+description: 'Convergencia de series.',
+driveId: '1FCxllhzNUAU7TC1kxMHHQizb_uvSozy4',
+date: '21/03/2024',
+size: '2.6 MB',
+available: true
+}
+]
+}
+]
+},
+{
+id: 'optimizacion-i',
+title: 'OPTIMIZACIÓN I',
+icon: 'fas fa-bullseye',
+description: 'Métodos para encontrar soluciones óptimas.',
+folders: [
+{
+name: 'Programación',
+icon: 'fas fa-cogs',
+files: [
+{
+name: 'Programación Lineal',
+description: 'Introducción a la optimización lineal.',
+driveId: '1FCxllhzNUAU7TC1kxMHHQizb_uvSozy4',
+date: '14/02/2024',
+size: '2.4 MB',
+available: true
+}
+]
+}
+]
+}
+];
+
+let currentSubjectFolders = [];
+let currentFolderFiles = [];
+let currentSubjectId = null;
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', () => {
+renderSubjects();
+
+document.getElementById('searchInput').addEventListener('keypress', (e) => {
+if (e.key === 'Enter') filterSubjects();
+});
+
+document.getElementById('fileSearchInput').addEventListener('keypress', (e) => {
+if (e.key === 'Enter') filterFiles();
+});
+
+document.getElementById('backToFoldersBtn').onclick = () => showFilesPage(currentSubjectId);
+});
+
+// Renderizar asignaturas
+function renderSubjects() {
+const grid = document.getElementById('subjectsGrid');
+grid.innerHTML = '';
+
+subjectsData.forEach(subject => {
+const totalFiles = subject.folders.reduce((count, folder) => count + folder.files.length, 0);
+const card = document.createElement('div');
+card.className = 'subject-card';
+card.innerHTML = `
+<div class="subject-icon">
+<i class="${subject.icon}"></i>
+</div>
+<div class="subject-info">
+<h3>${subject.title}</h3>
+<p>${subject.description}</p>
+<div class="file-count">
+<i class="fas fa-file-pdf"></i>
+<span>${totalFiles} archivos en ${subject.folders.length} carpetas</span>
+</div>
+</div>
+`;
+card.addEventListener('click', () => showFilesPage(subject.id));
+grid.appendChild(card);
+});
+}
+
+// Filtrar asignaturas
+function filterSubjects() {
+const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+const grid = document.getElementById('subjectsGrid');
+const cards = grid.getElementsByClassName('subject-card');
+let found = false;
+
+for (let card of cards) {
+const title = card.querySelector('h3').textContent.toLowerCase();
+if (title.includes(searchTerm)) {
+card.style.display = '';
+found = true;
+} else {
+card.style.display = 'none';
+}
+}
+
+if (!found && searchTerm) {
+showToast('No se encontraron asignaturas.', true);
+}
+}
+
+// Mostrar carpetas de asignatura
+function showFilesPage(subjectId) {
+const subject = subjectsData.find(s => s.id === subjectId);
+if (!subject) return;
+
+currentSubjectId = subjectId;
+currentSubjectFolders = subject.folders;
+currentFolderFiles = [];
+
+document.getElementById('main-page').style.display = 'none';
+
+const filesPage = document.getElementById('files-page');
+filesPage.style.display = 'block';
+filesPage.style.animation = 'fadeIn 0.4s ease';
+
+document.getElementById('backToSubjectsBtn').style.display = 'flex';
+document.getElementById('backToFoldersBtn').style.display = 'none';
+
+document.getElementById('subject-title').textContent = subject.title;
+
+document.getElementById('fileSearchContainer').style.display = 'none';
+document.getElementById('filesGrid').style.display = 'none';
+document.getElementById('filesGrid').innerHTML = '';
+
+renderFolders(currentSubjectFolders);
+}
+
+// Renderizar carpetas
+function renderFolders(foldersToRender) {
+const grid = document.getElementById('foldersGrid');
+grid.innerHTML = '';
+grid.style.display = 'grid';
+
+if (foldersToRender.length === 0) {
+grid.innerHTML = '<p style="text-align: center; color: #666; margin-top: 30px;">No se encontraron carpetas.</p>';
+return;
+}
+
+foldersToRender.forEach(folder => {
+const card = document.createElement('div');
+card.className = 'folder-card';
+card.innerHTML = `
+<i class="${folder.icon}"></i>
+<h3>${folder.name}</h3>
+<p style="font-size: 0.9em; color: #888;">${folder.files.length} archivos</p>
+`;
+card.addEventListener('click', () => showFolderContents(folder));
+grid.appendChild(card);
+});
+}
+
+// Mostrar archivos de carpeta
+function showFolderContents(folder) {
+currentFolderFiles = folder.files;
+
+document.getElementById('foldersGrid').style.display = 'none';
+document.getElementById('fileSearchContainer').style.display = 'block';
+document.getElementById('filesGrid').style.display = 'grid';
+document.getElementById('fileSearchInput').value = '';
+
+document.getElementById('backToFoldersBtn').style.display = 'flex';
+document.getElementById('backToSubjectsBtn').style.display = 'flex';
+
+const subjectTitle = subjectsData.find(s => s.id === currentSubjectId).title;
+document.getElementById('subject-title').textContent = `${folder.name} (${subjectTitle})`;
+
+renderFiles(currentFolderFiles);
+}
+
+// Renderizar archivos
+function renderFiles(filesToRender) {
+const grid = document.getElementById('filesGrid');
+grid.innerHTML = '';
+
+if (filesToRender.length === 0) {
+grid.innerHTML = '<p style="text-align: center; color: #666; margin-top: 30px;">No hay archivos disponibles.</p>';
+return;
+}
+
+filesToRender.forEach(file => {
+const card = document.createElement('div');
+card.className = 'file-card';
+card.innerHTML = `
+<div class="file-header">
+<div class="file-title">${file.name}</div>
+<div class="file-actions">
+<button class="view-btn ${file.available ? '' : 'disabled-btn'}"
+title="${file.available ? 'Ver PDF' : 'No disponible'}">
+<i class="fas fa-eye"></i>
+</button>
+</div>
+</div>
+<div class="file-description">${file.description}</div>
+<div class="file-meta">
+<div class="file-date"><i class="far fa-calendar"></i> ${file.date}</div>
+<div class="file-size"><i class="fas fa-weight-hanging"></i> ${file.size}</div>
+</div>
+`;
+
+if (file.available) {
+card.querySelector('.view-btn').addEventListener('click', (e) => {
+e.stopPropagation();
+showPDF(file.driveId, file.name);
+});
+}
+
+grid.appendChild(card);
+});
+}
+
+// Filtrar archivos
+function filterFiles() {
+const searchTerm = document.getElementById('fileSearchInput').value.toLowerCase();
+const filtered = currentFolderFiles.filter(file =>
+file.name.toLowerCase().includes(searchTerm)
+);
+renderFiles(filtered);
+}
+
+// Mostrar PDF
+function showPDF(driveId, fileName) {
+const container = document.getElementById('pdfViewerContainer');
+const viewer = document.getElementById('pdfViewer');
+const title = document.getElementById('pdfTitle');
+
+title.textContent = fileName;
+viewer.src = `https://drive.google.com/file/d/${driveId}/preview`;
+container.style.display = 'flex';
+}
+
+// Ocultar PDF
+function hidePDF() {
+document.getElementById('pdfViewerContainer').style.display = 'none';
+document.getElementById('pdfViewer').src = '';
+}
+
+// Volver a página principal
+function showMainPage() {
+document.getElementById('files-page').style.display = 'none';
+document.getElementById('main-page').style.display = 'block';
+document.getElementById('main-page').style.animation = 'fadeIn 0.4s ease';
+document.getElementById('backToSubjectsBtn').style.display = 'none';
+document.getElementById('backToFoldersBtn').style.display = 'none';
+currentSubjectId = null;
+}
+
+document.addEventListener('touchstart', function() {}, {passive: true});
+</script>
 </body>
 </html>
