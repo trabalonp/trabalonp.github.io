@@ -1,645 +1,937 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mecanografía con Texto Aleatorio</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: #f5f7fa;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            color: #2c3e50;
-        }
-        
-        .typing-app {
-            width: 100%;
-            max-width: 900px;
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            margin: 20px auto;
-        }
-        
-        .app-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        
-        .app-title {
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-            color: #3498db;
-            font-weight: 600;
-        }
-        
-        .app-description {
-            font-size: 1.1rem;
-            max-width: 700px;
-            margin: 0 auto 15px;
-            line-height: 1.6;
-            color: #7f8c8d;
-        }
-        
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            border: 1px solid #e9ecef;
-        }
-        
-        .stat-box {
-            text-align: center;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #3498db;
-        }
-        
-        .stat-label {
-            font-size: 0.9rem;
-            color: #7f8c8d;
-            margin-top: 5px;
-        }
-        
-        .typing-container {
-            position: relative;
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 25px;
-            min-height: 200px;
-            border: 1px solid #e9ecef;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.03);
-        }
-        
-        #textDisplay {
-            font-size: 1.3rem;
-            line-height: 1.7;
-            min-height: 150px;
-            color: #34495e;
-            overflow-wrap: break-word;
-            letter-spacing: 0.3px;
-        }
-        
-        #textDisplay span {
-            padding: 2px 1px;
-            border-radius: 3px;
-            transition: all 0.2s;
-        }
-        
-        .correct {
-            color: #27ae60;
-            background-color: rgba(39, 174, 96, 0.08);
-        }
-        
-        .incorrect {
-            color: #e74c3c;
-            background-color: rgba(231, 76, 60, 0.08);
-            text-decoration: line-through;
-        }
-        
-        .current {
-            background-color: rgba(52, 152, 219, 0.15);
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { background-color: rgba(52, 152, 219, 0.15); }
-            50% { background-color: rgba(52, 152, 219, 0.3); }
-            100% { background-color: rgba(52, 152, 219, 0.15); }
-        }
-        
-        .input-container {
-            position: relative;
-            margin-bottom: 25px;
-        }
-        
-        #typingInput {
-            width: 100%;
-            height: 120px;
-            padding: 20px;
-            font-size: 1.1rem;
-            border-radius: 10px;
-            border: 1px solid #e9ecef;
-            background: #f8f9fa;
-            color: #2c3e50;
-            resize: none;
-            outline: none;
-            transition: all 0.3s;
-            line-height: 1.6;
-        }
-        
-        #typingInput:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-            background: white;
-        }
-        
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 12px 28px;
-            font-size: 1rem;
-            border: none;
-            border-radius: 8px;
-            background: #3498db;
-            color: white;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.25);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .btn:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.3);
-        }
-        
-        .btn:active {
-            transform: translateY(1px);
-        }
-        
-        .btn-reset {
-            background: #95a5a6;
-            box-shadow: 0 4px 10px rgba(149, 165, 166, 0.2);
-        }
-        
-        .btn-reset:hover {
-            background: #7f8c8d;
-            box-shadow: 0 6px 15px rgba(149, 165, 166, 0.25);
-        }
-        
-        .difficulty {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .difficulty-btn {
-            padding: 10px 22px;
-            font-size: 0.95rem;
-            border: none;
-            border-radius: 8px;
-            background: #ecf0f1;
-            color: #7f8c8d;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-        
-        .difficulty-btn.active, .difficulty-btn:hover {
-            background: #3498db;
-            color: white;
-        }
-        
-        .instructions {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 25px;
-            font-size: 0.95rem;
-            border: 1px solid #e9ecef;
-        }
-        
-        .instructions h3 {
-            margin-bottom: 15px;
-            color: #3498db;
-            text-align: center;
-        }
-        
-        .instructions ul {
-            padding-left: 22px;
-        }
-        
-        .instructions li {
-            margin-bottom: 8px;
-            line-height: 1.5;
-            color: #34495e;
-        }
-        
-        .app-footer {
-            margin-top: 25px;
-            text-align: center;
-            font-size: 0.85rem;
-            color: #7f8c8d;
-        }
-        
-        @media (max-width: 768px) {
-            .typing-app {
-                padding: 25px;
-            }
-            
-            .app-title {
-                font-size: 1.9rem;
-            }
-            
-            #textDisplay {
-                font-size: 1.15rem;
-            }
-            
-            .stat-value {
-                font-size: 1.5rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .typing-app {
-                padding: 20px;
-            }
-            
-            .app-title {
-                font-size: 1.7rem;
-            }
-            
-            #textDisplay {
-                font-size: 1.05rem;
-            }
-            
-            #typingInput {
-                height: 100px;
-                padding: 15px;
-            }
-            
-            .controls {
-                gap: 10px;
-            }
-            
-            .btn {
-                padding: 10px 20px;
-                font-size: 0.95rem;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mecanografía - ONELIFE</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<style>
+:root {
+--primary: #00f7ff;
+--secondary: #7700ff;
+--accent: #ff00c8;
+--success: #00ff9d;
+--dark: #0a0a18;
+--light: #f0f0f0;
+--gray: #a0a0c0;
+--transition: all 0.3s ease;
+--radius: 12px;
+--shadow: 0 0 20px rgba(0,247,255,0.3);
+--day-primary: #5d8aa8;
+--day-secondary: #8a83c2;
+--day-accent: #b19cd9;
+--day-bg: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+--day-text: #495057;
+--day-card: rgba(255,255,255,0.95);
+--day-border: rgba(93,138,168,0.2);
+--day-glow: 0 0 10px rgba(93,138,168,0.2);
+--day-shadow: 0 0 15px rgba(0,0,0,0.05);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+font-family:'Segoe UI',Tahoma,sans-serif;
+background:linear-gradient(135deg,#0a0a18 0%,#12122e 100%);
+color:#f0f0f0;
+display:flex; flex-direction:column; min-height:100vh;
+overflow-x:hidden; transition:var(--transition);
+}
+body.light-mode { background:var(--day-bg); color:var(--day-text); }
+
+.bg-grid {
+position:fixed; top:0; left:0; width:100%; height:100%;
+background:linear-gradient(rgba(0,247,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,247,255,0.05) 1px,transparent 1px);
+background-size:40px 40px; z-index:-1;
+}
+.light-mode .bg-grid {
+background:linear-gradient(rgba(93,138,168,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(93,138,168,0.03) 1px,transparent 1px);
+background-size:40px 40px;
+}
+.floating-shapes { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; overflow:hidden; }
+.shape { position:absolute; border-radius:50%; opacity:0.3; filter:blur(60px); }
+.shape-1 { width:300px; height:300px; background:var(--primary); top:-100px; left:-100px; animation:float 15s infinite ease-in-out; }
+.shape-2 { width:500px; height:500px; background:var(--secondary); bottom:-200px; right:-200px; animation:float 18s infinite ease-in-out reverse; }
+.shape-3 { width:200px; height:200px; background:var(--accent); top:50%; left:70%; animation:float 12s infinite ease-in-out 2s; }
+.light-mode .shape-1 { background:var(--day-primary); opacity:0.1; }
+.light-mode .shape-2 { background:var(--day-secondary); opacity:0.08; }
+.light-mode .shape-3 { background:var(--day-accent); opacity:0.06; }
+@keyframes float {
+0%,100%{transform:translate(0,0) rotate(0deg);}
+25%{transform:translate(-30px,40px) rotate(5deg);}
+50%{transform:translate(20px,-30px) rotate(-5deg);}
+75%{transform:translate(30px,30px) rotate(5deg);}
+}
+.scan-lines {
+position:fixed; top:0; left:0; width:100%; height:100%;
+background:linear-gradient(transparent 50%,rgba(0,0,0,0.1) 50%);
+background-size:100% 4px; z-index:0; pointer-events:none; opacity:0.2;
+}
+.light-mode .scan-lines { opacity:0.05; }
+
+/* HEADER */
+header {
+background:rgba(10,10,24,0.85); backdrop-filter:blur(12px);
+border-bottom:1px solid rgba(0,247,255,0.2);
+position:sticky; top:0; z-index:1000; padding:1rem 0;
+overflow:hidden; transition:var(--transition);
+}
+.light-mode header { background:rgba(248,249,250,0.92); border-bottom:1px solid var(--day-border); }
+.neon-cascade { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:-1; }
+.cascade-particle {
+position:absolute; width:2px; height:15px;
+background:var(--primary); box-shadow:0 0 10px var(--primary),0 0 20px var(--primary);
+opacity:0; border-radius:2px;
+}
+.header-container {
+max-width:1200px; margin:0 auto; padding:0 2rem;
+display:flex; justify-content:space-between; align-items:center; position:relative;
+}
+.logo {
+font-size:1.8rem; font-weight:bold; color:var(--primary); text-decoration:none;
+font-family:'Courier New',monospace; letter-spacing:1px;
+text-shadow:0 0 5px var(--primary),0 0 10px var(--primary);
+animation:flicker 5s infinite alternate; transition:var(--transition);
+}
+.light-mode .logo { color:var(--day-primary); text-shadow:0 0 5px rgba(93,138,168,0.3); animation:none; }
+.logo:hover { color:#fff; animation:none; text-shadow:0 0 15px var(--primary),0 0 25px var(--primary),0 0 40px var(--primary); }
+@keyframes flicker {
+0%,19%,21%,23%,25%,54%,56%,100%{opacity:1;text-shadow:0 0 5px var(--primary),0 0 10px var(--primary);}
+20%,24%,55%{opacity:0.8;text-shadow:0 0 7px var(--primary),0 0 15px var(--primary),0 0 25px var(--secondary);}
+}
+.header-right { display:flex; align-items:center; gap:1.5rem; }
+nav ul { list-style:none; display:flex; gap:2rem; align-items:center; }
+nav ul li a {
+text-decoration:none; color:var(--gray); font-weight:600;
+transition:var(--transition); position:relative; padding:0.5rem 0;
+}
+.light-mode nav ul li a { color:#6c757d; }
+nav ul li a:hover { color:var(--primary); }
+.light-mode nav ul li a:hover { color:var(--day-primary); }
+nav ul li a::after {
+content:''; position:absolute; bottom:0; left:0; width:0; height:2px;
+background:var(--primary); transition:var(--transition);
+}
+nav ul li a:hover::after { width:100%; }
+.theme-toggle {
+background:transparent; border:none; color:var(--gray); cursor:pointer;
+font-size:1.2rem; width:40px; height:40px; border-radius:50%;
+display:flex; align-items:center; justify-content:center; transition:var(--transition);
+}
+.theme-toggle:hover { color:var(--primary); transform:rotate(30deg); }
+.light-mode .theme-toggle:hover { color:var(--day-primary); }
+.menu-toggle { display:none; color:var(--primary); font-size:1.5rem; cursor:pointer; transition:var(--transition); }
+.light-mode .menu-toggle { color:var(--day-primary); }
+
+/* Auth */
+.auth-area { display:flex; align-items:center; gap:0.75rem; visibility:hidden; opacity:0; transition:opacity 0.15s ease; }
+.auth-area.ready { visibility:visible; opacity:1; }
+#loginBtn {
+display:inline-flex; align-items:center; gap:0.5rem;
+padding:0.45rem 1.1rem; border-radius:50px;
+background:rgba(0,247,255,0.1); color:var(--primary);
+border:1px solid rgba(0,247,255,0.35);
+font-size:0.87rem; font-weight:600; cursor:pointer;
+transition:var(--transition); white-space:nowrap;
+font-family:'Segoe UI',Tahoma,sans-serif;
+}
+#loginBtn:hover { background:rgba(0,247,255,0.22); transform:translateY(-2px); box-shadow:0 0 18px rgba(0,247,255,0.35); }
+.light-mode #loginBtn { background:rgba(93,138,168,0.1); color:var(--day-primary); border-color:var(--day-border); }
+.light-mode #loginBtn:hover { background:rgba(93,138,168,0.2); }
+#userAvatar {
+width:36px; height:36px; border-radius:50%; border:2px solid var(--primary);
+object-fit:cover; cursor:pointer; transition:var(--transition);
+display:none; box-shadow:0 0 10px rgba(0,247,255,0.4);
+}
+.light-mode #userAvatar { border-color:var(--day-primary); }
+#userAvatar:hover { transform:scale(1.1); box-shadow:0 0 18px rgba(0,247,255,0.6); }
+
+/* OVERLAY */
+#overlay {
+position:fixed; inset:0; background:rgba(0,0,0,0.55);
+z-index:1998; opacity:0; pointer-events:none;
+transition:opacity 0.3s; backdrop-filter:blur(3px);
+}
+#overlay.open { opacity:1; pointer-events:all; }
+
+/* SIDEBAR */
+#sidebar {
+position:fixed; top:0; right:-360px; width:320px; max-width:90vw; height:100%;
+background:rgba(10,10,30,0.97); border-left:1px solid rgba(0,247,255,0.25);
+backdrop-filter:blur(18px); z-index:1999;
+transition:right 0.35s cubic-bezier(0.4,0,0.2,1);
+display:flex; flex-direction:column; overflow:hidden;
+}
+.light-mode #sidebar { background:rgba(248,249,250,0.98); border-left-color:var(--day-border); }
+#sidebar.open { right:0; }
+.sidebar-header {
+display:flex; justify-content:space-between; align-items:center;
+padding:1.2rem 1.4rem; border-bottom:1px solid rgba(0,247,255,0.15); flex-shrink:0;
+}
+.light-mode .sidebar-header { border-bottom-color:var(--day-border); }
+.sidebar-header h3 { font-family:'Courier New',monospace; font-size:1rem; color:var(--primary); letter-spacing:1px; }
+.light-mode .sidebar-header h3 { color:var(--day-primary); }
+.sidebar-close {
+background:none; border:none; color:var(--gray); font-size:1.1rem; cursor:pointer;
+width:32px; height:32px; border-radius:50%;
+display:flex; align-items:center; justify-content:center; transition:var(--transition);
+}
+.sidebar-close:hover { color:var(--primary); background:rgba(0,247,255,0.1); }
+.sidebar-body { flex:1; overflow-y:auto; padding:1.5rem 1.4rem; display:flex; flex-direction:column; gap:1.4rem; }
+.sidebar-body::-webkit-scrollbar { width:4px; }
+.sidebar-body::-webkit-scrollbar-track { background:transparent; }
+.sidebar-body::-webkit-scrollbar-thumb { background:rgba(0,247,255,0.2); border-radius:2px; }
+.profile-block {
+display:flex; flex-direction:column; align-items:center; gap:0.85rem;
+padding:1.5rem 1.5rem 1.2rem; background:rgba(0,247,255,0.04);
+border:1px solid rgba(0,247,255,0.12); border-radius:var(--radius);
+}
+.light-mode .profile-block { background:rgba(93,138,168,0.05); border-color:var(--day-border); }
+.avatar-wrapper { position:relative; width:82px; height:82px; flex-shrink:0; }
+#sidebarAvatar {
+width:82px; height:82px; border-radius:50%; border:3px solid var(--primary);
+object-fit:cover; box-shadow:0 0 20px rgba(0,247,255,0.4);
+background:rgba(0,247,255,0.05); display:block;
+}
+.light-mode #sidebarAvatar { border-color:var(--day-primary); }
+#editAvatarBtn {
+position:absolute; bottom:0; right:0; width:26px; height:26px; border-radius:50%;
+background:var(--primary); border:2px solid rgba(10,10,30,0.9);
+color:#000; font-size:0.65rem; cursor:pointer;
+display:flex; align-items:center; justify-content:center;
+transition:var(--transition); box-shadow:0 0 8px rgba(0,247,255,0.5);
+}
+.light-mode #editAvatarBtn { background:var(--day-primary); border-color:rgba(248,249,250,0.9); color:#fff; }
+#editAvatarBtn:hover { transform:scale(1.15); box-shadow:0 0 14px rgba(0,247,255,0.7); }
+.profile-name { font-size:1.05rem; font-weight:700; text-align:center; }
+.profile-email { font-size:0.78rem; color:var(--gray); text-align:center; word-break:break-all; }
+#avatarBar {
+display:none; align-items:center; gap:0.5rem; padding:0.7rem 0.9rem;
+background:rgba(10,10,30,0.97); border:1px solid rgba(0,247,255,0.35);
+border-radius:50px; box-shadow:0 0 24px rgba(0,247,255,0.25);
+animation:slideUp 0.25s ease-out; width:100%;
+}
+.light-mode #avatarBar { background:rgba(248,249,250,0.98); border-color:var(--day-border); box-shadow:var(--day-shadow); }
+#avatarBar.visible { display:flex; }
+@keyframes slideUp { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+#avatarBar i { color:var(--primary); font-size:0.85rem; flex-shrink:0; }
+.light-mode #avatarBar i { color:var(--day-primary); }
+#avatarUrlInput {
+flex:1; background:transparent; border:none; outline:none;
+color:#fff; font-size:0.83rem; font-family:'Segoe UI',Tahoma,sans-serif; min-width:0;
+}
+.light-mode #avatarUrlInput { color:var(--day-text); }
+#avatarUrlInput::placeholder { color:#555; }
+.light-mode #avatarUrlInput::placeholder { color:#aaa; }
+.bar-btn {
+width:28px; height:28px; border-radius:50%; border:none; cursor:pointer;
+display:flex; align-items:center; justify-content:center;
+font-size:0.75rem; flex-shrink:0; transition:var(--transition);
+}
+#applyAvatarBtn { background:var(--primary); color:#000; }
+#applyAvatarBtn:hover { background:#00d4dc; transform:scale(1.1); }
+#cancelAvatarBtn { background:rgba(255,60,60,0.15); color:#ff6b6b; border:1px solid rgba(255,60,60,0.3); }
+#cancelAvatarBtn:hover { background:rgba(255,60,60,0.3); transform:scale(1.1); }
+.info-card { background:rgba(0,247,255,0.04); border:1px solid rgba(0,247,255,0.1); border-radius:var(--radius); padding:1rem 1.1rem; }
+.light-mode .info-card { background:rgba(93,138,168,0.05); border-color:var(--day-border); }
+.info-card-title { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--gray); margin-bottom:0.65rem; font-weight:600; }
+.info-row { display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; padding:0.3rem 0; color:var(--light); }
+.light-mode .info-row { color:var(--day-text); }
+.info-row i { color:var(--primary); width:16px; text-align:center; font-size:0.9rem; }
+.light-mode .info-row i { color:var(--day-primary); }
+.sidebar-footer { padding:1rem 1.4rem 1.4rem; border-top:1px solid rgba(0,247,255,0.12); flex-shrink:0; }
+.light-mode .sidebar-footer { border-top-color:var(--day-border); }
+#logoutBtn {
+width:100%; padding:0.75rem; border-radius:var(--radius);
+background:rgba(255,60,60,0.1); color:#ff6b6b;
+border:1px solid rgba(255,60,60,0.3); font-size:0.9rem; font-weight:700;
+cursor:pointer; transition:var(--transition);
+display:flex; align-items:center; justify-content:center; gap:0.6rem;
+font-family:'Segoe UI',Tahoma,sans-serif;
+}
+#logoutBtn:hover { background:rgba(255,60,60,0.22); box-shadow:0 0 15px rgba(255,60,60,0.3); transform:translateY(-1px); }
+
+/* TOAST */
+#toast {
+position:fixed; bottom:2rem; left:50%;
+transform:translateX(-50%) translateY(20px);
+background:rgba(0,247,255,0.12); border:1px solid rgba(0,247,255,0.35);
+color:var(--primary); padding:0.7rem 1.6rem; border-radius:50px;
+font-size:0.88rem; font-weight:600; z-index:3000; opacity:0;
+pointer-events:none; transition:all 0.35s ease; backdrop-filter:blur(10px); white-space:nowrap;
+}
+#toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+#toast.error { background:rgba(255,60,60,0.12); border-color:rgba(255,60,60,0.35); color:#ff6b6b; }
+
+/* ══════ TYPING APP ══════ */
+.typing-app {
+width:100%; max-width:900px; margin:2rem auto; padding:0 2rem; flex:1;
+}
+
+.app-title {
+text-align:center; font-size:2.2rem; font-weight:700; margin-bottom:0.5rem;
+background:linear-gradient(90deg,var(--primary),var(--secondary));
+-webkit-background-clip:text; background-clip:text; color:transparent;
+font-family:'Courier New',monospace; letter-spacing:2px;
+}
+.light-mode .app-title {
+background:linear-gradient(90deg,var(--day-primary),var(--day-secondary));
+-webkit-background-clip:text; background-clip:text; color:transparent;
+}
+
+.app-description {
+text-align:center; font-size:1rem; color:var(--gray); margin-bottom:2rem; line-height:1.6;
+}
+.light-mode .app-description { color:#6c757d; }
+
+.stats-container {
+display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+gap:12px; padding:15px; border-radius:var(--radius); margin-bottom:2rem;
+background:rgba(0,247,255,0.04); border:1px solid rgba(0,247,255,0.15);
+}
+.light-mode .stats-container { background:rgba(93,138,168,0.05); border-color:var(--day-border); }
+
+.stat-box {
+text-align:center; padding:12px;
+background:rgba(10,10,24,0.5); border-radius:10px;
+border:1px solid rgba(0,247,255,0.1);
+}
+.light-mode .stat-box { background:var(--day-card); border-color:var(--day-border); }
+
+.stat-value { font-size:1.8rem; font-weight:bold; color:var(--primary); }
+.light-mode .stat-value { color:var(--day-primary); }
+
+.stat-label { font-size:0.85rem; color:var(--gray); margin-top:4px; }
+.light-mode .stat-label { color:#6c757d; }
+
+.typing-container {
+position:relative; border-radius:var(--radius); padding:25px; margin-bottom:2rem;
+min-height:200px; border:1px solid rgba(0,247,255,0.2);
+background:rgba(10,10,24,0.5); backdrop-filter:blur(10px);
+}
+.light-mode .typing-container { background:var(--day-card); border-color:var(--day-border); }
+
+#textDisplay {
+font-size:1.25rem; line-height:1.8; min-height:150px;
+color:var(--gray); overflow-wrap:break-word; letter-spacing:0.3px;
+font-family:'Courier New',monospace;
+}
+.light-mode #textDisplay { color:#495057; }
+
+#textDisplay span { padding:2px 1px; border-radius:3px; transition:all 0.15s; }
+
+.correct { color:var(--success) !important; background-color:rgba(0,255,157,0.1); }
+.light-mode .correct { color:#27ae60 !important; background-color:rgba(39,174,96,0.08); }
+
+.incorrect { color:#ff6b6b !important; background-color:rgba(255,60,60,0.1); text-decoration:line-through; }
+.light-mode .incorrect { color:#e74c3c !important; background-color:rgba(231,76,60,0.08); }
+
+.current { background-color:rgba(0,247,255,0.2); animation:pulse 1.5s infinite; }
+.light-mode .current { background-color:rgba(93,138,168,0.2); }
+
+@keyframes pulse {
+0% { background-color:rgba(0,247,255,0.15); }
+50% { background-color:rgba(0,247,255,0.35); }
+100% { background-color:rgba(0,247,255,0.15); }
+}
+
+#typingInput {
+width:100%; height:120px; padding:20px; font-size:1.05rem;
+border-radius:var(--radius); border:1px solid rgba(0,247,255,0.2);
+background:rgba(10,10,24,0.4); color:var(--light);
+resize:none; outline:none; transition:var(--transition);
+line-height:1.6; font-family:'Segoe UI',Tahoma,sans-serif;
+margin-bottom:1.5rem;
+}
+.light-mode #typingInput {
+background:rgba(255,255,255,0.8); border-color:var(--day-border); color:var(--day-text);
+}
+#typingInput:focus {
+border-color:var(--primary); box-shadow:0 0 15px rgba(0,247,255,0.2);
+}
+.light-mode #typingInput:focus {
+border-color:var(--day-primary); box-shadow:var(--day-shadow);
+}
+#typingInput::placeholder { color:#555; }
+.light-mode #typingInput::placeholder { color:#aaa; }
+
+.controls {
+display:flex; justify-content:center; gap:15px; flex-wrap:wrap;
+}
+
+.btn-typing {
+padding:12px 28px; font-size:1rem; border:none; border-radius:var(--radius);
+color:#fff; cursor:pointer; font-weight:600; transition:var(--transition);
+display:flex; align-items:center; gap:8px;
+font-family:'Segoe UI',Tahoma,sans-serif;
+}
+
+.btn-start {
+background:linear-gradient(135deg,var(--primary),var(--secondary));
+box-shadow:0 4px 15px rgba(0,247,255,0.3);
+}
+.light-mode .btn-start {
+background:linear-gradient(135deg,var(--day-primary),var(--day-secondary));
+}
+.btn-start:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,247,255,0.4); }
+
+.btn-reset-typing {
+background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
+}
+.light-mode .btn-reset-typing {
+background:rgba(0,0,0,0.05); border:1px solid var(--day-border); color:var(--day-text);
+}
+.btn-reset-typing:hover { background:rgba(255,255,255,0.2); transform:translateY(-2px); }
+
+.difficulty {
+display:flex; justify-content:center; gap:12px; margin-top:1.5rem; flex-wrap:wrap;
+}
+
+.difficulty-btn {
+padding:10px 22px; font-size:0.9rem; border:none; border-radius:var(--radius);
+background:rgba(0,247,255,0.08); color:var(--gray); cursor:pointer;
+transition:var(--transition); font-weight:500;
+border:1px solid rgba(0,247,255,0.1);
+}
+.light-mode .difficulty-btn {
+background:rgba(93,138,168,0.08); color:#6c757d; border-color:var(--day-border);
+}
+.difficulty-btn.active, .difficulty-btn:hover {
+background:rgba(0,247,255,0.2); color:var(--primary);
+border-color:var(--primary);
+}
+.light-mode .difficulty-btn.active, .light-mode .difficulty-btn:hover {
+background:rgba(93,138,168,0.2); color:var(--day-primary); border-color:var(--day-primary);
+}
+
+.instructions {
+background:rgba(0,247,255,0.04); border:1px solid rgba(0,247,255,0.1);
+padding:20px; border-radius:var(--radius); margin-top:2rem;
+}
+.light-mode .instructions { background:rgba(93,138,168,0.05); border-color:var(--day-border); }
+
+.instructions h3 {
+margin-bottom:15px; color:var(--primary); text-align:center;
+font-family:'Courier New',monospace;
+}
+.light-mode .instructions h3 { color:var(--day-primary); }
+
+.instructions ul { padding-left:22px; }
+
+.instructions li { margin-bottom:8px; line-height:1.5; color:var(--gray); }
+.light-mode .instructions li { color:#6c757d; }
+
+/* RESPONSIVE */
+@media (max-width:900px) {
+nav ul {
+display:none; flex-direction:column; position:absolute;
+top:100%; left:0; width:100%; background:rgba(10,10,24,0.95);
+backdrop-filter:blur(10px); padding:1rem 0;
+border-top:1px solid rgba(0,247,255,0.2); z-index:999;
+}
+.light-mode nav ul { background:rgba(248,249,250,0.95); border-top-color:var(--day-border); }
+nav ul.active { display:flex; }
+.menu-toggle { display:block; }
+.header-right { gap:0.75rem; }
+}
+@media (max-width:768px) {
+.typing-app { padding:0 1rem; }
+.app-title { font-size:1.8rem; }
+#textDisplay { font-size:1.1rem; }
+.stat-value { font-size:1.5rem; }
+.header-container { padding:0 1rem; }
+}
+@media (max-width:600px) {
+#loginBtn span { display:none; }
+.app-title { font-size:1.5rem; }
+#textDisplay { font-size:1rem; }
+#typingInput { height:100px; padding:15px; }
+.btn-typing { padding:10px 20px; font-size:0.9rem; }
+}
+</style>
 </head>
 <body>
-    <div class="typing-app">
-        <div class="app-header">
-            <h1 class="app-title">Mecanografía con Texto Aleatorio</h1>
-            <p class="app-description">Escribe el texto generado automáticamente. Las letras correctas se marcarán en verde y los errores en rojo.</p>
-        </div>
-        
-        <div class="stats-container">
-            <div class="stat-box">
-                <div class="stat-value" id="accuracy">100%</div>
-                <div class="stat-label">Precisión</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-value" id="typed">0</div>
-                <div class="stat-label">Caracteres</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-value" id="errors">0</div>
-                <div class="stat-label">Errores</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-value" id="time">0s</div>
-                <div class="stat-label">Tiempo</div>
-            </div>
-        </div>
-        
-        <div class="typing-container">
-            <div id="textDisplay"></div>
-        </div>
-        
-        <div class="input-container">
-            <textarea id="typingInput" placeholder="Comienza a escribir aquí..."></textarea>
-        </div>
-        
-        <div class="controls">
-            <button class="btn" id="startBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
-                </svg>
-                Comenzar
-            </button>
-            <button class="btn btn-reset" id="resetBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-                </svg>
-                Reiniciar
-            </button>
-        </div>
-        
-        <div class="difficulty">
-            <button class="difficulty-btn active" data-difficulty="short">Corto (50-70 palabras)</button>
-            <button class="difficulty-btn" data-difficulty="medium">Medio (100-120 palabras)</button>
-            <button class="difficulty-btn" data-difficulty="long">Largo (150-200 palabras)</button>
-        </div>
-        
-        <div class="instructions">
-            <h3>¿Cómo funciona?</h3>
-            <ul>
-                <li>Selecciona la longitud del texto (Corto, Medio o Largo)</li>
-                <li>Haz clic en "Comenzar" para generar un nuevo texto aleatorio</li>
-                <li>Escribe exactamente el texto que aparece arriba</li>
-                <li>Las letras correctas se mostrarán en <span style="color:#27ae60;">verde</span></li>
-                <li>Los errores se mostrarán en <span style="color:#e74c3c;">rojo</span> y tachados</li>
-                <li>La posición actual se resalta con un fondo azul claro</li>
-                <li>Usa "Reiniciar" para comenzar un nuevo ejercicio</li>
-            </ul>
-        </div>
-        
-        <div class="app-footer">
-            <p>Herramienta de mecanografía con texto aleatorio &copy; 2023</p>
-        </div>
-    </div>
+<div class="bg-grid"></div>
+<div class="floating-shapes">
+<div class="shape shape-1"></div>
+<div class="shape shape-2"></div>
+<div class="shape shape-3"></div>
+</div>
+<div class="scan-lines"></div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Elementos DOM
-            const textDisplay = document.getElementById('textDisplay');
-            const typingInput = document.getElementById('typingInput');
-            const startBtn = document.getElementById('startBtn');
-            const resetBtn = document.getElementById('resetBtn');
-            const accuracyDisplay = document.getElementById('accuracy');
-            const typedDisplay = document.getElementById('typed');
-            const errorsDisplay = document.getElementById('errors');
-            const timeDisplay = document.getElementById('time');
-            const difficultyButtons = document.querySelectorAll('.difficulty-btn');
-            
-            // Variables de estado
-            let originalText = '';
-            let startTime = 0;
-            let timerInterval = null;
-            let currentDifficulty = 'short';
-            let exerciseStarted = false;
-            
-            // Banco de palabras para generar texto aleatorio
-            const wordBank = [
-                "el", "la", "los", "las", "un", "una", "unos", "unas", "yo", "tú", 
-                "él", "ella", "nosotros", "vosotros", "ellos", "este", "ese", "aquel",
-                "mi", "tu", "su", "nuestro", "vuestro", "mío", "tuyo", "suyo", "qué",
-                "quién", "cuál", "cuánto", "dónde", "cuándo", "cómo", "por", "para",
-                "con", "sin", "sobre", "bajo", "entre", "hacia", "desde", "hasta",
-                "durante", "mediante", "según", "ante", "bajo", "cabe", "contra",
-                "desde", "durante", "en", "entre", "hacia", "hasta", "mediante",
-                "para", "por", "según", "sin", "sobre", "tras", "a", "ante", "bajo",
-                "cabe", "con", "contra", "de", "desde", "durante", "en", "entre",
-                "hacia", "hasta", "mediante", "para", "por", "según", "sin", "sobre",
-                "tras", "y", "o", "pero", "aunque", "mas", "sino", "porque", "pues",
-                "si", "como", "cuando", "mientras", "que", "aquel", "cuyo", "donde",
-                "como", "cuando", "mientras", "aunque", "si", "porque", "pues", "pero",
-                "sino", "mas", "y", "o", "bien", "sea", "ya", "tan", "tanto", "tal",
-                "así", "también", "además", "incluso", "hasta", "aun", "siquiera",
-                "no", "nunca", "jamás", "tampoco", "nadie", "nada", "ninguno", "ni",
-                "sí", "siempre", "también", "claro", "efectivamente", "ciertamente",
-                "quizá", "acaso", "tal", "vez", "puede", "ser", "deber", "haber",
-                "estar", "tener", "hacer", "poder", "decir", "ir", "ver", "dar",
-                "saber", "querer", "llegar", "pasar", "dejar", "llevar", "encontrar",
-                "seguir", "venir", "pensar", "parecer", "hablar", "llevar", "dejar",
-                "empezar", "esperar", "buscar", "existir", "entrar", "trabajar",
-                "necesitar", "ocurrir", "recordar", "pedir", "permitir", "aparecer",
-                "considerar", "intentar", "lograr", "incluir", "continuar", "cambiar",
-                "presentar", "crear", "recibir", "abrir", "mantener", "explicar",
-                "conseguir", "formar", "traer", "comenzar", "servir", "sacar", "dejar",
-                "terminar", "permitir", "escribir", "ofrecer", "leer", "caer", "conocer",
-                "vivir", "sentir", "tratar", "mirar", "contar", "empezar", "esperar",
-                "buscar", "existir", "entrar", "trabajar", "necesitar", "ocurrir",
-                "recordar", "pedir", "permitir", "aparecer", "considerar", "intentar",
-                "lograr", "incluir", "continuar", "cambiar", "presentar", "crear",
-                "recibir", "abrir", "mantener", "explicar", "conseguir", "formar",
-                "traer", "comenzar", "servir", "sacar", "dejar", "terminar", "permitir",
-                "escribir", "ofrecer", "leer", "caer", "conocer", "vivir", "sentir",
-                "tratar", "mirar", "contar", "ganar", "elegir", "desarrollar", "entender",
-                "aceptar", "valorar", "mostrar", "comprender", "demostrar", "construir",
-                "ocurrir", "responder", "estudiar", "mejorar", "analizar", "descubrir",
-                "producir", "publicar", "compartir", "superar", "controlar", "defender",
-                "demostrar", "diseñar", "distinguir", "ejercer", "elevar", "eliminar",
-                "garantizar", "generar", "gestionar", "impulsar", "incrementar", "indicar",
-                "informar", "iniciar", "inspirar", "instalar", "interpretar", "intervenir",
-                "introducir", "inventar", "invertir", "invitar", "jugar", "juzgar",
-                "lanzar", "limitar", "lograr", "manejar", "manifestar", "mantener",
-                "marcar", "medir", "mejorar", "mencionar", "mostrar", "mover", "nacer",
-                "necesitar", "negociar", "notar", "obtener", "ofrecer", "operar",
-                "organizar", "orientar", "originar", "participar", "pensar", "perder",
-                "permitir", "perseguir", "plantear", "poseer", "precisar", "preferir",
-                "preguntar", "preparar", "presentar", "presionar", "pretender", "prevenir",
-                "probar", "proceder", "producir", "promover", "proponer", "proteger",
-                "protestar", "proveer", "publicar", "quedar", "realizar", "recibir",
-                "reclamar", "reconocer", "recordar", "reducir", "referir", "reflejar",
-                "registrar", "regular", "relacionar", "representar", "requerir", "resolver",
-                "responder", "resultar", "reunir", "revelar", "saber", "satisfacer",
-                "seguir", "seleccionar", "señalar", "separar", "ser", "servir", "significar",
-                "situar", "sobrevivir", "solicitar", "someter", "sonar", "subir", "sufrir",
-                "sugerir", "superar", "suponer", "surgir", "sustituir", "tener", "terminar",
-                "tocar", "tomar", "trabajar", "traducir", "traer", "tratar", "unir", "usar",
-                "utilizar", "valer", "variar", "vender", "venir", "ver", "viajar", "vivir",
-                "volver", "votar", "yacer"
-            ];
-            
-            // Inicializar
-            generateRandomText();
-            updateStats();
-            
-            // Configurar eventos
-            typingInput.addEventListener('input', handleTyping);
-            startBtn.addEventListener('click', startExercise);
-            resetBtn.addEventListener('click', resetExercise);
-            
-            difficultyButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    setDifficulty(this.dataset.difficulty);
-                });
-            });
-            
-            // Funciones
-            function setDifficulty(difficulty) {
-                currentDifficulty = difficulty;
-                
-                // Actualizar botones de dificultad
-                difficultyButtons.forEach(btn => {
-                    if (btn.dataset.difficulty === difficulty) {
-                        btn.classList.add('active');
-                    } else {
-                        btn.classList.remove('active');
-                    }
-                });
-                
-                // Generar nuevo texto según la dificultad
-                generateRandomText();
-                resetExercise();
-            }
-            
-            function generateRandomText() {
-                let wordCount;
-                
-                switch(currentDifficulty) {
-                    case 'short':
-                        wordCount = Math.floor(Math.random() * 21) + 50; // 50-70 palabras
-                        break;
-                    case 'medium':
-                        wordCount = Math.floor(Math.random() * 21) + 100; // 100-120 palabras
-                        break;
-                    case 'long':
-                        wordCount = Math.floor(Math.random() * 51) + 150; // 150-200 palabras
-                        break;
-                    default:
-                        wordCount = 50;
-                }
-                
-                // Generar texto aleatorio
-                let generatedText = '';
-                for (let i = 0; i < wordCount; i++) {
-                    const randomWord = wordBank[Math.floor(Math.random() * wordBank.length)];
-                    
-                    // Cada 10-15 palabras, agregar una coma o punto
-                    if (i > 0 && i % (Math.floor(Math.random() * 6) + 10) === 0) {
-                        const punctuation = Math.random() > 0.7 ? '.' : ',';
-                        generatedText += punctuation + ' ';
-                    }
-                    
-                    // La primera palabra de cada oración en mayúscula
-                    if (generatedText.length === 0 || generatedText.slice(-2) === '. ') {
-                        generatedText += randomWord.charAt(0).toUpperCase() + randomWord.slice(1) + ' ';
-                    } else {
-                        generatedText += randomWord + ' ';
-                    }
-                }
-                
-                // Asegurar que termina con punto
-                generatedText = generatedText.trim();
-                if (generatedText.slice(-1) !== '.') {
-                    generatedText += '.';
-                }
-                
-                originalText = generatedText;
-                renderText();
-            }
-            
-            function renderText() {
-                textDisplay.innerHTML = '';
-                originalText.split('').forEach(char => {
-                    const span = document.createElement('span');
-                    span.textContent = char;
-                    textDisplay.appendChild(span);
-                });
-            }
-            
-            function startExercise() {
-                if (exerciseStarted) return;
-                
-                startBtn.textContent = "En progreso...";
-                startBtn.disabled = true;
-                exerciseStarted = true;
-                typingInput.disabled = false;
-                typingInput.value = '';
-                typingInput.focus();
-                startTime = Date.now();
-                
-                timerInterval = setInterval(() => {
-                    const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-                    timeDisplay.textContent = `${elapsedSeconds}s`;
-                }, 1000);
-            }
-            
-            function resetExercise() {
-                clearInterval(timerInterval);
-                timerInterval = null;
-                
-                startBtn.textContent = "Comenzar";
-                startBtn.disabled = false;
-                exerciseStarted = false;
-                typingInput.disabled = false;
-                typingInput.value = '';
-                
-                startTime = 0;
-                timeDisplay.textContent = "0s";
-                
-                updateStats();
-            }
-            
-            function handleTyping() {
-                if (!exerciseStarted && typingInput.value.length > 0) {
-                    startExercise();
-                }
-                
-                const typedText = typingInput.value;
-                const originalChars = originalText.split('');
-                const displayChars = textDisplay.querySelectorAll('span');
-                
-                let correctCount = 0;
-                let errorCount = 0;
-                
-                originalChars.forEach((char, index) => {
-                    if (index < typedText.length) {
-                        if (char === typedText[index]) {
-                            displayChars[index].className = 'correct';
-                            correctCount++;
-                        } else {
-                            displayChars[index].className = 'incorrect';
-                            errorCount++;
-                        }
-                    } else {
-                        displayChars[index].className = '';
-                    }
-                    
-                    // Eliminar clase "current" de todos los caracteres
-                    displayChars[index].classList.remove('current');
-                });
-                
-                // Resaltar la posición actual
-                if (typedText.length < originalText.length) {
-                    displayChars[typedText.length].classList.add('current');
-                }
-                
-                // Actualizar estadísticas
-                const totalTyped = typedText.length;
-                const accuracy = totalTyped > 0 ? Math.round((correctCount / totalTyped) * 100) : 100;
-                
-                accuracyDisplay.textContent = `${accuracy}%`;
-                typedDisplay.textContent = totalTyped;
-                errorsDisplay.textContent = errorCount;
-                
-                // Si se completó el texto, detener el temporizador
-                if (typedText.length === originalText.length) {
-                    clearInterval(timerInterval);
-                    startBtn.textContent = "¡Completado!";
-                }
-            }
-            
-            function updateStats() {
-                accuracyDisplay.textContent = "100%";
-                typedDisplay.textContent = "0";
-                errorsDisplay.textContent = "0";
-                timeDisplay.textContent = "0s";
-            }
-        });
-    </script>
+<header>
+<div class="neon-cascade" id="neonCascade"></div>
+<div class="header-container">
+<a href="https://trabalonp.github.io" class="logo">ONELIFE</a>
+<div class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></div>
+<div class="header-right">
+<nav>
+<ul id="navMenu">
+<li><a href="https://trabalonp.github.io">INICIO</a></li>
+<li><a href="enlaces">ENLACES</a></li>
+<li><a href="inversiones">INVERSIONES</a></li>
+<li><a href="sources">SOURCES</a></li>
+<li>
+<button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">
+<i class="fas fa-moon"></i>
+</button>
+</li>
+</ul>
+</nav>
+<div class="auth-area">
+<button id="loginBtn"><i class="fab fa-google"></i><span>Iniciar sesión</span></button>
+<img id="userAvatar" alt="Mi perfil" title="Ver perfil">
+</div>
+</div>
+</div>
+</header>
+
+<div id="overlay"></div>
+<div id="sidebar">
+<div class="sidebar-header">
+<h3>// MI PERFIL</h3>
+<button class="sidebar-close" id="sidebarClose"><i class="fas fa-times"></i></button>
+</div>
+<div class="sidebar-body">
+<div class="profile-block">
+<div class="avatar-wrapper">
+<img id="sidebarAvatar" src="" alt="Avatar">
+<button id="editAvatarBtn" title="Cambiar foto de perfil"><i class="fas fa-pen"></i></button>
+</div>
+<div class="profile-name" id="sidebarName">—</div>
+<div class="profile-email" id="sidebarEmail">—</div>
+<div id="avatarBar">
+<i class="fas fa-link"></i>
+<input type="url" id="avatarUrlInput" placeholder="https://i.imgur.com/tu-imagen.jpg" autocomplete="off">
+<button class="bar-btn" id="applyAvatarBtn" title="Confirmar"><i class="fas fa-check"></i></button>
+<button class="bar-btn" id="cancelAvatarBtn" title="Cancelar"><i class="fas fa-times"></i></button>
+</div>
+</div>
+<div class="info-card">
+<div class="info-card-title">Cuenta</div>
+<div class="info-row"><i class="fab fa-google"></i><span>Google Sign-In</span></div>
+<div class="info-row"><i class="fas fa-shield-alt"></i><span>Sesión verificada</span></div>
+<div class="info-row"><i class="fas fa-database"></i><span>Firebase Realtime DB</span></div>
+</div>
+</div>
+<div class="sidebar-footer">
+<button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
+</div>
+</div>
+
+<div class="typing-app">
+<h1 class="app-title">MECANOGRAFÍA</h1>
+<p class="app-description">Escribe el texto generado automáticamente. Las letras correctas se marcarán en verde y los errores en rojo.</p>
+
+<div class="stats-container">
+<div class="stat-box">
+<div class="stat-value" id="accuracy">100%</div>
+<div class="stat-label">Precisión</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" id="typed">0</div>
+<div class="stat-label">Caracteres</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" id="errors">0</div>
+<div class="stat-label">Errores</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" id="time">0s</div>
+<div class="stat-label">Tiempo</div>
+</div>
+</div>
+
+<div class="typing-container">
+<div id="textDisplay"></div>
+</div>
+
+<textarea id="typingInput" placeholder="Comienza a escribir aquí..."></textarea>
+
+<div class="controls">
+<button class="btn-typing btn-start" id="startBtn">
+<i class="fas fa-play"></i> Comenzar
+</button>
+<button class="btn-typing btn-reset-typing" id="resetBtn">
+<i class="fas fa-redo"></i> Reiniciar
+</button>
+</div>
+
+<div class="difficulty">
+<button class="difficulty-btn active" data-difficulty="short">Corto (50-70)</button>
+<button class="difficulty-btn" data-difficulty="medium">Medio (100-120)</button>
+<button class="difficulty-btn" data-difficulty="long">Largo (150-200)</button>
+</div>
+
+<div class="instructions">
+<h3>// ¿Cómo funciona?</h3>
+<ul>
+<li>Selecciona la longitud del texto</li>
+<li>Haz clic en "Comenzar" para generar un nuevo texto</li>
+<li>Escribe exactamente el texto que aparece arriba</li>
+<li>Las letras correctas se muestran en <span style="color:var(--success);">verde</span></li>
+<li>Los errores se muestran en <span style="color:#ff6b6b;">rojo</span> y tachados</li>
+<li>La posición actual se resalta con un fondo azul</li>
+<li>Usa "Reiniciar" para comenzar un nuevo ejercicio</li>
+</ul>
+</div>
+</div>
+
+<div id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyDCm1pFZLRXk34UIGU3UY0ltLkyHkElsIg",
+authDomain: "onelife-cec55.firebaseapp.com",
+projectId: "onelife-cec55",
+storageBucket: "onelife-cec55.firebasestorage.app",
+messagingSenderId: "599128086819",
+appId: "1:599128086819:web:af149214fe5b68a12ad496",
+databaseURL: "https://onelife-cec55-default-rtdb.europe-west1.firebasedatabase.app"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const provider = new GoogleAuthProvider();
+
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const userAvatar = document.getElementById('userAvatar');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+const sidebarClose = document.getElementById('sidebarClose');
+const sidebarAvatar = document.getElementById('sidebarAvatar');
+const sidebarName = document.getElementById('sidebarName');
+const sidebarEmail = document.getElementById('sidebarEmail');
+const editAvatarBtn = document.getElementById('editAvatarBtn');
+const avatarBar = document.getElementById('avatarBar');
+const avatarUrlInput = document.getElementById('avatarUrlInput');
+const applyAvatarBtn = document.getElementById('applyAvatarBtn');
+const cancelAvatarBtn = document.getElementById('cancelAvatarBtn');
+const authArea = document.querySelector('.auth-area');
+const toast = document.getElementById('toast');
+
+const CK_LOGGED='ol_logged', CK_AVATAR='ol_avatar', CK_NAME='ol_name', CK_EMAIL='ol_email';
+
+const cachedLogged = localStorage.getItem(CK_LOGGED);
+if(cachedLogged==='true'){
+loginBtn.style.display='none'; userAvatar.style.display='inline-block';
+const cv=localStorage.getItem(CK_AVATAR),cn=localStorage.getItem(CK_NAME),ce=localStorage.getItem(CK_EMAIL);
+if(cv){userAvatar.src=cv;sidebarAvatar.src=cv;}
+if(cn)sidebarName.textContent=cn;
+if(ce)sidebarEmail.textContent=ce;
+}else if(cachedLogged==='false'){
+loginBtn.style.display='inline-flex'; userAvatar.style.display='none';
+}
+authArea.classList.add('ready');
+
+function showToast(msg,isError=false){
+toast.textContent=msg;
+toast.className='show'+(isError?' error':'');
+clearTimeout(toast._t);
+toast._t=setTimeout(()=>{toast.className='';},3000);
+}
+
+function openSidebar(){sidebar.classList.add('open');overlay.classList.add('open');}
+function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('open');hideAvatarBar();}
+userAvatar.addEventListener('click',openSidebar);
+sidebarClose.addEventListener('click',closeSidebar);
+overlay.addEventListener('click',closeSidebar);
+
+function showAvatarBar(){avatarBar.classList.add('visible');avatarUrlInput.value='';avatarUrlInput.focus();}
+function hideAvatarBar(){avatarBar.classList.remove('visible');avatarUrlInput.value='';}
+editAvatarBtn.addEventListener('click',()=>{avatarBar.classList.contains('visible')?hideAvatarBar():showAvatarBar();});
+cancelAvatarBtn.addEventListener('click',hideAvatarBar);
+avatarUrlInput.addEventListener('keydown',e=>{if(e.key==='Enter')applyAvatarBtn.click();if(e.key==='Escape')hideAvatarBar();});
+
+applyAvatarBtn.addEventListener('click',async()=>{
+const user=auth.currentUser;
+if(!user){showToast('Inicia sesión primero.',true);return;}
+const url=avatarUrlInput.value.trim();
+if(!url){showToast('Pega una URL de imagen válida.',true);return;}
+const testImg=new Image();
+testImg.onload=async()=>{
+try{await set(ref(db,'users/'+user.uid+'/avatarUrl'),url);applyAvatarToUI(url);localStorage.setItem(CK_AVATAR,url);hideAvatarBar();showToast('✓ Foto actualizada');}
+catch(err){showToast('Error: '+err.message,true);}
+};
+testImg.onerror=()=>showToast('URL no válida.',true);
+testImg.src=url;
+});
+
+function applyAvatarToUI(url){if(!url)return;userAvatar.src=url;sidebarAvatar.src=url;}
+function saveCache(user,avatarUrl){
+localStorage.setItem(CK_LOGGED,'true');
+localStorage.setItem(CK_NAME,user.displayName||'');
+localStorage.setItem(CK_EMAIL,user.email||'');
+if(avatarUrl)localStorage.setItem(CK_AVATAR,avatarUrl);
+}
+function clearCache(){
+localStorage.setItem(CK_LOGGED,'false');
+localStorage.removeItem(CK_AVATAR);localStorage.removeItem(CK_NAME);localStorage.removeItem(CK_EMAIL);
+}
+
+async function loadProfile(user){
+sidebarName.textContent=user.displayName||'Usuario';
+sidebarEmail.textContent=user.email||'';
+const cached=localStorage.getItem(CK_AVATAR);
+const initial=cached||user.photoURL||'';
+applyAvatarToUI(initial);
+try{
+const snap=await get(ref(db,'users/'+user.uid));
+const dbAvatar=snap.exists()&&snap.val().avatarUrl?snap.val().avatarUrl:null;
+if(dbAvatar&&dbAvatar!==initial){applyAvatarToUI(dbAvatar);localStorage.setItem(CK_AVATAR,dbAvatar);}
+saveCache(user,dbAvatar||initial);
+}catch(err){saveCache(user,initial);console.warn('DB:',err.message);}
+}
+
+loginBtn.addEventListener('click',async()=>{
+try{await signInWithPopup(auth,provider);}catch(err){showToast('Error al iniciar sesión.',true);console.error(err);}
+});
+logoutBtn.addEventListener('click',async()=>{
+await signOut(auth);clearCache();closeSidebar();showToast('Sesión cerrada');
+});
+
+onAuthStateChanged(auth,async user=>{
+if(user){loginBtn.style.display='none';userAvatar.style.display='inline-block';await loadProfile(user);}
+else{
+loginBtn.style.display='inline-flex';userAvatar.style.display='none';
+sidebarName.textContent='—';sidebarEmail.textContent='—';sidebarAvatar.src='';userAvatar.src='';
+if(localStorage.getItem(CK_LOGGED)==='true')clearCache();else localStorage.setItem(CK_LOGGED,'false');
+}
+});
+</script>
+
+<script>
+// Menu móvil
+document.getElementById('menuToggle').addEventListener('click',()=>{
+document.getElementById('navMenu').classList.toggle('active');
+});
+
+// Cascada neon
+const neonCascade=document.getElementById('neonCascade');
+function createCascadeParticle(){
+const p=document.createElement('div');p.classList.add('cascade-particle');
+p.style.left=Math.random()*100+'%';
+p.style.width=(1+Math.random()*2)+'px';
+p.style.height=(10+Math.random()*20)+'px';
+neonCascade.appendChild(p);
+const dur=3+Math.random()*4,del=Math.random()*2;
+p.animate([
+{transform:'translateY(-20px)',opacity:0},
+{transform:'translateY(0)',opacity:0.7},
+{transform:`translateY(${window.innerHeight}px)`,opacity:0}
+],{duration:dur*1000,delay:del*1000,easing:'cubic-bezier(0.4,0,0.2,1)'});
+setTimeout(()=>p.remove(),(dur+del)*1000);
+}
+(function cascade(){createCascadeParticle();setTimeout(cascade,100+Math.random()*200);})();
+
+// Tema
+const themeToggle=document.getElementById('themeToggle');
+const themeIcon=themeToggle.querySelector('i');
+function updateThemeIcon(){themeIcon.className=document.body.classList.contains('light-mode')?'fas fa-sun':'fas fa-moon';}
+const savedTheme=localStorage.getItem('theme');
+if(savedTheme){document.body.classList.toggle('light-mode',savedTheme==='light');updateThemeIcon();}
+themeToggle.addEventListener('click',()=>{
+document.body.classList.toggle('light-mode');
+localStorage.setItem('theme',document.body.classList.contains('light-mode')?'light':'dark');
+updateThemeIcon();
+});
+
+// ══════ MECANOGRAFÍA ══════
+document.addEventListener('DOMContentLoaded',function(){
+const textDisplay=document.getElementById('textDisplay');
+const typingInput=document.getElementById('typingInput');
+const startBtn=document.getElementById('startBtn');
+const resetBtn=document.getElementById('resetBtn');
+const accuracyDisplay=document.getElementById('accuracy');
+const typedDisplay=document.getElementById('typed');
+const errorsDisplay=document.getElementById('errors');
+const timeDisplay=document.getElementById('time');
+const difficultyButtons=document.querySelectorAll('.difficulty-btn');
+
+let originalText='';
+let startTime=0;
+let timerInterval=null;
+let currentDifficulty='short';
+let exerciseStarted=false;
+
+const wordBank=[
+"el","la","los","las","un","una","unos","unas","yo","tú",
+"él","ella","nosotros","vosotros","ellos","este","ese","aquel",
+"mi","tu","su","nuestro","vuestro","mío","tuyo","suyo","qué",
+"quién","cuál","cuánto","dónde","cuándo","cómo","por","para",
+"con","sin","sobre","bajo","entre","hacia","desde","hasta",
+"durante","mediante","según","ante","contra","en","de","a",
+"y","o","pero","aunque","mas","sino","porque","pues",
+"si","como","cuando","mientras","que","donde","bien","sea",
+"ya","tan","tanto","tal","así","también","además","incluso",
+"no","nunca","jamás","tampoco","nadie","nada","ninguno","ni",
+"sí","siempre","claro","efectivamente","ciertamente",
+"quizá","acaso","puede","ser","deber","haber",
+"estar","tener","hacer","poder","decir","ir","ver","dar",
+"saber","querer","llegar","pasar","dejar","llevar","encontrar",
+"seguir","venir","pensar","parecer","hablar","empezar","esperar",
+"buscar","existir","entrar","trabajar","necesitar","ocurrir",
+"recordar","pedir","permitir","aparecer","considerar","intentar",
+"lograr","incluir","continuar","cambiar","presentar","crear",
+"recibir","abrir","mantener","explicar","conseguir","formar",
+"traer","comenzar","servir","sacar","terminar","escribir",
+"ofrecer","leer","caer","conocer","vivir","sentir","tratar",
+"mirar","contar","ganar","elegir","desarrollar","entender",
+"aceptar","valorar","mostrar","comprender","demostrar","construir",
+"responder","estudiar","mejorar","analizar","descubrir",
+"producir","publicar","compartir","superar","controlar","defender",
+"diseñar","distinguir","ejercer","elevar","eliminar",
+"garantizar","generar","gestionar","impulsar","incrementar","indicar",
+"informar","iniciar","inspirar","instalar","interpretar","intervenir",
+"introducir","inventar","invertir","invitar","jugar","juzgar",
+"lanzar","limitar","manejar","manifestar","mantener",
+"marcar","medir","mencionar","mover","nacer",
+"negociar","notar","obtener","operar","organizar","orientar",
+"originar","participar","perder","perseguir","plantear","poseer",
+"precisar","preferir","preguntar","preparar","presionar","pretender",
+"prevenir","probar","proceder","promover","proponer","proteger",
+"protestar","proveer","quedar","realizar","reclamar","reconocer",
+"reducir","referir","reflejar","registrar","regular","relacionar",
+"representar","requerir","resolver","resultar","reunir","revelar",
+"satisfacer","seleccionar","señalar","separar","significar",
+"situar","sobrevivir","solicitar","someter","sonar","subir","sufrir",
+"sugerir","suponer","surgir","sustituir","tocar","tomar",
+"traducir","unir","usar","utilizar","valer","variar","vender",
+"viajar","volver","votar"
+];
+
+generateRandomText();
+updateStats();
+
+typingInput.addEventListener('input',handleTyping);
+startBtn.addEventListener('click',startExercise);
+resetBtn.addEventListener('click',resetExercise);
+
+difficultyButtons.forEach(btn=>{
+btn.addEventListener('click',function(){setDifficulty(this.dataset.difficulty);});
+});
+
+function setDifficulty(difficulty){
+currentDifficulty=difficulty;
+difficultyButtons.forEach(btn=>{
+btn.classList.toggle('active',btn.dataset.difficulty===difficulty);
+});
+generateRandomText();
+resetExercise();
+}
+
+function generateRandomText(){
+let wordCount;
+switch(currentDifficulty){
+case 'short': wordCount=Math.floor(Math.random()*21)+50; break;
+case 'medium': wordCount=Math.floor(Math.random()*21)+100; break;
+case 'long': wordCount=Math.floor(Math.random()*51)+150; break;
+default: wordCount=50;
+}
+
+let generatedText='';
+for(let i=0;i<wordCount;i++){
+const randomWord=wordBank[Math.floor(Math.random()*wordBank.length)];
+if(i>0&&i%(Math.floor(Math.random()*6)+10)===0){
+const punctuation=Math.random()>0.7?'.':',';
+generatedText+=punctuation+' ';
+}
+if(generatedText.length===0||generatedText.slice(-2)==='. '){
+generatedText+=randomWord.charAt(0).toUpperCase()+randomWord.slice(1)+' ';
+}else{
+generatedText+=randomWord+' ';
+}
+}
+generatedText=generatedText.trim();
+if(generatedText.slice(-1)!=='.')generatedText+='.';
+originalText=generatedText;
+renderText();
+}
+
+function renderText(){
+textDisplay.innerHTML='';
+originalText.split('').forEach(char=>{
+const span=document.createElement('span');
+span.textContent=char;
+textDisplay.appendChild(span);
+});
+}
+
+function startExercise(){
+if(exerciseStarted)return;
+startBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> En progreso...';
+startBtn.disabled=true;
+exerciseStarted=true;
+typingInput.disabled=false;
+typingInput.value='';
+typingInput.focus();
+startTime=Date.now();
+timerInterval=setInterval(()=>{
+const s=Math.floor((Date.now()-startTime)/1000);
+timeDisplay.textContent=`${s}s`;
+},1000);
+}
+
+function resetExercise(){
+clearInterval(timerInterval);
+timerInterval=null;
+startBtn.innerHTML='<i class="fas fa-play"></i> Comenzar';
+startBtn.disabled=false;
+exerciseStarted=false;
+typingInput.disabled=false;
+typingInput.value='';
+startTime=0;
+timeDisplay.textContent='0s';
+generateRandomText();
+updateStats();
+}
+
+function handleTyping(){
+if(!exerciseStarted&&typingInput.value.length>0){startExercise();}
+const typedText=typingInput.value;
+const originalChars=originalText.split('');
+const displayChars=textDisplay.querySelectorAll('span');
+let correctCount=0,errorCount=0;
+
+originalChars.forEach((char,index)=>{
+if(index<typedText.length){
+if(char===typedText[index]){displayChars[index].className='correct';correctCount++;}
+else{displayChars[index].className='incorrect';errorCount++;}
+}else{displayChars[index].className='';}
+displayChars[index].classList.remove('current');
+});
+
+if(typedText.length<originalText.length){
+displayChars[typedText.length].classList.add('current');
+}
+
+const totalTyped=typedText.length;
+const accuracy=totalTyped>0?Math.round((correctCount/totalTyped)*100):100;
+accuracyDisplay.textContent=`${accuracy}%`;
+typedDisplay.textContent=totalTyped;
+errorsDisplay.textContent=errorCount;
+
+if(typedText.length===originalText.length){
+clearInterval(timerInterval);
+startBtn.innerHTML='<i class="fas fa-check"></i> ¡Completado!';
+}
+}
+
+function updateStats(){
+accuracyDisplay.textContent='100%';
+typedDisplay.textContent='0';
+errorsDisplay.textContent='0';
+timeDisplay.textContent='0s';
+}
+});
+
+document.addEventListener('touchstart',function(){},{passive:true});
+</script>
 </body>
 </html>
