@@ -115,8 +115,7 @@
         .light-mode nav ul li a:hover { color: var(--day-primary); }
 
         /* --- AUTH BUTTONS --- */
-        .auth-area { display: flex; align-items: center; gap: 0.75rem; visibility: hidden; opacity: 0; transition: opacity 0.15s ease; }
-        .auth-area.ready { visibility: visible; opacity: 1; }
+        .auth-area { display: flex; align-items: center; gap: 0.75rem; }
 
         #loginBtn {
             display: inline-flex; align-items: center; gap: 0.5rem;
@@ -141,10 +140,8 @@
         .dashboard-container {
             max-width: 1200px; margin: 2rem auto; padding: 0 2rem;
             display: grid; grid-template-columns: 1fr; gap: 2rem;
-            opacity: 0; transform: translateY(20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
+            /* Quitamos la opacidad inicial para que no parezca que carga */
         }
-        .dashboard-container.loaded { opacity: 1; transform: translateY(0); }
 
         /* Stats Cards */
         .stats-grid {
@@ -204,19 +201,7 @@
         .badge-bonus { background: rgba(255,193,7,0.15); color: #ffc107; }
         .badge-fail { background: rgba(255,60,60,0.15); color: #ff6b6b; }
 
-        /* Loading & Toast */
-        .loading-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 2000; backdrop-filter: blur(5px);
-        }
-        .spinner {
-            width: 50px; height: 50px; border: 4px solid rgba(0,247,255,0.1);
-            border-top: 4px solid var(--primary); border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
+        /* Toast */
         #toast {
             position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px);
             background: rgba(0,247,255,0.1); border: 1px solid rgba(0,247,255,0.3);
@@ -261,18 +246,13 @@
                     <button id="loginBtn">
                         <i class="fab fa-google"></i> <span>Login</span>
                     </button>
-                    <img id="userAvatar" alt="Perfil" title="Ver perfil">
+                    <img id="userAvatar" alt="Perfil" title="Cerrar sesión">
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- PANTALLA DE CARGA INICIAL -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="spinner"></div>
-    </div>
-
-    <!-- CONTENIDO PRINCIPAL (Oculto hasta login) -->
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="dashboard-container" id="dashboardContent">
         
         <!-- ESTADÍSTICAS -->
@@ -326,7 +306,12 @@
                     </tr>
                 </thead>
                 <tbody id="transactionsTable">
-                    <!-- Se rellena con JS -->
+                    <tr>
+                        <td colspan="4" style="text-align:center; padding: 2rem; color: var(--gray);">
+                            <i class="fas fa-lock" style="margin-bottom: 10px; display:block; font-size: 2rem;"></i>
+                            Inicia sesión para ver tus datos privados
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -339,7 +324,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        import { getDatabase, ref, onValue, off } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
         // ═══════════════════════════════════════════════════════════════════
         // CONFIGURACIÓN FIREBASE (PROYECTO LIFEPOINTSDASHBOARD)
@@ -366,20 +351,18 @@
         const loginBtn = document.getElementById('loginBtn');
         const userAvatar = document.getElementById('userAvatar');
         const authArea = document.getElementById('authArea');
-        const loadingOverlay = document.getElementById('loadingOverlay');
         const dashboardContent = document.getElementById('dashboardContent');
         const toast = document.getElementById('toast');
+        const tableBody = document.getElementById('transactionsTable');
 
         let chartInstance = null;
         let surveyData = [];
+        let dbListener = null; // Para poder desconectar si hace logout
 
         // ═══════════════════════════════════════════════════════════════════
         // AUTENTICACIÓN
         // ═══════════════════════════════════════════════════════════════════
         
-        // Mostrar área de auth cuando Firebase esté listo
-        authArea.classList.add('ready');
-
         loginBtn.addEventListener('click', async () => {
             try {
                 await signInWithPopup(auth, provider);
@@ -388,12 +371,13 @@
             }
         });
 
-        document.getElementById('userAvatar').addEventListener('click', async () => {
+        userAvatar.addEventListener('click', async () => {
             await signOut(auth);
             showToast("Sesión cerrada");
         });
 
-        onAuthStateChanged(auth, async (user) => {
+        // Escuchar cambios de estado
+        onAuthStateChanged(auth, (user) => {
             if (user) {
                 // USUARIO LOGUEADO
                 loginBtn.style.display = 'none';
@@ -401,25 +385,26 @@
                 userAvatar.src = user.photoURL || 'https://ui-avatars.com/api/?name=' + user.displayName;
                 
                 // Cargar datos privados
-                await loadUserData(user.uid);
-                
-                // Mostrar dashboard
-                loadingOverlay.style.display = 'none';
-                dashboardContent.classList.add('loaded');
+                loadUserData(user.uid);
 
             } else {
                 // USUARIO NO LOGUEADO
                 loginBtn.style.display = 'inline-flex';
                 userAvatar.style.display = 'none';
                 
-                // Ocultar dashboard y mostrar loading (o mensaje de login)
-                dashboardContent.classList.remove('loaded');
-                loadingOverlay.style.display = 'flex';
-                
-                // Limpiar datos
+                // Limpiar datos y mostrar mensaje de bloqueo
                 surveyData = [];
                 updateStats();
-                document.getElementById('transactionsTable').innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 2rem;">Inicia sesión para ver tus datos</td></tr>';
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align:center; padding: 2rem; color: var(--gray);">
+                            <i class="fas fa-lock" style="margin-bottom: 10px; display:block; font-size: 2rem;"></i>
+                            Inicia sesión para ver tus datos privados
+                        </td>
+                    </tr>`;
+                
+                // Desconectar listener de BD para no gastar recursos
+                if (dbListener) off(dbListener);
             }
         });
 
@@ -429,14 +414,16 @@
         function loadUserData(uid) {
             const userRef = ref(db, 'users/' + uid + '/surveys');
             
-            onValue(userRef, (snapshot) => {
+            // Escuchar cambios en tiempo real
+            dbListener = onValue(userRef, (snapshot) => {
                 const data = snapshot.val();
                 
                 if (!data) {
                     surveyData = [];
                     updateStats();
                     renderTable();
-                    showToast("Bienvenido. Usa el bot de Telegram para añadir datos.");
+                    // No mostramos toast de bienvenida cada vez que recarga, solo si está vacío
+                    if(tableBody.children.length === 0) showToast("Bienvenido. Usa el bot para añadir datos.");
                     return;
                 }
 
@@ -452,9 +439,12 @@
                 updateChart('accumulated');
 
             }, (error) => {
-                console.error(error);
-                showToast("Error de permisos en la base de datos", true);
-                loadingOverlay.style.display = 'none';
+                console.error("Error DB:", error);
+                // Si hay error de permisos, mostramos mensaje claro
+                if (error.code === 'PERMISSION_DENIED') {
+                    showToast("Error: No tienes permisos para ver estos datos", true);
+                    tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Error de permisos. Revisa las reglas de Firebase.</td></tr>`;
+                }
             });
         }
 
@@ -492,8 +482,12 @@
         }
 
         function renderTable() {
-            const tbody = document.getElementById('transactionsTable');
-            tbody.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            if (surveyData.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 2rem;">No hay registros aún</td></tr>`;
+                return;
+            }
 
             surveyData.slice(0, 10).forEach(item => {
                 const dateStr = item.dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -519,7 +513,7 @@
                         <td style="text-align: right; font-weight: bold; ${amountClass}">${amount}</td>
                     </tr>
                 `;
-                tbody.innerHTML += row;
+                tableBody.innerHTML += row;
             });
         }
 
@@ -603,7 +597,7 @@
             setTimeout(() => { toast.className = ''; }, 3000);
         }
 
-        // Tema (opcional, copiado de sources.html)
+        // Tema (opcional)
         const themeToggle = document.createElement('button');
         themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
         themeToggle.style.cssText = "position:fixed; bottom:20px; right:20px; width:40px; height:40px; border-radius:50%; border:none; background:var(--primary); color:#000; cursor:pointer; z-index:1000; display:flex; align-items:center; justify-content:center;";
