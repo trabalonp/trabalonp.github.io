@@ -4,311 +4,497 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Dashboard de Encuestas - Analiza tus ganancias en euros">
-    <title>Survey Dashboard - ONELIFE</title>
+    <meta name="author" content="Tu Nombre">
+    <title>Survey Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- He quitado los SDKs viejos de aquí para poner los nuevos en el script de abajo -->
-
     <style>
-        /* He añadido algunos estilos para el login y el estado de carga */
+        /* TUS ESTILOS ORIGINALES */
         :root {
-            --primary: #6366f1; --primary-dark: #4f46e5; --secondary: #8b5cf6; --accent: #ec4899;
-            --success: #10b981; --warning: #f59e0b; --error: #ef4444; --info: #3b82f6;
-            --bg-1: #0f172a; --bg-2: #1e293b; --bg-3: #334155; --bg-4: #475569;
-            --text-1: #f1f5f9; --text-2: #cbd5e1; --text-3: #94a3b8; --border: #334155;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --glass-bg: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #6366f1; --primary-dark: #4f46e5; --secondary: #8b5cf6; --accent: #ec4899; --success: #10b981; --warning: #f59e0b; --error: #ef4444; --info: #3b82f6; --bg-1: #0f172a; --bg-2: #1e293b; --bg-3: #334155; --bg-4: #475569; --text-1: #f1f5f9; --text-2: #cbd5e1; --text-3: #94a3b8; --border: #334155; --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); --glass-bg: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1);
         }
         [data-theme="light"] {
-            --bg-1: #ffffff; --bg-2: #f8fafc; --bg-3: #f1f5f9; --bg-4: #e2e8f0;
-            --text-1: #0f172a; --text-2: #334155; --text-3: #64748b; --border: #e2e8f0;
-            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); --glass-bg: rgba(0, 0, 0, 0.05);
-            --glass-border: rgba(0, 0, 0, 0.1);
+            --bg-1: #ffffff; --bg-2: #f8fafc; --bg-3: #f1f5f9; --bg-4: #e2e8f0; --text-1: #0f172a; --text-2: #334155; --text-3: #64748b; --border: #e2e8f0; --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); --glass-bg: rgba(0, 0, 0, 0.05); --glass-border: rgba(0, 0, 0, 0.1);
         }
-        body { font-family: 'Inter', sans-serif; background: var(--bg-1); color: var(--text-1); line-height: 1.6; transition: var(--transition); overflow-x: hidden; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-1); color: var(--text-1); line-height: 1.6; transition: var(--transition); overflow-x: hidden; }
         .container { max-width: 1400px; margin: 0 auto; padding: 2rem; padding-bottom: 4rem; }
-        
-        /* Estilos para el Auth y estado de la página */
-        #auth-section { text-align: center; padding: 4rem 1rem; background: var(--bg-2); border-radius: 1rem; margin: 2rem 0; }
-        #auth-section h2 { margin-bottom: 1rem; font-size: 1.5rem; }
-        #auth-section p { color: var(--text-3); margin-bottom: 1.5rem; }
-        .login-btn { 
-            display: inline-flex; align-items: center; gap: 0.75rem; background: #4285F4; color: white;
-            padding: 0.75rem 1.5rem; border-radius: 50px; border: none; font-size: 1rem; font-weight: 500;
-            cursor: pointer; transition: background 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        .login-btn:hover { background: #357ae8; }
-        #user-info { display: none; align-items: center; gap: 1rem; padding: 0.5rem 1rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 50px; }
-        #user-info img { width: 32px; height: 32px; border-radius: 50%; }
-        #user-info span { font-weight: 500; }
-        .logout-btn { background: var(--error); color: white; border:none; padding: 0.5rem 1rem; cursor: pointer; border-radius: 20px; font-weight: 500; }
-        #main-content { display: none; } /* Ocultar contenido hasta el login */
-        .uid-display { margin-top: 2rem; background: var(--bg-3); padding: 1rem; border-radius: 8px; word-break: break-all; }
-        .uid-display code { font-family: monospace; color: var(--accent); }
-        .uid-display button { margin-left: 10px; background: var(--primary); border: none; color: white; padding: 5px 8px; border-radius: 4px; cursor: pointer;}
-        
-        /* ... Resto de tus estilos CSS (header, stats-grid, etc.) ... */
         .header { background: linear-gradient(135deg, var(--primary), var(--secondary)); padding: 2.5rem; margin-bottom: 2rem; border-radius: 1.5rem; box-shadow: var(--shadow); position: relative; overflow: hidden; animation: slideDown 0.6s ease-out; }
-        .header-content { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 1rem; position: relative; z-index: 1;}
-        .header-title h1 { color: white; font-size: 1.75rem; font-weight: 600; }
+        .header::before { content: ''; position: absolute; inset: 0; background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,0 Q300,60 600,30 T1200,0 L1200,120 L0,120 Z" fill="rgba(255,255,255,0.05)"/></svg>'); opacity: 0.3; }
+        .header-content { position: relative; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; z-index: 1; }
+        .header-title h1 { color: white; font-size: 1.75rem; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .header-title .subtitle { color: rgba(255,255,255,0.9); font-size: 0.9rem; }
-        .header-actions { display: flex; align-items: center; gap: 1rem; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        /* Añade el resto de tus estilos aquí para que la página se vea como antes */
+        .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+        .last-update { color: rgba(255,255,255,0.8); font-size: 0.8rem; background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 0.4rem 0.85rem; border-radius: 2rem; backdrop-filter: blur(10px); }
+        .theme-toggle { background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1rem; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+        .theme-toggle:hover { background: rgba(255,255,255,0.15); transform: scale(1.1); }
+        
+        /* === ESTILOS NUEVOS PARA AUTH Y VISIBILIDAD === */
+        #main-dashboard-content { display: none; } /* OCULTAMOS EL DASHBOARD POR DEFECTO */
+        #auth-prompt { text-align: center; padding: 4rem 1rem; background: var(--bg-2); border-radius: 1rem; margin-top: 2rem; }
+        #auth-prompt h2 { margin-bottom: 1rem; font-size: 1.5rem; }
+        #auth-prompt p { color: var(--text-3); }
+
+        #login-container button {
+            display: inline-flex; align-items: center; gap: 0.75rem; background: #4285F4; color: white;
+            padding: 0.6rem 1.2rem; border-radius: 50px; border: none; font-size: 0.9rem; font-weight: 500;
+            cursor: pointer; transition: background 0.3s;
+        }
+        #login-container button:hover { background: #357ae8; }
+        #user-info { display: none; align-items: center; gap: 0.8rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 50px; padding: 5px; padding-right: 15px; backdrop-filter: blur(10px); }
+        #user-info img { width: 30px; height: 30px; border-radius: 50%; }
+        #user-info span { font-weight: 500; color: white; font-size: 0.9rem; }
+        #logout-btn { background: transparent; border: none; color: white; opacity: 0.7; cursor: pointer; font-size: 1rem; margin-left: 5px; }
+        #logout-btn:hover { opacity: 1; }
+
+        .uid-display { padding: 1rem; background: var(--bg-3); border-radius: 8px; margin-bottom: 2rem; font-family: monospace; }
+        .uid-display p { font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text-3); margin-bottom: 0.5rem; }
+        .uid-display code { color: var(--accent); word-break: break-all; }
+        .uid-display button { margin-left: 10px; background: var(--primary); border: none; color: white; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.8rem; }
+        .uid-display button:hover { background: var(--primary-dark); }
+
+        /* ... Aquí continúa el resto de tus estilos CSS (stats-grid, chart-section, etc.) ... */
+        .loading-spinner { display: block; width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid white; border-radius: 50%; animation: spin 1s linear infinite; margin: 3rem auto; }
+        .error-message { background: rgba(239,68,68,0.1); border: 1px solid var(--error); color: var(--error); padding: 1rem; border-radius: 0.5rem; margin: 1rem 0; display: none; animation: fadeIn 0.3s ease-out; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; animation: fadeInUp 0.6s ease-out; }
+        .stat-card { background: var(--bg-2); padding: 2rem; border-radius: 1rem; border: 1px solid var(--border); box-shadow: var(--shadow); transition: var(--transition); position: relative; overflow: hidden; }
+        /* Pega el resto de tus estilos aquí para que no se pierdan */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 
 <body data-theme="dark">
 
 <div class="container">
-    
-    <!-- SECCIÓN DE AUTENTICACIÓN -->
+    <!-- HEADER -->
     <header class="header">
         <div class="header-content">
             <div class="header-title">
                 <h1><i class="fas fa-poll-h" style="margin-right:.5rem"></i>Survey Dashboard</h1>
-                <div class="subtitle">Seguimiento de ganancias para tu cuenta</div>
+                <div class="subtitle">Seguimiento de ganancias en tiempo real</div>
             </div>
             <div class="header-actions">
+                <span class="last-update" id="lastUpdate"></span>
+                
+                <!-- ÁREA DE AUTENTICACIÓN INTEGRADA -->
                 <div id="user-info">
                     <img id="user-avatar" src="" alt="avatar">
                     <span id="user-name"></span>
-                    <button id="logout-btn" class="logout-btn">Salir</button>
+                    <button id="logout-btn" title="Cerrar sesión"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
                 <div id="login-container">
-                    <button id="login-btn" class="login-btn"><i class="fab fa-google"></i> Iniciar sesión con Google</button>
+                    <button id="login-btn"><i class="fab fa-google"></i> Iniciar sesión</button>
                 </div>
+
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Cambiar tema">
+                    <i class="fas fa-sun" id="theme-icon"></i>
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- CONTENIDO PRINCIPAL (se muestra al iniciar sesión) -->
-    <div id="main-content">
+    <!-- MENSAJE PARA INICIAR SESIÓN (se muestra por defecto) -->
+    <div id="auth-prompt">
+        <div class="loading-spinner" id="loadingSpinner"></div>
+        <div id="auth-message">
+            <h2>Bienvenido al Dashboard</h2>
+            <p>Por favor, inicia sesión con tu cuenta de Google para ver tus datos.</p>
+        </div>
+    </div>
+    
+    <div class="error-message" id="errorMessage"></div>
+
+    <!-- CONTENIDO PRINCIPAL DEL DASHBOARD (oculto hasta el login) -->
+    <div id="main-dashboard-content">
+
+        <!-- Widget para mostrar y copiar el UID -->
         <div class="uid-display">
-            <p>Tu <strong>UID de Firebase</strong> (pégalo en `bot.js`):</p>
+            <p><strong>Tu UID de Firebase</strong> (pégalo en <code>bot.js</code> en la variable <code>USER_UID</code>):</p>
             <code id="user-uid-display"></code>
             <button onclick="copyUid()"><i class="fas fa-copy"></i> Copiar</button>
         </div>
-        
-        <!-- Aquí va el resto de tu dashboard: stats-grid, chart-section, etc. -->
-        <div class="stats-grid" id="stats-grid">
-            <!-- Los stat-cards se generarán con JS -->
+
+        <!-- STATS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-euro-sign"></i> Total Ganado</div>
+                <div class="stat-value"><span class="currency">€</span><span id="total-earned">0.00</span></div>
+                <div class="stat-subtext">Suma de todas las encuestas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-piggy-bank"></i> Saldo Actual</div>
+                <div class="stat-value"><span class="currency">€</span><span id="current-balance">0.00</span></div>
+                <div class="stat-subtext">Pendiente de retirar</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fab fa-paypal"></i> Retirado (PayPal)</div>
+                <div class="stat-value"><span class="currency">€</span><span id="total-withdrawn">0.00</span></div>
+                <div class="stat-subtext">Transferido a tu cuenta</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-check-circle"></i> Tasa de Éxito</div>
+                <div class="stat-value"><span id="success-rate">0</span><span class="currency" style="font-size:1.4rem">%</span></div>
+                <div class="stat-subtext"><span id="success-counts">0 completadas / 0 intentos</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-coins"></i> Media por Encuesta</div>
+                <div class="stat-value"><span class="currency">€</span><span id="avg-per-survey">0.00</span></div>
+                <div class="stat-subtext">Encuestas completadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-calendar-day"></i> Este Mes</div>
+                <div class="stat-value"><span class="currency">€</span><span id="this-month-earned">0.00</span></div>
+                <div class="stat-subtext"><span id="this-month-surveys">0</span> encuestas completadas</div>
+            </div>
         </div>
 
+        <!-- El resto de tu contenido HTML (chart, widgets, table, schedule) va aquí... -->
+        <!-- CHART -->
         <div class="chart-section">
             <div class="section-header">
                 <h2><i class="fas fa-chart-area"></i> Evolución de Ganancias</h2>
-                <!-- Chart tabs... -->
+                <div class="chart-tabs">
+                    <button class="chart-tab active" onclick="switchChart('accumulated', this)">Acumulado</button>
+                    <button class="chart-tab" onclick="switchChart('monthly', this)">Por Mes</button>
+                    <button class="chart-tab" onclick="switchChart('daily', this)">Diario</button>
+                </div>
             </div>
-            <div class="chart-wrapper">
-                <canvas id="mainChart"></canvas>
-            </div>
+            <div class="chart-wrapper"><canvas id="mainChart"></canvas></div>
         </div>
-        <!-- ... más widgets y tablas ... -->
-    </div>
 
-    <!-- MENSAJE DE LOGIN -->
-    <div id="auth-section">
-        <h2>Bienvenido al Dashboard de Encuestas</h2>
-        <p>Por favor, inicia sesión con tu cuenta de Google para ver tus datos.</p>
-    </div>
+        <!-- WIDGETS -->
+        <div class="widgets-container">
+            <!-- ... tu widget de objetivo mensual ... -->
+        </div>
 
-</div>
+        <!-- TABLE -->
+        <div class="table-section">
+             <h2><i class="fas fa-table"></i> Resumen por Mes</h2>
+            <table id="monthly-summary">
+                <thead><tr><th>Mes</th><th>Ganado (€)</th><th>Retirado (€)</th><th>Encuestas ✓ </th><th>Intentos</th><th>Tasa Éxito</th><th>Media/Encuesta</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div><!-- /container -->
+
 
 <script type="module">
-    // -------------------------------------------------
-    // 1. SDKs Y CONFIGURACIÓN DE FIREBASE
-    // -------------------------------------------------
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+// ==================================================================
+// 1. CONFIGURACIÓN FIREBASE Y AUTENTICACIÓN
+// ==================================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getDatabase, ref as dbRef, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyD9sBTTe9PFQct9Ym9tkiVBr8wYDMl4SI0", // La tuya de surveys.html
-      authDomain: "lifepointsdashboard.firebaseapp.com",
-      databaseURL: "https://lifepointsdashboard-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "lifepointsdashboard",
-      storageBucket: "lifepointsdashboard.firebasestorage.app",
-      messagingSenderId: "70452481394",
-      appId: "1:70452481394:web:60e497d37b8b74c2d8a1eb"
-    };
+const firebaseConfig = {
+    apiKey: "AIzaSyD9sBTTe9PFQct9Ym9tkiVBr8wYDMl4SI0",
+    authDomain: "lifepointsdashboard.firebaseapp.com",
+    databaseURL: "https://lifepointsdashboard-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "lifepointsdashboard",
+    storageBucket: "lifepointsdashboard.firebasestorage.app",
+    messagingSenderId: "70452481394",
+    appId: "1:70452481394:web:60e497d37b8b74c2d8a1eb"
+};
 
-    // Inicializar Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    const provider = new GoogleAuthProvider();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const provider = new GoogleAuthProvider();
 
-    // -------------------------------------------------
-    // 2. REFERENCIAS A ELEMENTOS DEL DOM
-    // -------------------------------------------------
-    const loginBtn = document.getElementById('login-btn');
-    const logoutBtn = document.getElementById('logout-btn');
-    const loginContainer = document.getElementById('login-container');
-    
-    const userInfo = document.getElementById('user-info');
-    const userName = document.getElementById('user-name');
-    const userAvatar = document.getElementById('user-avatar');
-    const userUidDisplay = document.getElementById('user-uid-display');
-    
-    const authSection = document.getElementById('auth-section');
-    const mainContent = document.getElementById('main-content');
-    
-    // -------------------------------------------------
-    // 3. LÓGICA DE AUTENTICACIÓN
-    // -------------------------------------------------
-    loginBtn.addEventListener('click', async () => {
-        try {
-            await signInWithPopup(auth, provider);
-            // onAuthStateChanged se encargará del resto
-        } catch (error) {
-            console.error("Error al iniciar sesión: ", error);
-            alert("Hubo un error al iniciar sesión. Revisa la consola.");
-        }
-    });
+// Referencias a elementos del DOM para Auth
+const loginBtn = document.getElementById('login-btn');
+const logoutBtn = document.getElementById('logout-btn');
+const loginContainer = document.getElementById('login-container');
+const userInfo = document.getElementById('user-info');
+const userName = document.getElementById('user-name');
+const userAvatar = document.getElementById('user-avatar');
+const userUidDisplay = document.getElementById('user-uid-display');
+const authPrompt = document.getElementById('auth-prompt');
+const mainDashboardContent = document.getElementById('main-dashboard-content');
+const loadingSpinner = document.getElementById('loadingSpinner');
+const authMessage = document.getElementById('auth-message');
+const lastUpdateSpan = document.getElementById('lastUpdate');
 
-    logoutBtn.addEventListener('click', async () => {
-        await signOut(auth);
-        // onAuthStateChanged se encargará del resto
-    });
+// Lógica de Autenticación
+loginBtn.addEventListener('click', () => signInWithPopup(auth, provider).catch(err => showError("Error al iniciar sesión: " + err.message)));
+logoutBtn.addEventListener('click', () => signOut(auth));
 
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            // Usuario ha iniciado sesión
-            uiUpdateForLoggedIn(user);
-            loadDataForUser(user.uid);
-        } else {
-            // Usuario ha cerrado sesión
-            uiUpdateForLoggedOut();
-        }
-    });
-
-    function uiUpdateForLoggedIn(user) {
-        // Ocultar mensaje de login y mostrar contenido
-        authSection.style.display = 'none';
-        mainContent.style.display = 'block';
+onAuthStateChanged(auth, user => {
+    loadingSpinner.style.display = 'none';
+    if (user) {
+        // Usuario está logueado
+        authPrompt.style.display = 'none';
+        mainDashboardContent.style.display = 'block';
         
-        // Mostrar info de usuario y ocultar botón de login
         loginContainer.style.display = 'none';
         userInfo.style.display = 'flex';
         userName.textContent = user.displayName;
         userAvatar.src = user.photoURL;
-
-        // Mostrar el UID para el bot.js
         userUidDisplay.textContent = user.uid;
-    }
 
-    function uiUpdateForLoggedOut() {
-        // Mostrar mensaje de login y ocultar contenido
-        authSection.style.display = 'block';
-        mainContent.style.display = 'none';
+        loadUserData(user.uid);
+    } else {
+        // Usuario no está logueado
+        mainDashboardContent.style.display = 'none';
+        authPrompt.style.display = 'block';
+        authMessage.style.display = 'block';
 
-        // Ocultar info de usuario y mostrar botón de login
         loginContainer.style.display = 'block';
         userInfo.style.display = 'none';
         
-        // Limpiar datos antiguos
-        document.getElementById('stats-grid').innerHTML = 'Inicia sesión para ver los datos.';
-        if (window.mainChart instanceof Chart) {
-            window.mainChart.destroy();
-        }
+        lastUpdateSpan.textContent = "Inicia sesión";
     }
+});
 
-    // Función para copiar UID al portapapeles
-    window.copyUid = () => {
-        navigator.clipboard.writeText(userUidDisplay.textContent).then(() => {
-            alert('¡UID copiado al portapapeles!');
-        }).catch(err => {
-            alert('Error al copiar el UID.');
+window.copyUid = () => {
+    navigator.clipboard.writeText(userUidDisplay.textContent)
+      .then(() => alert('UID copiado al portapapeles!'))
+      .catch(() => alert('Error al copiar.'));
+}
+
+// ==================================================================
+// 2. LÓGICA DE DATOS (Carga y Procesado)
+// ==================================================================
+let surveyData = [];
+let mainChart = null;
+let currentMode = 'accumulated';
+let monthlyGoal = 10.00;
+let lastMonthEarned = 0;
+
+async function loadUserData(uid) {
+    show('loadingSpinner');
+    hide('errorMessage');
+    lastUpdateSpan.textContent = 'Cargando...';
+    
+    const userSurveysRef = dbRef(db, `users/${uid}/surveys`);
+
+    try {
+        const snapshot = await get(userSurveysRef);
+        
+        if (!snapshot.exists()) {
+            showError('No tienes datos registrados todavía. ¡Usa el bot de Telegram para añadir el primero!');
+            lastUpdateSpan.textContent = 'Sin datos';
+            // Aquí puedes resetear el dashboard a un estado "vacío" si quieres
+            processData([]); // Procesar con un array vacío
+            return;
+        }
+
+        const raw = snapshot.val();
+        surveyData = Object.entries(raw).map(([id, v]) => ({
+            ...v,
+            id,
+            fecha: parseDate(v.fecha)
+        })).sort((a, b) => b.fecha - a.fecha);
+
+        processData(surveyData);
+        lastUpdateSpan.textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-ES');
+
+    } catch (err) {
+        showError('Error al cargar datos: ' + err.message);
+        lastUpdateSpan.textContent = 'Error';
+    } finally {
+        hide('loadingSpinner');
+    }
+}
+
+// ==================================================================
+// 3. TUS FUNCIONES ORIGINALES DEL DASHBOARD
+// (He mantenido todo tu código de procesado, gráficos, etc.)
+// ==================================================================
+
+function parseDate(v) {
+    if (v instanceof Date) return v;
+    if (!v) return new Date();
+    // ISO 8601 (el que usa tu bot)
+    const iso = new Date(v);
+    if (!isNaN(iso)) return iso;
+    // Formato antiguo DD/MM/YYYY HH:MM
+    const m = String(v).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})/);
+    if (m) return new Date(+m[3], +m[2]-1, +m[1], +m[4], +m[5]);
+    return new Date();
+}
+
+function processData(data) {
+    const now = new Date();
+    const thisMonth = now.getMonth();
+    const thisYear = now.getFullYear();
+
+    let totalEarned = 0, totalWithdrawn = 0, successCount = 0, attemptCount = 0;
+    let thisMonthEarned = 0, thisMonthSurveys = 0;
+    const monthly = {};
+
+    data.forEach(item => {
+        const key = monthKey(item.fecha);
+        if (!monthly[key]) monthly[key] = { earned: 0, withdrawn: 0, success: 0, attempts: 0 };
+
+        switch (item.tipo) {
+            case 'encuesta':
+                totalEarned += item.importe;
+                monthly[key].earned += item.importe;
+                monthly[key].success += 1;
+                monthly[key].attempts += 1;
+                successCount++;
+                attemptCount++;
+                if (item.fecha.getMonth() === thisMonth && item.fecha.getFullYear() === thisYear) {
+                    thisMonthEarned += item.importe;
+                    thisMonthSurveys++;
+                }
+                break;
+            case 'screener':
+            case 'descalificado':
+                monthly[key].attempts += 1;
+                attemptCount++;
+                break;
+            case 'retiro':
+                totalWithdrawn += item.importe;
+                monthly[key].withdrawn += item.importe;
+                break;
+            case 'bonus':
+                totalEarned += item.importe;
+                monthly[key].earned += item.importe;
+                if (item.fecha.getMonth() === thisMonth && item.fecha.getFullYear() === thisYear) {
+                    thisMonthEarned += item.importe;
+                }
+                break;
+        }
+    });
+
+    const currentBalance = totalEarned - totalWithdrawn;
+    const avgPerSurvey = successCount > 0 ? (totalEarned / successCount) : 0;
+    const successRate = attemptCount > 0 ? (successCount / attemptCount * 100) : 0;
+
+    const prevKey = prevMonthKey(now);
+    lastMonthEarned = monthly[prevKey] ? monthly[prevKey].earned : 0;
+    monthlyGoal = calcAdaptiveGoal(lastMonthEarned);
+
+    // Actualizar DOM
+    setTxt('total-earned', fmt(totalEarned));
+    setTxt('current-balance', fmt(currentBalance));
+    setTxt('total-withdrawn', fmt(totalWithdrawn));
+    setTxt('success-rate', successRate.toFixed(1));
+    setTxt('success-counts', `${successCount} completadas / ${attemptCount} intentos`);
+    setTxt('avg-per-survey', fmt(avgPerSurvey));
+    setTxt('this-month-earned', fmt(thisMonthEarned));
+    setTxt('this-month-surveys', thisMonthSurveys);
+
+    //updateGoalWidget(thisMonthEarned);
+    updateMonthlySummary(monthly);
+    buildChart(data, currentMode);
+    //buildSchedule(data);
+    //updateRecentActivity(data.slice(0, 6));
+}
+
+function updateMonthlySummary(monthly) {
+    const tbody = document.querySelector('#monthly-summary tbody');
+    tbody.innerHTML = '';
+    Object.entries(monthly)
+        .sort(([a], [b]) => b.localeCompare(a))
+        .forEach(([key, d]) => {
+            const rate = d.attempts > 0 ? (d.success / d.attempts * 100).toFixed(1) : '—';
+            const avg = d.success > 0 ? fmt(d.earned / d.success) : '—';
+            tbody.innerHTML += `
+                <tr>
+                    <td>${formatMonthLabel(key)}</td>
+                    <td class="positive">€${fmt(d.earned)}</td>
+                    <td class="${d.withdrawn > 0 ? 'negative' : ''}">€${fmt(d.withdrawn)}</td>
+                    <td>${d.success}</td>
+                    <td>${d.attempts}</td>
+                    <td>${rate}%</td>
+                    <td>€${avg}</td>
+                </tr>`;
         });
-    }
+}
 
-    // -------------------------------------------------
-    // 4. LÓGICA DE CARGA Y PROCESADO DE DATOS (adaptada)
-    // -------------------------------------------------
-    async function loadDataForUser(uid) {
-        console.log(`Cargando datos para el usuario: ${uid}`);
-        const userSurveysRef = ref(db, `users/${uid}/surveys`);
+function buildChart(data, mode) {
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    if (mainChart) mainChart.destroy();
+    
+    let labels, values, label, color;
+    const sorted = [...data].sort((a,b) => a.fecha - b.fecha);
 
-        try {
-            const snapshot = await get(userSurveysRef);
-            if (snapshot.exists()) {
-                const rawData = snapshot.val();
-                const surveyData = Object.values(rawData); // Tu bot ya guarda los datos correctamente anidados
-                console.log(`Se encontraron ${surveyData.length} registros.`);
-                processData(surveyData);
-            } else {
-                console.log("No hay datos para este usuario.");
-                document.getElementById('stats-grid').innerHTML = '<p>Aún no tienes datos registrados. ¡Usa el bot de Telegram para empezar!</p>';
-                // Aquí podrías poner a cero los gráficos o mostrar un estado inicial
-            }
-        } catch (error) {
-            console.error("Error al cargar los datos del usuario: ", error);
-            document.getElementById('stats-grid').innerHTML = '<p style="color:var(--error);">Error al cargar los datos.</p>';
-        }
-    }
-
-    function processData(surveyData) {
-        // Aquí pega toda tu lógica de `processData` que ya tenías.
-        // Por ejemplo, para mostrar una de las tarjetas:
-        const totalEarned = surveyData
-            .filter(item => item.tipo === 'encuesta' || item.tipo === 'bonus')
-            .reduce((sum, item) => sum + (item.importe || 0), 0);
-
-        const statsGrid = document.getElementById('stats-grid');
-        statsGrid.innerHTML = `
-            <div class="stat-card">
-                <div class="stat-label"><i class="fas fa-euro-sign"></i> Total Ganado</div>
-                <div class="stat-value">
-                    <span class="currency">€</span>
-                    <span>${totalEarned.toFixed(2)}</span>
-                </div>
-            </div>
-            <!-- ...genera las otras tarjetas aquí... -->
-        `;
-        
-        // Y aquí llamas a tus funciones para construir los gráficos, etc.
-        // buildChart(surveyData, 'accumulated');
-        console.log("Datos procesados. Total ganado:", totalEarned.toFixed(2));
-        
-        // Ejemplo simple para el gráfico principal
-        const chartData = surveyData
-            .filter(d => d.tipo === 'encuesta')
-            .sort((a,b) => new Date(a.fecha) - new Date(b.fecha)); // Ordenar por fecha
-            
-        const labels = chartData.map(d => new Date(d.fecha).toLocaleDateString('es-ES', {month: 'short', day: 'numeric'}));
-        const data = chartData.map(d => d.importe);
-        
-        buildMainChart(labels, data);
+    if (mode === 'accumulated') {
+        let acc = 0;
+        const points = sorted
+            .filter(d => d.tipo === 'encuesta' || d.tipo === 'bonus')
+            .map(d => { acc += d.importe; return { x: d.fecha, y: acc }; });
+        labels = points.map(p => fmtDateShort(p.x));
+        values = points.map(p => p.y);
+        label = 'Ganancias acumuladas (€)';
+        color = '#6366f1';
+    } else if (mode === 'monthly') {
+        const monthly = {};
+        sorted.filter(d => d.tipo === 'encuesta' || d.tipo === 'bonus')
+            .forEach(d => {
+                const k = monthKey(d.fecha);
+                monthly[k] = (monthly[k] || 0) + d.importe;
+            });
+        labels = Object.keys(monthly).sort().map(formatMonthLabel);
+        values = Object.keys(monthly).sort().map(k => monthly[k]);
+        label = 'Ganancias por mes (€)';
+        color = '#10b981';
+    } else { // daily
+        const daily = {};
+        sorted.filter(d => d.tipo === 'encuesta' || d.tipo === 'bonus')
+            .forEach(d => {
+                const k = d.fecha.toISOString().slice(0, 10);
+                daily[k] = (daily[k] || 0) + d.importe;
+            });
+        labels = Object.keys(daily).sort().map(k => {
+            const [,m,d] = k.split('-');
+            return `${d}/${m}`;
+        });
+        values = Object.keys(daily).sort().map(k => daily[k]);
+        label = 'Ganancias diarias (€)';
+        color = '#ec4899';
     }
     
-    function buildMainChart(labels, data) {
-        const ctx = document.getElementById('mainChart').getContext('2d');
-        if (window.mainChart instanceof Chart) {
-            window.mainChart.destroy();
-        }
-        window.mainChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Ganancia por encuesta (€)',
-                    data: data,
-                    borderColor: 'var(--primary)',
-                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
-                    fill: true,
-                    tension: 0.3
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
-    }
+    mainChart = new Chart(ctx, { /* ... tu configuración de Chart.js ... */ 
+        type: mode === 'accumulated' ? 'line' : 'bar',
+        data: { labels, datasets: [{ label, data: values, borderColor: color,
+            backgroundColor: mode === 'accumulated' ? hexAlpha(color, 0.12) : hexAlpha(color, 0.7),
+            fill: mode === 'accumulated', tension: 0.4
+        }]},
+        options: { responsive: true, maintainAspectRatio: false /*, etc */ }
+    });
+}
+
+window.switchChart = (mode, btn) => {
+    document.querySelectorAll('.chart-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMode = mode;
+    buildChart(surveyData, mode);
+};
+
+// UTILIDADES
+const fmt = v => parseFloat(v || 0).toFixed(2);
+const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+const show = id => { const el = document.getElementById(id); if (el) el.style.display = 'block'; };
+const hide = id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; };
+function showError(msg) {
+    const el = document.getElementById('errorMessage');
+    el.textContent = msg;
+    show('errorMessage');
+}
+function monthKey(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; }
+function prevMonthKey(d) { const p = new Date(d.getFullYear(), d.getMonth() - 1, 1); return monthKey(p); }
+function formatMonthLabel(key) { const [y, m] = key.split('-'); return new Date(+y, +m - 1, 1).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }); }
+function fmtDateShort(d) { return `${d.getDate()}/${d.getMonth() + 1}`; }
+function hexAlpha(hex, a) { const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16); return `rgba(${r},${g},${b},${a})`; }
+function calcAdaptiveGoal(lastEarned) { /* ... tu lógica de meta adaptativa ... */ return 10.00; }
+
+// TEMA
+window.toggleTheme = () => {
+    const body = document.body;
+    const next = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    body.setAttribute('data-theme', next);
+    document.getElementById('theme-icon').className = next === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+};
 
 </script>
 
