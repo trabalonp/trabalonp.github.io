@@ -74,7 +74,18 @@ body {
   position: relative;
   z-index: 100;
 }
-.sidebar.collapsed { width: 56px; }
+.sidebar.collapsed {
+  width: 56px;
+  overflow: hidden;
+}
+
+.sidebar.collapsed .nav-group {
+  overflow: hidden;
+}
+
+.sidebar.collapsed .sidebar-footer {
+  overflow: hidden;
+}
 
 .sidebar-header {
   height: var(--topbar-h);
@@ -132,6 +143,7 @@ body {
   padding: 12px 8px;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
+  overflow: hidden;
 }
 .sidebar-collapse-btn {
   width: 100%; display: flex; align-items: center; gap: 10px;
