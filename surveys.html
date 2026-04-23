@@ -3,2087 +3,2020 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Dashboard de Encuestas - Analiza tus ganancias en euros" />
-  <meta name="author" content="Tu Nombre" />
-  <title>Survey Dashboard</title>
+  <title>PollPay · Dashboard</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Firebase (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
   <style>
-    :root{
-      --primary:#6366f1;
-      --primary-dark:#4f46e5;
-      --secondary:#8b5cf6;
-      --accent:#ec4899;
-      --success:#10b981;
-      --warning:#f59e0b;
-      --error:#ef4444;
-      --info:#3b82f6;
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-      --bg-1:#0b1226;
-      --bg-2:#0f172a;
-      --bg-3:#1e293b;
-      --bg-4:#334155;
-
-      --card: rgba(255,255,255,0.05);
-      --card-2: rgba(255,255,255,0.07);
-      --glass-border: rgba(255,255,255,0.12);
-      --glass-strong: rgba(255,255,255,0.10);
-
-      --text-1:#f1f5f9;
-      --text-2:#cbd5e1;
-      --text-3:#94a3b8;
-
-      --border: rgba(148,163,184,0.18);
-      --shadow: 0 18px 55px rgba(0,0,0,0.38);
-      --shadow-soft: 0 10px 25px rgba(0,0,0,0.22);
-
-      --radius-xl: 18px;
-      --radius-lg: 14px;
-      --radius-md: 12px;
-      --radius-sm: 10px;
-
-      --transition: all 0.28s cubic-bezier(0.4,0,0.2,1);
-
-      --grid-line: rgba(99,102,241,0.055);
-      --glow: 0 0 22px rgba(99,102,241,0.25);
+    :root {
+      --bg:       #07080D;
+      --s1:       #0D1019;
+      --s2:       #141B27;
+      --s3:       #1C2535;
+      --border:   rgba(255,255,255,0.06);
+      --border-b: rgba(99,255,211,0.25);
+      --primary:  #63FFD3;
+      --primary-dim: rgba(99,255,211,0.12);
+      --primary-glow: 0 0 24px rgba(99,255,211,0.25);
+      --accent:   #FF6B9D;
+      --gold:     #FFD93D;
+      --blue:     #60A5FA;
+      --t1:       #EEF2FF;
+      --t2:       #8892A8;
+      --t3:       #424B62;
+      --ok:       #63FFD3;
+      --err:      #FF6B9D;
+      --warn:     #FFD93D;
+      --tr: all 0.22s cubic-bezier(0.4,0,0.2,1);
+      --r: 14px;
     }
 
-    [data-theme="light"]{
-      --bg-1:#f7f8ff;
-      --bg-2:#f8fafc;
-      --bg-3:#ffffff;
-      --bg-4:#eef2ff;
+    html { scroll-behavior: smooth; }
 
-      --card: rgba(0,0,0,0.035);
-      --card-2: rgba(0,0,0,0.045);
-      --glass-border: rgba(0,0,0,0.10);
-      --glass-strong: rgba(0,0,0,0.06);
-
-      --text-1:#0f172a;
-      --text-2:#334155;
-      --text-3:#64748b;
-
-      --border: rgba(2,6,23,0.11);
-      --shadow: 0 18px 45px rgba(15,23,42,0.10);
-      --shadow-soft: 0 10px 22px rgba(15,23,42,0.08);
-
-      --grid-line: rgba(99,102,241,0.05);
-      --glow: 0 0 18px rgba(99,102,241,0.12);
-    }
-
-    *{ margin:0; padding:0; box-sizing:border-box; }
-    html, body { height: 100%; }
-
-    body{
-      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: radial-gradient(1200px 600px at 20% -10%, rgba(99,102,241,0.38), transparent 60%),
-                  radial-gradient(900px 500px at 90% 0%, rgba(236,72,153,0.25), transparent 58%),
-                  radial-gradient(900px 600px at 40% 115%, rgba(16,185,129,0.14), transparent 60%),
-                  linear-gradient(180deg, var(--bg-1), var(--bg-2) 50%, var(--bg-2));
-      color: var(--text-1);
-      transition: var(--transition);
-      overflow-x:hidden;
-    }
-
-    /* Fondo grid suave */
-    .bg-grid{
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(var(--grid-line) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-      background-size: 44px 44px;
-      pointer-events: none;
-      z-index: -3;
-      opacity: 0.75;
-      mask-image: radial-gradient(600px 500px at 35% 0%, rgba(0,0,0,0.9), transparent 70%);
-    }
-
-    /* “Glow blobs” */
-    .blob{
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(60px);
-      opacity: 0.45;
-      z-index: -4;
-      pointer-events: none;
-      animation: floaty 14s ease-in-out infinite;
-    }
-    .blob.b1{ width: 380px; height: 380px; background: rgba(99,102,241,0.45); left: -120px; top: 80px; }
-    .blob.b2{ width: 420px; height: 420px; background: rgba(236,72,153,0.30); right: -140px; top: 120px; animation-delay: -4s; }
-    .blob.b3{ width: 360px; height: 360px; background: rgba(16,185,129,0.18); left: 42%; bottom: -160px; animation-delay: -8s; }
-
-    @keyframes floaty{
-      0%,100%{ transform: translate(0,0) scale(1); }
-      50%{ transform: translate(18px, -18px) scale(1.03); }
-    }
-
-    .container{
-      max-width: 1480px;
-      margin: 0 auto;
-      padding: 22px;
-      padding-bottom: 64px;
-    }
-
-    /* Topbar */
-    .topbar{
-      background: linear-gradient(135deg, rgba(99,102,241,0.22), rgba(139,92,246,0.12));
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--shadow);
-      border-radius: var(--radius-xl);
-      padding: 18px 18px;
-      position: sticky;
-      top: 14px;
-      z-index: 100;
-      backdrop-filter: blur(14px);
-    }
-
-    .topbar-inner{
-      display:flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .brand{
-      display:flex;
-      flex-direction: column;
-      gap: 6px;
-      min-width: 260px;
-    }
-    .brand-row{
-      display:flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .brand h1{
-      font-size: 1.25rem;
-      font-weight: 800;
-      letter-spacing: 0.2px;
-      display:flex;
-      align-items:center;
-      gap: 10px;
-    }
-    .brand h1 .mark{
-      width: 38px; height: 38px;
-      border-radius: 12px;
-      display:flex; align-items:center; justify-content:center;
-      background: linear-gradient(135deg, rgba(99,102,241,0.85), rgba(236,72,153,0.72));
-      box-shadow: var(--glow);
-      border: 1px solid rgba(255,255,255,0.18);
-    }
-    .brand h1 .mark i{ color: white; font-size: 1.05rem; }
-    .subtitle{
-      color: rgba(255,255,255,0.86);
-      font-size: 0.88rem;
-      font-weight: 500;
-    }
-    [data-theme="light"] .subtitle{ color: rgba(15,23,42,0.72); }
-
-    /* UID discreto + borroso */
-    .uid-chip{
-      display: none; /* solo logged */
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.14);
-      border: 1px solid rgba(255,255,255,0.20);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 24px rgba(0,0,0,0.12);
-      max-width: 100%;
-    }
-    [data-theme="light"] .uid-chip{
-      background: rgba(0,0,0,0.05);
-      border-color: rgba(0,0,0,0.10);
-      box-shadow: 0 10px 22px rgba(15,23,42,0.06);
-    }
-    .uid-chip .label{
-      font-size: 0.78rem;
-      font-weight: 800;
-      color: rgba(255,255,255,0.88);
-    }
-    [data-theme="light"] .uid-chip .label{ color: rgba(15,23,42,0.75); }
-    .uid-chip .uid-text{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
-      font-size: 0.82rem;
-      letter-spacing: 0.2px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: rgba(0,0,0,0.12);
-      border: 1px solid rgba(255,255,255,0.14);
-      color: rgba(255,255,255,0.85);
-      filter: blur(5px);               /* <<<< borroso */
-      user-select: none;               /* <<<< no seleccionable */
-      pointer-events: none;            /* <<<< no clic ni copiar */
-      white-space: nowrap;
-      max-width: min(520px, 70vw);
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--t1);
+      height: 100dvh;
       overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    [data-theme="light"] .uid-chip .uid-text{
-      background: rgba(0,0,0,0.06);
-      color: rgba(15,23,42,0.60);
-      border-color: rgba(0,0,0,0.10);
-    }
-    .uid-chip .copy-btn{
-      border: 1px solid rgba(255,255,255,0.22);
-      background: rgba(255,255,255,0.16);
-      color: white;
-      font-weight: 800;
-      font-size: 0.78rem;
-      padding: 6px 10px;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: var(--transition);
-      white-space: nowrap;
-      position: relative;
-      overflow: hidden;
-    }
-    .uid-chip .copy-btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.22); }
-    .uid-chip .copy-btn:active{ transform: translateY(0px) scale(0.98); }
-    [data-theme="light"] .uid-chip .copy-btn{
-      background: rgba(0,0,0,0.06);
-      color: rgba(15,23,42,0.82);
-      border-color: rgba(0,0,0,0.10);
-    }
-    [data-theme="light"] .uid-chip .copy-btn:hover{ background: rgba(0,0,0,0.085); }
-
-    /* Botones y chips (mejor micro-interacción) */
-    .actions{
-      display:flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
+      display: flex;
     }
 
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.18);
-      backdrop-filter: blur(10px);
-      font-size: 0.82rem;
-      color: rgba(255,255,255,0.9);
-      font-weight: 700;
-      box-shadow: 0 10px 18px rgba(0,0,0,0.10);
-      white-space: nowrap;
+    /* ─── TOAST ─────────────────────────────── */
+    #toast-container {
+      position: fixed; top: 1.5rem; right: 1.5rem;
+      display: flex; flex-direction: column; gap: .5rem;
+      z-index: 9999; pointer-events: none;
     }
-    [data-theme="light"] .pill{
-      background: rgba(0,0,0,0.045);
-      color: rgba(15,23,42,0.78);
-      border-color: rgba(0,0,0,0.10);
-    }
-
-    .icon-btn{
-      width: 40px;
-      height: 40px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(255,255,255,0.12);
-      color: rgba(255,255,255,0.92);
-      cursor: pointer;
-      transition: var(--transition);
-      backdrop-filter: blur(10px);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      position: relative;
-      overflow: hidden;
-    }
-    .icon-btn:hover{ transform: translateY(-1px) scale(1.05); background: rgba(255,255,255,0.18); }
-    .icon-btn:active{ transform: translateY(0px) scale(0.98); }
-    [data-theme="light"] .icon-btn{
-      background: rgba(0,0,0,0.05);
-      border-color: rgba(0,0,0,0.10);
-      color: rgba(15,23,42,0.78);
-    }
-
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.20);
-      background: rgba(255,255,255,0.12);
-      color: rgba(255,255,255,0.95);
-      cursor:pointer;
-      transition: var(--transition);
-      font-weight: 800;
-      font-size: 0.86rem;
-      backdrop-filter: blur(10px);
-      white-space: nowrap;
-      position: relative;
-      overflow: hidden;
-    }
-    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.18); }
-    .btn:active{ transform: translateY(0px) scale(0.985); }
-    [data-theme="light"] .btn{
-      background: rgba(0,0,0,0.05);
-      border-color: rgba(0,0,0,0.10);
-      color: rgba(15,23,42,0.80);
-    }
-    .btn.primary{
-      background: linear-gradient(135deg, rgba(99,102,241,0.90), rgba(139,92,246,0.70));
-      border-color: rgba(255,255,255,0.22);
-      box-shadow: var(--glow);
-      color: white;
-    }
-    .btn.primary:hover{ filter: brightness(1.05); }
-    .btn.google{
-      background: rgba(66,133,244,0.22);
-      border-color: rgba(66,133,244,0.45);
-    }
-    .btn.google:hover{ background: rgba(66,133,244,0.30); }
-
-    /* Efecto shimmer (sutil) para primary */
-    .btn.primary::after{
-      content:'';
-      position:absolute;
-      inset:0;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
-      transform: translateX(-120%);
-      transition: transform 0.8s ease;
-    }
-    .btn.primary:hover::after{
-      transform: translateX(120%);
-    }
-
-    .user-chip{
-      display:none;
-      align-items:center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(255,255,255,0.12);
-      backdrop-filter: blur(10px);
-    }
-    [data-theme="light"] .user-chip{
-      background: rgba(0,0,0,0.045);
-      border-color: rgba(0,0,0,0.10);
-    }
-
-    .user-chip img{
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid rgba(255,255,255,0.55);
-    }
-    [data-theme="light"] .user-chip img{ border-color: rgba(0,0,0,0.12); }
-
-    .user-chip .name{
-      font-weight: 800;
-      font-size: 0.86rem;
-      max-width: 200px;
-      overflow:hidden;
-      white-space:nowrap;
-      text-overflow:ellipsis;
-    }
-
-    .user-chip .logout{
-      border:none;
-      background: transparent;
-      cursor:pointer;
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      color: rgba(255,255,255,0.85);
-      transition: var(--transition);
-      display:flex; align-items:center; justify-content:center;
-    }
-    .user-chip .logout:hover{ background: rgba(255,255,255,0.14); color: white; }
-    .user-chip .logout:active{ transform: scale(0.96); }
-    [data-theme="light"] .user-chip .logout{ color: rgba(15,23,42,0.70); }
-    [data-theme="light"] .user-chip .logout:hover{ background: rgba(0,0,0,0.07); }
-
-    /* Layout */
-    .grid{
-      display:grid;
-      gap: 16px;
-    }
-    .grid.kpis{
-      grid-template-columns: repeat(12, 1fr);
-      margin-top: 18px;
-    }
-    @media (max-width: 1100px){
-      .grid.kpis{ grid-template-columns: repeat(6, 1fr); }
-    }
-    @media (max-width: 720px){
-      .grid.kpis{ grid-template-columns: repeat(2, 1fr); }
-    }
-
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.04));
+    .toast {
+      background: var(--s2);
       border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-soft);
-      backdrop-filter: blur(12px);
-      overflow:hidden;
-      animation: fadeInUp 0.45s ease-out;
+      border-left: 3px solid var(--primary);
+      padding: .75rem 1.25rem;
+      border-radius: 10px;
+      font-size: .88rem;
+      font-weight: 500;
+      backdrop-filter: blur(16px);
+      animation: toastIn .3s ease-out forwards;
+      pointer-events: all;
+      display: flex; align-items: center; gap: .6rem;
+      min-width: 240px; max-width: 340px;
     }
-    [data-theme="light"] .card{
-      background: linear-gradient(180deg, rgba(0,0,0,0.03), rgba(0,0,0,0.02));
-    }
+    .toast.warn { border-left-color: var(--warn); }
+    .toast.err  { border-left-color: var(--err); }
+    .toast.out  { animation: toastOut .3s ease-in forwards; }
+    @keyframes toastIn  { from { opacity:0; transform: translateX(30px); } to { opacity:1; transform: none; } }
+    @keyframes toastOut { to   { opacity:0; transform: translateX(30px); } }
 
-    .card-head{
-      padding: 16px 16px 10px 16px;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      gap: 10px;
-      border-bottom: 1px solid rgba(148,163,184,0.14);
-    }
-    [data-theme="light"] .card-head{
-      border-bottom-color: rgba(2,6,23,0.08);
-    }
-
-    .card-title{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      font-weight: 900;
-      font-size: 0.98rem;
-      letter-spacing: 0.2px;
-    }
-    .card-title i{
-      width: 34px; height: 34px;
-      border-radius: 12px;
-      display:flex; align-items:center; justify-content:center;
-      background: rgba(99,102,241,0.18);
-      border: 1px solid rgba(99,102,241,0.25);
-      color: rgba(255,255,255,0.92);
-    }
-    [data-theme="light"] .card-title i{
-      color: rgba(15,23,42,0.78);
-      background: rgba(99,102,241,0.12);
-      border-color: rgba(99,102,241,0.18);
-    }
-
-    .card-body{
-      padding: 16px;
-    }
-
-    /* KPI card */
-    .kpi{
-      grid-column: span 3;
+    /* ─── SIDEBAR ────────────────────────────── */
+    .sidebar {
+      width: 60px;
+      background: var(--s1);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      align-items: center;
+      padding: 1.25rem 0;
+      gap: 0;
+      flex-shrink: 0;
+      transition: width .3s cubic-bezier(0.4,0,0.2,1);
+      overflow: hidden;
       position: relative;
-      transform: translateZ(0);
+      z-index: 100;
     }
-    .kpi::before{
-      content:'';
-      position:absolute;
-      inset: 0;
-      border-radius: var(--radius-xl);
-      pointer-events:none;
-      background: radial-gradient(420px 220px at 20% 0%, rgba(99,102,241,0.22), transparent 62%);
-      opacity: 0.9;
-    }
-    .kpi:hover{
-      box-shadow: var(--shadow);
-      transform: translateY(-3px);
-      border-color: rgba(99,102,241,0.28);
-    }
-    .kpi .card-body{ position: relative; z-index: 1; }
+    .sidebar.open { width: 230px; }
+    .sidebar.open .nav-label,
+    .sidebar.open .brand-name,
+    .sidebar.open .sidebar-footer-text { opacity: 1; width: auto; pointer-events: auto; }
 
-    .kpi .label{
-      color: var(--text-3);
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
-      font-weight: 900;
-      text-transform: uppercase;
+    .brand {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .5rem .8rem;
+      margin-bottom: 1.5rem;
+      white-space: nowrap;
+      width: 100%;
     }
-    .kpi .value{
-      margin-top: 10px;
-      font-size: 2.05rem;
-      font-weight: 900;
-      letter-spacing: -0.02em;
-      display:flex;
-      align-items: baseline;
-      gap: 8px;
+    .brand-icon {
+      width: 36px; height: 36px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--primary), #00BFA5);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; color: #07080D; font-family:'Syne',sans-serif; font-weight: 800;
     }
-    .kpi .value .currency{
-      font-size: 1.2rem;
-      font-weight: 900;
-      color: var(--text-2);
-    }
-    .kpi .sub{
-      margin-top: 8px;
-      color: var(--text-3);
-      font-size: 0.86rem;
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      flex-wrap: wrap;
-      font-weight: 700;
-    }
-
-    /* Badges (para elementos no-trend) */
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-weight: 900;
-      font-size: 0.74rem;
-      border: 1px solid rgba(148,163,184,0.16);
-      background: rgba(148,163,184,0.10);
-      color: var(--text-2);
+    .brand-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1.1rem;
+      color: var(--t1);
+      opacity: 0; width: 0; overflow: hidden;
+      transition: var(--tr);
       white-space: nowrap;
     }
-    .badge.neutral{
-      border-color: rgba(148,163,184,0.18);
-      background: rgba(148,163,184,0.09);
-      color: var(--text-3);
+
+    .nav-section { width: 100%; padding: 0 .5rem; }
+    .nav-label-section {
+      font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--t3); font-weight: 600;
+      padding: .4rem .6rem; margin-bottom: .25rem;
+      opacity: 0; width: 0; overflow: hidden; white-space: nowrap;
+      transition: var(--tr);
+    }
+    .sidebar.open .nav-label-section { opacity: 1; width: auto; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: .85rem;
+      padding: .65rem .75rem;
+      border-radius: 10px;
+      cursor: pointer;
+      border: none; background: transparent;
+      color: var(--t2); width: 100%;
+      font-family: 'Outfit', sans-serif; font-size: .92rem; font-weight: 500;
+      transition: var(--tr);
+      white-space: nowrap;
+      text-align: left;
+    }
+    .nav-item .nav-icon {
+      width: 20px; height: 20px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .9rem;
+    }
+    .nav-label { opacity: 0; width: 0; overflow: hidden; transition: var(--tr); }
+    .nav-item:hover { background: var(--s2); color: var(--t1); }
+    .nav-item.active {
+      background: var(--primary-dim);
+      color: var(--primary);
+      border: 1px solid var(--border-b);
+    }
+    .nav-item.active .nav-icon { color: var(--primary); }
+
+    .sidebar-divider {
+      width: calc(100% - 1rem); height: 1px;
+      background: var(--border);
+      margin: .75rem .5rem;
     }
 
-    /* 2 columnas */
-    .split{
-      display:grid;
-      grid-template-columns: 1.35fr 0.85fr;
-      gap: 16px;
-      margin-top: 16px;
+    .sidebar-footer {
+      margin-top: auto; width: 100%;
+      padding: 0 .5rem;
     }
-    @media (max-width: 1100px){
-      .split{ grid-template-columns: 1fr; }
-    }
-
-    /* 2 módulos */
-    .triple{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-top: 16px;
-    }
-    @media (max-width: 980px){
-      .triple{ grid-template-columns: 1fr; }
+    .sidebar-footer-text {
+      font-size: .75rem; color: var(--t3);
+      opacity: 0; width: 0; overflow: hidden; white-space: nowrap;
+      transition: var(--tr);
+      padding: .3rem .75rem;
     }
 
-    /* Chart wrapper */
-    .chart-wrap{
-      height: 380px;
-    }
-    @media (max-width: 720px){
-      .chart-wrap{ height: 300px; }
-    }
-
-    .tabs{
-      display:flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-    .tab{
-      border: 1px solid rgba(148,163,184,0.18);
-      background: rgba(148,163,184,0.08);
-      color: var(--text-2);
-      padding: 7px 10px;
-      border-radius: 999px;
-      cursor:pointer;
-      font-weight: 900;
-      font-size: 0.78rem;
-      transition: var(--transition);
-      user-select: none;
-    }
-    .tab:hover{ transform: translateY(-1px); }
-    .tab:active{ transform: translateY(0px) scale(0.99); }
-    .tab.active{
-      background: rgba(99,102,241,0.25);
-      border-color: rgba(99,102,241,0.45);
-      color: white;
-      box-shadow: var(--glow);
-    }
-    [data-theme="light"] .tab.active{ color: rgba(15,23,42,0.85); }
-
-    /* Recent activity list */
-    .activity-list{
-      display:flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .activity-item{
-      display:flex;
-      align-items:center;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(148,163,184,0.14);
-      transition: var(--transition);
-    }
-    .activity-item:hover{ transform: translateX(6px); border-color: rgba(99,102,241,0.28); }
-    .activity-icon{
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+    /* ─── TOGGLE BUTTON ─────────────────── */
+    .sidebar-toggle {
+      width: 28px; height: 28px;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer; color: var(--t2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem;
+      transition: var(--tr);
       flex-shrink: 0;
     }
-    .activity-icon.earned{ background: rgba(16,185,129,0.18); color: var(--success); }
-    .activity-icon.withdrawn{ background: rgba(236,72,153,0.16); color: var(--accent); }
-    .activity-icon.failed{ background: rgba(239,68,68,0.13); color: var(--error); }
-    .activity-icon.bonus{ background: rgba(245,158,11,0.16); color: var(--warning); }
+    .sidebar-toggle:hover { background: var(--s3); color: var(--t1); }
 
-    .activity-content{ flex: 1; min-width: 0; }
-    .activity-title{
-      font-weight: 900;
-      font-size: 0.92rem;
-      white-space: nowrap;
+    /* ─── MAIN AREA ──────────────────────── */
+    .main {
+      flex: 1;
+      display: flex; flex-direction: column;
       overflow: hidden;
-      text-overflow: ellipsis;
+      min-width: 0;
     }
-    .activity-details{
-      margin-top: 3px;
-      font-size: 0.82rem;
-      color: var(--text-3);
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      flex-wrap: wrap;
-      font-weight: 700;
-    }
-    .activity-amount{
-      font-weight: 950;
-      font-size: 0.95rem;
-      white-space: nowrap;
-    }
-    .activity-amount.positive{ color: var(--success); }
-    .activity-amount.negative{ color: var(--error); }
-    .activity-amount.neutral{ color: var(--text-3); }
 
-    /* Schedule heatmap */
-    .schedule-scroll{ overflow-x: auto; }
-    .schedule-grid{
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      gap: 3px;
-      min-width: 560px;
+    /* ─── TOPBAR ─────────────────────────── */
+    .topbar {
+      height: 60px; flex-shrink: 0;
+      background: var(--s1);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 1.5rem;
+      gap: 1rem;
     }
-    .schedule-header{
-      font-weight: 900;
-      text-align: center;
-      padding: 10px 8px;
-      background: rgba(99,102,241,0.85);
-      color: white;
-      border-radius: 10px;
-      font-size: 0.75rem;
-      border: 1px solid rgba(255,255,255,0.18);
-    }
-    .schedule-cell{
-      padding: 9px 8px;
-      text-align: center;
-      border-radius: 10px;
-      font-weight: 950;
-      font-size: 0.78rem;
-      cursor: default;
-      transition: var(--transition);
-      border: 1px solid rgba(148,163,184,0.10);
-    }
-    .schedule-cell:hover{
-      transform: scale(1.12);
-      position: relative;
-      z-index: 2;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-    }
-    .schedule-cell.high-activity{ background: rgba(16,185,129,0.90); color: white; }
-    .schedule-cell.medium-activity{ background: rgba(245,158,11,0.90); color: white; }
-    .schedule-cell.low-activity{ background: rgba(239,68,68,0.85); color: white; }
-    .schedule-cell.no-data{ background: rgba(148,163,184,0.08); color: var(--text-3); }
+    .topbar-left { display: flex; align-items: center; gap: .75rem; flex: 1; }
+    .topbar-right { display: flex; align-items: center; gap: .75rem; }
 
-    .legend{
-      display:flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      justify-content: center;
-      padding-top: 12px;
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      color: var(--t1);
     }
-    .legend-item{
-      display:flex;
-      align-items:center;
-      gap: 8px;
-      font-size: 0.82rem;
-      color: var(--text-3);
-      font-weight: 800;
+    .page-badge {
+      font-size: .7rem; font-weight: 600;
+      background: var(--primary-dim);
+      color: var(--primary);
+      border: 1px solid var(--border-b);
+      padding: .2rem .55rem;
+      border-radius: 20px;
     }
-    .legend-color{
-      width: 12px;
-      height: 12px;
-      border-radius: 4px;
-    }
-    .legend-color.high{ background: rgba(16,185,129,0.95); }
-    .legend-color.medium{ background: rgba(245,158,11,0.95); }
-    .legend-color.low{ background: rgba(239,68,68,0.90); }
-    .legend-color.none{ background: rgba(148,163,184,0.12); border: 1px solid rgba(148,163,184,0.12); }
 
-    /* Tables */
-    .table-wrap{ overflow-x:auto; }
-    table{
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th{
-      text-align: left;
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 12px 12px;
-      color: var(--text-3);
-      border-bottom: 1px solid rgba(148,163,184,0.14);
-      white-space: nowrap;
-      font-weight: 900;
-    }
-    td{
-      padding: 12px 12px;
-      border-bottom: 1px solid rgba(148,163,184,0.10);
-      font-size: 0.90rem;
-      color: var(--text-2);
-      white-space: nowrap;
-      font-weight: 700;
-    }
-    tr:hover td{
-      background: rgba(255,255,255,0.04);
-    }
-    td.positive{ color: var(--success); font-weight: 900; }
-    td.negative{ color: var(--error); font-weight: 900; }
-
-    /* Gate (no auth) */
-    .gate{
-      display: none;
-      margin-top: 18px;
-      padding: 28px 18px;
-      text-align: center;
-      border-radius: var(--radius-xl);
+    .date-filter-group {
+      display: flex; gap: .3rem;
+      background: var(--s2);
+      padding: .2rem;
+      border-radius: 8px;
       border: 1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
-      box-shadow: var(--shadow-soft);
-      backdrop-filter: blur(12px);
-      animation: fadeInUp 0.5s ease-out;
     }
-    .gate h2{
-      font-size: 1.25rem;
-      font-weight: 950;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap: 10px;
+    .date-btn {
+      font-family: 'Outfit', sans-serif;
+      font-size: .78rem; font-weight: 600;
+      padding: .3rem .7rem;
+      border-radius: 6px;
+      border: none; background: transparent;
+      color: var(--t2); cursor: pointer;
+      transition: var(--tr);
+      white-space: nowrap;
     }
-    .gate p{
-      margin-top: 8px;
-      color: var(--text-3);
-      font-weight: 600;
-      max-width: 740px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .gate .gate-actions{
-      margin-top: 18px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap: 10px;
-      flex-wrap: wrap;
+    .date-btn:hover { color: var(--t1); }
+    .date-btn.active {
+      background: var(--primary);
+      color: #07080D;
     }
 
-    /* Loading + error */
-    .loading-spinner{
-      display:none;
-      width: 44px;
-      height: 44px;
-      border: 4px solid rgba(255,255,255,0.28);
-      border-top: 4px solid rgba(255,255,255,0.92);
+    .topbar-btn {
+      width: 34px; height: 34px;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer; color: var(--t2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem;
+      transition: var(--tr);
+      position: relative;
+    }
+    .topbar-btn:hover { background: var(--s3); color: var(--t1); border-color: var(--border-b); }
+    .topbar-btn.primary-btn {
+      background: var(--primary);
+      color: #07080D;
+      border-color: transparent;
+      font-weight: 700;
+      width: auto;
+      padding: 0 .9rem;
+      gap: .45rem;
+      font-size: .8rem;
+      font-family: 'Outfit', sans-serif;
+      display: flex; align-items: center;
+    }
+    .topbar-btn.primary-btn:hover {
+      box-shadow: var(--primary-glow);
+      transform: translateY(-1px);
+    }
+    .notif-dot {
+      position: absolute; top: 5px; right: 5px;
+      width: 7px; height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      border: 1.5px solid var(--s1);
+    }
+
+    .last-update-text {
+      font-size: .75rem; color: var(--t3);
+      font-family: 'DM Mono', monospace;
+      white-space: nowrap;
+    }
+
+    .auth-btn-google {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .4rem .9rem;
+      border-radius: 8px;
+      border: 1px solid rgba(66,133,244,.4);
+      background: rgba(66,133,244,.15);
+      color: var(--t1); cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-size: .82rem; font-weight: 600;
+      transition: var(--tr);
+    }
+    .auth-btn-google:hover { background: rgba(66,133,244,.25); }
+
+    .user-chip {
+      display: none; align-items: center; gap: .5rem;
+      padding: .3rem .6rem;
+      border-radius: 8px;
+      background: var(--s2); border: 1px solid var(--border);
+    }
+    .user-chip img {
+      width: 24px; height: 24px;
+      border-radius: 50%; object-fit: cover;
+      border: 1.5px solid var(--primary);
+    }
+    .user-chip .uname { font-size: .82rem; font-weight: 600; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .logout-btn {
+      background: transparent; border: none;
+      color: var(--t3); cursor: pointer;
+      font-size: .8rem; padding: .15rem .35rem;
+      border-radius: 5px; transition: var(--tr);
+    }
+    .logout-btn:hover { color: var(--err); background: rgba(255,107,157,.1); }
+
+    /* ─── CONTENT AREA ───────────────────── */
+    .content {
+      flex: 1; overflow-y: auto;
+      padding: 1.75rem;
+      display: flex; flex-direction: column;
+      gap: 1.5rem;
+    }
+    .content::-webkit-scrollbar { width: 5px; }
+    .content::-webkit-scrollbar-track { background: transparent; }
+    .content::-webkit-scrollbar-thumb { background: var(--s3); border-radius: 4px; }
+
+    /* ─── VIEWS ──────────────────────────── */
+    .view { display: none; flex-direction: column; gap: 1.5rem; animation: fadeUp .35s ease-out; }
+    .view.active { display: flex; }
+    @keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: none; } }
+
+    /* ─── AUTH PROMPT ────────────────────── */
+    #authPrompt {
+      display: none;
+      background: var(--s1);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 3rem 2rem;
+      text-align: center;
+      animation: fadeUp .4s ease-out;
+    }
+    #authPrompt .auth-icon {
+      width: 64px; height: 64px;
+      background: var(--primary-dim);
+      border: 1px solid var(--border-b);
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; color: var(--primary);
+      margin: 0 auto 1.25rem;
+    }
+    #authPrompt h2 { font-family: 'Syne',sans-serif; font-size: 1.4rem; margin-bottom: .5rem; }
+    #authPrompt p { color: var(--t2); font-size: .92rem; max-width: 360px; margin: 0 auto; }
+
+    #loadingOverlay {
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1rem; padding: 4rem;
+      color: var(--t2);
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--s3);
+      border-top-color: var(--primary);
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin: 18px auto 0 auto;
     }
-    [data-theme="light"] .loading-spinner{
-      border-color: rgba(15,23,42,0.18);
-      border-top-color: rgba(15,23,42,0.78);
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-bar {
+      display: none;
+      background: rgba(255,107,157,.1);
+      border: 1px solid rgba(255,107,157,.35);
+      color: var(--err);
+      padding: .75rem 1rem;
+      border-radius: 10px;
+      font-size: .88rem;
+      animation: fadeUp .3s ease-out;
     }
 
-    .error{
-      display:none;
-      margin-top: 16px;
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(239,68,68,0.35);
-      background: rgba(239,68,68,0.10);
-      color: rgba(255,255,255,0.92);
-      font-weight: 800;
+    /* ─── STATS GRID ─────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
     }
-    [data-theme="light"] .error{
-      color: rgba(15,23,42,0.85);
-      background: rgba(239,68,68,0.08);
-      border-color: rgba(239,68,68,0.22);
+    .stat-card {
+      background: var(--s1);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 1.4rem 1.5rem;
+      transition: var(--tr);
+      position: relative;
+      overflow: hidden;
+      cursor: default;
     }
-
-    /* Toast */
-    .toast{
-      position: fixed;
-      left: 50%;
-      bottom: 22px;
-      transform: translateX(-50%) translateY(16px);
-      background: rgba(0,0,0,0.75);
-      border: 1px solid rgba(255,255,255,0.14);
-      color: white;
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-weight: 900;
-      font-size: 0.86rem;
-      backdrop-filter: blur(12px);
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--r);
       opacity: 0;
-      pointer-events:none;
-      transition: var(--transition);
-      z-index: 9999;
-      box-shadow: 0 14px 30px rgba(0,0,0,0.30);
+      transition: opacity .3s;
+      background: radial-gradient(ellipse at top left, var(--primary-dim), transparent 60%);
     }
-    .toast.show{
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
+    .stat-card:hover { border-color: var(--border-b); transform: translateY(-2px); }
+    .stat-card:hover::after { opacity: 1; }
+
+    .stat-top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: .75rem;
     }
-    .toast.error{
-      background: rgba(239,68,68,0.18);
-      border-color: rgba(239,68,68,0.28);
+    .stat-icon-box {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .9rem;
+    }
+    .stat-icon-box.green  { background: rgba(99,255,211,.12); color: var(--primary); }
+    .stat-icon-box.pink   { background: rgba(255,107,157,.12); color: var(--accent); }
+    .stat-icon-box.gold   { background: rgba(255,217,61,.12);  color: var(--gold); }
+    .stat-icon-box.blue   { background: rgba(96,165,250,.12);  color: var(--blue); }
+
+    .stat-trend {
+      font-size: .72rem; font-weight: 700;
+      padding: .2rem .5rem;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .stat-trend.up   { background: rgba(99,255,211,.15); color: var(--ok); }
+    .stat-trend.down { background: rgba(255,107,157,.15); color: var(--err); }
+    .stat-trend.neu  { background: rgba(255,255,255,.06); color: var(--t3); }
+
+    .stat-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 2rem; font-weight: 500;
+      color: var(--t1);
+      line-height: 1;
+      margin-bottom: .4rem;
+      display: flex; align-items: baseline; gap: .2rem;
+    }
+    .stat-value .unit { font-size: 1rem; color: var(--t2); }
+    .stat-value .pct-unit { font-size: 1.2rem; color: var(--t2); }
+    .stat-label {
+      font-size: .78rem; font-weight: 600;
+      color: var(--t2);
+      text-transform: uppercase; letter-spacing: .06em;
+      margin-bottom: .2rem;
+    }
+    .stat-sub {
+      font-size: .8rem; color: var(--t3);
     }
 
-    @keyframes spin{ to{ transform: rotate(360deg); } }
-    @keyframes fadeInUp{ from{ opacity:0; transform: translateY(14px); } to{ opacity:1; transform: translateY(0); } }
+    /* ─── CARD ───────────────────────────── */
+    .card {
+      background: var(--s1);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 1.5rem;
+    }
+    .card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap; gap: .75rem;
+    }
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      display: flex; align-items: center; gap: .55rem;
+      color: var(--t1);
+    }
+    .card-title i { color: var(--primary); font-size: .9rem; }
+    .card-badge {
+      font-size: .72rem; font-weight: 700;
+      padding: .2rem .6rem; border-radius: 20px;
+      background: var(--primary-dim);
+      color: var(--primary);
+      border: 1px solid var(--border-b);
+    }
+
+    /* ─── CHART TABS ─────────────────────── */
+    .tab-group {
+      display: flex; gap: .3rem;
+      background: var(--s2); padding: .2rem;
+      border-radius: 8px; border: 1px solid var(--border);
+    }
+    .tab-btn {
+      font-family: 'Outfit', sans-serif;
+      font-size: .78rem; font-weight: 600;
+      padding: .3rem .75rem;
+      border-radius: 6px; border: none;
+      background: transparent; color: var(--t2);
+      cursor: pointer; transition: var(--tr); white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--t1); }
+    .tab-btn.active { background: var(--primary); color: #07080D; }
+
+    /* ─── CHART WRAPPER ──────────────────── */
+    .chart-wrap { position: relative; height: 340px; }
+
+    /* ─── TWO-COL WIDGETS ────────────────── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    /* ─── GOAL RING ──────────────────────── */
+    .goal-layout {
+      display: flex; align-items: center; gap: 1.75rem;
+    }
+    .goal-ring-wrap {
+      position: relative; flex-shrink: 0;
+      width: 110px; height: 110px;
+    }
+    .goal-ring-wrap svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+    .goal-ring-center {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: .1rem;
+    }
+    .goal-ring-pct {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.3rem; font-weight: 500;
+      color: var(--primary);
+    }
+    .goal-ring-label { font-size: .65rem; color: var(--t3); text-transform: uppercase; letter-spacing: .05em; }
+    .goal-info { flex: 1; }
+    .goal-amounts {
+      font-size: .85rem; color: var(--t2);
+      margin-bottom: .75rem;
+    }
+    .goal-amounts strong { color: var(--t1); font-family: 'DM Mono', monospace; }
+
+    .progress-bar {
+      height: 6px; background: var(--s3);
+      border-radius: 3px; overflow: hidden;
+      margin-bottom: .5rem;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), #00BFA5);
+      border-radius: 3px;
+      transition: width 1s ease-out;
+      position: relative; overflow: hidden;
+    }
+    .progress-fill::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+      animation: shimmer 2s infinite;
+    }
+    @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+
+    .goal-meta { font-size: .8rem; color: var(--t3); display: flex; justify-content: space-between; }
+
+    .goal-achieved {
+      display: none;
+      align-items: center; gap: .75rem;
+      padding: .85rem 1rem;
+      background: rgba(99,255,211,.08);
+      border: 1px solid rgba(99,255,211,.3);
+      border-radius: 10px;
+      margin-top: .75rem;
+      animation: bounceIn .5s ease-out;
+    }
+    @keyframes bounceIn { 0%{transform:scale(.8);opacity:0} 60%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1} }
+    .goal-achieved-icon {
+      width: 36px; height: 36px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #07080D; font-size: 1rem;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+    .goal-achieved-text .gtitle { font-weight: 700; font-size: .9rem; }
+    .goal-achieved-text .gsub { font-size: .78rem; color: var(--t2); }
+
+    .goal-input-group {
+      display: flex; gap: .5rem; margin-top: .85rem;
+    }
+    .goal-input {
+      flex: 1;
+      background: var(--s2); border: 1px solid var(--border);
+      border-radius: 8px; padding: .45rem .75rem;
+      color: var(--t1); font-family: 'DM Mono', monospace;
+      font-size: .88rem;
+      outline: none; transition: var(--tr);
+    }
+    .goal-input:focus { border-color: var(--border-b); }
+    .goal-save-btn {
+      padding: .45rem 1rem;
+      background: var(--primary); color: #07080D;
+      border: none; border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700; font-size: .82rem;
+      cursor: pointer; transition: var(--tr);
+      white-space: nowrap;
+    }
+    .goal-save-btn:hover { box-shadow: var(--primary-glow); transform: translateY(-1px); }
+
+    /* ─── ACTIVITY FEED ──────────────────── */
+    .activity-feed { display: flex; flex-direction: column; gap: .5rem; }
+    .activity-item {
+      display: flex; align-items: center; gap: .85rem;
+      padding: .75rem .9rem;
+      background: var(--s2);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      transition: var(--tr);
+    }
+    .activity-item:hover { border-color: var(--border-b); transform: translateX(4px); }
+    .act-icon {
+      width: 34px; height: 34px; flex-shrink: 0;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem;
+    }
+    .act-icon.earned   { background: rgba(99,255,211,.12); color: var(--ok); }
+    .act-icon.withdrawn{ background: rgba(255,107,157,.12); color: var(--accent); }
+    .act-icon.failed   { background: rgba(255,107,157,.08); color: var(--err); }
+    .act-icon.bonus    { background: rgba(255,217,61,.12);  color: var(--gold); }
+    .act-body { flex: 1; min-width: 0; }
+    .act-title { font-weight: 600; font-size: .87rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .act-date  { font-size: .75rem; color: var(--t3); margin-top: .1rem; font-family: 'DM Mono', monospace; }
+    .act-amount {
+      font-family: 'DM Mono', monospace;
+      font-size: .9rem; font-weight: 500;
+      white-space: nowrap;
+    }
+    .act-amount.pos { color: var(--ok); }
+    .act-amount.neg { color: var(--err); }
+    .act-amount.neu { color: var(--t3); }
+
+    /* ─── TABLE ──────────────────────────── */
+    .search-bar {
+      display: flex; align-items: center; gap: .75rem;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: .5rem 1rem;
+      transition: var(--tr);
+    }
+    .search-bar:focus-within { border-color: var(--border-b); }
+    .search-bar i { color: var(--t3); font-size: .85rem; }
+    .search-bar input {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: var(--t1); font-family: 'Outfit', sans-serif; font-size: .9rem;
+    }
+    .search-bar input::placeholder { color: var(--t3); }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: var(--s2);
+      padding: .75rem 1rem;
+      text-align: left;
+      font-size: .7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--t2);
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      transition: var(--tr);
+      border-bottom: 1px solid var(--border);
+    }
+    thead th:hover { color: var(--primary); }
+    thead th:first-child { border-radius: 8px 0 0 0; }
+    thead th:last-child  { border-radius: 0 8px 0 0; }
+    thead th .sort-icon { margin-left: .3rem; opacity: .4; font-size: .65rem; }
+    thead th.sorted .sort-icon { opacity: 1; color: var(--primary); }
+
+    tbody td {
+      padding: .8rem 1rem;
+      border-bottom: 1px solid var(--border);
+      font-size: .88rem; color: var(--t2);
+      transition: var(--tr);
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--s2); color: var(--t1); }
+
+    .type-badge {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .72rem; font-weight: 700;
+      padding: .2rem .6rem; border-radius: 20px;
+      text-transform: capitalize;
+    }
+    .type-badge.encuesta  { background: rgba(99,255,211,.12); color: var(--ok); }
+    .type-badge.retiro    { background: rgba(255,107,157,.12); color: var(--accent); }
+    .type-badge.screener  { background: rgba(255,255,255,.06); color: var(--t3); }
+    .type-badge.bonus     { background: rgba(255,217,61,.12); color: var(--gold); }
+    .type-badge.descalificado { background: rgba(255,107,157,.08); color: var(--err); }
+
+    td.pos { color: var(--ok); font-family: 'DM Mono', monospace; font-weight: 500; }
+    td.neg { color: var(--err); font-family: 'DM Mono', monospace; font-weight: 500; }
+    td.mono { font-family: 'DM Mono', monospace; }
+
+    .no-results {
+      text-align: center; padding: 3rem 1rem;
+      color: var(--t3); font-size: .9rem;
+    }
+
+    /* ─── SCHEDULE HEATMAP ───────────────── */
+    .schedule-scroll { overflow-x: auto; }
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 2px; min-width: 560px;
+    }
+    .sch-head {
+      background: var(--s2);
+      text-align: center;
+      padding: .5rem .25rem;
+      font-size: .68rem; font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--t2);
+      border-radius: 5px;
+    }
+    .sch-cell {
+      padding: .5rem .2rem;
+      text-align: center;
+      border-radius: 5px;
+      font-size: .7rem; font-weight: 600;
+      cursor: default; transition: var(--tr);
+    }
+    .sch-cell:hover { transform: scale(1.15); z-index: 1; position: relative; }
+    .sch-cell.high   { background: rgba(99,255,211,.75); color: #07080D; }
+    .sch-cell.medium { background: rgba(255,217,61,.65); color: #07080D; }
+    .sch-cell.low    { background: rgba(255,107,157,.5); color: var(--t1); }
+    .sch-cell.none   { background: var(--s2); color: var(--t3); }
+
+    .schedule-legend {
+      display: flex; gap: 1.5rem; justify-content: center;
+      margin-top: 1rem; flex-wrap: wrap;
+    }
+    .leg-item { display: flex; align-items: center; gap: .4rem; font-size: .78rem; color: var(--t2); }
+    .leg-dot { width: 10px; height: 10px; border-radius: 3px; }
+    .leg-dot.high   { background: rgba(99,255,211,.75); }
+    .leg-dot.medium { background: rgba(255,217,61,.65); }
+    .leg-dot.low    { background: rgba(255,107,157,.5); }
+    .leg-dot.none   { background: var(--s2); }
+
+    /* ─── ANALYTICS ──────────────────────── */
+    .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    /* ─── GOALS VIEW ─────────────────────── */
+    .milestones-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: .75rem; margin-top: 1rem; }
+    .milestone {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      transition: var(--tr);
+    }
+    .milestone.reached { border-color: var(--border-b); }
+    .milestone:hover { border-color: var(--border-b); }
+    .milestone-icon { font-size: 1.4rem; margin-bottom: .5rem; }
+    .milestone-name { font-weight: 700; font-size: .88rem; margin-bottom: .2rem; }
+    .milestone-desc { font-size: .78rem; color: var(--t3); }
+    .milestone-status {
+      margin-top: .5rem;
+      font-size: .75rem; font-weight: 700;
+      color: var(--t3);
+    }
+    .milestone.reached .milestone-status { color: var(--primary); }
+
+    /* ─── UID MINI ───────────────────────── */
+    .uid-mini {
+      display: none;
+      align-items: center; gap: .5rem;
+      padding: .35rem .65rem;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: .75rem; color: var(--t2);
+      white-space: nowrap;
+    }
+    .uid-mini code { font-family: 'DM Mono',monospace; color: var(--primary); font-size: .72rem; max-width: 100px; overflow: hidden; text-overflow: ellipsis; }
+    .uid-mini.show { display: inline-flex; }
+    .copy-uid-btn {
+      background: var(--s3); border: 1px solid var(--border);
+      color: var(--t2); cursor: pointer;
+      font-size: .7rem; font-weight: 700;
+      padding: .1rem .4rem; border-radius: 4px;
+      font-family: 'Outfit', sans-serif;
+      transition: var(--tr);
+    }
+    .copy-uid-btn:hover { background: var(--primary-dim); color: var(--primary); }
+
+    /* ─── RESPONSIVE ─────────────────────── */
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+      .analytics-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .content { padding: 1rem; gap: 1rem; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .date-filter-group { display: none; }
+      .topbar { padding: 0 1rem; }
+      .sidebar { width: 0; border: none; }
+      .sidebar.open { width: 230px; position: absolute; height: 100dvh; top: 0; left: 0; z-index: 999; }
+    }
+    @media (max-width: 420px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ─── STREAK CARD ────────────────────── */
+    .streak-badge {
+      display: flex; align-items: center; gap: .4rem;
+      font-size: .85rem; color: var(--gold); font-weight: 700;
+    }
+
+    /* ─── EXPORT DROPDOWN ────────────────── */
+    .export-wrap { position: relative; }
+    .export-menu {
+      display: none;
+      position: absolute; top: calc(100% + .5rem); right: 0;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: .35rem;
+      min-width: 170px;
+      z-index: 50;
+      animation: fadeUp .2s ease-out;
+    }
+    .export-menu.open { display: block; }
+    .export-item {
+      display: flex; align-items: center; gap: .6rem;
+      padding: .55rem .8rem;
+      border-radius: 7px;
+      font-size: .85rem; font-weight: 500;
+      color: var(--t2); cursor: pointer;
+      transition: var(--tr); width: 100%; border: none; background: transparent; text-align: left;
+    }
+    .export-item:hover { background: var(--s3); color: var(--t1); }
+    .export-item i { width: 14px; text-align: center; }
   </style>
 </head>
 
-<body data-theme="dark">
-  <div class="bg-grid"></div>
-  <div class="blob b1"></div>
-  <div class="blob b2"></div>
-  <div class="blob b3"></div>
+<body>
+  <!-- ─── SIDEBAR ───────────────────────────── -->
+  <nav class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">P</div>
+      <span class="brand-name">PollPay</span>
+    </div>
 
-  <div class="container">
+    <div class="nav-section">
+      <div class="nav-label-section">Principal</div>
+      <button class="nav-item active" onclick="navigate('overview', this)" data-view="overview">
+        <span class="nav-icon"><i class="fas fa-chart-pie"></i></span>
+        <span class="nav-label">Resumen</span>
+      </button>
+      <button class="nav-item" onclick="navigate('analytics', this)" data-view="analytics">
+        <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
+        <span class="nav-label">Analíticas</span>
+      </button>
+      <button class="nav-item" onclick="navigate('history', this)" data-view="history">
+        <span class="nav-icon"><i class="fas fa-list-ul"></i></span>
+        <span class="nav-label">Historial</span>
+      </button>
+      <button class="nav-item" onclick="navigate('goals', this)" data-view="goals">
+        <span class="nav-icon"><i class="fas fa-bullseye"></i></span>
+        <span class="nav-label">Objetivos</span>
+      </button>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-text" id="lastUpdate">—</div>
+    </div>
+  </nav>
+
+  <!-- ─── MAIN AREA ─────────────────────────── -->
+  <div class="main">
+
     <!-- TOPBAR -->
     <header class="topbar">
-      <div class="topbar-inner">
-        <div class="brand">
-          <div class="brand-row">
-            <h1>
-              <span class="mark"><i class="fas fa-chart-line"></i></span>
-              Survey Dashboard
-            </h1>
+      <div class="topbar-left">
+        <button class="topbar-btn" id="sidebarToggle" onclick="toggleSidebar()" title="Menú">
+          <i class="fas fa-bars"></i>
+        </button>
+        <span class="page-title" id="pageTitle">Resumen</span>
+        <span class="page-badge" id="pageBadge">Dashboard</span>
 
-            <!-- UID discreto + borroso -->
-            <div class="uid-chip" id="uidChip" title="UID oculto (borroso). Copia con el botón.">
-              <span class="label">UID</span>
-              <span class="uid-text" id="uidBlur">UID_NO_DISPONIBLE</span>
-              <button class="copy-btn" id="copyUidBtn" type="button"><i class="fas fa-copy"></i>&nbsp;Copiar</button>
-            </div>
-          </div>
+        <div class="date-filter-group">
+          <button class="date-btn" onclick="setDateRange(7, this)">7D</button>
+          <button class="date-btn" onclick="setDateRange(30, this)">30D</button>
+          <button class="date-btn" onclick="setDateRange(90, this)">3M</button>
+          <button class="date-btn active" onclick="setDateRange(0, this)">Todo</button>
+        </div>
+      </div>
 
-          <div class="subtitle" id="subtitleText">Análisis inteligente de ganancias y hábitos</div>
+      <div class="topbar-right">
+        <!-- UID mini -->
+        <div class="uid-mini" id="uidMini">
+          <span>UID:</span>
+          <code id="uidText"></code>
+          <button class="copy-uid-btn" id="copyUidBtn">Copiar</button>
+          <span id="uidCopyState" style="display:none;color:var(--primary);font-size:.72rem">✓</span>
         </div>
 
-        <div class="actions">
-          <span class="pill" id="lastUpdate"><i class="fas fa-clock"></i> Inicia sesión para ver tus datos</span>
-
-          <button class="icon-btn" id="refreshBtn" type="button" title="Actualizar datos"><i class="fas fa-rotate"></i></button>
-          <button class="icon-btn" id="themeBtn" type="button" title="Cambiar tema"><i class="fas fa-moon" id="themeIcon"></i></button>
-
-          <button class="btn google" id="loginBtn" type="button"><i class="fab fa-google"></i> Iniciar sesión</button>
-
-          <div class="user-chip" id="userChip">
-            <img id="userAvatar" alt="avatar" src="" />
-            <span class="name" id="userName">Usuario</span>
-            <button class="logout" id="logoutBtn" type="button" title="Cerrar sesión">
-              <i class="fas fa-right-from-bracket"></i>
-            </button>
+        <!-- Export -->
+        <div class="export-wrap" id="exportWrap">
+          <button class="topbar-btn" id="exportBtn" title="Exportar" onclick="toggleExportMenu()">
+            <i class="fas fa-download"></i>
+          </button>
+          <div class="export-menu" id="exportMenu">
+            <button class="export-item" onclick="exportCSV()"><i class="fas fa-file-csv"></i> Exportar CSV</button>
+            <button class="export-item" onclick="exportJSON()"><i class="fas fa-file-code"></i> Exportar JSON</button>
+            <button class="export-item" onclick="printPage()"><i class="fas fa-print"></i> Imprimir</button>
           </div>
+        </div>
+
+        <!-- Refresh -->
+        <button class="topbar-btn" id="refreshBtn" title="Actualizar datos" onclick="refreshData()">
+          <i class="fas fa-rotate-right"></i>
+        </button>
+
+        <!-- Auth -->
+        <button class="auth-btn-google" id="loginBtn">
+          <i class="fab fa-google"></i> Iniciar sesión
+        </button>
+        <div class="user-chip" id="userChip">
+          <img id="userAvatar" alt="avatar" />
+          <span class="uname" id="userName">Usuario</span>
+          <button class="logout-btn" id="logoutBtn" title="Cerrar sesión"><i class="fas fa-right-from-bracket"></i></button>
         </div>
       </div>
     </header>
 
-    <!-- Gate cuando no hay auth -->
-    <section class="gate" id="authGate">
-      <h2><i class="fab fa-google"></i> Acceso requerido</h2>
-      <p>
-        Para proteger tu información, el dashboard solo se muestra cuando inicias sesión.
-        Los datos se leen desde <strong>users/&lt;tu-uid&gt;/surveys</strong>.
-      </p>
-      <div class="gate-actions">
-        <button class="btn primary" id="gateLoginBtn" type="button"><i class="fab fa-google"></i> Iniciar sesión</button>
+    <!-- CONTENT -->
+    <div class="content" id="contentArea">
+
+      <!-- Error / Loading -->
+      <div class="error-bar" id="errorMessage"></div>
+      <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <span style="font-size:.9rem;color:var(--t3)">Cargando tus datos…</span>
       </div>
-    </section>
 
-    <div class="loading-spinner" id="loadingSpinner"></div>
-    <div class="error" id="errorBox"></div>
+      <!-- Auth Prompt -->
+      <div id="authPrompt">
+        <div class="auth-icon"><i class="fab fa-google"></i></div>
+        <h2>Acceso requerido</h2>
+        <p>Inicia sesión con Google para ver tus estadísticas y registros de encuestas en tiempo real.</p>
+      </div>
 
-    <!-- App (oculta hasta login) -->
-    <main id="app" style="display:none;">
-      <!-- KPIs -->
-      <section class="grid kpis" id="kpiGrid" aria-label="KPIs">
-        <div class="card kpi">
-          <div class="card-body">
-            <div class="label">Total ganado</div>
-            <div class="value"><span class="currency">€</span><span id="kpiTotalEarned">0.00</span></div>
-            <div class="sub"><span id="kpiEarnedSub">Acumulado histórico</span></div>
+      <!-- OVERVIEW VIEW -->
+      <div class="view active" id="view-overview">
+
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-box green"><i class="fas fa-euro-sign"></i></div>
+              <span class="stat-trend neu" id="trend-total">—</span>
+            </div>
+            <div class="stat-label">Total Ganado</div>
+            <div class="stat-value"><span class="unit">€</span><span id="total-earned">0.00</span></div>
+            <div class="stat-sub">Suma de encuestas y bonos</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-box blue"><i class="fas fa-wallet"></i></div>
+              <span class="stat-trend neu" id="trend-balance">—</span>
+            </div>
+            <div class="stat-label">Saldo Disponible</div>
+            <div class="stat-value"><span class="unit">€</span><span id="current-balance">0.00</span></div>
+            <div class="stat-sub">Pendiente de retirar</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-box pink"><i class="fab fa-paypal"></i></div>
+              <span class="stat-trend neu" id="trend-withdrawn">—</span>
+            </div>
+            <div class="stat-label">Retirado</div>
+            <div class="stat-value"><span class="unit">€</span><span id="total-withdrawn">0.00</span></div>
+            <div class="stat-sub">Transferido vía PayPal</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-box gold"><i class="fas fa-percent"></i></div>
+              <span class="stat-trend neu" id="trend-rate">—</span>
+            </div>
+            <div class="stat-label">Tasa de Éxito</div>
+            <div class="stat-value"><span id="success-rate">0.0</span><span class="pct-unit">%</span></div>
+            <div class="stat-sub" id="success-counts">0 completadas / 0 intentos</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-box green"><i class="fas fa-coins"></i></div>
+            </div>
+            <div class="stat-label">Media / Encuesta</div>
+            <div class="stat-value"><span class="unit">€</span><span id="avg-per-survey">0.00</span></div>
+            <div class="stat-sub">Por encuesta completada</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-box gold"><i class="fas fa-calendar-day"></i></div>
+              <span class="stat-trend neu" id="trend-month">—</span>
+            </div>
+            <div class="stat-label">Este Mes</div>
+            <div class="stat-value"><span class="unit">€</span><span id="this-month-earned">0.00</span></div>
+            <div class="stat-sub"><span id="this-month-surveys">0</span> encuestas completadas</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-box green"><i class="fas fa-fire"></i></div>
+            </div>
+            <div class="stat-label">Racha Actual</div>
+            <div class="stat-value" style="font-size:1.8rem"><span id="streak-days">0</span><span class="unit">días</span></div>
+            <div class="stat-sub">Días consecutivos activo</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-box gold"><i class="fas fa-trophy"></i></div>
+            </div>
+            <div class="stat-label">Mejor Mes</div>
+            <div class="stat-value"><span class="unit">€</span><span id="best-month-val">0.00</span></div>
+            <div class="stat-sub" id="best-month-label">—</div>
           </div>
         </div>
 
-        <div class="card kpi">
-          <div class="card-body">
-            <div class="label">Saldo</div>
-            <div class="value"><span class="currency">€</span><span id="kpiBalance">0.00</span></div>
-            <div class="sub"><span id="kpiBalanceSub">Ganado - retirado</span></div>
+        <!-- Main Chart -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title"><i class="fas fa-chart-area"></i> Evolución de Ganancias</h2>
+            <div class="tab-group">
+              <button class="tab-btn active" onclick="switchChart('accumulated', this)">Acumulado</button>
+              <button class="tab-btn" onclick="switchChart('monthly', this)">Mensual</button>
+              <button class="tab-btn" onclick="switchChart('daily', this)">Diario</button>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
+        </div>
+
+        <!-- Widgets row -->
+        <div class="two-col">
+          <!-- Goal Widget -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-bullseye"></i> Objetivo Mensual</h3>
+              <span class="card-badge" id="month-label">Este mes</span>
+            </div>
+
+            <div class="goal-layout">
+              <div class="goal-ring-wrap">
+                <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="60" cy="60" r="50" fill="none" stroke-width="10" stroke="rgba(255,255,255,.06)"/>
+                  <circle id="goal-ring" cx="60" cy="60" r="50" fill="none" stroke-width="10"
+                    stroke="var(--primary)" stroke-linecap="round"
+                    stroke-dasharray="314" stroke-dashoffset="314"
+                    style="transition: stroke-dashoffset 1s ease-out"/>
+                </svg>
+                <div class="goal-ring-center">
+                  <div class="goal-ring-pct" id="progress-pct-ring">0%</div>
+                  <div class="goal-ring-label">logrado</div>
+                </div>
+              </div>
+
+              <div class="goal-info">
+                <div class="goal-amounts">
+                  Ganado: <strong>€<span id="goal-current">0.00</span></strong> /
+                  meta <strong>€<span id="goal-target">10.00</span></strong>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="monthly-progress" style="width:0%"></div>
+                </div>
+                <div class="goal-meta">
+                  <span id="progress-pct">0% completado</span>
+                  <span>Meta: €<span id="goal-display">10.00</span></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="goal-achieved" id="goal-achievement">
+              <div class="goal-achieved-icon"><i class="fas fa-check"></i></div>
+              <div class="goal-achieved-text">
+                <div class="gtitle">¡Objetivo alcanzado! 🎉</div>
+                <div class="gsub">Has superado la meta del mes.</div>
+              </div>
+            </div>
+
+            <div style="font-size:.78rem;color:var(--t3);margin-top:.75rem;display:flex;align-items:center;gap:.4rem">
+              <i class="fas fa-wand-magic-sparkles" style="color:var(--primary)"></i>
+              Meta adaptativa: <span id="adaptive-goal-info" style="color:var(--t2)">basada en mes anterior</span>
+            </div>
+
+            <div class="goal-input-group">
+              <input type="number" step="0.01" min="1" class="goal-input" id="customGoalInput" placeholder="Meta personalizada (€)">
+              <button class="goal-save-btn" onclick="saveCustomGoal()">Guardar</button>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-clock-rotate-left"></i> Actividad Reciente</h3>
+              <span class="card-badge" id="recent-count">0 registros</span>
+            </div>
+            <div class="activity-feed" id="recent-activity"></div>
           </div>
         </div>
 
-        <div class="card kpi">
-          <div class="card-body">
-            <div class="label">Retirado</div>
-            <div class="value"><span class="currency">€</span><span id="kpiWithdrawn">0.00</span></div>
-            <div class="sub"><span id="kpiWithdrawSub">Total a PayPal</span></div>
+      </div><!-- /view-overview -->
+
+      <!-- ANALYTICS VIEW -->
+      <div class="view" id="view-analytics">
+        <div class="analytics-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-chart-bar"></i> Ganancias por Mes</h3>
+            </div>
+            <div class="chart-wrap" style="height:280px"><canvas id="monthlyBarChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-chart-donut"></i> Distribución por Tipo</h3>
+            </div>
+            <div class="chart-wrap" style="height:280px"><canvas id="typeDonutChart"></canvas></div>
           </div>
         </div>
 
-        <div class="card kpi">
-          <div class="card-body">
-            <div class="label">Tasa de éxito</div>
-            <div class="value"><span id="kpiSuccessRate">0.0</span><span class="currency">%</span></div>
-            <div class="sub"><span id="kpiSuccessSub">0 completadas / 0 intentos</span></div>
+        <!-- Monthly Summary Table -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-table-cells"></i> Resumen por Mes</h3>
           </div>
-        </div>
-
-        <div class="card kpi">
-          <div class="card-body">
-            <div class="label">Media/encuesta</div>
-            <div class="value"><span class="currency">€</span><span id="kpiAvgPerSurvey">0.00</span></div>
-            <div class="sub"><span id="kpiAvgSub">Sobre encuestas completadas</span></div>
-          </div>
-        </div>
-
-        <div class="card kpi">
-          <div class="card-body">
-            <div class="label">Este mes</div>
-            <div class="value"><span class="currency">€</span><span id="kpiThisMonth">0.00</span></div>
-            <div class="sub"><span id="kpiThisMonthSub">0 encuestas completadas</span></div>
-          </div>
-        </div>
-
-        <div class="card kpi">
-          <div class="card-body">
-            <div class="label">Últimos 7 días</div>
-            <div class="value"><span class="currency">€</span><span id="kpiLast7d">0.00</span></div>
-            <div class="sub"><span id="kpi7dSub">Ingresos recientes</span></div>
-          </div>
-        </div>
-
-        <div class="card kpi">
-          <div class="card-body">
-            <div class="label">Proyección mes</div>
-            <div class="value"><span class="currency">€</span><span id="kpiProjection">0.00</span></div>
-            <div class="sub"><span id="kpiProjSub">Estimación al final de mes</span></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Charts split -->
-      <section class="split">
-        <section class="card">
-          <div class="card-head">
-            <div class="card-title">
-              <i class="fas fa-chart-area"></i>
-              <span>Evolución</span>
-            </div>
-            <div class="tabs" id="mainChartTabs">
-              <button class="tab active" data-mode="accumulated" type="button">Acumulado</button>
-              <button class="tab" data-mode="monthly" type="button">Mensual</button>
-              <button class="tab" data-mode="daily" type="button">Diario</button>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="chart-wrap">
-              <canvas id="mainChart"></canvas>
-            </div>
-          </div>
-        </section>
-
-        <section class="card">
-          <div class="card-head">
-            <div class="card-title">
-              <i class="fas fa-chart-pie"></i>
-              <span>Distribución</span>
-            </div>
-            <div class="tabs" id="distTabs">
-              <button class="tab active" data-dist="types" type="button">Tipos</button>
-              <button class="tab" data-dist="weekday" type="button">Días</button>
-              <button class="tab" data-dist="hour" type="button">Horas</button>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="chart-wrap" style="height:380px;">
-              <canvas id="distChart"></canvas>
-            </div>
-          </div>
-        </section>
-      </section>
-
-      <!-- Activity + Schedule -->
-      <section class="triple">
-        <section class="card">
-          <div class="card-head">
-            <div class="card-title">
-              <i class="fas fa-clock"></i>
-              <span>Actividad reciente</span>
-            </div>
-            <span class="badge neutral" id="recentCount">0 registros</span>
-          </div>
-          <div class="card-body">
-            <div class="activity-list" id="recentActivity"></div>
-          </div>
-        </section>
-
-        <section class="card">
-          <div class="card-head">
-            <div class="card-title">
-              <i class="fas fa-calendar-alt"></i>
-              <span>Mapa por hora y día</span>
-            </div>
-            <span class="badge neutral" id="heatmapHint">Encuestas</span>
-          </div>
-          <div class="card-body">
-            <div class="schedule-scroll">
-              <div class="schedule-grid" id="scheduleGrid"></div>
-            </div>
-            <div class="legend">
-              <div class="legend-item"><span class="legend-color high"></span> Alta (≥3)</div>
-              <div class="legend-item"><span class="legend-color medium"></span> Media (2)</div>
-              <div class="legend-item"><span class="legend-color low"></span> Baja (1)</div>
-              <div class="legend-item"><span class="legend-color none"></span> Sin datos</div>
-            </div>
-          </div>
-        </section>
-      </section>
-
-      <!-- Monthly summary -->
-      <section class="card" style="margin-top:16px;">
-        <div class="card-head">
-          <div class="card-title">
-            <i class="fas fa-table"></i>
-            <span>Resumen por mes</span>
-          </div>
-          <span class="badge neutral" id="monthLabel">Histórico</span>
-        </div>
-        <div class="card-body">
           <div class="table-wrap">
-            <table id="monthlySummary">
+            <table id="monthly-summary">
               <thead>
                 <tr>
-                  <th>Mes</th>
-                  <th>Ganado (€)</th>
-                  <th>Retirado (€)</th>
-                  <th>Encuestas ✓</th>
-                  <th>Intentos</th>
-                  <th>Tasa éxito</th>
-                  <th>Media/encuesta</th>
-                  <th>Neto (€)</th>
+                  <th onclick="sortTable('monthly-summary',0)">Mes <i class="fas fa-sort sort-icon"></i></th>
+                  <th onclick="sortTable('monthly-summary',1)">Ganado <i class="fas fa-sort sort-icon"></i></th>
+                  <th onclick="sortTable('monthly-summary',2)">Retirado <i class="fas fa-sort sort-icon"></i></th>
+                  <th onclick="sortTable('monthly-summary',3)">Encuestas ✓ <i class="fas fa-sort sort-icon"></i></th>
+                  <th onclick="sortTable('monthly-summary',4)">Intentos <i class="fas fa-sort sort-icon"></i></th>
+                  <th onclick="sortTable('monthly-summary',5)">Tasa Éxito <i class="fas fa-sort sort-icon"></i></th>
+                  <th onclick="sortTable('monthly-summary',6)">Media/Enc <i class="fas fa-sort sort-icon"></i></th>
                 </tr>
               </thead>
               <tbody></tbody>
             </table>
           </div>
         </div>
-      </section>
 
-      <!-- Goals -->
-      <section class="card" style="margin-top:16px;">
-        <div class="card-head">
-          <div class="card-title">
-            <i class="fas fa-trophy"></i>
-            <span>Objetivo mensual (adaptativo)</span>
+        <!-- Heatmap -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-calendar-week"></i> Mapa de Actividad por Hora</h3>
           </div>
-          <span class="badge neutral" id="goalBadge">Meta</span>
+          <div class="schedule-scroll">
+            <div class="schedule-grid" id="schedule-grid"></div>
+          </div>
+          <div class="schedule-legend">
+            <div class="leg-item"><div class="leg-dot high"></div><span>Alta (≥3)</span></div>
+            <div class="leg-item"><div class="leg-dot medium"></div><span>Media (2)</span></div>
+            <div class="leg-item"><div class="leg-dot low"></div><span>Baja (1)</span></div>
+            <div class="leg-item"><div class="leg-dot none"></div><span>Sin datos</span></div>
+          </div>
         </div>
+      </div><!-- /view-analytics -->
 
-        <div class="card-body">
-          <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-            <div style="color:var(--text-3); font-weight:900;">Ganado este mes</div>
-            <div style="font-weight:950;">€<span id="goalCurrent">0.00</span> / €<span id="goalTarget">10.00</span></div>
-          </div>
-
-          <div style="height: 10px; background: rgba(148,163,184,0.12); border-radius: 999px; overflow:hidden; margin-top:10px; border: 1px solid rgba(148,163,184,0.12);">
-            <div id="goalProgress" style="height:100%; width:0%; background: linear-gradient(90deg, rgba(99,102,241,0.95), rgba(139,92,246,0.85)); border-radius:999px; transition: width 1s ease-out;"></div>
-          </div>
-
-          <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:10px;">
-            <div style="color:var(--text-3); font-weight:900;" id="goalPct">0% completado</div>
-            <div style="color:var(--text-3); font-weight:900;">Meta: €<span id="goalDisplay">10.00</span>/mes</div>
-          </div>
-
-          <div id="goalAchieved" style="display:none; margin-top:14px; padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(16,185,129,0.35); background: rgba(16,185,129,0.10);">
-            <div style="display:flex; align-items:center; gap:10px;">
-              <div style="width:40px; height:40px; border-radius:50%; background: var(--success); color: white; display:flex; align-items:center; justify-content:center;">
-                <i class="fas fa-check"></i>
-              </div>
-              <div>
-                <div style="font-weight: 950;">¡Objetivo alcanzado!</div>
-                <div style="color: var(--text-3); font-weight: 800; font-size:0.86rem;">Has superado la meta mensual de ganancias.</div>
+      <!-- HISTORY VIEW -->
+      <div class="view" id="view-history">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-list-ul"></i> Todas las transacciones</h3>
+            <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+              <div style="display:flex;gap:.3rem">
+                <button class="tab-btn active" onclick="filterType('all',this)" id="filter-all">Todo</button>
+                <button class="tab-btn" onclick="filterType('encuesta',this)">Encuestas</button>
+                <button class="tab-btn" onclick="filterType('retiro',this)">Retiros</button>
+                <button class="tab-btn" onclick="filterType('bonus',this)">Bonos</button>
               </div>
             </div>
           </div>
-
-          <div style="margin-top:12px; color: var(--text-3); font-weight: 800; font-size:0.82rem; display:flex; align-items:center; gap:8px;">
-            <i class="fas fa-magic" style="color: var(--primary);"></i>
-            <span>Meta adaptativa: <strong id="adaptiveInfo" style="color: var(--primary);">basada en mes anterior</strong></span>
+          <div class="search-bar" style="margin-bottom:1rem">
+            <i class="fas fa-magnifying-glass"></i>
+            <input type="text" id="tableSearch" placeholder="Buscar por concepto, tipo, importe…" oninput="filterTable()">
           </div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <div class="toast" id="toast"></div>
-
-  <script>
-    // ==============================
-    // Firebase init
-    // ==============================
-    const firebaseConfig = {
-      apiKey: "AIzaSyD9sBTTe9PFQct9Ym9tkiVBr8wYDMl4SI0",
-      authDomain: "lifepointsdashboard.firebaseapp.com",
-      databaseURL: "https://lifepointsdashboard-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "lifepointsdashboard",
-      storageBucket: "lifepointsdashboard.firebasestorage.app",
-      messagingSenderId: "70452481394",
-      appId: "1:70452481394:web:60e497d37b8b74c2d8a1eb"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
-    const provider = new firebase.auth.GoogleAuthProvider();
-
-    // ==============================
-    // DOM refs
-    // ==============================
-    const lastUpdateEl = document.getElementById('lastUpdate');
-    const loginBtn = document.getElementById('loginBtn');
-    const gateLoginBtn = document.getElementById('gateLoginBtn');
-    const userChip = document.getElementById('userChip');
-    const userAvatar = document.getElementById('userAvatar');
-    const userName = document.getElementById('userName');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const uidChip = document.getElementById('uidChip');
-    const uidBlur = document.getElementById('uidBlur');
-    const copyUidBtn = document.getElementById('copyUidBtn');
-
-    const themeBtn = document.getElementById('themeBtn');
-    const themeIcon = document.getElementById('themeIcon');
-    const refreshBtn = document.getElementById('refreshBtn');
-
-    const authGate = document.getElementById('authGate');
-    const appEl = document.getElementById('app');
-    const loadingSpinner = document.getElementById('loadingSpinner');
-    const errorBox = document.getElementById('errorBox');
-    const toast = document.getElementById('toast');
-
-    // KPIs
-    const kpiTotalEarned = document.getElementById('kpiTotalEarned');
-    const kpiBalance = document.getElementById('kpiBalance');
-    const kpiWithdrawn = document.getElementById('kpiWithdrawn');
-    const kpiSuccessRate = document.getElementById('kpiSuccessRate');
-    const kpiAvgPerSurvey = document.getElementById('kpiAvgPerSurvey');
-    const kpiThisMonth = document.getElementById('kpiThisMonth');
-    const kpiLast7d = document.getElementById('kpiLast7d');
-    const kpiProjection = document.getElementById('kpiProjection');
-
-    const kpiEarnedSub = document.getElementById('kpiEarnedSub');
-    const kpiBalanceSub = document.getElementById('kpiBalanceSub');
-    const kpiWithdrawSub = document.getElementById('kpiWithdrawSub');
-    const kpiSuccessSub = document.getElementById('kpiSuccessSub');
-    const kpiAvgSub = document.getElementById('kpiAvgSub');
-    const kpiThisMonthSub = document.getElementById('kpiThisMonthSub');
-    const kpi7dSub = document.getElementById('kpi7dSub');
-    const kpiProjSub = document.getElementById('kpiProjSub');
-
-    // Charts + tabs
-    const mainChartTabs = document.getElementById('mainChartTabs');
-    const distTabs = document.getElementById('distTabs');
-
-    // Recent + heatmap
-    const recentCount = document.getElementById('recentCount');
-    const recentActivity = document.getElementById('recentActivity');
-    const scheduleGrid = document.getElementById('scheduleGrid');
-
-    // Monthly summary
-    const monthLabel = document.getElementById('monthLabel');
-    const monthlySummaryTbody = document.querySelector('#monthlySummary tbody');
-
-    // Goals
-    const goalCurrentEl = document.getElementById('goalCurrent');
-    const goalTargetEl = document.getElementById('goalTarget');
-    const goalDisplayEl = document.getElementById('goalDisplay');
-    const goalProgressEl = document.getElementById('goalProgress');
-    const goalPctEl = document.getElementById('goalPct');
-    const adaptiveInfoEl = document.getElementById('adaptiveInfo');
-    const goalAchievedEl = document.getElementById('goalAchieved');
-    const goalBadge = document.getElementById('goalBadge');
-
-    // ==============================
-    // Global state
-    // ==============================
-    let currentUid = null;
-    let liveRef = null;
-
-    let allData = []; // registros del usuario
-    let mainChart = null;
-    let distChart = null;
-
-    let mainMode = 'accumulated';
-    let distMode = 'types';
-
-    let monthlyGoal = 10.00;
-    let lastMonthEarned = 0;
-
-    // ==============================
-    // Helpers UI
-    // ==============================
-    function showToast(msg, isError=false){
-      toast.textContent = msg;
-      toast.classList.toggle('error', !!isError);
-      toast.classList.add('show');
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => toast.classList.remove('show'), 2800);
-    }
-
-    function showError(msg){
-      errorBox.style.display = 'block';
-      errorBox.textContent = msg;
-    }
-    function hideError(){
-      errorBox.style.display = 'none';
-      errorBox.textContent = '';
-    }
-
-    function setLoading(on){
-      loadingSpinner.style.display = on ? 'block' : 'none';
-    }
-
-    const fmt2 = (v) => (Number(v||0)).toFixed(2);
-    const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
-
-    function fmtDateFull(d){
-      return d.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}) +
-        ' ' + d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
-    }
-
-    function fmtDateShort(d){
-      return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
-    }
-
-    function monthKey(d){
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    }
-    function formatMonthLabel(key){
-      const [y,m] = key.split('-');
-      return new Date(+y,+m-1,1).toLocaleDateString('es-ES',{month:'short',year:'numeric'});
-    }
-
-    function parseDate(v){
-      if (v instanceof Date) return v;
-      if (!v) return new Date();
-      const iso = new Date(v);
-      if (!isNaN(iso)) return iso;
-      const m = String(v).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})/);
-      if (m) return new Date(+m[3], +m[2]-1, +m[1], +m[4], +m[5]);
-      return new Date();
-    }
-
-    function calcAdaptiveGoal(lastEarned){
-      if (lastEarned <= 0) return 10.00;
-      if (lastEarned > 30) return +(lastEarned * 1.10).toFixed(2);
-      if (lastEarned > 20) return +(lastEarned * 1.08).toFixed(2);
-      if (lastEarned > 10) return +(lastEarned * 1.05).toFixed(2);
-      return +(lastEarned * 1.03).toFixed(2);
-    }
-
-    function escapeHtml(s){
-      return String(s ?? '')
-        .replaceAll('&','&amp;')
-        .replaceAll('<','&lt;')
-        .replaceAll('>','&gt;')
-        .replaceAll('"','&quot;')
-        .replaceAll("'","&#039;");
-    }
-
-    // ==============================
-    // Theme
-    // ==============================
-    function applySavedTheme(){
-      const saved = localStorage.getItem('sd_theme');
-      if (saved === 'light' || saved === 'dark'){
-        document.body.setAttribute('data-theme', saved);
-      }
-      updateThemeIcon();
-    }
-    function updateThemeIcon(){
-      const t = document.body.getAttribute('data-theme') || 'dark';
-      themeIcon.className = t === 'light' ? 'fas fa-sun' : 'fas fa-moon';
-    }
-    themeBtn.addEventListener('click', () => {
-      const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      document.body.setAttribute('data-theme', t);
-      localStorage.setItem('sd_theme', t);
-      updateThemeIcon();
-      renderAll(); // re-render charts for contrast
-    });
-
-    // ctrl+t theme
-    document.addEventListener('keydown', e => {
-      if (e.ctrlKey && e.key.toLowerCase() === 't'){
-        e.preventDefault();
-        themeBtn.click();
-      }
-    });
-
-    // ==============================
-    // Auth
-    // ==============================
-    async function doLogin(){
-      try{
-        await auth.signInWithPopup(provider);
-      }catch(err){
-        showToast('Error al iniciar sesión: ' + err.message, true);
-        showError('Error al iniciar sesión: ' + err.message);
-      }
-    }
-    loginBtn.addEventListener('click', doLogin);
-    gateLoginBtn.addEventListener('click', doLogin);
-
-    logoutBtn.addEventListener('click', async () => {
-      try{
-        await auth.signOut();
-      }catch(err){
-        showToast('Error al cerrar sesión: ' + err.message, true);
-      }
-    });
-
-    copyUidBtn.addEventListener('click', async () => {
-      if (!currentUid) return;
-      try{
-        await navigator.clipboard.writeText(currentUid);
-        showToast('UID copiado al portapapeles');
-      }catch(err){
-        showToast('No se pudo copiar el UID', true);
-      }
-    });
-
-    auth.onAuthStateChanged(user => {
-      hideError();
-      setLoading(false);
-
-      // Stop previous listener
-      if (liveRef){
-        liveRef.off();
-        liveRef = null;
-      }
-
-      if (!user){
-        currentUid = null;
-        allData = [];
-
-        appEl.style.display = 'none';
-        authGate.style.display = 'block';
-        loginBtn.style.display = 'inline-flex';
-        userChip.style.display = 'none';
-        uidChip.style.display = 'none';
-        lastUpdateEl.innerHTML = '<i class="fas fa-clock"></i> Inicia sesión para ver tus datos';
-
-        destroyCharts();
-        clearMonthly();
-        clearRecent();
-        clearHeatmap();
-        renderKPIsEmpty();
-        renderGoalsEmpty();
-
-        return;
-      }
-
-      currentUid = user.uid;
-
-      authGate.style.display = 'none';
-      appEl.style.display = 'block';
-
-      loginBtn.style.display = 'none';
-      userChip.style.display = 'inline-flex';
-      userAvatar.src = user.photoURL || '';
-      userName.textContent = (user.displayName || 'Usuario');
-
-      uidChip.style.display = 'inline-flex';
-      uidBlur.textContent = currentUid; // se ve borroso por CSS
-
-      lastUpdateEl.innerHTML = '<i class="fas fa-clock"></i> Cargando…';
-      setLoading(true);
-
-      // Start realtime listener
-      const ref = db.ref(`users/${currentUid}/surveys`);
-      liveRef = ref;
-
-      ref.on('value', snap => {
-        const raw = snap.val();
-
-        if (!raw){
-          allData = [];
-          lastUpdateEl.innerHTML = '<i class="fas fa-circle-info"></i> Sin datos (usa el bot)';
-          setLoading(false);
-
-          destroyCharts();
-          clearMonthly();
-          clearRecent();
-          clearHeatmap();
-          renderKPIsEmpty();
-          renderGoalsEmpty();
-          return;
-        }
-
-        allData = Object.entries(raw).map(([id, v]) => ({
-          ...v,
-          id,
-          fecha: parseDate(v.fecha),
-          importe: Number(v.importe || 0)
-        })).sort((a,b) => b.fecha - a.fecha);
-
-        setLoading(false);
-        lastUpdateEl.innerHTML = '<i class="fas fa-clock"></i> Actualizado: ' + new Date().toLocaleTimeString('es-ES');
-        renderAll();
-      }, err => {
-        setLoading(false);
-        showError('Error al cargar datos: ' + err.message);
-        showToast('Error al cargar datos', true);
-        lastUpdateEl.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Error';
-      });
-    });
-
-    // Manual refresh
-    refreshBtn.addEventListener('click', async () => {
-      if (!currentUid) return;
-      hideError();
-      setLoading(true);
-      lastUpdateEl.innerHTML = '<i class="fas fa-clock"></i> Actualizando…';
-      try{
-        const snap = await db.ref(`users/${currentUid}/surveys`).once('value');
-        const raw = snap.val();
-        if (!raw){
-          allData = [];
-        }else{
-          allData = Object.entries(raw).map(([id, v]) => ({
-            ...v,
-            id,
-            fecha: parseDate(v.fecha),
-            importe: Number(v.importe || 0)
-          })).sort((a,b) => b.fecha - a.fecha);
-        }
-        setLoading(false);
-        lastUpdateEl.innerHTML = '<i class="fas fa-clock"></i> Actualizado: ' + new Date().toLocaleTimeString('es-ES');
-        renderAll();
-        showToast('Datos actualizados');
-      }catch(err){
-        setLoading(false);
-        showError('Error al actualizar: ' + err.message);
-        showToast('Error al actualizar', true);
-        lastUpdateEl.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Error';
-      }
-    });
-
-    // Chart tabs
-    mainChartTabs.addEventListener('click', (e) => {
-      const btn = e.target.closest('.tab');
-      if (!btn) return;
-      [...mainChartTabs.querySelectorAll('.tab')].forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      mainMode = btn.dataset.mode;
-      renderMainChart();
-    });
-
-    distTabs.addEventListener('click', (e) => {
-      const btn = e.target.closest('.tab');
-      if (!btn) return;
-      [...distTabs.querySelectorAll('.tab')].forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      distMode = btn.dataset.dist;
-      renderDistChart();
-    });
-
-    // ==============================
-    // Rendering
-    // ==============================
-    function destroyCharts(){
-      if (mainChart){ mainChart.destroy(); mainChart = null; }
-      if (distChart){ distChart.destroy(); distChart = null; }
-    }
-
-    function clearMonthly(){
-      monthlySummaryTbody.innerHTML = '';
-      monthLabel.textContent = 'Histórico';
-    }
-    function clearRecent(){
-      recentActivity.innerHTML = '';
-      recentCount.textContent = '0 registros';
-    }
-    function clearHeatmap(){
-      scheduleGrid.innerHTML = '';
-    }
-
-    function renderAll(){
-      if (!currentUid) return;
-
-      renderKPIs();
-      renderGoals();
-      renderMainChart();
-      renderDistChart();
-      renderMonthlySummary();
-      renderRecent();
-      renderHeatmap();
-    }
-
-    // ==============================
-    // KPIs
-    // ==============================
-    function computeStats(data){
-      let totalEarned = 0;
-      let totalWithdrawn = 0;
-      let successCount = 0;
-      let attemptCount = 0;
-
-      data.forEach(r => {
-        switch(r.tipo){
-          case 'encuesta':
-            totalEarned += r.importe || 0;
-            successCount++;
-            attemptCount++;
-            break;
-          case 'bonus':
-            totalEarned += r.importe || 0;
-            break;
-          case 'retiro':
-            totalWithdrawn += r.importe || 0;
-            break;
-          case 'screener':
-          case 'descalificado':
-            attemptCount++;
-            break;
-        }
-      });
-
-      const balance = totalEarned - totalWithdrawn;
-      const successRate = attemptCount > 0 ? (successCount/attemptCount*100) : 0;
-      const avgPerSurvey = successCount > 0 ? (totalEarned/successCount) : 0;
-
-      return { totalEarned, totalWithdrawn, balance, successCount, attemptCount, successRate, avgPerSurvey };
-    }
-
-    function renderKPIsEmpty(){
-      kpiTotalEarned.textContent = '0.00';
-      kpiBalance.textContent = '0.00';
-      kpiWithdrawn.textContent = '0.00';
-      kpiSuccessRate.textContent = '0.0';
-      kpiAvgPerSurvey.textContent = '0.00';
-      kpiThisMonth.textContent = '0.00';
-      kpiLast7d.textContent = '0.00';
-      kpiProjection.textContent = '0.00';
-
-      kpiEarnedSub.textContent = 'Acumulado histórico';
-      kpiBalanceSub.textContent = 'Ganado - retirado';
-      kpiWithdrawSub.textContent = 'Total a PayPal';
-      kpiSuccessSub.textContent = '0 completadas / 0 intentos';
-      kpiAvgSub.textContent = 'Sobre encuestas completadas';
-      kpiThisMonthSub.textContent = '0 encuestas completadas';
-      kpi7dSub.textContent = 'Ingresos recientes';
-      kpiProjSub.textContent = 'Estimación al final de mes';
-    }
-
-    function renderKPIs(){
-      const statsAll = computeStats(allData);
-
-      kpiTotalEarned.textContent = fmt2(statsAll.totalEarned);
-      kpiWithdrawn.textContent = fmt2(statsAll.totalWithdrawn);
-      kpiBalance.textContent = fmt2(statsAll.balance);
-      kpiSuccessRate.textContent = statsAll.successRate.toFixed(1);
-      kpiAvgPerSurvey.textContent = fmt2(statsAll.avgPerSurvey);
-      kpiSuccessSub.textContent = `${statsAll.successCount} completadas / ${statsAll.attemptCount} intentos`;
-
-      kpiEarnedSub.textContent = 'Acumulado histórico';
-      kpiWithdrawSub.textContent = 'Total a PayPal';
-      kpiBalanceSub.textContent = 'Ganado - retirado';
-      kpiAvgSub.textContent = 'Sobre encuestas completadas';
-
-      // Este mes / últimos 7 días
-      const now = new Date();
-      const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0,0,0,0);
-      const thisMonthEnd = new Date(now.getFullYear(), now.getMonth()+1, 0, 23,59,59,999);
-
-      const last7Start = new Date(now);
-      last7Start.setDate(last7Start.getDate()-6);
-      last7Start.setHours(0,0,0,0);
-
-      const monthData = allData.filter(r => r.fecha >= thisMonthStart && r.fecha <= thisMonthEnd);
-      const last7Data = allData.filter(r => r.fecha >= last7Start && r.fecha <= now);
-
-      const monthEarned = computeStats(monthData).totalEarned;
-      const monthSurveys = monthData.filter(r => r.tipo === 'encuesta').length;
-
-      const last7Earned = computeStats(last7Data).totalEarned;
-      const last7Surveys = last7Data.filter(r => r.tipo === 'encuesta').length;
-
-      kpiThisMonth.textContent = fmt2(monthEarned);
-      kpiThisMonthSub.textContent = `${monthSurveys} encuestas completadas`;
-
-      kpiLast7d.textContent = fmt2(last7Earned);
-      kpi7dSub.textContent = `${last7Surveys} encuestas en 7 días`;
-
-      // Proyección fin de mes
-      const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
-      const dayOfMonth = now.getDate();
-      const avgPerDay = dayOfMonth > 0 ? (monthEarned / dayOfMonth) : 0;
-      const projection = avgPerDay * daysInMonth;
-
-      kpiProjection.textContent = fmt2(projection);
-      kpiProjSub.textContent = `Basado en €${fmt2(avgPerDay)}/día`;
-    }
-
-    // ==============================
-    // Goals
-    // ==============================
-    function renderGoalsEmpty(){
-      goalCurrentEl.textContent = '0.00';
-      goalTargetEl.textContent = '10.00';
-      goalDisplayEl.textContent = '10.00';
-      goalProgressEl.style.width = '0%';
-      goalPctEl.textContent = '0% completado';
-      adaptiveInfoEl.textContent = 'meta base de €10.00';
-      goalAchievedEl.style.display = 'none';
-      goalBadge.textContent = 'Meta';
-      monthlyGoal = 10.00;
-      lastMonthEarned = 0;
-    }
-
-    function renderGoals(){
-      const now = new Date();
-      const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0,0,0,0);
-      const thisMonthEnd = new Date(now.getFullYear(), now.getMonth()+1, 0, 23,59,59,999);
-
-      const thisMonthData = allData.filter(r => r.fecha >= thisMonthStart && r.fecha <= thisMonthEnd);
-      const thisMonthEarned = computeStats(thisMonthData).totalEarned;
-
-      const lastMonthStart = new Date(now.getFullYear(), now.getMonth()-1, 1, 0,0,0,0);
-      const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23,59,59,999);
-      const lastMonthData = allData.filter(r => r.fecha >= lastMonthStart && r.fecha <= lastMonthEnd);
-      lastMonthEarned = computeStats(lastMonthData).totalEarned;
-
-      monthlyGoal = calcAdaptiveGoal(lastMonthEarned);
-
-      goalCurrentEl.textContent = fmt2(thisMonthEarned);
-      goalTargetEl.textContent = fmt2(monthlyGoal);
-      goalDisplayEl.textContent = fmt2(monthlyGoal);
-
-      const pct = monthlyGoal > 0 ? clamp((thisMonthEarned / monthlyGoal) * 100, 0, 100) : 0;
-      goalProgressEl.style.width = pct.toFixed(2) + '%';
-      goalPctEl.textContent = pct.toFixed(1) + '% completado';
-
-      adaptiveInfoEl.textContent = lastMonthEarned > 0
-        ? `${fmt2(lastMonthEarned)} € ganados el mes anterior`
-        : 'meta base de €10.00';
-
-      goalAchievedEl.style.display = thisMonthEarned >= monthlyGoal ? 'block' : 'none';
-      goalBadge.textContent = now.toLocaleDateString('es-ES',{month:'long', year:'numeric'});
-    }
-
-    // ==============================
-    // Charts
-    // ==============================
-    function chartColors(){
-      const theme = document.body.getAttribute('data-theme') || 'dark';
-      const isLight = theme === 'light';
-      return {
-        grid: isLight ? 'rgba(15,23,42,0.08)' : 'rgba(148,163,184,0.10)',
-        ticks: isLight ? 'rgba(15,23,42,0.65)' : 'rgba(241,245,249,0.75)',
-        tooltipBg: isLight ? 'rgba(15,23,42,0.92)' : 'rgba(0,0,0,0.85)',
-      };
-    }
-
-    function hexAlpha(hex, a){
-      const r=parseInt(hex.slice(1,3),16);
-      const g=parseInt(hex.slice(3,5),16);
-      const b=parseInt(hex.slice(5,7),16);
-      return `rgba(${r},${g},${b},${a})`;
-    }
-
-    function renderMainChart(){
-      const ctx = document.getElementById('mainChart').getContext('2d');
-      if (mainChart) mainChart.destroy();
-
-      const data = allData.slice().sort((a,b) => a.fecha - b.fecha);
-      let labels = [];
-      let values = [];
-      let label = '';
-      let color = '#6366f1';
-      const c = chartColors();
-
-      if (mainMode === 'accumulated'){
-        let acc = 0;
-        const points = data
-          .filter(d => d.tipo === 'encuesta' || d.tipo === 'bonus')
-          .map(d => { acc += d.importe; return { x: d.fecha, y: acc }; });
-
-        labels = points.map(p => fmtDateShort(p.x));
-        values = points.map(p => p.y);
-        label = 'Acumulado (€)';
-        color = '#6366f1';
-      }
-      else if (mainMode === 'monthly'){
-        const m = {};
-        data.filter(d => d.tipo === 'encuesta' || d.tipo === 'bonus').forEach(d => {
-          const k = monthKey(d.fecha);
-          m[k] = (m[k] || 0) + d.importe;
-        });
-        const keys = Object.keys(m).sort();
-        labels = keys.map(formatMonthLabel);
-        values = keys.map(k => m[k]);
-        label = 'Mensual (€)';
-        color = '#10b981';
-      }
-      else { // daily
-        const daily = {};
-        data.filter(d => d.tipo === 'encuesta' || d.tipo === 'bonus').forEach(d => {
-          const k = d.fecha.toISOString().slice(0,10);
-          daily[k] = (daily[k] || 0) + d.importe;
-        });
-        const keys = Object.keys(daily).sort();
-        labels = keys.map(k => { const [,m,dd] = k.split('-'); return `${dd}/${m}`; });
-        values = keys.map(k => daily[k]);
-        label = 'Diario (€)';
-        color = '#ec4899';
-      }
-
-      mainChart = new Chart(ctx, {
-        type: mainMode === 'accumulated' ? 'line' : 'bar',
-        data: {
-          labels,
-          datasets: [{
-            label,
-            data: values,
-            borderColor: color,
-            backgroundColor: mainMode === 'accumulated' ? hexAlpha(color, 0.14) : hexAlpha(color, 0.75),
-            borderWidth: 2.6,
-            fill: mainMode === 'accumulated',
-            tension: 0.35,
-            pointRadius: mainMode === 'accumulated' ? 0 : undefined,
-            pointHoverRadius: 5,
-            borderRadius: mainMode !== 'accumulated' ? 8 : undefined
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: c.tooltipBg,
-              padding: 12,
-              callbacks: {
-                label: t => ` €${Number(t.parsed.y).toFixed(2)}`
-              }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              grid: { color: c.grid },
-              ticks: { color: c.ticks, callback: v => '€' + Number(v).toFixed(2) }
-            },
-            x: {
-              grid: { display: false },
-              ticks: { color: c.ticks, maxTicksLimit: 14, maxRotation: 45 }
-            }
-          }
-        }
-      });
-    }
-
-    function renderDistChart(){
-      const ctx = document.getElementById('distChart').getContext('2d');
-      if (distChart) distChart.destroy();
-      const c = chartColors();
-
-      const data = allData.slice();
-
-      if (!data.length){
-        distChart = new Chart(ctx, {
-          type: 'doughnut',
-          data: { labels: ['Sin datos'], datasets: [{ data: [1], backgroundColor: [hexAlpha('#94a3b8', 0.35)], borderColor: [hexAlpha('#94a3b8',0.2)], borderWidth: 1 }] },
-          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-        });
-        return;
-      }
-
-      if (distMode === 'types'){
-        const map = { encuesta:0, bonus:0, retiro:0, screener:0, descalificado:0 };
-        data.forEach(r => map[r.tipo] = (map[r.tipo] || 0) + 1);
-
-        const labels = Object.keys(map);
-        const values = labels.map(k => map[k] || 0);
-
-        const colors = {
-          encuesta: '#10b981',
-          bonus: '#f59e0b',
-          retiro: '#ec4899',
-          screener: '#ef4444',
-          descalificado: '#fb7185'
-        };
-
-        distChart = new Chart(ctx, {
-          type: 'doughnut',
-          data: {
-            labels: labels.map(l => l.toUpperCase()),
-            datasets: [{
-              data: values,
-              backgroundColor: labels.map(l => hexAlpha(colors[l] || '#94a3b8', 0.75)),
-              borderColor: labels.map(l => hexAlpha(colors[l] || '#94a3b8', 0.22)),
-              borderWidth: 1.2
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { position: 'bottom', labels: { color: c.ticks, font: { weight: '700' } } },
-              tooltip: {
-                backgroundColor: c.tooltipBg,
-                callbacks: {
-                  label: t => ` ${t.label}: ${t.parsed} registros`
-                }
-              }
-            }
-          }
-        });
-      }
-      else if (distMode === 'weekday'){
-        const labels = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-        const earned = Array(7).fill(0);
-        data.filter(r => r.tipo === 'encuesta' || r.tipo === 'bonus').forEach(r => {
-          earned[r.fecha.getDay()] += r.importe || 0;
-        });
-
-        distChart = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels,
-            datasets: [{
-              data: earned,
-              label: '€ por día',
-              backgroundColor: hexAlpha('#6366f1', 0.75),
-              borderColor: hexAlpha('#6366f1', 0.35),
-              borderWidth: 1.2,
-              borderRadius: 10
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: { backgroundColor: c.tooltipBg, callbacks: { label: t => ` €${Number(t.parsed.y).toFixed(2)}` } }
-            },
-            scales: {
-              y: { beginAtZero: true, grid: { color: c.grid }, ticks: { color: c.ticks, callback: v => '€'+Number(v).toFixed(2) } },
-              x: { grid: { display: false }, ticks: { color: c.ticks } }
-            }
-          }
-        });
-      }
-      else { // hour
-        const hours = Array.from({length:24}, (_,h)=>h);
-        const cnt = Array(24).fill(0);
-        data.filter(r => r.tipo === 'encuesta').forEach(r => { cnt[r.fecha.getHours()] += 1; });
-
-        distChart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: hours.map(h => String(h).padStart(2,'0')+':00'),
-            datasets: [{
-              data: cnt,
-              label: 'Encuestas / hora',
-              borderColor: '#10b981',
-              backgroundColor: hexAlpha('#10b981', 0.12),
-              borderWidth: 2.4,
-              fill: true,
-              tension: 0.28,
-              pointRadius: 0
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { backgroundColor: c.tooltipBg } },
-            scales: {
-              y: { beginAtZero: true, grid: { color: c.grid }, ticks: { color: c.ticks } },
-              x: { grid: { display: false }, ticks: { color: c.ticks, maxTicksLimit: 8 } }
-            }
-          }
-        });
-      }
-    }
-
-    // ==============================
-    // Monthly summary table
-    // ==============================
-    function renderMonthlySummary(){
-      const monthly = {};
-
-      allData.forEach(r => {
-        const k = monthKey(r.fecha);
-        if (!monthly[k]) monthly[k] = { earned:0, withdrawn:0, success:0, attempts:0 };
-
-        switch(r.tipo){
-          case 'encuesta':
-            monthly[k].earned += r.importe || 0;
-            monthly[k].success += 1;
-            monthly[k].attempts += 1;
-            break;
-          case 'bonus':
-            monthly[k].earned += r.importe || 0;
-            break;
-          case 'retiro':
-            monthly[k].withdrawn += r.importe || 0;
-            break;
-          case 'screener':
-          case 'descalificado':
-            monthly[k].attempts += 1;
-            break;
-        }
-      });
-
-      const keys = Object.keys(monthly).sort((a,b) => b.localeCompare(a));
-      monthlySummaryTbody.innerHTML = '';
-
-      if (!keys.length){
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td colspan="8" style="color:var(--text-3); font-weight:900;">Sin datos.</td>`;
-        monthlySummaryTbody.appendChild(tr);
-        return;
-      }
-
-      keys.forEach(k => {
-        const d = monthly[k];
-        const rate = d.attempts > 0 ? (d.success/d.attempts*100).toFixed(1) : '—';
-        const avg = d.success > 0 ? (d.earned/d.success).toFixed(2) : '—';
-        const net = (d.earned - d.withdrawn);
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${formatMonthLabel(k)}</td>
-          <td class="positive">€${fmt2(d.earned)}</td>
-          <td class="${d.withdrawn>0?'negative':''}">€${fmt2(d.withdrawn)}</td>
-          <td>${d.success}</td>
-          <td>${d.attempts}</td>
-          <td>${rate}%</td>
-          <td>€${avg}</td>
-          <td class="${net>=0?'positive':'negative'}">€${fmt2(net)}</td>
-        `;
-        monthlySummaryTbody.appendChild(tr);
-      });
-    }
-
-    // ==============================
-    // Recent activity
-    // ==============================
-    function renderRecent(){
-      const items = allData.slice().sort((a,b) => b.fecha - a.fecha).slice(0, 8);
-      recentCount.textContent = `${items.length} registros`;
-      recentActivity.innerHTML = '';
-
-      if (!items.length){
-        recentActivity.innerHTML = `<div style="color:var(--text-3); font-weight:800;">Sin actividad registrada.</div>`;
-        return;
-      }
-
-      const metaMap = {
-        encuesta: { cls: 'earned', icon: 'fa-check', sign: '+', amtCls: 'positive' },
-        bonus: { cls: 'bonus', icon: 'fa-star', sign: '+', amtCls: 'positive' },
-        retiro: { cls: 'withdrawn', icon: 'fa-paper-plane', sign: '-', amtCls: 'negative' },
-        screener: { cls: 'failed', icon: 'fa-times', sign: '', amtCls: 'neutral' },
-        descalificado: { cls: 'failed', icon: 'fa-times', sign: '', amtCls: 'neutral' }
-      };
-
-      items.forEach(item => {
-        const meta = metaMap[item.tipo] || { cls:'failed', icon:'fa-circle', sign:'', amtCls:'neutral' };
-        const amount = Number(item.importe || 0);
-        const amt = (amount > 0) ? `${meta.sign}€${fmt2(amount)}` : '€0.00';
-
-        const el = document.createElement('div');
-        el.className = 'activity-item';
-        el.innerHTML = `
-          <div class="activity-icon ${meta.cls}"><i class="fas ${meta.icon}"></i></div>
-          <div class="activity-content">
-            <div class="activity-title">${escapeHtml(item.concepto || item.tipo)}</div>
-            <div class="activity-details">
-              <span><i class="fas fa-calendar"></i> ${fmtDateFull(item.fecha)}</span>
-              <span class="badge neutral" style="padding:3px 8px; font-size:0.72rem;">${String(item.tipo).toUpperCase()}</span>
+          <div class="table-wrap">
+            <table id="history-table">
+              <thead>
+                <tr>
+                  <th onclick="sortTable('history-table',0)">Fecha <i class="fas fa-sort sort-icon"></i></th>
+                  <th onclick="sortTable('history-table',1)">Tipo <i class="fas fa-sort sort-icon"></i></th>
+                  <th onclick="sortTable('history-table',2)">Concepto <i class="fas fa-sort sort-icon"></i></th>
+                  <th onclick="sortTable('history-table',3)">Importe <i class="fas fa-sort sort-icon"></i></th>
+                </tr>
+              </thead>
+              <tbody id="history-tbody"></tbody>
+            </table>
+            <div class="no-results" id="no-results" style="display:none">
+              <i class="fas fa-magnifying-glass" style="font-size:1.5rem;color:var(--t3);margin-bottom:.75rem;display:block"></i>
+              Sin resultados para tu búsqueda
             </div>
           </div>
-          <div class="activity-amount ${meta.amtCls}">${amt}</div>
-        `;
-        recentActivity.appendChild(el);
-      });
+          <div style="margin-top:.75rem;font-size:.8rem;color:var(--t3);text-align:right" id="history-count">0 registros</div>
+        </div>
+      </div><!-- /view-history -->
+
+      <!-- GOALS VIEW -->
+      <div class="view" id="view-goals">
+        <!-- Summary ring large -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-bullseye"></i> Estado del Objetivo</h3>
+            <span class="card-badge" id="month-label-goals">Este mes</span>
+          </div>
+          <div style="display:flex;gap:2rem;align-items:center;flex-wrap:wrap">
+            <div style="position:relative;width:150px;height:150px;flex-shrink:0">
+              <svg viewBox="0 0 120 120" style="width:100%;height:100%;transform:rotate(-90deg)">
+                <circle cx="60" cy="60" r="50" fill="none" stroke-width="12" stroke="rgba(255,255,255,.06)"/>
+                <circle id="goal-ring-lg" cx="60" cy="60" r="50" fill="none" stroke-width="12"
+                  stroke="var(--primary)" stroke-linecap="round"
+                  stroke-dasharray="314" stroke-dashoffset="314"
+                  style="transition:stroke-dashoffset 1.2s ease-out"/>
+              </svg>
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem">
+                <div style="font-family:'DM Mono',monospace;font-size:1.8rem;color:var(--primary)" id="goal-pct-lg">0%</div>
+                <div style="font-size:.65rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em">completado</div>
+              </div>
+            </div>
+            <div style="flex:1;min-width:200px">
+              <div style="font-size:1.5rem;font-family:'DM Mono',monospace;margin-bottom:.5rem;color:var(--t1)">
+                €<span id="goal-current-lg">0.00</span>
+                <span style="color:var(--t3);font-size:1rem"> / €<span id="goal-target-lg">10.00</span></span>
+              </div>
+              <div class="progress-bar" style="height:10px;margin-bottom:.5rem">
+                <div class="progress-fill" id="monthly-progress-lg" style="width:0%"></div>
+              </div>
+              <div style="font-size:.85rem;color:var(--t2)">
+                Meta adaptativa basada en <span id="adaptive-goal-lg" style="color:var(--primary)">mes anterior</span>
+              </div>
+              <div class="goal-input-group" style="margin-top:1rem">
+                <input type="number" step="0.01" min="1" class="goal-input" id="customGoalInput2" placeholder="Nueva meta (€)">
+                <button class="goal-save-btn" onclick="saveCustomGoal2()">Establecer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Milestones -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-medal"></i> Logros y Hitos</h3>
+          </div>
+          <div class="milestones-grid" id="milestones-grid">
+            <!-- populated by JS -->
+          </div>
+        </div>
+      </div><!-- /view-goals -->
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container"></div>
+
+<script>
+// ══════════════════════════════════════════
+// FIREBASE CONFIG
+// ══════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyD9sBTTe9PFQct9Ym9tkiVBr8wYDMl4SI0",
+  authDomain: "lifepointsdashboard.firebaseapp.com",
+  databaseURL: "https://lifepointsdashboard-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "lifepointsdashboard",
+  storageBucket: "lifepointsdashboard.firebasestorage.app",
+  messagingSenderId: "70452481394",
+  appId: "1:70452481394:web:60e497d37b8b74c2d8a1eb"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
+const provider = new firebase.auth.GoogleAuthProvider();
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let surveyData = [];
+let filteredData = [];
+let mainChart = null, monthlyBarChart = null, typeDonutChart = null;
+let currentMode = 'accumulated';
+let monthlyGoal = 10.00;
+let lastMonthEarned = 0;
+let dateRangeDays = 0; // 0 = all
+let activeTypeFilter = 'all';
+let currentUid = null;
+
+// ══════════════════════════════════════════
+// SIDEBAR & NAV
+// ══════════════════════════════════════════
+let sidebarOpen = false;
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('open', sidebarOpen);
+}
+
+const viewTitles = { overview: 'Resumen', analytics: 'Analíticas', history: 'Historial', goals: 'Objetivos' };
+const viewBadges = { overview: 'Dashboard', analytics: 'Estadísticas', history: 'Transacciones', goals: 'Metas' };
+
+function navigate(viewId, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + viewId).classList.add('active');
+  if (btn) btn.classList.add('active');
+  document.getElementById('pageTitle').textContent = viewTitles[viewId] || viewId;
+  document.getElementById('pageBadge').textContent = viewBadges[viewId] || viewId;
+  // Rebuild analytics charts when switching
+  if (viewId === 'analytics' && surveyData.length) {
+    buildMonthlyBarChart(surveyData);
+    buildTypeDonutChart(surveyData);
+  }
+}
+
+// ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  try { await auth.signInWithPopup(provider); }
+  catch(e) { showError('Error al iniciar sesión: ' + e.message); }
+});
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  try { await auth.signOut(); toast('Sesión cerrada', 'ok'); }
+  catch(e) { showError(e.message); }
+});
+document.getElementById('copyUidBtn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(document.getElementById('uidText').textContent);
+    document.getElementById('uidCopyState').style.display = 'inline';
+    setTimeout(() => document.getElementById('uidCopyState').style.display = 'none', 1400);
+  } catch(e) {}
+});
+
+auth.onAuthStateChanged(user => {
+  hide('errorMessage');
+  if (user) {
+    currentUid = user.uid;
+    document.getElementById('loginBtn').style.display = 'none';
+    const chip = document.getElementById('userChip');
+    chip.style.display = 'inline-flex';
+    document.getElementById('userAvatar').src = user.photoURL || '';
+    document.getElementById('userName').textContent = (user.displayName||'Usuario').split(' ')[0];
+    document.getElementById('uidMini').classList.add('show');
+    document.getElementById('uidText').textContent = user.uid;
+    hide('authPrompt');
+    loadData(user.uid);
+  } else {
+    currentUid = null;
+    document.getElementById('loginBtn').style.display = 'inline-flex';
+    document.getElementById('userChip').style.display = 'none';
+    document.getElementById('uidMini').classList.remove('show');
+    show('authPrompt');
+    hide('loadingOverlay');
+    resetDashboard();
+  }
+});
+
+// ══════════════════════════════════════════
+// DATA LOADING
+// ══════════════════════════════════════════
+function loadData(uid) {
+  show('loadingOverlay');
+  hide('errorMessage');
+  db.ref(`users/${uid}/surveys`).once('value')
+    .then(snap => {
+      const raw = snap.val();
+      hide('loadingOverlay');
+      if (!raw) {
+        showError('No hay datos todavía. Usa el bot para registrar encuestas.');
+        setTxt('lastUpdate', 'Sin datos');
+        return;
+      }
+      surveyData = Object.entries(raw).map(([id,v]) => ({
+        ...v, id, fecha: parseDate(v.fecha)
+      })).sort((a,b) => b.fecha - a.fecha);
+
+      processData();
+      buildHistoryTable();
+      setTxt('lastUpdate', 'Actualizado: ' + new Date().toLocaleTimeString('es-ES'));
+      toast('Datos cargados correctamente', 'ok');
+    })
+    .catch(err => {
+      hide('loadingOverlay');
+      showError('Error: ' + err.message);
+    });
+}
+
+function refreshData() {
+  if (!currentUid) return toast('Inicia sesión primero', 'warn');
+  const btn = document.getElementById('refreshBtn');
+  btn.querySelector('i').style.animation = 'spin 1s linear infinite';
+  db.ref(`users/${currentUid}/surveys`).once('value')
+    .then(snap => {
+      btn.querySelector('i').style.animation = '';
+      const raw = snap.val();
+      if (!raw) return;
+      surveyData = Object.entries(raw).map(([id,v]) => ({
+        ...v, id, fecha: parseDate(v.fecha)
+      })).sort((a,b) => b.fecha - a.fecha);
+      processData();
+      buildHistoryTable();
+      setTxt('lastUpdate', 'Actualizado: ' + new Date().toLocaleTimeString('es-ES'));
+      toast('Datos actualizados', 'ok');
+    })
+    .catch(e => { btn.querySelector('i').style.animation = ''; showError(e.message); });
+}
+
+// ══════════════════════════════════════════
+// DATE RANGE FILTER
+// ══════════════════════════════════════════
+function setDateRange(days, btn) {
+  dateRangeDays = days;
+  document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (surveyData.length) {
+    processData();
+    buildHistoryTable();
+  }
+}
+
+function getFilteredByDate(data) {
+  if (!dateRangeDays) return data;
+  const cutoff = new Date(Date.now() - dateRangeDays * 86400000);
+  return data.filter(d => d.fecha >= cutoff);
+}
+
+// ══════════════════════════════════════════
+// PROCESS DATA
+// ══════════════════════════════════════════
+function processData() {
+  const data = getFilteredByDate(surveyData);
+  const now = new Date();
+  const thisMonth = now.getMonth(), thisYear = now.getFullYear();
+
+  let totalEarned=0, totalWithdrawn=0, successCount=0, attemptCount=0;
+  let thisMonthEarned=0, thisMonthSurveys=0;
+  const monthly = {};
+
+  data.forEach(item => {
+    const key = monthKey(item.fecha);
+    if (!monthly[key]) monthly[key] = {earned:0,withdrawn:0,success:0,attempts:0};
+    switch(item.tipo) {
+      case 'encuesta':
+        totalEarned += item.importe; monthly[key].earned += item.importe;
+        monthly[key].success++; monthly[key].attempts++; successCount++; attemptCount++;
+        if (item.fecha.getMonth()===thisMonth && item.fecha.getFullYear()===thisYear)
+          { thisMonthEarned += item.importe; thisMonthSurveys++; }
+        break;
+      case 'screener': case 'descalificado':
+        monthly[key].attempts++; attemptCount++; break;
+      case 'retiro':
+        totalWithdrawn += item.importe; monthly[key].withdrawn += item.importe; break;
+      case 'bonus':
+        totalEarned += item.importe; monthly[key].earned += item.importe;
+        if (item.fecha.getMonth()===thisMonth && item.fecha.getFullYear()===thisYear)
+          thisMonthEarned += item.importe;
+        break;
     }
+  });
 
-    // ==============================
-    // Heatmap schedule
-    // ==============================
-    function renderHeatmap(){
-      const encuestas = allData.filter(d => d.tipo === 'encuesta');
-      const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const balance = totalEarned - totalWithdrawn;
+  const avg = successCount > 0 ? totalEarned/successCount : 0;
+  const rate = attemptCount > 0 ? successCount/attemptCount*100 : 0;
 
-      scheduleGrid.innerHTML = '';
-      scheduleGrid.innerHTML += `<div class="schedule-header">Hora</div>`;
-      dias.forEach(d => scheduleGrid.innerHTML += `<div class="schedule-header">${d}</div>`);
+  const prevKey = prevMonthKey(now);
+  lastMonthEarned = monthly[prevKey] ? monthly[prevKey].earned : 0;
+  if (!localStorage.getItem('customGoal'))
+    monthlyGoal = calcAdaptiveGoal(lastMonthEarned);
 
-      for (let h=0; h<24; h++){
-        const label = h===0?'12am':h<12?`${h}am`:h===12?'12pm':`${h-12}pm`;
-        scheduleGrid.innerHTML += `<div class="schedule-header">${label}</div>`;
+  setTxt('total-earned', fmt(totalEarned));
+  setTxt('current-balance', fmt(balance));
+  setTxt('total-withdrawn', fmt(totalWithdrawn));
+  setTxt('success-rate', rate.toFixed(1));
+  setTxt('success-counts', `${successCount} completadas / ${attemptCount} intentos`);
+  setTxt('avg-per-survey', fmt(avg));
+  setTxt('this-month-earned', fmt(thisMonthEarned));
+  setTxt('this-month-surveys', thisMonthSurveys);
 
-        dias.forEach((_, di) => {
-          const cnt = encuestas.filter(e => e.fecha.getDay()===di && e.fecha.getHours()===h).length;
-          const cls = cnt===0 ? 'no-data' : cnt>=3 ? 'high-activity' : cnt>=2 ? 'medium-activity' : 'low-activity';
-          scheduleGrid.innerHTML += `<div class="schedule-cell ${cls}" title="${cnt} encuestas">${cnt || ''}</div>`;
-        });
+  // Streak
+  const streak = calcStreak(surveyData);
+  setTxt('streak-days', streak);
+
+  // Best month
+  let bestKey = null, bestVal = 0;
+  Object.entries(monthly).forEach(([k,v]) => { if(v.earned > bestVal) { bestVal=v.earned; bestKey=k; } });
+  setTxt('best-month-val', fmt(bestVal));
+  setTxt('best-month-label', bestKey ? formatMonthLabel(bestKey) : '—');
+
+  updateGoalWidget(thisMonthEarned);
+  updateMonthlySummary(monthly);
+  buildChart(data, currentMode);
+  buildSchedule(data);
+  updateRecentActivity(surveyData.slice(0,7));
+  updateMilestones(totalEarned, successCount, streak, bestVal);
+
+  const ml = now.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
+  setTxt('month-label', ml); setTxt('month-label-goals', ml);
+  setTxt('recent-count', `${Math.min(surveyData.length,7)} registros`);
+}
+
+// ══════════════════════════════════════════
+// STREAK CALC
+// ══════════════════════════════════════════
+function calcStreak(data) {
+  const activeDays = new Set(
+    data.filter(d => d.tipo==='encuesta'||d.tipo==='bonus')
+        .map(d => d.fecha.toISOString().slice(0,10))
+  );
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today); d.setDate(d.getDate()-i);
+    if (activeDays.has(d.toISOString().slice(0,10))) streak++;
+    else if (i > 0) break;
+  }
+  return streak;
+}
+
+// ══════════════════════════════════════════
+// GOAL WIDGET
+// ══════════════════════════════════════════
+function updateGoalWidget(earned) {
+  const pct = Math.min(earned/monthlyGoal*100, 100);
+  const pctStr = pct.toFixed(1) + '%';
+
+  setTxt('goal-current', fmt(earned)); setTxt('goal-target', fmt(monthlyGoal));
+  setTxt('goal-display', fmt(monthlyGoal));
+  setTxt('progress-pct', pct.toFixed(1) + '% completado');
+  document.getElementById('monthly-progress').style.width = pct + '%';
+  document.getElementById('goal-achievement').style.display = earned >= monthlyGoal ? 'flex' : 'none';
+
+  // Ring animation
+  const circumference = 314;
+  const offset = circumference - (pct/100)*circumference;
+  const ring = document.getElementById('goal-ring');
+  if (ring) ring.style.strokeDashoffset = offset;
+  setTxt('progress-pct-ring', Math.round(pct) + '%');
+
+  // Goals view
+  setTxt('goal-current-lg', fmt(earned)); setTxt('goal-target-lg', fmt(monthlyGoal));
+  document.getElementById('monthly-progress-lg').style.width = pct + '%';
+  const ringLg = document.getElementById('goal-ring-lg');
+  if (ringLg) ringLg.style.strokeDashoffset = offset;
+  setTxt('goal-pct-lg', Math.round(pct) + '%');
+
+  setTxt('adaptive-goal-info', lastMonthEarned > 0
+    ? `${fmt(lastMonthEarned)} € ganados el mes anterior`
+    : 'meta base de €10.00');
+  setTxt('adaptive-goal-lg', lastMonthEarned > 0
+    ? `mes anterior (€${fmt(lastMonthEarned)})`
+    : 'base (€10.00)');
+}
+
+// ══════════════════════════════════════════
+// CUSTOM GOAL
+// ══════════════════════════════════════════
+function saveCustomGoal() {
+  const val = parseFloat(document.getElementById('customGoalInput').value);
+  if (val > 0) {
+    monthlyGoal = val;
+    localStorage.setItem('customGoal', val);
+    const now = new Date();
+    const thisMonth = now.getMonth(), thisYear = now.getFullYear();
+    let thisMonthEarned = 0;
+    getFilteredByDate(surveyData).forEach(d => {
+      if ((d.tipo==='encuesta'||d.tipo==='bonus') && d.fecha.getMonth()===thisMonth && d.fecha.getFullYear()===thisYear)
+        thisMonthEarned += d.importe;
+    });
+    updateGoalWidget(thisMonthEarned);
+    toast('Meta actualizada a €' + fmt(val), 'ok');
+    document.getElementById('customGoalInput').value = '';
+  }
+}
+function saveCustomGoal2() {
+  const val = parseFloat(document.getElementById('customGoalInput2').value);
+  if (val > 0) {
+    monthlyGoal = val;
+    localStorage.setItem('customGoal', val);
+    const now = new Date();
+    const thisMonth = now.getMonth(), thisYear = now.getFullYear();
+    let thisMonthEarned = 0;
+    getFilteredByDate(surveyData).forEach(d => {
+      if ((d.tipo==='encuesta'||d.tipo==='bonus') && d.fecha.getMonth()===thisMonth && d.fecha.getFullYear()===thisYear)
+        thisMonthEarned += d.importe;
+    });
+    updateGoalWidget(thisMonthEarned);
+    toast('Meta actualizada a €' + fmt(val), 'ok');
+    document.getElementById('customGoalInput2').value = '';
+  }
+}
+
+// Init custom goal from localStorage
+if (localStorage.getItem('customGoal')) monthlyGoal = parseFloat(localStorage.getItem('customGoal'));
+
+// ══════════════════════════════════════════
+// MILESTONES
+// ══════════════════════════════════════════
+const MILESTONES = [
+  { id:'first', icon:'🌱', name:'Primera Encuesta', desc:'Completa tu primera encuesta', check:(e,s)=>s>=1 },
+  { id:'ten',   icon:'💰', name:'10 Encuestas',    desc:'Completa 10 encuestas',        check:(e,s)=>s>=10 },
+  { id:'fifty', icon:'🏆', name:'50 Encuestas',    desc:'Completa 50 encuestas',        check:(e,s)=>s>=50 },
+  { id:'earn5', icon:'💵', name:'€5 Ganados',      desc:'Acumula €5 en ganancias',       check:(e,s)=>e>=5 },
+  { id:'earn25',icon:'💸', name:'€25 Ganados',     desc:'Acumula €25 en ganancias',      check:(e,s)=>e>=25 },
+  { id:'earn100',icon:'🤑',name:'€100 Ganados',    desc:'Acumula €100 en ganancias',     check:(e,s)=>e>=100 },
+  { id:'earn500',icon:'💎',name:'€500 Ganados',    desc:'Acumula €500 en ganancias',     check:(e,s)=>e>=500 },
+  { id:'streak3',icon:'🔥',name:'Racha 3 Días',    desc:'3 días consecutivos activo',    check:(e,s,st)=>st>=3 },
+  { id:'streak7',icon:'⚡',name:'Racha 7 Días',    desc:'7 días consecutivos activo',    check:(e,s,st)=>st>=7 },
+];
+
+function updateMilestones(totalEarned, surveys, streak) {
+  const grid = document.getElementById('milestones-grid');
+  grid.innerHTML = MILESTONES.map(m => {
+    const reached = m.check(totalEarned, surveys, streak);
+    return `<div class="milestone ${reached?'reached':''}">
+      <div class="milestone-icon">${m.icon}</div>
+      <div class="milestone-name">${m.name}</div>
+      <div class="milestone-desc">${m.desc}</div>
+      <div class="milestone-status">${reached ? '✓ Conseguido' : 'Pendiente'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// MONTHLY SUMMARY TABLE
+// ══════════════════════════════════════════
+function updateMonthlySummary(monthly) {
+  const tbody = document.querySelector('#monthly-summary tbody');
+  tbody.innerHTML = Object.entries(monthly)
+    .sort(([a],[b]) => b.localeCompare(a))
+    .map(([key,d]) => {
+      const rate = d.attempts>0 ? (d.success/d.attempts*100).toFixed(1)+'%' : '—';
+      const avg = d.success>0 ? '€'+fmt(d.earned/d.success) : '—';
+      return `<tr>
+        <td class="mono">${formatMonthLabel(key)}</td>
+        <td class="pos">€${fmt(d.earned)}</td>
+        <td class="${d.withdrawn>0?'neg':'mono'}">€${fmt(d.withdrawn)}</td>
+        <td class="mono">${d.success}</td>
+        <td class="mono">${d.attempts}</td>
+        <td class="mono">${rate}</td>
+        <td class="mono">${avg}</td>
+      </tr>`;
+    }).join('');
+}
+
+// ══════════════════════════════════════════
+// HISTORY TABLE
+// ══════════════════════════════════════════
+const TYPE_ICONS = { encuesta:'fa-check', retiro:'fa-paper-plane', screener:'fa-times', descalificado:'fa-times', bonus:'fa-star' };
+
+function buildHistoryTable() {
+  renderHistoryTable(surveyData);
+}
+
+function renderHistoryTable(data) {
+  const tbody = document.getElementById('history-tbody');
+  const rows = data.map(item => {
+    const amountPos = item.tipo==='encuesta'||item.tipo==='bonus';
+    const amountNeg = item.tipo==='retiro';
+    const amtCls = amountPos?'pos':amountNeg?'neg':'mono';
+    const amtTxt = amountPos ? '+€'+fmt(item.importe) : amountNeg ? '-€'+fmt(item.importe) : '€0.00';
+    return `<tr data-tipo="${item.tipo}" data-raw="${(item.concepto||item.tipo||'').toLowerCase()} ${fmt(item.importe)} ${item.tipo}">
+      <td class="mono">${fmtDateFull(item.fecha)}</td>
+      <td><span class="type-badge ${item.tipo||'encuesta'}">${item.tipo||'encuesta'}</span></td>
+      <td>${item.concepto || item.tipo || '—'}</td>
+      <td class="${amtCls}">${amtTxt}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = rows.join('');
+  setTxt('history-count', data.length + ' registros');
+  filterTable(); // apply current search
+}
+
+let currentTypeFilter = 'all';
+function filterType(type, btn) {
+  currentTypeFilter = type;
+  document.querySelectorAll('#view-history .tab-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  filterTable();
+}
+
+function filterTable() {
+  const q = (document.getElementById('tableSearch')?.value || '').toLowerCase();
+  const rows = document.querySelectorAll('#history-tbody tr');
+  let visible = 0;
+  rows.forEach(row => {
+    const tipo = row.getAttribute('data-tipo')||'';
+    const raw  = row.getAttribute('data-raw')||'';
+    const typeOk = currentTypeFilter==='all' || tipo===currentTypeFilter;
+    const searchOk = !q || raw.includes(q);
+    const show = typeOk && searchOk;
+    row.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('no-results').style.display = visible===0 ? 'block' : 'none';
+  setTxt('history-count', visible + ' registros');
+}
+
+// ══════════════════════════════════════════
+// MAIN CHART
+// ══════════════════════════════════════════
+function buildChart(data, mode) {
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  if (mainChart) mainChart.destroy();
+  const sorted = [...data].sort((a,b)=>a.fecha-b.fecha);
+  let labels, values, label, color;
+
+  if (mode==='accumulated') {
+    let acc=0;
+    const pts = sorted.filter(d=>d.tipo==='encuesta'||d.tipo==='bonus')
+      .map(d=>{ acc+=d.importe; return {x:d.fecha,y:acc}; });
+    labels = pts.map(p=>fmtDateShort(p.x));
+    values = pts.map(p=>p.y);
+    label = 'Acumulado (€)'; color = '#63FFD3';
+  } else if (mode==='monthly') {
+    const m={};
+    sorted.filter(d=>d.tipo==='encuesta'||d.tipo==='bonus')
+      .forEach(d=>{ const k=monthKey(d.fecha); m[k]=(m[k]||0)+d.importe; });
+    labels = Object.keys(m).sort().map(formatMonthLabel);
+    values = Object.keys(m).sort().map(k=>m[k]);
+    label = 'Mensual (€)'; color = '#FFD93D';
+  } else {
+    const d={};
+    sorted.filter(x=>x.tipo==='encuesta'||x.tipo==='bonus')
+      .forEach(x=>{ const k=x.fecha.toISOString().slice(0,10); d[k]=(d[k]||0)+x.importe; });
+    labels = Object.keys(d).sort().map(k=>{ const[y,m,dd]=k.split('-'); return `${dd}/${m}`; });
+    values = Object.keys(d).sort().map(k=>d[k]);
+    label = 'Diario (€)'; color = '#FF6B9D';
+  }
+
+  mainChart = new Chart(ctx, {
+    type: mode==='accumulated'?'line':'bar',
+    data: { labels, datasets:[{
+      label, data: values,
+      borderColor: color,
+      backgroundColor: mode==='accumulated' ? hexAlpha(color,.1) : hexAlpha(color,.7),
+      borderWidth: 2.5, fill: mode==='accumulated', tension: 0.4,
+      pointRadius: mode==='accumulated'?0:undefined, pointHoverRadius:5,
+      borderRadius: mode!=='accumulated'?6:undefined
+    }]},
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{ backgroundColor:'rgba(13,16,25,.95)', padding:12, cornerRadius:8,
+          callbacks:{label:c=>` €${c.parsed.y.toFixed(2)}`} }
+      },
+      scales:{
+        y:{ beginAtZero:true, grid:{color:'rgba(255,255,255,.04)'},
+          ticks:{color:'#8892A8', callback:v=>'€'+Number(v).toFixed(2)},
+          border:{display:false} },
+        x:{ grid:{display:false}, ticks:{color:'#8892A8', maxTicksLimit:14, maxRotation:45},
+          border:{display:false} }
       }
     }
+  });
+}
 
-    // ==============================
-    // Boot
-    // ==============================
-    (function init(){
-      applySavedTheme();
-      // UI inicial (sin sesión)
-      authGate.style.display = 'block';
-      appEl.style.display = 'none';
-      setLoading(false);
-      hideError();
-      monthLabel.textContent = 'Histórico';
-    })();
-  </script>
+function switchChart(mode, btn) {
+  document.querySelectorAll('#view-overview .tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentMode = mode;
+  buildChart(getFilteredByDate(surveyData), mode);
+}
+
+// ══════════════════════════════════════════
+// ANALYTICS CHARTS
+// ══════════════════════════════════════════
+function buildMonthlyBarChart(data) {
+  const ctx = document.getElementById('monthlyBarChart')?.getContext('2d');
+  if (!ctx) return;
+  if (monthlyBarChart) monthlyBarChart.destroy();
+  const m={};
+  [...data].sort((a,b)=>a.fecha-b.fecha)
+    .filter(d=>d.tipo==='encuesta'||d.tipo==='bonus')
+    .forEach(d=>{ const k=monthKey(d.fecha); m[k]=(m[k]||0)+d.importe; });
+  const keys = Object.keys(m).sort();
+  monthlyBarChart = new Chart(ctx, {
+    type:'bar',
+    data:{ labels:keys.map(formatMonthLabel), datasets:[{
+      label:'Ganancias (€)', data:keys.map(k=>m[k]),
+      backgroundColor:'rgba(99,255,211,.65)', borderColor:'#63FFD3',
+      borderWidth:1.5, borderRadius:6
+    }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{backgroundColor:'rgba(13,16,25,.95)',padding:10,callbacks:{label:c=>` €${c.parsed.y.toFixed(2)}`}}},
+      scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#8892A8'},border:{display:false}},
+              x:{grid:{display:false},ticks:{color:'#8892A8'},border:{display:false}}} }
+  });
+}
+
+function buildTypeDonutChart(data) {
+  const ctx = document.getElementById('typeDonutChart')?.getContext('2d');
+  if (!ctx) return;
+  if (typeDonutChart) typeDonutChart.destroy();
+  const types={encuesta:0,bonus:0,retiro:0,screener:0,descalificado:0};
+  data.forEach(d=>{ if(types[d.tipo]!==undefined) types[d.tipo]++; else types[d.tipo]=1; });
+  const labels = Object.keys(types).filter(k=>types[k]>0);
+  const colors = { encuesta:'#63FFD3', bonus:'#FFD93D', retiro:'#FF6B9D', screener:'#60A5FA', descalificado:'#F87171' };
+  typeDonutChart = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels, datasets:[{
+      data:labels.map(k=>types[k]),
+      backgroundColor:labels.map(k=>colors[k]||'#424B62'),
+      borderColor:'#0D1019', borderWidth:3
+    }]},
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'65%',
+      plugins:{ legend:{position:'right',labels:{color:'#8892A8',font:{size:12},padding:12}},
+        tooltip:{backgroundColor:'rgba(13,16,25,.95)',padding:10} } }
+  });
+}
+
+// ══════════════════════════════════════════
+// SCHEDULE HEATMAP
+// ══════════════════════════════════════════
+function buildSchedule(data) {
+  const encuestas = data.filter(d=>d.tipo==='encuesta');
+  const grid = document.getElementById('schedule-grid');
+  const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  grid.innerHTML = '<div class="sch-head">Hora</div>';
+  dias.forEach(d => grid.innerHTML += `<div class="sch-head">${d}</div>`);
+  for (let h=0; h<24; h++) {
+    const lbl = h===0?'12am':h<12?`${h}am`:h===12?'12pm':`${h-12}pm`;
+    grid.innerHTML += `<div class="sch-head">${lbl}</div>`;
+    dias.forEach((_,di) => {
+      const cnt = encuestas.filter(e=>e.fecha.getDay()===di && e.fecha.getHours()===h).length;
+      const cls = cnt===0?'none':cnt>=3?'high':cnt>=2?'medium':'low';
+      grid.innerHTML += `<div class="sch-cell ${cls}">${cnt||''}</div>`;
+    });
+  }
+}
+
+// ══════════════════════════════════════════
+// RECENT ACTIVITY
+// ══════════════════════════════════════════
+function updateRecentActivity(items) {
+  const cont = document.getElementById('recent-activity');
+  if (!items.length) { cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--t3);font-size:.88rem">Sin actividad registrada</div>'; return; }
+  cont.innerHTML = items.map(item => {
+    let iconCls, iconI, amtCls, amtTxt;
+    switch(item.tipo) {
+      case 'encuesta':   iconCls='earned';    iconI='fa-check';      amtCls='pos'; amtTxt=`+€${fmt(item.importe)}`; break;
+      case 'retiro':     iconCls='withdrawn'; iconI='fa-paper-plane'; amtCls='neg'; amtTxt=`-€${fmt(item.importe)}`; break;
+      case 'screener': case 'descalificado': iconCls='failed'; iconI='fa-times'; amtCls='neu'; amtTxt='€0.00'; break;
+      case 'bonus':      iconCls='bonus';     iconI='fa-star';        amtCls='pos'; amtTxt=`+€${fmt(item.importe)}`; break;
+      default:           iconCls='earned';    iconI='fa-circle';      amtCls='neu'; amtTxt=`€${fmt(item.importe||0)}`;
+    }
+    return `<div class="activity-item">
+      <div class="act-icon ${iconCls}"><i class="fas ${iconI}"></i></div>
+      <div class="act-body">
+        <div class="act-title">${item.concepto||item.tipo||'—'}</div>
+        <div class="act-date">${fmtDateFull(item.fecha)}</div>
+      </div>
+      <span class="act-amount ${amtCls}">${amtTxt}</span>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// TABLE SORT
+// ══════════════════════════════════════════
+function sortTable(tableId, col) {
+  const table = document.getElementById(tableId);
+  const tbody = table.querySelector('tbody');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const th = table.querySelectorAll('th')[col];
+  const asc = th.dataset.asc !== 'true';
+  table.querySelectorAll('th').forEach(h => { h.classList.remove('sorted'); h.dataset.asc=''; });
+  th.classList.add('sorted'); th.dataset.asc = asc;
+  rows.sort((a,b) => {
+    const av = a.cells[col]?.textContent.trim().replace(/[€%+\-]/g,'') || '';
+    const bv = b.cells[col]?.textContent.trim().replace(/[€%+\-]/g,'') || '';
+    const an = parseFloat(av), bn = parseFloat(bv);
+    if (!isNaN(an) && !isNaN(bn)) return asc ? an-bn : bn-an;
+    return asc ? av.localeCompare(bv,'es') : bv.localeCompare(av,'es');
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+// ══════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════
+function toggleExportMenu() {
+  document.getElementById('exportMenu').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!document.getElementById('exportWrap').contains(e.target))
+    document.getElementById('exportMenu').classList.remove('open');
+});
+
+function exportCSV() {
+  if (!surveyData.length) return toast('Sin datos para exportar', 'warn');
+  const header = ['Fecha','Tipo','Concepto','Importe'];
+  const rows = surveyData.map(d => [
+    fmtDateFull(d.fecha), d.tipo||'', (d.concepto||'').replace(/,/g,' '), fmt(d.importe||0)
+  ]);
+  const csv = [header, ...rows].map(r => r.join(',')).join('\n');
+  downloadFile('pollpay_export.csv', 'text/csv', csv);
+  toast('CSV exportado', 'ok');
+  document.getElementById('exportMenu').classList.remove('open');
+}
+
+function exportJSON() {
+  if (!surveyData.length) return toast('Sin datos para exportar', 'warn');
+  const json = JSON.stringify(surveyData.map(d => ({
+    fecha: fmtDateFull(d.fecha), tipo: d.tipo, concepto: d.concepto, importe: d.importe
+  })), null, 2);
+  downloadFile('pollpay_export.json', 'application/json', json);
+  toast('JSON exportado', 'ok');
+  document.getElementById('exportMenu').classList.remove('open');
+}
+
+function printPage() {
+  window.print();
+  document.getElementById('exportMenu').classList.remove('open');
+}
+
+function downloadFile(name, type, content) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], {type}));
+  a.download = name; a.click();
+}
+
+// ══════════════════════════════════════════
+// RESET
+// ══════════════════════════════════════════
+function resetDashboard() {
+  surveyData = [];
+  if (mainChart) { mainChart.destroy(); mainChart=null; }
+  if (monthlyBarChart) { monthlyBarChart.destroy(); monthlyBarChart=null; }
+  if (typeDonutChart) { typeDonutChart.destroy(); typeDonutChart=null; }
+  ['total-earned','current-balance','total-withdrawn','avg-per-survey','this-month-earned',
+   'goal-current','goal-target','goal-display','streak-days','best-month-val'
+  ].forEach(id => setTxt(id,'0.00'));
+  setTxt('success-rate','0.0'); setTxt('success-counts','0 completadas / 0 intentos');
+  setTxt('this-month-surveys','0'); setTxt('recent-count','0 registros');
+  const mp = document.getElementById('monthly-progress'); if(mp) mp.style.width='0%';
+  const ga = document.getElementById('goal-achievement'); if(ga) ga.style.display='none';
+  const ring = document.getElementById('goal-ring'); if(ring) ring.style.strokeDashoffset='314';
+  const tbody1 = document.querySelector('#monthly-summary tbody'); if(tbody1) tbody1.innerHTML='';
+  const tbody2 = document.getElementById('history-tbody'); if(tbody2) tbody2.innerHTML='';
+  const sg = document.getElementById('schedule-grid'); if(sg) sg.innerHTML='';
+  const ra = document.getElementById('recent-activity'); if(ra) ra.innerHTML='';
+}
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+function toast(msg, type='ok') {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type==='ok'?'':'toast '+type}`;
+  const icon = type==='ok' ? 'fa-circle-check' : type==='warn' ? 'fa-triangle-exclamation' : 'fa-circle-xmark';
+  el.innerHTML = `<i class="fas ${icon}" style="color:${type==='ok'?'var(--primary)':type==='warn'?'var(--gold)':'var(--err)'}"></i> ${msg}`;
+  container.appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(()=>el.remove(), 300); }, 3000);
+}
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+const fmt = v => parseFloat(v||0).toFixed(2);
+const setTxt = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+const show = id => { const el=document.getElementById(id); if(el) el.style.display=''; };
+const hide = id => { const el=document.getElementById(id); if(el) el.style.display='none'; };
+
+function showError(msg) {
+  const el = document.getElementById('errorMessage');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function calcAdaptiveGoal(last) {
+  if(last<=0) return 10;
+  if(last>30) return +(last*1.10).toFixed(2);
+  if(last>20) return +(last*1.08).toFixed(2);
+  if(last>10) return +(last*1.05).toFixed(2);
+  return +(last*1.03).toFixed(2);
+}
+
+function monthKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+function prevMonthKey(d) { const p=new Date(d.getFullYear(),d.getMonth()-1,1); return monthKey(p); }
+function formatMonthLabel(key) {
+  const [y,m]=key.split('-');
+  return new Date(+y,+m-1,1).toLocaleDateString('es-ES',{month:'short',year:'numeric'});
+}
+function fmtDateShort(d) { return `${d.getDate()}/${d.getMonth()+1}`; }
+function fmtDateFull(d) {
+  return d.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}) +
+    ' ' + d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+}
+function hexAlpha(hex,a) {
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function parseDate(v) {
+  if(v instanceof Date) return v;
+  if(!v) return new Date();
+  const iso=new Date(v); if(!isNaN(iso)) return iso;
+  const m=String(v).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})/);
+  if(m) return new Date(+m[3],+m[2]-1,+m[1],+m[4],+m[5]);
+  return new Date();
+}
+</script>
 </body>
 </html>
