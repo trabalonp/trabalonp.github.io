@@ -7,8 +7,8 @@
   <meta name="author" content="Tu Nombre" />
   <title>Survey Dashboard</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Firebase (Compat) -->
@@ -81,6 +81,7 @@
 
     *{ margin:0; padding:0; box-sizing:border-box; }
     html, body { height: 100%; }
+
     body{
       font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       background: radial-gradient(1200px 600px at 20% -10%, rgba(99,102,241,0.38), transparent 60%),
@@ -190,6 +191,7 @@
     }
     [data-theme="light"] .subtitle{ color: rgba(15,23,42,0.72); }
 
+    /* UID discreto + borroso */
     .uid-chip{
       display: none; /* solo logged */
       align-items: center;
@@ -213,8 +215,6 @@
       color: rgba(255,255,255,0.88);
     }
     [data-theme="light"] .uid-chip .label{ color: rgba(15,23,42,0.75); }
-
-    /* El UID se ve “borroso” / no legible */
     .uid-chip .uid-text{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
       font-size: 0.82rem;
@@ -224,9 +224,9 @@
       background: rgba(0,0,0,0.12);
       border: 1px solid rgba(255,255,255,0.14);
       color: rgba(255,255,255,0.85);
-      filter: blur(5px);
-      user-select: none;
-      pointer-events: none;
+      filter: blur(5px);               /* <<<< borroso */
+      user-select: none;               /* <<<< no seleccionable */
+      pointer-events: none;            /* <<<< no clic ni copiar */
       white-space: nowrap;
       max-width: min(520px, 70vw);
       overflow: hidden;
@@ -237,7 +237,6 @@
       color: rgba(15,23,42,0.60);
       border-color: rgba(0,0,0,0.10);
     }
-
     .uid-chip .copy-btn{
       border: 1px solid rgba(255,255,255,0.22);
       background: rgba(255,255,255,0.16);
@@ -249,8 +248,11 @@
       cursor: pointer;
       transition: var(--transition);
       white-space: nowrap;
+      position: relative;
+      overflow: hidden;
     }
     .uid-chip .copy-btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.22); }
+    .uid-chip .copy-btn:active{ transform: translateY(0px) scale(0.98); }
     [data-theme="light"] .uid-chip .copy-btn{
       background: rgba(0,0,0,0.06);
       color: rgba(15,23,42,0.82);
@@ -258,6 +260,7 @@
     }
     [data-theme="light"] .uid-chip .copy-btn:hover{ background: rgba(0,0,0,0.085); }
 
+    /* Botones y chips (mejor micro-interacción) */
     .actions{
       display:flex;
       align-items: center;
@@ -300,8 +303,11 @@
       display:flex;
       align-items:center;
       justify-content:center;
+      position: relative;
+      overflow: hidden;
     }
     .icon-btn:hover{ transform: translateY(-1px) scale(1.05); background: rgba(255,255,255,0.18); }
+    .icon-btn:active{ transform: translateY(0px) scale(0.98); }
     [data-theme="light"] .icon-btn{
       background: rgba(0,0,0,0.05);
       border-color: rgba(0,0,0,0.10);
@@ -323,14 +329,16 @@
       font-size: 0.86rem;
       backdrop-filter: blur(10px);
       white-space: nowrap;
+      position: relative;
+      overflow: hidden;
     }
     .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.18); }
+    .btn:active{ transform: translateY(0px) scale(0.985); }
     [data-theme="light"] .btn{
       background: rgba(0,0,0,0.05);
       border-color: rgba(0,0,0,0.10);
       color: rgba(15,23,42,0.80);
     }
-
     .btn.primary{
       background: linear-gradient(135deg, rgba(99,102,241,0.90), rgba(139,92,246,0.70));
       border-color: rgba(255,255,255,0.22);
@@ -338,12 +346,24 @@
       color: white;
     }
     .btn.primary:hover{ filter: brightness(1.05); }
-
     .btn.google{
       background: rgba(66,133,244,0.22);
       border-color: rgba(66,133,244,0.45);
     }
     .btn.google:hover{ background: rgba(66,133,244,0.30); }
+
+    /* Efecto shimmer (sutil) para primary */
+    .btn.primary::after{
+      content:'';
+      position:absolute;
+      inset:0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+      transform: translateX(-120%);
+      transition: transform 0.8s ease;
+    }
+    .btn.primary:hover::after{
+      transform: translateX(120%);
+    }
 
     .user-chip{
       display:none;
@@ -371,7 +391,7 @@
     .user-chip .name{
       font-weight: 800;
       font-size: 0.86rem;
-      max-width: 180px;
+      max-width: 200px;
       overflow:hidden;
       white-space:nowrap;
       text-overflow:ellipsis;
@@ -389,10 +409,11 @@
       display:flex; align-items:center; justify-content:center;
     }
     .user-chip .logout:hover{ background: rgba(255,255,255,0.14); color: white; }
+    .user-chip .logout:active{ transform: scale(0.96); }
     [data-theme="light"] .user-chip .logout{ color: rgba(15,23,42,0.70); }
     [data-theme="light"] .user-chip .logout:hover{ background: rgba(0,0,0,0.07); }
 
-    /* Secciones y cards */
+    /* Layout */
     .grid{
       display:grid;
       gap: 16px;
@@ -415,6 +436,7 @@
       box-shadow: var(--shadow-soft);
       backdrop-filter: blur(12px);
       overflow:hidden;
+      animation: fadeInUp 0.45s ease-out;
     }
     [data-theme="light"] .card{
       background: linear-gradient(180deg, rgba(0,0,0,0.03), rgba(0,0,0,0.02));
@@ -462,6 +484,7 @@
     .kpi{
       grid-column: span 3;
       position: relative;
+      transform: translateZ(0);
     }
     .kpi::before{
       content:'';
@@ -472,6 +495,11 @@
       background: radial-gradient(420px 220px at 20% 0%, rgba(99,102,241,0.22), transparent 62%);
       opacity: 0.9;
     }
+    .kpi:hover{
+      box-shadow: var(--shadow);
+      transform: translateY(-3px);
+      border-color: rgba(99,102,241,0.28);
+    }
     .kpi .card-body{ position: relative; z-index: 1; }
 
     .kpi .label{
@@ -480,10 +508,6 @@
       letter-spacing: 0.08em;
       font-weight: 900;
       text-transform: uppercase;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      gap: 8px;
     }
     .kpi .value{
       margin-top: 10px;
@@ -507,7 +531,10 @@
       align-items:center;
       gap: 10px;
       flex-wrap: wrap;
+      font-weight: 700;
     }
+
+    /* Badges (para elementos no-trend) */
     .badge{
       display:inline-flex;
       align-items:center;
@@ -519,11 +546,15 @@
       border: 1px solid rgba(148,163,184,0.16);
       background: rgba(148,163,184,0.10);
       color: var(--text-2);
+      white-space: nowrap;
     }
-    .badge.up{ border-color: rgba(16,185,129,0.30); background: rgba(16,185,129,0.12); color: var(--success); }
-    .badge.down{ border-color: rgba(239,68,68,0.30); background: rgba(239,68,68,0.12); color: var(--error); }
-    .badge.neutral{ border-color: rgba(148,163,184,0.18); background: rgba(148,163,184,0.09); color: var(--text-3); }
+    .badge.neutral{
+      border-color: rgba(148,163,184,0.18);
+      background: rgba(148,163,184,0.09);
+      color: var(--text-3);
+    }
 
+    /* 2 columnas */
     .split{
       display:grid;
       grid-template-columns: 1.35fr 0.85fr;
@@ -534,6 +565,7 @@
       .split{ grid-template-columns: 1fr; }
     }
 
+    /* 2 módulos */
     .triple{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -568,8 +600,10 @@
       font-weight: 900;
       font-size: 0.78rem;
       transition: var(--transition);
+      user-select: none;
     }
     .tab:hover{ transform: translateY(-1px); }
+    .tab:active{ transform: translateY(0px) scale(0.99); }
     .tab.active{
       background: rgba(99,102,241,0.25);
       border-color: rgba(99,102,241,0.45);
@@ -577,82 +611,6 @@
       box-shadow: var(--glow);
     }
     [data-theme="light"] .tab.active{ color: rgba(15,23,42,0.85); }
-
-    /* Filters */
-    .filters{
-      margin-top: 16px;
-    }
-    .filters-grid{
-      display:grid;
-      grid-template-columns: 1.25fr 1.25fr 1fr;
-      gap: 14px;
-    }
-    @media (max-width: 1100px){
-      .filters-grid{ grid-template-columns: 1fr; }
-    }
-    .field{
-      display:flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .field label{
-      font-size: 0.78rem;
-      color: var(--text-3);
-      font-weight: 900;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-    }
-    .control-row{
-      display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .select, .input{
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(148,163,184,0.18);
-      color: var(--text-1);
-      border-radius: 12px;
-      padding: 10px 12px;
-      font-weight: 700;
-      outline: none;
-      transition: var(--transition);
-      min-width: 180px;
-    }
-    .input{ min-width: 220px; flex: 1; }
-    .select:focus, .input:focus{
-      border-color: rgba(99,102,241,0.55);
-      box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
-    }
-    [data-theme="light"] .select,
-    [data-theme="light"] .input{
-      background: rgba(0,0,0,0.03);
-      color: rgba(15,23,42,0.9);
-      border-color: rgba(2,6,23,0.10);
-    }
-
-    .chips{
-      display:flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(148,163,184,0.18);
-      cursor:pointer;
-      transition: var(--transition);
-      user-select: none;
-      font-weight: 900;
-      font-size: 0.78rem;
-      color: var(--text-2);
-    }
-    .chip:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.09); }
-    .chip input{ accent-color: var(--primary); }
 
     /* Recent activity list */
     .activity-list{
@@ -701,6 +659,7 @@
       align-items:center;
       gap: 10px;
       flex-wrap: wrap;
+      font-weight: 700;
     }
     .activity-amount{
       font-weight: 950;
@@ -790,6 +749,7 @@
       color: var(--text-3);
       border-bottom: 1px solid rgba(148,163,184,0.14);
       white-space: nowrap;
+      font-weight: 900;
     }
     td{
       padding: 12px 12px;
@@ -797,20 +757,13 @@
       font-size: 0.90rem;
       color: var(--text-2);
       white-space: nowrap;
+      font-weight: 700;
     }
     tr:hover td{
       background: rgba(255,255,255,0.04);
     }
     td.positive{ color: var(--success); font-weight: 900; }
     td.negative{ color: var(--error); font-weight: 900; }
-
-    .table-tools{
-      display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items:center;
-      justify-content: flex-end;
-    }
 
     /* Gate (no auth) */
     .gate{
@@ -837,7 +790,7 @@
       margin-top: 8px;
       color: var(--text-3);
       font-weight: 600;
-      max-width: 720px;
+      max-width: 740px;
       margin-left: auto;
       margin-right: auto;
     }
@@ -948,7 +901,6 @@
           <span class="pill" id="lastUpdate"><i class="fas fa-clock"></i> Inicia sesión para ver tus datos</span>
 
           <button class="icon-btn" id="refreshBtn" type="button" title="Actualizar datos"><i class="fas fa-rotate"></i></button>
-
           <button class="icon-btn" id="themeBtn" type="button" title="Cambiar tema"><i class="fas fa-moon" id="themeIcon"></i></button>
 
           <button class="btn google" id="loginBtn" type="button"><i class="fab fa-google"></i> Iniciar sesión</button>
@@ -981,78 +933,19 @@
 
     <!-- App (oculta hasta login) -->
     <main id="app" style="display:none;">
-      <!-- Filters -->
-      <section class="card filters">
-        <div class="card-head">
-          <div class="card-title">
-            <i class="fas fa-sliders"></i>
-            <span>Filtros inteligentes</span>
-          </div>
-
-          <div class="table-tools">
-            <button class="btn" id="exportCsvBtn" type="button" title="Exportar registros filtrados">
-              <i class="fas fa-file-export"></i> Exportar CSV
-            </button>
-            <button class="btn" id="resetFiltersBtn" type="button">
-              <i class="fas fa-eraser"></i> Reset filtros
-            </button>
-          </div>
-        </div>
-
-        <div class="card-body">
-          <div class="filters-grid">
-            <div class="field">
-              <label>Rango de fechas</label>
-              <div class="control-row">
-                <select class="select" id="rangeSelect">
-                  <option value="all">Todo</option>
-                  <option value="7d">Últimos 7 días</option>
-                  <option value="30d">Últimos 30 días</option>
-                  <option value="thisMonth">Este mes</option>
-                  <option value="lastMonth">Mes anterior</option>
-                  <option value="ytd">Año en curso</option>
-                  <option value="custom">Personalizado</option>
-                </select>
-
-                <input class="select" type="date" id="startDate" style="display:none;">
-                <input class="select" type="date" id="endDate" style="display:none;">
-              </div>
-            </div>
-
-            <div class="field">
-              <label>Tipos</label>
-              <div class="chips" id="typeChips">
-                <label class="chip"><input type="checkbox" value="encuesta" checked> Encuestas</label>
-                <label class="chip"><input type="checkbox" value="bonus" checked> Bonus</label>
-                <label class="chip"><input type="checkbox" value="retiro" checked> Retiros</label>
-                <label class="chip"><input type="checkbox" value="screener" checked> Screener</label>
-                <label class="chip"><input type="checkbox" value="descalificado" checked> Descalificado</label>
-              </div>
-            </div>
-
-            <div class="field">
-              <label>Buscar concepto</label>
-              <div class="control-row">
-                <input class="input" id="searchInput" type="text" placeholder="Ej: encuesta, PayPal, bonus..." />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <!-- KPIs -->
       <section class="grid kpis" id="kpiGrid" aria-label="KPIs">
         <div class="card kpi">
           <div class="card-body">
-            <div class="label">Total ganado <span class="badge neutral" id="kpiEarnedTrend">—</span></div>
+            <div class="label">Total ganado</div>
             <div class="value"><span class="currency">€</span><span id="kpiTotalEarned">0.00</span></div>
-            <div class="sub"><span id="kpiEarnedSub">Acumulado</span></div>
+            <div class="sub"><span id="kpiEarnedSub">Acumulado histórico</span></div>
           </div>
         </div>
 
         <div class="card kpi">
           <div class="card-body">
-            <div class="label">Saldo <span class="badge neutral" id="kpiBalanceTrend">—</span></div>
+            <div class="label">Saldo</div>
             <div class="value"><span class="currency">€</span><span id="kpiBalance">0.00</span></div>
             <div class="sub"><span id="kpiBalanceSub">Ganado - retirado</span></div>
           </div>
@@ -1060,7 +953,7 @@
 
         <div class="card kpi">
           <div class="card-body">
-            <div class="label">Retirado <span class="badge neutral" id="kpiWithdrawTrend">—</span></div>
+            <div class="label">Retirado</div>
             <div class="value"><span class="currency">€</span><span id="kpiWithdrawn">0.00</span></div>
             <div class="sub"><span id="kpiWithdrawSub">Total a PayPal</span></div>
           </div>
@@ -1068,7 +961,7 @@
 
         <div class="card kpi">
           <div class="card-body">
-            <div class="label">Tasa de éxito <span class="badge neutral" id="kpiSuccessTrend">—</span></div>
+            <div class="label">Tasa de éxito</div>
             <div class="value"><span id="kpiSuccessRate">0.0</span><span class="currency">%</span></div>
             <div class="sub"><span id="kpiSuccessSub">0 completadas / 0 intentos</span></div>
           </div>
@@ -1076,7 +969,7 @@
 
         <div class="card kpi">
           <div class="card-body">
-            <div class="label">Media/encuesta <span class="badge neutral" id="kpiAvgTrend">—</span></div>
+            <div class="label">Media/encuesta</div>
             <div class="value"><span class="currency">€</span><span id="kpiAvgPerSurvey">0.00</span></div>
             <div class="sub"><span id="kpiAvgSub">Sobre encuestas completadas</span></div>
           </div>
@@ -1084,7 +977,7 @@
 
         <div class="card kpi">
           <div class="card-body">
-            <div class="label">Este mes <span class="badge neutral" id="kpiMonthTrend">—</span></div>
+            <div class="label">Este mes</div>
             <div class="value"><span class="currency">€</span><span id="kpiThisMonth">0.00</span></div>
             <div class="sub"><span id="kpiThisMonthSub">0 encuestas completadas</span></div>
           </div>
@@ -1092,7 +985,7 @@
 
         <div class="card kpi">
           <div class="card-body">
-            <div class="label">Últimos 7 días <span class="badge neutral" id="kpi7dTrend">—</span></div>
+            <div class="label">Últimos 7 días</div>
             <div class="value"><span class="currency">€</span><span id="kpiLast7d">0.00</span></div>
             <div class="sub"><span id="kpi7dSub">Ingresos recientes</span></div>
           </div>
@@ -1100,7 +993,7 @@
 
         <div class="card kpi">
           <div class="card-body">
-            <div class="label">Proyección mes <span class="badge neutral" id="kpiProjTrend">—</span></div>
+            <div class="label">Proyección mes</div>
             <div class="value"><span class="currency">€</span><span id="kpiProjection">0.00</span></div>
             <div class="sub"><span id="kpiProjSub">Estimación al final de mes</span></div>
           </div>
@@ -1192,7 +1085,7 @@
             <i class="fas fa-table"></i>
             <span>Resumen por mes</span>
           </div>
-          <span class="badge neutral" id="monthLabel">—</span>
+          <span class="badge neutral" id="monthLabel">Histórico</span>
         </div>
         <div class="card-body">
           <div class="table-wrap">
@@ -1211,52 +1104,6 @@
               </thead>
               <tbody></tbody>
             </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- Transactions -->
-      <section class="card" style="margin-top:16px;">
-        <div class="card-head">
-          <div class="card-title">
-            <i class="fas fa-list"></i>
-            <span>Registros (filtrados)</span>
-          </div>
-
-          <div class="table-tools">
-            <span class="badge neutral" id="txCount">0</span>
-            <button class="btn" id="toggleTxSortBtn" type="button" title="Alternar orden">
-              <i class="fas fa-sort"></i> Orden: <span id="txSortLabel">Reciente</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="card-body">
-          <div class="table-wrap">
-            <table id="txTable">
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Tipo</th>
-                  <th>Concepto</th>
-                  <th>Importe</th>
-                  <th>ID</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-
-          <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
-            <span style="color:var(--text-3); font-weight:800; font-size:0.82rem;">
-              Consejo: usa filtros arriba para analizar periodos concretos.
-            </span>
-
-            <div style="display:flex; gap:10px; align-items:center;">
-              <button class="btn" id="prevPageBtn" type="button"><i class="fas fa-chevron-left"></i></button>
-              <span class="badge neutral" id="pageInfo">1 / 1</span>
-              <button class="btn" id="nextPageBtn" type="button"><i class="fas fa-chevron-right"></i></button>
-            </div>
           </div>
         </div>
       </section>
@@ -1352,15 +1199,6 @@
     const errorBox = document.getElementById('errorBox');
     const toast = document.getElementById('toast');
 
-    // Filters
-    const rangeSelect = document.getElementById('rangeSelect');
-    const startDate = document.getElementById('startDate');
-    const endDate = document.getElementById('endDate');
-    const typeChips = document.getElementById('typeChips');
-    const searchInput = document.getElementById('searchInput');
-    const exportCsvBtn = document.getElementById('exportCsvBtn');
-    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
-
     // KPIs
     const kpiTotalEarned = document.getElementById('kpiTotalEarned');
     const kpiBalance = document.getElementById('kpiBalance');
@@ -1371,15 +1209,6 @@
     const kpiLast7d = document.getElementById('kpiLast7d');
     const kpiProjection = document.getElementById('kpiProjection');
 
-    const kpiEarnedTrend = document.getElementById('kpiEarnedTrend');
-    const kpiBalanceTrend = document.getElementById('kpiBalanceTrend');
-    const kpiWithdrawTrend = document.getElementById('kpiWithdrawTrend');
-    const kpiSuccessTrend = document.getElementById('kpiSuccessTrend');
-    const kpiAvgTrend = document.getElementById('kpiAvgTrend');
-    const kpiMonthTrend = document.getElementById('kpiMonthTrend');
-    const kpi7dTrend = document.getElementById('kpi7dTrend');
-    const kpiProjTrend = document.getElementById('kpiProjTrend');
-
     const kpiEarnedSub = document.getElementById('kpiEarnedSub');
     const kpiBalanceSub = document.getElementById('kpiBalanceSub');
     const kpiWithdrawSub = document.getElementById('kpiWithdrawSub');
@@ -1389,23 +1218,18 @@
     const kpi7dSub = document.getElementById('kpi7dSub');
     const kpiProjSub = document.getElementById('kpiProjSub');
 
-    // Charts
+    // Charts + tabs
     const mainChartTabs = document.getElementById('mainChartTabs');
     const distTabs = document.getElementById('distTabs');
+
+    // Recent + heatmap
     const recentCount = document.getElementById('recentCount');
     const recentActivity = document.getElementById('recentActivity');
     const scheduleGrid = document.getElementById('scheduleGrid');
-    const monthLabel = document.getElementById('monthLabel');
 
-    // Tables
+    // Monthly summary
+    const monthLabel = document.getElementById('monthLabel');
     const monthlySummaryTbody = document.querySelector('#monthlySummary tbody');
-    const txTbody = document.querySelector('#txTable tbody');
-    const txCount = document.getElementById('txCount');
-    const toggleTxSortBtn = document.getElementById('toggleTxSortBtn');
-    const txSortLabel = document.getElementById('txSortLabel');
-    const prevPageBtn = document.getElementById('prevPageBtn');
-    const nextPageBtn = document.getElementById('nextPageBtn');
-    const pageInfo = document.getElementById('pageInfo');
 
     // Goals
     const goalCurrentEl = document.getElementById('goalCurrent');
@@ -1421,20 +1245,14 @@
     // Global state
     // ==============================
     let currentUid = null;
-    let unsubRef = null;
+    let liveRef = null;
 
-    let allData = [];       // todos los registros del usuario
-    let filteredData = [];  // registros filtrados
-
+    let allData = []; // registros del usuario
     let mainChart = null;
     let distChart = null;
 
     let mainMode = 'accumulated';
     let distMode = 'types';
-
-    let txSort = 'desc'; // 'desc' = reciente primero; 'asc' = antiguo primero
-    let txPage = 1;
-    const txPageSize = 18;
 
     let monthlyGoal = 10.00;
     let lastMonthEarned = 0;
@@ -1493,80 +1311,21 @@
       return new Date();
     }
 
-    function getSelectedTypes(){
-      const checks = [...typeChips.querySelectorAll('input[type="checkbox"]')];
-      return checks.filter(c => c.checked).map(c => c.value);
-    }
-
-    function getRange(){
-      const now = new Date();
-      const val = rangeSelect.value;
-
-      if (val === 'all') return { start: null, end: null, label: 'Todo' };
-
-      if (val === '7d') {
-        const start = new Date(now);
-        start.setDate(start.getDate()-6);
-        start.setHours(0,0,0,0);
-        const end = new Date(now);
-        end.setHours(23,59,59,999);
-        return { start, end, label: 'Últimos 7 días' };
-      }
-
-      if (val === '30d') {
-        const start = new Date(now);
-        start.setDate(start.getDate()-29);
-        start.setHours(0,0,0,0);
-        const end = new Date(now);
-        end.setHours(23,59,59,999);
-        return { start, end, label: 'Últimos 30 días' };
-      }
-
-      if (val === 'thisMonth') {
-        const start = new Date(now.getFullYear(), now.getMonth(), 1, 0,0,0,0);
-        const end = new Date(now.getFullYear(), now.getMonth()+1, 0, 23,59,59,999);
-        return { start, end, label: 'Este mes' };
-      }
-
-      if (val === 'lastMonth') {
-        const start = new Date(now.getFullYear(), now.getMonth()-1, 1, 0,0,0,0);
-        const end = new Date(now.getFullYear(), now.getMonth(), 0, 23,59,59,999);
-        return { start, end, label: 'Mes anterior' };
-      }
-
-      if (val === 'ytd') {
-        const start = new Date(now.getFullYear(), 0, 1, 0,0,0,0);
-        const end = new Date(now.getFullYear(), 11, 31, 23,59,59,999);
-        return { start, end, label: 'Año en curso' };
-      }
-
-      if (val === 'custom') {
-        const s = startDate.value ? new Date(startDate.value + 'T00:00:00') : null;
-        const e = endDate.value ? new Date(endDate.value + 'T23:59:59') : null;
-        return { start: s, end: e, label: 'Personalizado' };
-      }
-
-      return { start: null, end: null, label: 'Todo' };
-    }
-
-    function setBadge(el, kind, text){
-      el.classList.remove('up','down','neutral');
-      el.classList.add(kind);
-      el.innerHTML = text;
-    }
-
-    function pctChange(current, previous){
-      if (previous === 0 && current === 0) return 0;
-      if (previous === 0) return 100;
-      return ((current - previous) / Math.abs(previous)) * 100;
-    }
-
     function calcAdaptiveGoal(lastEarned){
       if (lastEarned <= 0) return 10.00;
       if (lastEarned > 30) return +(lastEarned * 1.10).toFixed(2);
       if (lastEarned > 20) return +(lastEarned * 1.08).toFixed(2);
       if (lastEarned > 10) return +(lastEarned * 1.05).toFixed(2);
       return +(lastEarned * 1.03).toFixed(2);
+    }
+
+    function escapeHtml(s){
+      return String(s ?? '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'","&#039;");
     }
 
     // ==============================
@@ -1588,9 +1347,15 @@
       document.body.setAttribute('data-theme', t);
       localStorage.setItem('sd_theme', t);
       updateThemeIcon();
+      renderAll(); // re-render charts for contrast
+    });
 
-      // Re-render charts for tick colors / etc
-      renderAll();
+    // ctrl+t theme
+    document.addEventListener('keydown', e => {
+      if (e.ctrlKey && e.key.toLowerCase() === 't'){
+        e.preventDefault();
+        themeBtn.click();
+      }
     });
 
     // ==============================
@@ -1629,16 +1394,15 @@
       hideError();
       setLoading(false);
 
-      // stop previous listener
-      if (unsubRef){
-        unsubRef.off();
-        unsubRef = null;
+      // Stop previous listener
+      if (liveRef){
+        liveRef.off();
+        liveRef = null;
       }
 
       if (!user){
         currentUid = null;
         allData = [];
-        filteredData = [];
 
         appEl.style.display = 'none';
         authGate.style.display = 'block';
@@ -1648,9 +1412,11 @@
         lastUpdateEl.innerHTML = '<i class="fas fa-clock"></i> Inicia sesión para ver tus datos';
 
         destroyCharts();
-        clearTables();
+        clearMonthly();
         clearRecent();
         clearHeatmap();
+        renderKPIsEmpty();
+        renderGoalsEmpty();
 
         return;
       }
@@ -1666,25 +1432,25 @@
       userName.textContent = (user.displayName || 'Usuario');
 
       uidChip.style.display = 'inline-flex';
-      uidBlur.textContent = currentUid; // se verá borroso por CSS
+      uidBlur.textContent = currentUid; // se ve borroso por CSS
 
       lastUpdateEl.innerHTML = '<i class="fas fa-clock"></i> Cargando…';
       setLoading(true);
 
-      // start realtime listener
+      // Start realtime listener
       const ref = db.ref(`users/${currentUid}/surveys`);
-      unsubRef = ref;
+      liveRef = ref;
 
       ref.on('value', snap => {
         const raw = snap.val();
+
         if (!raw){
           allData = [];
-          filteredData = [];
           lastUpdateEl.innerHTML = '<i class="fas fa-circle-info"></i> Sin datos (usa el bot)';
           setLoading(false);
 
           destroyCharts();
-          clearTables();
+          clearMonthly();
           clearRecent();
           clearHeatmap();
           renderKPIsEmpty();
@@ -1710,7 +1476,7 @@
       });
     });
 
-    // Manual refresh (forces once read)
+    // Manual refresh
     refreshBtn.addEventListener('click', async () => {
       if (!currentUid) return;
       hideError();
@@ -1732,52 +1498,13 @@
         setLoading(false);
         lastUpdateEl.innerHTML = '<i class="fas fa-clock"></i> Actualizado: ' + new Date().toLocaleTimeString('es-ES');
         renderAll();
+        showToast('Datos actualizados');
       }catch(err){
         setLoading(false);
         showError('Error al actualizar: ' + err.message);
         showToast('Error al actualizar', true);
         lastUpdateEl.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Error';
       }
-    });
-
-    // ==============================
-    // Filters events
-    // ==============================
-    function updateCustomDateVisibility(){
-      const isCustom = rangeSelect.value === 'custom';
-      startDate.style.display = isCustom ? 'inline-block' : 'none';
-      endDate.style.display = isCustom ? 'inline-block' : 'none';
-    }
-    rangeSelect.addEventListener('change', () => {
-      updateCustomDateVisibility();
-      txPage = 1;
-      renderAll();
-    });
-    startDate.addEventListener('change', () => { txPage = 1; renderAll(); });
-    endDate.addEventListener('change', () => { txPage = 1; renderAll(); });
-
-    typeChips.addEventListener('change', () => { txPage = 1; renderAll(); });
-    searchInput.addEventListener('input', () => { txPage = 1; renderAll(); });
-
-    resetFiltersBtn.addEventListener('click', () => {
-      rangeSelect.value = 'all';
-      startDate.value = '';
-      endDate.value = '';
-      searchInput.value = '';
-      [...typeChips.querySelectorAll('input[type="checkbox"]')].forEach(c => c.checked = true);
-      updateCustomDateVisibility();
-      txPage = 1;
-      renderAll();
-      showToast('Filtros reiniciados');
-    });
-
-    exportCsvBtn.addEventListener('click', () => {
-      if (!currentUid) return;
-      if (!filteredData.length){
-        showToast('No hay registros para exportar con los filtros actuales', true);
-        return;
-      }
-      exportToCsv(filteredData);
     });
 
     // Chart tabs
@@ -1799,60 +1526,17 @@
       renderDistChart();
     });
 
-    // Tx table sort/pagination
-    toggleTxSortBtn.addEventListener('click', () => {
-      txSort = (txSort === 'desc') ? 'asc' : 'desc';
-      txSortLabel.textContent = txSort === 'desc' ? 'Reciente' : 'Antiguo';
-      txPage = 1;
-      renderTxTable();
-    });
-
-    prevPageBtn.addEventListener('click', () => {
-      txPage = Math.max(1, txPage - 1);
-      renderTxTable();
-    });
-    nextPageBtn.addEventListener('click', () => {
-      const totalPages = Math.max(1, Math.ceil(filteredData.length / txPageSize));
-      txPage = Math.min(totalPages, txPage + 1);
-      renderTxTable();
-    });
-
     // ==============================
-    // Core filtering + rendering
+    // Rendering
     // ==============================
-    function applyFilters(){
-      const types = new Set(getSelectedTypes());
-      const q = (searchInput.value || '').trim().toLowerCase();
-      const { start, end, label } = getRange();
-
-      let out = allData.slice();
-
-      // type filter
-      out = out.filter(r => types.has(String(r.tipo || '')));
-
-      // date filter
-      if (start) out = out.filter(r => r.fecha >= start);
-      if (end) out = out.filter(r => r.fecha <= end);
-
-      // search
-      if (q){
-        out = out.filter(r => String(r.concepto || r.tipo || '').toLowerCase().includes(q));
-      }
-
-      filteredData = out;
-      return label;
-    }
-
     function destroyCharts(){
       if (mainChart){ mainChart.destroy(); mainChart = null; }
       if (distChart){ distChart.destroy(); distChart = null; }
     }
 
-    function clearTables(){
+    function clearMonthly(){
       monthlySummaryTbody.innerHTML = '';
-      txTbody.innerHTML = '';
-      txCount.textContent = '0';
-      pageInfo.textContent = '1 / 1';
+      monthLabel.textContent = 'Histórico';
     }
     function clearRecent(){
       recentActivity.innerHTML = '';
@@ -1865,10 +1549,6 @@
     function renderAll(){
       if (!currentUid) return;
 
-      hideError();
-      const filterLabel = applyFilters();
-      monthLabel.textContent = filterLabel;
-
       renderKPIs();
       renderGoals();
       renderMainChart();
@@ -1876,7 +1556,6 @@
       renderMonthlySummary();
       renderRecent();
       renderHeatmap();
-      renderTxTable();
     }
 
     // ==============================
@@ -1925,38 +1604,32 @@
       kpiLast7d.textContent = '0.00';
       kpiProjection.textContent = '0.00';
 
-      setBadge(kpiEarnedTrend,'neutral','—');
-      setBadge(kpiBalanceTrend,'neutral','—');
-      setBadge(kpiWithdrawTrend,'neutral','—');
-      setBadge(kpiSuccessTrend,'neutral','—');
-      setBadge(kpiAvgTrend,'neutral','—');
-      setBadge(kpiMonthTrend,'neutral','—');
-      setBadge(kpi7dTrend,'neutral','—');
-      setBadge(kpiProjTrend,'neutral','—');
-
+      kpiEarnedSub.textContent = 'Acumulado histórico';
+      kpiBalanceSub.textContent = 'Ganado - retirado';
+      kpiWithdrawSub.textContent = 'Total a PayPal';
       kpiSuccessSub.textContent = '0 completadas / 0 intentos';
+      kpiAvgSub.textContent = 'Sobre encuestas completadas';
+      kpiThisMonthSub.textContent = '0 encuestas completadas';
+      kpi7dSub.textContent = 'Ingresos recientes';
+      kpiProjSub.textContent = 'Estimación al final de mes';
     }
 
     function renderKPIs(){
       const statsAll = computeStats(allData);
-      const statsF = computeStats(filteredData);
 
-      // KPIs reflejan el filtrado (lo más útil para análisis)
-      kpiTotalEarned.textContent = fmt2(statsF.totalEarned);
-      kpiWithdrawn.textContent = fmt2(statsF.totalWithdrawn);
-      kpiBalance.textContent = fmt2(statsF.balance);
-      kpiSuccessRate.textContent = statsF.successRate.toFixed(1);
-      kpiAvgPerSurvey.textContent = fmt2(statsF.avgPerSurvey);
-      kpiSuccessSub.textContent = `${statsF.successCount} completadas / ${statsF.attemptCount} intentos`;
+      kpiTotalEarned.textContent = fmt2(statsAll.totalEarned);
+      kpiWithdrawn.textContent = fmt2(statsAll.totalWithdrawn);
+      kpiBalance.textContent = fmt2(statsAll.balance);
+      kpiSuccessRate.textContent = statsAll.successRate.toFixed(1);
+      kpiAvgPerSurvey.textContent = fmt2(statsAll.avgPerSurvey);
+      kpiSuccessSub.textContent = `${statsAll.successCount} completadas / ${statsAll.attemptCount} intentos`;
 
-      // Subtexts con info adicional
-      const filterLabel = getRange().label;
-      kpiEarnedSub.textContent = `${filterLabel} (filtrado)`;
-      kpiWithdrawSub.textContent = `Retiros en ${filterLabel}`;
-      kpiBalanceSub.textContent = `Neto en ${filterLabel}`;
-      kpiAvgSub.textContent = `Media en ${filterLabel}`;
+      kpiEarnedSub.textContent = 'Acumulado histórico';
+      kpiWithdrawSub.textContent = 'Total a PayPal';
+      kpiBalanceSub.textContent = 'Ganado - retirado';
+      kpiAvgSub.textContent = 'Sobre encuestas completadas';
 
-      // Este mes / últimos 7 días se calculan sobre ALL data (independiente del filtro)
+      // Este mes / últimos 7 días
       const now = new Date();
       const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0,0,0,0);
       const thisMonthEnd = new Date(now.getFullYear(), now.getMonth()+1, 0, 23,59,59,999);
@@ -1980,61 +1653,14 @@
       kpiLast7d.textContent = fmt2(last7Earned);
       kpi7dSub.textContent = `${last7Surveys} encuestas en 7 días`;
 
-      // Proyección fin de mes: promedio diario * días del mes
+      // Proyección fin de mes
       const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
       const dayOfMonth = now.getDate();
       const avgPerDay = dayOfMonth > 0 ? (monthEarned / dayOfMonth) : 0;
       const projection = avgPerDay * daysInMonth;
+
       kpiProjection.textContent = fmt2(projection);
       kpiProjSub.textContent = `Basado en €${fmt2(avgPerDay)}/día`;
-
-      // Tendencias (comparaciones básicas)
-      // 1) Filtrado vs All-time (no es lo más “finanzas estándar”, pero da contexto)
-      const ePct = pctChange(statsF.totalEarned, statsAll.totalEarned);
-      setBadge(kpiEarnedTrend, ePct>0?'up':ePct<0?'down':'neutral', formatPctBadge(ePct));
-
-      const bPct = pctChange(statsF.balance, statsAll.balance);
-      setBadge(kpiBalanceTrend, bPct>0?'up':bPct<0?'down':'neutral', formatPctBadge(bPct));
-
-      const wPct = pctChange(statsF.totalWithdrawn, statsAll.totalWithdrawn);
-      setBadge(kpiWithdrawTrend, wPct>0?'up':wPct<0?'down':'neutral', formatPctBadge(wPct));
-
-      const sPct = pctChange(statsF.successRate, statsAll.successRate);
-      setBadge(kpiSuccessTrend, sPct>0?'up':sPct<0?'down':'neutral', formatPctBadge(sPct));
-
-      const aPct = pctChange(statsF.avgPerSurvey, statsAll.avgPerSurvey);
-      setBadge(kpiAvgTrend, aPct>0?'up':aPct<0?'down':'neutral', formatPctBadge(aPct));
-
-      // 2) Este mes vs mes anterior (mejor tendencia para finanzas)
-      const lastMonthStart = new Date(now.getFullYear(), now.getMonth()-1, 1, 0,0,0,0);
-      const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23,59,59,999);
-      const lastMonthData = allData.filter(r => r.fecha >= lastMonthStart && r.fecha <= lastMonthEnd);
-      const lastMonthEarn = computeStats(lastMonthData).totalEarned;
-
-      const mPct = pctChange(monthEarned, lastMonthEarn);
-      setBadge(kpiMonthTrend, mPct>0?'up':mPct<0?'down':'neutral', formatPctBadge(mPct));
-
-      // 3) 7d vs 7d prev
-      const prev7Start = new Date(last7Start);
-      prev7Start.setDate(prev7Start.getDate()-7);
-      const prev7End = new Date(last7Start);
-      prev7End.setMilliseconds(-1);
-
-      const prev7Data = allData.filter(r => r.fecha >= prev7Start && r.fecha <= prev7End);
-      const prev7Earned = computeStats(prev7Data).totalEarned;
-
-      const w7Pct = pctChange(last7Earned, prev7Earned);
-      setBadge(kpi7dTrend, w7Pct>0?'up':w7Pct<0?'down':'neutral', formatPctBadge(w7Pct));
-
-      // 4) Proyección vs meta adaptativa
-      const goalPct = pctChange(projection, monthlyGoal);
-      setBadge(kpiProjTrend, goalPct>0?'up':goalPct<0?'down':'neutral', formatPctBadge(goalPct));
-    }
-
-    function formatPctBadge(p){
-      if (!isFinite(p)) return '—';
-      const sign = p > 0 ? '+' : '';
-      return `${sign}${p.toFixed(1)}%`;
     }
 
     // ==============================
@@ -2061,11 +1687,11 @@
       const thisMonthData = allData.filter(r => r.fecha >= thisMonthStart && r.fecha <= thisMonthEnd);
       const thisMonthEarned = computeStats(thisMonthData).totalEarned;
 
-      // Meta adaptativa basada en mes anterior
       const lastMonthStart = new Date(now.getFullYear(), now.getMonth()-1, 1, 0,0,0,0);
       const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23,59,59,999);
       const lastMonthData = allData.filter(r => r.fecha >= lastMonthStart && r.fecha <= lastMonthEnd);
       lastMonthEarned = computeStats(lastMonthData).totalEarned;
+
       monthlyGoal = calcAdaptiveGoal(lastMonthEarned);
 
       goalCurrentEl.textContent = fmt2(thisMonthEarned);
@@ -2108,7 +1734,7 @@
       const ctx = document.getElementById('mainChart').getContext('2d');
       if (mainChart) mainChart.destroy();
 
-      const data = filteredData.slice().sort((a,b) => a.fecha - b.fecha);
+      const data = allData.slice().sort((a,b) => a.fecha - b.fecha);
       let labels = [];
       let values = [];
       let label = '';
@@ -2201,7 +1827,7 @@
       if (distChart) distChart.destroy();
       const c = chartColors();
 
-      const data = filteredData.slice();
+      const data = allData.slice();
 
       if (!data.length){
         distChart = new Chart(ctx, {
@@ -2254,7 +1880,6 @@
         });
       }
       else if (distMode === 'weekday'){
-        // Ganado por día de semana (solo encuesta+bonus)
         const labels = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
         const earned = Array(7).fill(0);
         data.filter(r => r.tipo === 'encuesta' || r.tipo === 'bonus').forEach(r => {
@@ -2277,7 +1902,10 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { backgroundColor: c.tooltipBg, callbacks: { label: t => ` €${Number(t.parsed.y).toFixed(2)}` } } },
+            plugins: {
+              legend: { display: false },
+              tooltip: { backgroundColor: c.tooltipBg, callbacks: { label: t => ` €${Number(t.parsed.y).toFixed(2)}` } }
+            },
             scales: {
               y: { beginAtZero: true, grid: { color: c.grid }, ticks: { color: c.ticks, callback: v => '€'+Number(v).toFixed(2) } },
               x: { grid: { display: false }, ticks: { color: c.ticks } }
@@ -2286,7 +1914,6 @@
         });
       }
       else { // hour
-        // Recuento de encuestas por hora (solo encuestas)
         const hours = Array.from({length:24}, (_,h)=>h);
         const cnt = Array(24).fill(0);
         data.filter(r => r.tipo === 'encuesta').forEach(r => { cnt[r.fecha.getHours()] += 1; });
@@ -2351,6 +1978,13 @@
       const keys = Object.keys(monthly).sort((a,b) => b.localeCompare(a));
       monthlySummaryTbody.innerHTML = '';
 
+      if (!keys.length){
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td colspan="8" style="color:var(--text-3); font-weight:900;">Sin datos.</td>`;
+        monthlySummaryTbody.appendChild(tr);
+        return;
+      }
+
       keys.forEach(k => {
         const d = monthly[k];
         const rate = d.attempts > 0 ? (d.success/d.attempts*100).toFixed(1) : '—';
@@ -2376,16 +2010,16 @@
     // Recent activity
     // ==============================
     function renderRecent(){
-      const items = filteredData.slice().sort((a,b) => b.fecha - a.fecha).slice(0, 8);
+      const items = allData.slice().sort((a,b) => b.fecha - a.fecha).slice(0, 8);
       recentCount.textContent = `${items.length} registros`;
       recentActivity.innerHTML = '';
 
       if (!items.length){
-        recentActivity.innerHTML = `<div style="color:var(--text-3); font-weight:800;">Sin actividad para los filtros actuales.</div>`;
+        recentActivity.innerHTML = `<div style="color:var(--text-3); font-weight:800;">Sin actividad registrada.</div>`;
         return;
       }
 
-      const emojis = {
+      const metaMap = {
         encuesta: { cls: 'earned', icon: 'fa-check', sign: '+', amtCls: 'positive' },
         bonus: { cls: 'bonus', icon: 'fa-star', sign: '+', amtCls: 'positive' },
         retiro: { cls: 'withdrawn', icon: 'fa-paper-plane', sign: '-', amtCls: 'negative' },
@@ -2394,8 +2028,9 @@
       };
 
       items.forEach(item => {
-        const meta = emojis[item.tipo] || { cls:'failed', icon:'fa-circle', sign:'', amtCls:'neutral' };
-        const amt = (item.importe && item.importe > 0) ? `${meta.sign}€${fmt2(item.importe)}` : '€0.00';
+        const meta = metaMap[item.tipo] || { cls:'failed', icon:'fa-circle', sign:'', amtCls:'neutral' };
+        const amount = Number(item.importe || 0);
+        const amt = (amount > 0) ? `${meta.sign}€${fmt2(amount)}` : '€0.00';
 
         const el = document.createElement('div');
         el.className = 'activity-item';
@@ -2418,7 +2053,7 @@
     // Heatmap schedule
     // ==============================
     function renderHeatmap(){
-      const encuestas = filteredData.filter(d => d.tipo === 'encuesta');
+      const encuestas = allData.filter(d => d.tipo === 'encuesta');
       const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
       scheduleGrid.innerHTML = '';
@@ -2438,124 +2073,17 @@
     }
 
     // ==============================
-    // Transactions table
-    // ==============================
-    function renderTxTable(){
-      let data = filteredData.slice();
-
-      data.sort((a,b) => txSort === 'desc' ? (b.fecha - a.fecha) : (a.fecha - b.fecha));
-
-      const total = data.length;
-      txCount.textContent = total;
-
-      const totalPages = Math.max(1, Math.ceil(total / txPageSize));
-      txPage = clamp(txPage, 1, totalPages);
-
-      const start = (txPage-1) * txPageSize;
-      const pageItems = data.slice(start, start + txPageSize);
-
-      pageInfo.textContent = `${txPage} / ${totalPages}`;
-
-      txTbody.innerHTML = '';
-
-      if (!pageItems.length){
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td colspan="5" style="color:var(--text-3); font-weight:900;">Sin registros para mostrar.</td>`;
-        txTbody.appendChild(tr);
-        return;
-      }
-
-      pageItems.forEach(r => {
-        const amount = Number(r.importe || 0);
-        const isPositive = (r.tipo === 'encuesta' || r.tipo === 'bonus') && amount > 0;
-        const isNegative = (r.tipo === 'retiro') && amount > 0;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${fmtDateFull(r.fecha)}</td>
-          <td><span class="badge neutral">${String(r.tipo || '').toUpperCase()}</span></td>
-          <td title="${escapeHtml(r.concepto || '')}" style="max-width:420px; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(r.concepto || r.tipo || '')}</td>
-          <td class="${isPositive?'positive':isNegative?'negative':''}">${amount>0 ? (isNegative?`-€${fmt2(amount)}`:`+€${fmt2(amount)}`) : `€${fmt2(amount)}`}</td>
-          <td style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size:0.80rem; color:var(--text-3);">
-            ${escapeHtml(r.id || '')}
-          </td>
-        `;
-        txTbody.appendChild(tr);
-      });
-    }
-
-    // ==============================
-    // Export CSV
-    // ==============================
-    function exportToCsv(rows){
-      const headers = ['id','fecha','tipo','concepto','importe'];
-      const lines = [headers.join(',')];
-
-      rows.slice().sort((a,b) => a.fecha - b.fecha).forEach(r => {
-        const line = [
-          csvEscape(r.id || ''),
-          csvEscape(r.fecha ? r.fecha.toISOString() : ''),
-          csvEscape(r.tipo || ''),
-          csvEscape(r.concepto || ''),
-          csvEscape(String(Number(r.importe || 0)))
-        ];
-        lines.push(line.join(','));
-      });
-
-      const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `survey-dashboard-${new Date().toISOString().slice(0,10)}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-
-      showToast('CSV exportado');
-    }
-
-    function csvEscape(v){
-      const s = String(v ?? '');
-      if (/[",\n]/.test(s)) return `"${s.replace(/"/g,'""')}"`;
-      return s;
-    }
-
-    // ==============================
-    // Utils: escape
-    // ==============================
-    function escapeHtml(s){
-      return String(s ?? '')
-        .replaceAll('&','&amp;')
-        .replaceAll('<','&lt;')
-        .replaceAll('>','&gt;')
-        .replaceAll('"','&quot;')
-        .replaceAll("'","&#039;");
-    }
-
-    // ==============================
     // Boot
     // ==============================
-    function init(){
+    (function init(){
       applySavedTheme();
-      updateCustomDateVisibility();
-
-      // default custom dates to last 30 days if user chooses custom later (UX)
-      const now = new Date();
-      const d30 = new Date(now);
-      d30.setDate(d30.getDate()-29);
-      startDate.value = d30.toISOString().slice(0,10);
-      endDate.value = now.toISOString().slice(0,10);
-
-      // minor: ctrl+t theme
-      document.addEventListener('keydown', e => {
-        if (e.ctrlKey && e.key.toLowerCase() === 't'){
-          e.preventDefault();
-          themeBtn.click();
-        }
-      });
-    }
-    init();
+      // UI inicial (sin sesión)
+      authGate.style.display = 'block';
+      appEl.style.display = 'none';
+      setLoading(false);
+      hideError();
+      monthLabel.textContent = 'Histórico';
+    })();
   </script>
 </body>
 </html>
