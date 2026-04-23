@@ -1124,6 +1124,9 @@ function loadData(u) {
   show('loadingOverlay');
   hide('errorBar');
 
+  // Cargar objetivo guardado en Firebase primero
+  loadGoalFromFirebase(u);
+
   db.ref(`users/${u}/surveys`).once('value')
     .then(snap => {
       hide('loadingOverlay');
@@ -1325,6 +1328,11 @@ function saveGoal() {
     el('goalInput').value = '';
     recalcGoal();
     toast('Meta actualizada a €' + fmt(v));
+    if (uid) {
+      db.ref(`users/${uid}/settings/monthlyGoal`).set(v)
+      .then(() => toast('Meta sincronizada en la nube'))
+      .catch(e => toast('Error al sincronizar meta: ' + e.message, 'warn'));
+    }
   }
 }
 
@@ -1336,7 +1344,27 @@ function saveGoal2() {
     el('goalInput2').value = '';
     recalcGoal();
     toast('Meta actualizada a €' + fmt(v));
+    if (uid) {
+      db.ref(`users/${uid}/settings/monthlyGoal`).set(v)
+      .then(() => toast('Meta sincronizada en la nube'))
+      .catch(e => toast('Error al sincronizar meta: ' + e.message, 'warn'));
+    }
   }
+}
+
+function loadGoalFromFirebase(u) {
+  db.ref(`users/${u}/settings/monthlyGoal`).once('value')
+    .then(snap => {
+      const savedGoal = snap.val();
+      if (savedGoal && savedGoal > 0) {
+        goal = savedGoal;
+        localStorage.setItem('goal', savedGoal);
+        // Actualizar el display si ya hay datos cargados
+        if (allData.length) recalcGoal();
+        toast('Objetivo cargado desde la nube: €' + fmt(savedGoal));
+      }
+    })
+    .catch(e => console.warn('No se pudo cargar el objetivo:', e.message));
 }
 
 function recalcGoal() {
