@@ -547,6 +547,8 @@ td.mono { font-family: var(--mono); }
 .uid-widget code {
   font-family: var(--mono); color: var(--accent2); font-size: 11px;
   max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  filter: blur(4px);
+  user-select: none;
 }
 .uid-widget.show { display: inline-flex; }
 .copy-btn {
@@ -672,7 +674,6 @@ td.mono { font-family: var(--mono); }
         <div class="export-menu" id="exportMenu">
           <button class="exp-item" onclick="exportCSV()"><i class="fas fa-file-csv"></i> CSV</button>
           <button class="exp-item" onclick="exportJSON()"><i class="fas fa-file-code"></i> JSON</button>
-          <button class="exp-item" onclick="window.print();closeExport()"><i class="fas fa-print"></i> Imprimir</button>
         </div>
       </div>
       <button class="tb-btn" onclick="refreshData()" title="Actualizar">
