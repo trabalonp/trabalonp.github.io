@@ -1321,12 +1321,29 @@ function updateGoal(earned) {
   el('goalRing').style.strokeDashoffset  = offset;
   el('goalAchieved').style.display       = earned >= goal ? 'flex' : 'none';
 
+  // Cambiar color a verde si se llega al 100%
+  if (pct >= 100) {
+    el('goalRing').style.stroke = 'var(--green)';
+    el('ringPct').style.color = 'var(--green)';
+  } else {
+    el('goalRing').style.stroke = 'var(--accent2)';
+    el('ringPct').style.color = 'var(--accent2)';
+  }
+
   // Goals view
   s('goalCurrentLg', fmt(earned));
   s('goalTargetLg',  fmt(goal));
   s('ringPctLg',     Math.round(pct) + '%');
   el('goalBarLg').style.width             = pct + '%';
   el('goalRingLg').style.strokeDashoffset = offset;
+
+  if (pct >= 100) {
+    el('goalRingLg').style.stroke = 'var(--green)';
+    el('ringPctLg').style.color = 'var(--green)';
+  } else {
+    el('goalRingLg').style.stroke = 'var(--accent2)';
+    el('ringPctLg').style.color = 'var(--accent2)';
+  }
 }
 
 function saveGoal() {
@@ -1724,8 +1741,12 @@ function resetAll() {
   s('kpi-rate', '0.0'); s('kpi-streak', '0');
   el('goalBar').style.width              = '0%';
   el('goalRing').style.strokeDashoffset  = '264';
+  el('goalRing').style.stroke            = 'var(--accent2)';
+  el('ringPct').style.color              = 'var(--accent2)';
   el('goalBarLg').style.width            = '0%';
   el('goalRingLg').style.strokeDashoffset = '264';
+  el('goalRingLg').style.stroke            = 'var(--accent2)';
+  el('ringPctLg').style.color              = 'var(--accent2)';
   el('historyTbody').innerHTML = '';
   el('activityList').innerHTML = '';
   el('milestoneGrid').innerHTML = '';
