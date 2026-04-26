@@ -414,16 +414,6 @@ body {
 }
 .goal-input:focus { border-color: var(--accent-border); }
 
-/* Quitar flechas de los inputs de objetivo */
-.goal-input::-webkit-outer-spin-button,
-.goal-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.goal-input[type=number] {
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
 .goal-save-btn {
   padding: 7px 14px; background: var(--accent); color: #fff;
   border: none; border-radius: var(--r);
@@ -824,7 +814,7 @@ td.mono { font-family: var(--mono); }
                 <div><p>¡Objetivo alcanzado! 🎉</p><span>Has superado la meta del mes.</span></div>
               </div>
               <div class="goal-input-row">
-                <input type="number" class="goal-input" id="goalInput" placeholder="Nueva meta (€)" step="0.01" min="1">
+                <input type="text" inputmode="decimal" class="goal-input" id="goalInput" placeholder="Nueva meta (€)">
                 <button class="goal-save-btn" onclick="saveGoal()">Guardar</button>
               </div>
             </div>
@@ -955,7 +945,7 @@ td.mono { font-family: var(--mono); }
             </div>
             <div style="font-size:13px;color:var(--t2);margin-bottom:14px">Meta adaptativa basada en el mes anterior</div>
             <div class="goal-input-row">
-              <input type="number" class="goal-input" id="goalInput2" placeholder="Nueva meta (€)" step="0.01" min="1">
+              <input type="text" inputmode="decimal" class="goal-input" id="goalInput2" placeholder="Nueva meta (€)">
               <button class="goal-save-btn" onclick="saveGoal2()">Establecer</button>
             </div>
           </div>
@@ -1802,16 +1792,24 @@ function parseDate(v) {
   const input = el(id);
   if (input) {
     input.addEventListener('keydown', e => {
-      // Bloquear 'e', '+', '-' que son válidos en type="number" pero no deseados aquí
-      if (['e', 'E', '+', '-'].includes(e.key)) {
+      // Bloquear teclas no deseadas: 'e', 'E', '+', '-', ','
+      if (['e', 'E', '+', '-', ','].includes(e.key)) {
         e.preventDefault();
       }
     });
     input.addEventListener('input', function() {
-      const val = this.value;
-      if (val.includes('.') && val.split('.')[1].length > 2) {
-        this.value = val.substring(0, val.indexOf('.') + 3);
+      // Reemplazar comas por puntos por si se pegan datos
+      let val = this.value.replace(/,/g, '.');
+      // Permitir solo números y un punto decimal
+      val = val.replace(/[^0-9.]/g, '');
+      // Asegurarse de que solo haya un punto
+      const parts = val.split('.');
+      if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
+      // Limitar a 2 decimales
+      if (parts.length > 1 && parts[1].length > 2) {
+        val = parts[0] + '.' + parts[1].substring(0, 2);
       }
+      this.value = val;
     });
   }
 });
