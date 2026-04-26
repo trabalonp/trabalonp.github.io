@@ -413,6 +413,16 @@ body {
   outline: none; transition: var(--tr);
 }
 .goal-input:focus { border-color: var(--accent-border); }
+
+/* Quitar flechas de los inputs de objetivo */
+.goal-input::-webkit-outer-spin-button,
+.goal-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.goal-input[type=number] {
+  -moz-appearance: textfield;
+}
 .goal-save-btn {
   padding: 7px 14px; background: var(--accent); color: #fff;
   border: none; border-radius: var(--r);
@@ -1785,6 +1795,25 @@ function parseDate(v) {
   if (m) return new Date(+m[3], +m[2]-1, +m[1], +m[4], +m[5]);
   return new Date();
 }
+
+// Validación para inputs de metas (solo números y máx 2 decimales)
+['goalInput', 'goalInput2'].forEach(id => {
+  const input = el(id);
+  if (input) {
+    input.addEventListener('keydown', e => {
+      // Bloquear 'e', '+', '-' que son válidos en type="number" pero no deseados aquí
+      if (['e', 'E', '+', '-'].includes(e.key)) {
+        e.preventDefault();
+      }
+    });
+    input.addEventListener('input', function() {
+      const val = this.value;
+      if (val.includes('.') && val.split('.')[1].length > 2) {
+        this.value = val.substring(0, val.indexOf('.') + 3);
+      }
+    });
+  }
+});
 </script>
 </body>
 </html>
