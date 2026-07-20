@@ -4,29 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Surveys · Dashboard</title>
-<style>
-@font-face {
-  font-family: 'Geist Pixel';
-  src: url('fonts/GeistPixel-Line.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist Pixel';
-  src: url('fonts/GeistPixel-Square.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist Mono';
-  src: url('fonts/GeistMono-Variable.woff2') format('woff2');
-  font-weight: 300 700;
-  font-style: normal;
-  font-display: swap;
-}
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -36,10 +15,10 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg:        #080a08;
-  --surface:   #0d100d;
-  --surface2:  #141814;
-  --surface3:  #1a1f1a;
+  --bg:        #0a0a0f;
+  --surface:   #111118;
+  --surface2:  #18181f;
+  --surface3:  #1e1e28;
   --border:    rgba(255,255,255,0.07);
   --border2:   rgba(255,255,255,0.12);
   --accent:    #7c6fea;
@@ -57,8 +36,8 @@
   --t1:        #f1f1f5;
   --t2:        #8b8b9e;
   --t3:        #4a4a5e;
-  --font:      'Geist Pixel', 'Geist', sans-serif;
-  --mono:      'Geist Mono', monospace;
+  --font:      'Inter', sans-serif;
+  --mono:      'JetBrains Mono', monospace;
   --r:         10px;
   --r2:        14px;
   --tr:        all 0.18s ease;
@@ -1601,7 +1580,7 @@ function buildMainChart(data, mode) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: 'rgba(8,10,8,0.95)', padding: 10, cornerRadius: 8,
+          backgroundColor: 'rgba(10,10,15,0.95)', padding: 10, cornerRadius: 8,
           callbacks: { label: c => ` €${c.parsed.y.toFixed(2)}` }
         }
       },
@@ -1639,7 +1618,7 @@ function buildBarChart() {
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false },
-        tooltip: { backgroundColor: 'rgba(8,10,8,0.95)', padding: 10, callbacks: { label: c => ` €${c.parsed.y.toFixed(2)}` } }
+        tooltip: { backgroundColor: 'rgba(10,10,15,0.95)', padding: 10, callbacks: { label: c => ` €${c.parsed.y.toFixed(2)}` } }
       },
       scales: {
         y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8b8b9e' }, border: { display: false } },
@@ -1661,13 +1640,13 @@ function buildDonutChart() {
     type: 'doughnut',
     data: { labels: labs, datasets: [{ data: labs.map(k => types[k]),
       backgroundColor: labs.map(k => colors[k] || '#444'),
-      borderColor: '#0d100d', borderWidth: 3
+      borderColor: '#111118', borderWidth: 3
     }]},
     options: {
       responsive: true, maintainAspectRatio: false, cutout: '68%',
       plugins: {
         legend: { position: 'right', labels: { color: '#8b8b9e', font: { size: 12 }, padding: 10 } },
-        tooltip: { backgroundColor: 'rgba(8,10,8,0.95)', padding: 10 }
+        tooltip: { backgroundColor: 'rgba(10,10,15,0.95)', padding: 10 }
       }
     }
   });
