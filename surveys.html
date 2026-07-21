@@ -4,29 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Surveys · Dashboard</title>
-<style>
-@font-face {
-  font-family: 'Geist Pixel';
-  src: url('fonts/GeistPixel-Line.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist Pixel';
-  src: url('fonts/GeistPixel-Square.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist Mono';
-  src: url('fonts/GeistMono-Variable.woff2') format('woff2');
-  font-weight: 300 700;
-  font-style: normal;
-  font-display: swap;
-}
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -36,10 +15,10 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg:        #080a08;
-  --surface:   #0d100d;
-  --surface2:  #141814;
-  --surface3:  #1a1f1a;
+  --bg:        #0a0a0f;
+  --surface:   #111118;
+  --surface2:  #18181f;
+  --surface3:  #1e1e28;
   --border:    rgba(255,255,255,0.07);
   --border2:   rgba(255,255,255,0.12);
   --accent:    #7c6fea;
@@ -57,8 +36,8 @@
   --t1:        #f1f1f5;
   --t2:        #8b8b9e;
   --t3:        #4a4a5e;
-  --font:      'Geist Pixel', 'Geist', sans-serif;
-  --mono:      'Geist Mono', monospace;
+  --font:      'Inter', sans-serif;
+  --mono:      'JetBrains Mono', monospace;
   --r:         10px;
   --r2:        14px;
   --tr:        all 0.18s ease;
@@ -78,10 +57,9 @@ body {
   line-height: 1.5;
 }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 4px; }
 
 /* SIDEBAR */
 .sidebar {
@@ -117,12 +95,6 @@ body {
   gap: 10px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
-  position: relative;
-}
-.sidebar-header::after {
-  content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 1px;
-  background: linear-gradient(90deg, var(--accent), transparent);
-  opacity: 0.4;
 }
 .logo-mark {
   width: 28px; height: 28px;
@@ -131,7 +103,6 @@ body {
   display: flex; align-items: center; justify-content: center;
   font-size: 12px; font-weight: 700; color: #fff;
   flex-shrink: 0;
-  box-shadow: 0 0 20px rgba(124,111,234,0.3);
 }
 .logo-text {
   font-weight: 700; font-size: 15px; color: var(--t1);
@@ -165,24 +136,8 @@ body {
 .nav-label { transition: var(--tr); }
 .sidebar.collapsed .nav-label { opacity: 0; width: 0; overflow: hidden; }
 .nav-item:hover { background: var(--surface2); color: var(--t1); }
-.nav-item.active { background: linear-gradient(135deg, var(--accent-bg), rgba(124,111,234,0.05)); color: var(--accent2); box-shadow: inset 3px 0 0 var(--accent); }
+.nav-item.active { background: var(--accent-bg); color: var(--accent2); }
 .nav-item.active .nav-icon { color: var(--accent2); }
-
-.hamburger-btn {
-  display: none; width: 36px; height: 36px;
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: var(--r); cursor: pointer;
-  color: var(--t2); align-items: center; justify-content: center;
-  font-size: 15px; position: relative; z-index: 200;
-}
-.hamburger-btn:hover { color: var(--t1); border-color: var(--border2); }
-.sidebar-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.5); z-index: 149;
-  backdrop-filter: blur(2px);
-}
-.sidebar-overlay.open { display: block; animation: fadeIn 0.2s ease; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .sidebar-footer {
   padding: 12px 8px;
@@ -214,7 +169,6 @@ body {
   padding: 0 20px; gap: 12px; flex-shrink: 0;
 }
 .topbar-left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
-.hamburger-btn { display: none; }
 .topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
 .page-breadcrumb {
@@ -255,12 +209,7 @@ body {
   font-family: var(--font); font-size: 13px; font-weight: 500;
   transition: var(--tr);
 }
-.login-btn:hover { 
-  background: var(--accent-bg); 
-  border-color: var(--accent-border); 
-  color: var(--accent2);
-  box-shadow: 0 0 16px rgba(124,111,234,0.15);
-}
+.login-btn:hover { background: var(--surface2); border-color: var(--accent-border); color: var(--accent2); }
 
 .user-area {
   display: none; align-items: center; gap: 8px;
@@ -441,7 +390,6 @@ body {
   height: 100%;
   background: linear-gradient(90deg, var(--accent), var(--accent2));
   border-radius: 2px; transition: width 1s ease;
-  box-shadow: 0 0 8px rgba(124,111,234,0.4);
 }
 .goal-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--t3); }
 .goal-achieved {
@@ -464,10 +412,7 @@ body {
   color: var(--t1); font-family: var(--mono); font-size: 13px;
   outline: none; transition: var(--tr);
 }
-.goal-input:focus { 
-  border-color: var(--accent-border); 
-  box-shadow: 0 0 0 3px rgba(124,111,234,0.1); 
-}
+.goal-input:focus { border-color: var(--accent-border); }
 
 .goal-save-btn {
   padding: 7px 14px; background: var(--accent); color: #fff;
@@ -475,10 +420,7 @@ body {
   font-family: var(--font); font-size: 13px; font-weight: 600;
   cursor: pointer; transition: var(--tr); white-space: nowrap;
 }
-.goal-save-btn:hover { 
-  box-shadow: 0 4px 12px rgba(124,111,234,0.3);
-  transform: translateY(-1px);
-}
+.goal-save-btn:hover { opacity: 0.85; }
 
 /* ACTIVITY */
 .activity-list { display: flex; flex-direction: column; gap: 2px; }
@@ -503,19 +445,6 @@ body {
 .act-amt.pos { color: var(--green); }
 .act-amt.neg { color: var(--red); }
 .act-amt.neu { color: var(--t3); }
-.act-item { animation: fadeSlideIn 0.3s ease both; }
-.act-item:nth-child(1) { animation-delay: 0ms; }
-.act-item:nth-child(2) { animation-delay: 40ms; }
-.act-item:nth-child(3) { animation-delay: 80ms; }
-.act-item:nth-child(4) { animation-delay: 120ms; }
-.act-item:nth-child(5) { animation-delay: 160ms; }
-.act-item:nth-child(6) { animation-delay: 200ms; }
-.act-item:nth-child(7) { animation-delay: 240ms; }
-.act-item:nth-child(8) { animation-delay: 280ms; }
-@keyframes fadeSlideIn { 
-  from { opacity: 0; transform: translateX(-8px); } 
-  to { opacity: 1; transform: none; } 
-}
 
 /* TABLE */
 .search-wrap {
@@ -524,7 +453,6 @@ body {
   border-radius: var(--r); padding: 7px 12px; margin-bottom: 14px; transition: var(--tr);
 }
 .search-wrap:focus-within { border-color: var(--accent-border); }
-.search-wrap:focus-within i { color: var(--accent2); transition: color 0.2s ease; }
 .search-wrap i { color: var(--t3); font-size: 12px; }
 .search-wrap input {
   flex: 1; background: none; border: none; outline: none;
@@ -552,7 +480,6 @@ tbody td {
 }
 tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover td { background: var(--surface2); color: var(--t1); }
-tbody tr { transition: background 0.15s ease; }
 .badge {
   display: inline-flex; align-items: center; gap: 4px;
   font-size: 11px; font-weight: 600;
@@ -602,18 +529,8 @@ td.mono { font-family: var(--mono); }
 .milestone-card {
   background: var(--surface2); border: 1px solid var(--border);
   border-radius: var(--r); padding: 14px; transition: var(--tr);
-  position: relative; overflow: hidden;
 }
-.milestone-card.done {
-  border-color: var(--accent-border);
-  background: linear-gradient(135deg, rgba(124,111,234,0.08), var(--surface2));
-}
-.milestone-card.done::after {
-  content: ''; position: absolute; top: -20px; right: -20px;
-  width: 60px; height: 60px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(124,111,234,0.15), transparent);
-  pointer-events: none;
-}
+.milestone-card.done  { border-color: var(--accent-border); }
 .milestone-card:hover { border-color: var(--border2); }
 .ms-icon   { font-size: 20px; margin-bottom: 8px; }
 .ms-name   { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
@@ -649,7 +566,6 @@ td.mono { font-family: var(--mono); }
   background: var(--surface2); border: 1px solid var(--border);
   border-radius: var(--r); padding: 4px; min-width: 160px;
   z-index: 50; animation: fadeUp 0.15s ease;
-  box-shadow: 0 12px 32px rgba(0,0,0,0.5);
 }
 .export-menu.open { display: block; }
 .exp-item {
@@ -680,261 +596,18 @@ td.mono { font-family: var(--mono); }
 .toast.out  { animation: slideOut 0.2s ease forwards; }
 @keyframes slideIn  { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:none; } }
 @keyframes slideOut { to   { opacity:0; transform:translateX(20px); } }
-.toast i { font-size: 14px; flex-shrink: 0; }
 
 /* RESPONSIVE */
 @media (max-width: 900px) {
   .two-col { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
-  .content { padding: 14px; gap: 14px; padding-top: 58px; }
+  .content { padding: 14px; gap: 14px; }
   .kpi-grid { grid-template-columns: 1fr 1fr; }
   .range-group { display: none; }
-  .sidebar { position: fixed; left: -100%; z-index: 150; height: 100dvh; transition: left 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
-  .sidebar.mobile-open { left: 0; }
-  .sidebar.collapsed { width: var(--sidebar-w); overflow-y: auto; }
-  .sidebar.collapsed .logo-text { opacity: 1; width: auto; }
-  .sidebar.collapsed .nav-label { opacity: 1; width: auto; }
-  .sidebar.collapsed .cbtn-label { opacity: 1; width: auto; }
-  .sidebar.collapsed .nav-group-label { opacity: 1; }
-  .hamburger-btn { display: flex; }
-  .two-col { grid-template-columns: 1fr; }
-  .goal-layout { flex-direction: column; align-items: stretch; }
-  .ring-wrap { margin: 0 auto; }
-  .kpi-value { font-size: 22px; }
-  .chart-wrap { height: 220px; }
 }
 @media (max-width: 400px) {
   .kpi-grid { grid-template-columns: 1fr; }
-}
-
-/* ══════════════════════════════════════
-   ENHANCED VISUAL EFFECTS
-   ══════════════════════════════════════ */
-
-/* KPI Cards - Glassmorphic with colored top borders */
-.kpi-card { position: relative; overflow: hidden; backdrop-filter: blur(8px); }
-.kpi-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0; transition: opacity 0.3s ease;
-}
-.kpi-card:hover::before { opacity: 0.8; }
-.kpi-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.4); border-color: var(--border2); }
-.kpi-card::after {
-  content: ''; position: absolute; bottom: -30px; right: -30px;
-  width: 80px; height: 80px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(124,111,234,0.06), transparent 70%);
-  pointer-events: none; transition: transform 0.3s ease;
-}
-.kpi-card:hover::after { transform: scale(1.5); }
-
-/* Colored top borders per KPI type */
-.kpi-card[data-color="green"]  { border-top: 2px solid rgba(52,211,153,0.4); }
-.kpi-card[data-color="violet"] { border-top: 2px solid rgba(124,111,234,0.4); }
-.kpi-card[data-color="red"]    { border-top: 2px solid rgba(248,113,113,0.4); }
-.kpi-card[data-color="yellow"] { border-top: 2px solid rgba(251,191,36,0.4); }
-
-/* Card ambient glow */
-.card { position: relative; overflow: hidden; }
-.card::after {
-  content: ''; position: absolute; inset: 0; border-radius: var(--r2);
-  background: linear-gradient(135deg, rgba(124,111,234,0.03) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-/* KPI Tooltip */
-.kpi-tooltip {
-  position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%) translateY(4px);
-  background: var(--surface3); border: 1px solid var(--border2);
-  border-radius: var(--r); padding: 8px 12px;
-  font-size: 12px; color: var(--t2); white-space: nowrap;
-  pointer-events: none; opacity: 0; transition: opacity 0.2s ease, transform 0.2s ease;
-  z-index: 50; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-}
-.kpi-tooltip::after {
-  content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
-  border: 5px solid transparent; border-top-color: var(--surface3);
-}
-.kpi-card:hover .kpi-tooltip { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* Theme toggle button */
-.theme-toggle {
-  width: 32px; height: 32px;
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: var(--r); cursor: pointer; color: var(--t2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; transition: var(--tr); position: relative;
-}
-.theme-toggle:hover { color: var(--yellow); border-color: var(--border2); background: var(--yellow-bg); }
-
-/* Light theme overrides */
-html.light {
-  --bg:       #f5f5f0;
-  --surface:  #ffffff;
-  --surface2: #f0f0eb;
-  --surface3: #e5e5e0;
-  --border:   rgba(0,0,0,0.08);
-  --border2:  rgba(0,0,0,0.14);
-  --t1:       #1a1a1a;
-  --t2:       #6b6b6b;
-  --t3:       #999999;
-  --accent-bg: rgba(124,111,234,0.08);
-  --accent-border: rgba(124,111,234,0.2);
-  --green-bg:  rgba(52,211,153,0.08);
-  --red-bg:    rgba(248,113,113,0.08);
-  --yellow-bg: rgba(251,191,36,0.08);
-  --blue-bg:   rgba(96,165,250,0.08);
-}
-html.light body { background: var(--bg); color: var(--t1); }
-html.light .kpi-card { box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-html.light .kpi-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
-html.light .card { box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-html.light .sidebar { box-shadow: 1px 0 8px rgba(0,0,0,0.05); }
-html.light .nav-item.active { background: rgba(124,111,234,0.08); }
-html.light .toast { background: var(--surface); border-color: var(--border2); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-html.light .spinner { border-color: var(--surface3); border-top-color: var(--accent); }
-html.light .milestone-card.done { background: linear-gradient(135deg, rgba(124,111,234,0.06), var(--surface2)); }
-html.light .kpi-card::after { background: radial-gradient(circle, rgba(124,111,234,0.04), transparent 70%); }
-html.light .logo-mark { box-shadow: 0 2px 8px rgba(124,111,234,0.25); }
-
-/* Smooth theme transition */
-html { transition: background 0.35s ease, color 0.35s ease; }
-.sidebar, .topbar, .kpi-card, .card, .nav-item, .goal-input, 
-.toast, .badge, .exp-item, .export-menu, .search-wrap, 
-.milestone-card, .auth-icon-wrap, .hamburger-btn, .theme-toggle {
-  transition: background 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
-}
-
-/* Quick Add FAB */
-.fab {
-  position: fixed; bottom: 24px; right: 24px;
-  width: 52px; height: 52px;
-  background: var(--accent); color: #fff;
-  border: none; border-radius: 50%; cursor: pointer;
-  font-size: 20px; display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 20px rgba(124,111,234,0.4);
-  z-index: 80; transition: var(--tr);
-}
-.fab:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(124,111,234,0.5); }
-.fab:active { transform: scale(0.95); }
-
-/* Quick Add Modal */
-.modal-overlay {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-  z-index: 200; align-items: center; justify-content: center;
-  backdrop-filter: blur(4px);
-}
-.modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
-.modal {
-  background: var(--surface); border: 1px solid var(--border2);
-  border-radius: var(--r2); padding: 24px; width: 90%; max-width: 400px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: fadeUp 0.25s ease;
-}
-.modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-.modal p  { font-size: 13px; color: var(--t2); margin-bottom: 16px; }
-.modal label { font-size: 12px; font-weight: 600; color: var(--t2); display: block; margin-bottom: 6px; }
-.modal select, .modal input {
-  width: 100%; background: var(--surface2); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 9px 12px; color: var(--t1);
-  font-family: var(--font); font-size: 14px; outline: none;
-  margin-bottom: 14px; transition: var(--tr);
-}
-.modal select:focus, .modal input:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(124,111,234,0.1); }
-.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
-.modal-cancel {
-  padding: 8px 16px; background: transparent; border: 1px solid var(--border);
-  border-radius: var(--r); color: var(--t2); font-family: var(--font); font-size: 13px;
-  font-weight: 500; cursor: pointer; transition: var(--tr);
-}
-.modal-cancel:hover { color: var(--t1); border-color: var(--border2); }
-.modal-submit {
-  padding: 8px 16px; background: var(--accent); border: none;
-  border-radius: var(--r); color: #fff; font-family: var(--font); font-size: 13px;
-  font-weight: 600; cursor: pointer; transition: var(--tr);
-}
-.modal-submit:hover { opacity: 0.9; transform: translateY(-1px); }
-
-/* Keyboard shortcut hints */
-.kbd {
-  display: inline-flex; align-items: center; justify-content: center;
-  min-width: 18px; height: 18px; padding: 0 5px;
-  background: var(--surface3); border: 1px solid var(--border);
-  border-radius: 4px; font-family: var(--mono); font-size: 10px;
-  color: var(--t3); margin-left: auto; flex-shrink: 0;
-}
-
-/* Status footer bar */
-.status-bar {
-  display: flex; align-items: center; gap: 16px;
-  padding: 8px 20px; background: var(--surface);
-  border-top: 1px solid var(--border);
-  font-size: 11px; color: var(--t3); flex-shrink: 0;
-}
-.status-bar .status-item { display: flex; align-items: center; gap: 5px; }
-.status-bar .status-dot { width: 6px; height: 6px; border-radius: 50%; }
-.status-bar .status-dot.green { background: var(--green); }
-.status-bar .status-dot.red { background: var(--red); }
-.status-bar .status-dot.yellow { background: var(--yellow); }
-.status-sep { width: 1px; height: 12px; background: var(--border); }
-
-/* Pulse animation for live values */
-@keyframes subtlePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
-.pulse-live { animation: subtlePulse 2s ease-in-out infinite; }
-
-/* Section header decorative line */
-.section-header {
-  display: flex; align-items: center; gap: 12px; margin-bottom: 4px;
-}
-.section-header::after {
-  content: ''; flex: 1; height: 1px;
-  background: linear-gradient(90deg, var(--border2), transparent);
-}
-
-/* Better auth prompt styling */
-#authPrompt { 
-  background: linear-gradient(135deg, var(--surface), rgba(124,111,234,0.03)); 
-  border: 1px solid var(--accent-border);
-}
-.auth-login-btn { 
-  background: linear-gradient(135deg, var(--accent), var(--accent2)); 
-  box-shadow: 0 4px 16px rgba(124,111,234,0.3); 
-}
-.auth-login-btn:hover { 
-  box-shadow: 0 6px 24px rgba(124,111,234,0.4); 
-  transform: translateY(-1px); 
-}
-
-/* Demo mode banner */
-.demo-banner {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 14px; background: var(--yellow-bg); 
-  border: 1px solid rgba(251,191,36,0.25);
-  border-radius: var(--r); font-size: 12px; color: var(--yellow);
-  margin-bottom: 16px;
-}
-.demo-banner i { font-size: 13px; }
-
-/* Improved empty state for analytics */
-.empty-state {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 48px 24px; text-align: center;
-}
-.empty-state-icon {
-  width: 56px; height: 56px; border-radius: 16px;
-  background: var(--accent-bg); border: 1px solid var(--accent-border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px; color: var(--accent2); margin-bottom: 16px;
-}
-.empty-state h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
-.empty-state p { font-size: 13px; color: var(--t3); max-width: 280px; }
-
-/* Responsive improvements */
-@media (max-width: 640px) {
-  .fab { bottom: 16px; right: 16px; width: 46px; height: 46px; font-size: 18px; }
-  .modal { padding: 20px; margin: 16px; }
-  .status-bar { padding: 6px 14px; gap: 10px; font-size: 10px; }
-  .kpi-tooltip { display: none; }
 }
 </style>
 </head>
@@ -951,22 +624,18 @@ html { transition: background 0.35s ease, color 0.35s ease; }
     <button class="nav-item active" onclick="navigate('overview',this)">
       <span class="nav-icon"><i class="fas fa-chart-pie"></i></span>
       <span class="nav-label">Resumen</span>
-      <span class="kbd">1</span>
     </button>
     <button class="nav-item" onclick="navigate('analytics',this)">
       <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
       <span class="nav-label">Analíticas</span>
-      <span class="kbd">2</span>
     </button>
     <button class="nav-item" onclick="navigate('history',this)">
       <span class="nav-icon"><i class="fas fa-list-ul"></i></span>
       <span class="nav-label">Historial</span>
-      <span class="kbd">3</span>
     </button>
     <button class="nav-item" onclick="navigate('goals',this)">
       <span class="nav-icon"><i class="fas fa-bullseye"></i></span>
       <span class="nav-label">Objetivos</span>
-      <span class="kbd">4</span>
     </button>
   </div>
   <div class="sidebar-footer">
@@ -981,9 +650,6 @@ html { transition: background 0.35s ease, color 0.35s ease; }
 <div class="main">
   <header class="topbar">
     <div class="topbar-left">
-      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileSidebar()" aria-label="Menú">
-        <i class="fas fa-bars"></i>
-      </button>
       <div class="page-breadcrumb">
         <span>Surveys</span>
         <span class="sep">/</span>
@@ -995,11 +661,6 @@ html { transition: background 0.35s ease, color 0.35s ease; }
         <button class="range-btn" onclick="setRange(90,this)">3M</button>
         <button class="range-btn active" onclick="setRange(0,this)">Todo</button>
       </div>
-      <div id="connStatus" style="display:none;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(52,211,153,0.5);flex-shrink:0" title="Conectado a Firebase"></div>
-    </div>
-    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t3);font-family:var(--mono);margin-right:8px">
-      <i class="fas fa-clock" style="font-size:11px"></i>
-      <span id="liveClock"></span>
     </div>
     <div class="topbar-right">
       <div class="uid-widget" id="uidWidget">
@@ -1007,9 +668,6 @@ html { transition: background 0.35s ease, color 0.35s ease; }
         <code id="uidText"></code>
         <button class="copy-btn" onclick="copyUid()">Copiar</button>
       </div>
-      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Cambiar tema (T)">
-        <i class="fas fa-moon" id="themeIcon"></i>
-      </button>
       <div class="export-wrap" id="exportWrap">
         <button class="tb-btn" onclick="toggleExport()" title="Exportar">
           <i class="fas fa-download"></i>
@@ -1054,68 +712,60 @@ html { transition: background 0.35s ease, color 0.35s ease; }
     <!-- OVERVIEW -->
     <div class="view active" id="view-overview">
       <div class="kpi-grid">
-        <div class="kpi-card" data-color="green" data-kpi="kpi-total">
-          <div class="kpi-tooltip">Total acumulado de todas las encuestas y bonos</div>
+        <div class="kpi-card">
           <div class="kpi-header">
             <div class="kpi-icon green"><i class="fas fa-euro-sign"></i></div>
           </div>
-          <div class="kpi-value" style="color: var(--green); font-weight: 700;"><span class="kpi-unit">€</span><span id="kpi-total">0.00</span></div>
+          <div class="kpi-value" style="color: #28a745; font-weight: 700;"><span class="kpi-unit">€</span><span id="kpi-total">0.00</span></div>
           <div class="kpi-label">Total ganado</div>
         </div>
-        <div class="kpi-card" data-color="violet" data-kpi="kpi-balance">
-          <div class="kpi-tooltip">Dinero ganado menos retiros realizados</div>
+        <div class="kpi-card">
           <div class="kpi-header">
             <div class="kpi-icon violet"><i class="fas fa-wallet"></i></div>
           </div>
-          <div class="kpi-value" style="color: var(--accent2); font-weight: 700;"><span class="kpi-unit">€</span><span id="kpi-balance">0.00</span></div>
+          <div class="kpi-value" style="color: #28a745; font-weight: 700;"><span class="kpi-unit">€</span><span id="kpi-balance">0.00</span></div>
           <div class="kpi-label">Saldo disponible</div>
         </div>
-        <div class="kpi-card" data-color="red" data-kpi="kpi-withdrawn">
-          <div class="kpi-tooltip">Total de dinero retirado a través de PayPal</div>
+        <div class="kpi-card">
           <div class="kpi-header">
             <div class="kpi-icon red"><i class="fab fa-paypal"></i></div>
           </div>
-          <div class="kpi-value" style="color: var(--red); font-weight: 700;"><span class="kpi-unit">€</span><span id="kpi-withdrawn">0.00</span></div>
+          <div class="kpi-value" style="color: #D90D0D; font-weight: 700;"><span class="kpi-unit">€</span><span id="kpi-withdrawn">0.00</span></div>
           <div class="kpi-label">Retirado</div>
         </div>
-        <div class="kpi-card" data-color="yellow" data-kpi="kpi-rate">
-          <div class="kpi-tooltip">Porcentaje de encuestas completadas sobre intentos</div>
+        <div class="kpi-card">
           <div class="kpi-header">
             <div class="kpi-icon yellow"><i class="fas fa-percent"></i></div>
           </div>
           <div class="kpi-value"><span id="kpi-rate">0.0</span><span class="kpi-unit">%</span></div>
           <div class="kpi-label" id="kpi-rate-sub">Tasa de éxito</div>
         </div>
-        <div class="kpi-card" data-color="green" data-kpi="kpi-avg">
-          <div class="kpi-tooltip">Promedio ganado por cada encuesta completada</div>
+        <div class="kpi-card">
           <div class="kpi-header">
             <div class="kpi-icon green"><i class="fas fa-coins"></i></div>
           </div>
-          <div class="kpi-value" style="color: var(--green);"><span class="kpi-unit">€</span><span id="kpi-avg">0.00</span></div>
+          <div class="kpi-value"><span class="kpi-unit">€</span><span id="kpi-avg">0.00</span></div>
           <div class="kpi-label">Media por encuesta</div>
         </div>
-        <div class="kpi-card" data-color="yellow" data-kpi="kpi-month">
-          <div class="kpi-tooltip">Ganancias acumuladas durante el mes actual</div>
+        <div class="kpi-card">
           <div class="kpi-header">
             <div class="kpi-icon yellow"><i class="fas fa-calendar-day"></i></div>
           </div>
-          <div class="kpi-value" style="color: var(--yellow);"><span class="kpi-unit">€</span><span id="kpi-month">0.00</span></div>
+          <div class="kpi-value"><span class="kpi-unit">€</span><span id="kpi-month">0.00</span></div>
           <div class="kpi-label">Este mes</div>
         </div>
-        <div class="kpi-card" data-color="violet" data-kpi="kpi-streak">
-          <div class="kpi-tooltip">Días consecutivos completando al menos una encuesta</div>
+        <div class="kpi-card">
           <div class="kpi-header">
             <div class="kpi-icon violet"><i class="fas fa-fire-flame-curved"></i></div>
           </div>
-          <div class="kpi-value" style="color: var(--accent2);"><span id="kpi-streak">0</span><span class="kpi-unit" style="font-size:13px">días</span></div>
+          <div class="kpi-value"><span id="kpi-streak">0</span><span class="kpi-unit" style="font-size:13px">días</span></div>
           <div class="kpi-label">Racha activa</div>
         </div>
-        <div class="kpi-card" data-color="yellow" data-kpi="kpi-best">
-          <div class="kpi-tooltip">Mes con mayor cantidad de ganancias registradas</div>
+        <div class="kpi-card">
           <div class="kpi-header">
             <div class="kpi-icon yellow"><i class="fas fa-trophy"></i></div>
           </div>
-          <div class="kpi-value" style="color: var(--yellow);"><span class="kpi-unit">€</span><span id="kpi-best">0.00</span></div>
+          <div class="kpi-value"><span class="kpi-unit">€</span><span id="kpi-best">0.00</span></div>
           <div class="kpi-label" id="kpi-best-label">Mejor mes</div>
         </div>
       </div>
@@ -1258,13 +908,7 @@ html { transition: background 0.35s ease, color 0.35s ease; }
             </tr></thead>
             <tbody id="historyTbody"></tbody>
           </table>
-          <div class="no-results" id="noResults" style="display:none">
-  <div style="text-align:center;padding:40px 20px">
-    <i class="fas fa-search" style="font-size:24px;color:var(--t3);margin-bottom:12px;display:block"></i>
-    <div style="color:var(--t3);font-size:13px;margin-bottom:4px">Sin resultados</div>
-    <div style="color:var(--t3);font-size:11px;opacity:0.7">Prueba con otros filtros o términos de búsqueda</div>
-  </div>
-</div>
+          <div class="no-results" id="noResults" style="display:none">Sin resultados</div>
         </div>
         <div style="margin-top:10px;font-size:12px;color:var(--t3);text-align:right" id="histCount"></div>
       </div>
@@ -1319,56 +963,6 @@ html { transition: background 0.35s ease, color 0.35s ease; }
 </div>
 
 <div id="toast-wrap"></div>
-
-<!-- SIDEBAR OVERLAY (mobile) -->
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
-
-<!-- QUICK ADD FAB -->
-<button class="fab" id="fabBtn" onclick="openQuickAdd()" title="Añadir entrada (N)" aria-label="Añadir entrada">
-  <i class="fas fa-plus"></i>
-</button>
-
-<!-- QUICK ADD MODAL -->
-<div class="modal-overlay" id="quickAddModal">
-  <div class="modal">
-    <h3>Nueva entrada</h3>
-    <p>Registra una transacción manualmente</p>
-    <label for="qa-type">Tipo</label>
-    <select id="qa-type">
-      <option value="encuesta">Encuesta completada</option>
-      <option value="retiro">Retiro PayPal</option>
-      <option value="bonus">Bono recibido</option>
-      <option value="screener">Screener</option>
-      <option value="descalificado">Descalificado</option>
-    </select>
-    <label for="qa-amount">Importe (€)</label>
-    <input type="text" inputmode="decimal" id="qa-amount" placeholder="0.00">
-    <label for="qa-concept">Concepto (opcional)</label>
-    <input type="text" id="qa-concept" placeholder="Descripción de la entrada">
-    <div class="modal-actions">
-      <button class="modal-cancel" onclick="closeQuickAdd()">Cancelar</button>
-      <button class="modal-submit" onclick="submitQuickAdd()">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<!-- STATUS BAR -->
-<footer class="status-bar" id="statusBar">
-  <div class="status-item">
-    <div class="status-dot" id="statusDot" style="background:var(--yellow)"></div>
-    <span id="statusText">Modo demo</span>
-  </div>
-  <div class="status-sep"></div>
-  <div class="status-item">
-    <i class="fas fa-database" style="font-size:10px"></i>
-    <span id="statusRecords">0 registros</span>
-  </div>
-  <div class="status-sep"></div>
-  <div class="status-item">
-    <i class="fas fa-keyboard" style="font-size:10px"></i>
-    <span>1-4 Navegar · Ctrl+R Refrescar · T Tema · N Nueva</span>
-  </div>
-</footer>
 
 <script>
 // ══════════════════════════════════════
@@ -1499,7 +1093,6 @@ auth.onAuthStateChanged(user => {
 
   if (user) {
     uid = user.uid;
-    el('connStatus').style.display = 'block';
 
     // Mostrar UI de usuario autenticado
     el('loginBtn').style.display  = 'none';
@@ -1510,26 +1103,19 @@ auth.onAuthStateChanged(user => {
     el('uidText').textContent     = user.uid;
 
     hide('authPrompt');
-    // Remove demo banner if present
-    const demoBanner = document.querySelector('.demo-banner');
-    if (demoBanner) demoBanner.remove();
-    document.getElementById('fabBtn').style.opacity = '1';
     loadData(user.uid);
 
   } else {
     uid = null;
-    isDemoMode = true;
-    el('connStatus').style.display = 'none';
 
     // Mostrar UI de usuario no autenticado
     el('loginBtn').style.display = '';
     el('userArea').style.display = 'none';
     el('uidWidget').classList.remove('show');
 
-    hide('authPrompt');
+    show('authPrompt');
     hide('loadingOverlay');
-    // Reload demo data when logged out
-    loadDemoData();
+    resetAll();
   }
 });
 
@@ -1561,11 +1147,8 @@ function loadData(u) {
       allData = Object.entries(raw)
         .map(([id, v]) => ({ ...v, id, fecha: parseDate(v.fecha) }))
         .sort((a, b) => b.fecha - a.fecha);
-      isDemoMode = false;
       processAll();
       renderHistory();
-      updateStatusBar();
-      buildMainChart();
       toast('Datos cargados correctamente');
     })
     .catch(e => {
@@ -1587,11 +1170,8 @@ function refreshData() {
       allData = Object.entries(raw)
         .map(([id, v]) => ({ ...v, id, fecha: parseDate(v.fecha) }))
         .sort((a, b) => b.fecha - a.fecha);
-      isDemoMode = false;
       processAll();
       renderHistory();
-      updateStatusBar();
-      buildMainChart();
       toast('Datos actualizados');
     })
     .catch(e => {
@@ -2000,7 +1580,7 @@ function buildMainChart(data, mode) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: 'rgba(8,10,8,0.95)', padding: 10, cornerRadius: 8,
+          backgroundColor: 'rgba(10,10,15,0.95)', padding: 10, cornerRadius: 8,
           callbacks: { label: c => ` €${c.parsed.y.toFixed(2)}` }
         }
       },
@@ -2038,7 +1618,7 @@ function buildBarChart() {
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false },
-        tooltip: { backgroundColor: 'rgba(8,10,8,0.95)', padding: 10, callbacks: { label: c => ` €${c.parsed.y.toFixed(2)}` } }
+        tooltip: { backgroundColor: 'rgba(10,10,15,0.95)', padding: 10, callbacks: { label: c => ` €${c.parsed.y.toFixed(2)}` } }
       },
       scales: {
         y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8b8b9e' }, border: { display: false } },
@@ -2060,13 +1640,13 @@ function buildDonutChart() {
     type: 'doughnut',
     data: { labels: labs, datasets: [{ data: labs.map(k => types[k]),
       backgroundColor: labs.map(k => colors[k] || '#444'),
-      borderColor: '#0d100d', borderWidth: 3
+      borderColor: '#111118', borderWidth: 3
     }]},
     options: {
       responsive: true, maintainAspectRatio: false, cutout: '68%',
       plugins: {
         legend: { position: 'right', labels: { color: '#8b8b9e', font: { size: 12 }, padding: 10 } },
-        tooltip: { backgroundColor: 'rgba(8,10,8,0.95)', padding: 10 }
+        tooltip: { backgroundColor: 'rgba(10,10,15,0.95)', padding: 10 }
       }
     }
   });
@@ -2193,22 +1773,7 @@ function toast(msg, type = 'ok') {
 // UTILS
 // ══════════════════════════════════════
 const el   = id => document.getElementById(id);
-const s = (id, v) => {
-  const e = el(id);
-  if (!e) return;
-  // Animate numeric KPI values
-  if (animatedIds.has(id) && v !== undefined && v !== null) {
-    const numVal = parseFloat(v);
-    if (!isNaN(numVal)) {
-      const prev = parseFloat(e.textContent) || 0;
-      if (Math.abs(numVal - prev) > 0.001) {
-        animateValue(e, prev, numVal, 600, '', '');
-        return;
-      }
-    }
-  }
-  e.textContent = v;
-};
+const s    = (id, v) => { const e = el(id); if (e) e.textContent = v; };
 const show = id => { const e = el(id); if (e) e.style.display = ''; };
 const hide = id => { const e = el(id); if (e) e.style.display = 'none'; };
 const fmt  = v  => parseFloat(v || 0).toFixed(2);
@@ -2269,275 +1834,6 @@ function parseDate(v) {
     });
   }
 });
-</script>
-
-<script>
-// ══════════════════════════════════════
-// LIVE CLOCK
-// ══════════════════════════════════════
-function updateClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2, '0');
-  const m = String(now.getMinutes()).padStart(2, '0');
-  const s = String(now.getSeconds()).padStart(2, '0');
-  const clockEl = document.getElementById('liveClock');
-  if (clockEl) clockEl.textContent = h + ':' + m + ':' + s;
-}
-updateClock();
-setInterval(updateClock, 1000);
-
-// ══════════════════════════════════════
-// KPI HOVER TOOLTIPS
-// ══════════════════════════════════════
-const KPI_TIPS = {
-  'kpi-total': 'Total acumulado de todas las encuestas completadas y bonos',
-  'kpi-balance': 'Dinero ganado menos retiros realizados',
-  'kpi-withdrawn': 'Total de dinero retirado a través de PayPal',
-  'kpi-rate': 'Porcentaje de encuestas completadas sobre intentos totales',
-  'kpi-avg': 'Promedio ganado por cada encuesta completada',
-  'kpi-month': 'Ganancias acumuladas durante el mes actual',
-  'kpi-streak': 'Días consecutivos completando al menos una encuesta',
-  'kpi-best': 'Mes con mayor cantidad de ganancias registradas'
-};
-document.addEventListener('mouseover', e => {
-  const card = e.target.closest('.kpi-card');
-  if (!card) return;
-  card.title = '';
-});
-
-// ══════════════════════════════════════
-// ANIMATED NUMBER COUNTERS
-// ══════════════════════════════════════
-function animateValue(el, start, end, duration, prefix, suffix) {
-  if (!el || start === end) { if (el) el.textContent = (prefix||'') + parseFloat(end).toFixed(2) + (suffix||''); return; }
-  const startTime = performance.now();
-  function update(currentTime) {
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
-    const current = start + (end - start) * eased;
-    el.textContent = (prefix||'') + current.toFixed(2) + (suffix||'');
-    if (progress < 1) requestAnimationFrame(update);
-    else el.textContent = (prefix||'') + parseFloat(end).toFixed(2) + (suffix||'');
-  }
-  requestAnimationFrame(update);
-}
-
-// ══════════════════════════════════════
-// SIDEBAR PERSISTENCE
-// ══════════════════════════════════════
-(function() {
-  const saved = localStorage.getItem('sidebarCollapsed');
-  if (saved === 'true') {
-    collapsed = true;
-    document.getElementById('sidebar').classList.add('collapsed');
-  }
-})();
-
-// Override toggleSidebar to persist state
-const _origToggle = toggleSidebar;
-toggleSidebar = function() {
-  _origToggle();
-  localStorage.setItem('sidebarCollapsed', collapsed ? 'true' : 'false');
-};
-
-// ══════════════════════════════════════
-// MOBILE HAMBURGER MENU
-// ══════════════════════════════════════
-function toggleMobileSidebar() {
-  const sb = document.getElementById('sidebar');
-  const ov = document.getElementById('sidebarOverlay');
-  const isOpen = sb.classList.contains('mobile-open');
-  if (isOpen) { closeMobileSidebar(); }
-  else { sb.classList.add('mobile-open'); ov.classList.add('open'); }
-}
-function closeMobileSidebar() {
-  document.getElementById('sidebar').classList.remove('mobile-open');
-  document.getElementById('sidebarOverlay').classList.remove('open');
-}
-
-// ══════════════════════════════════════
-// THEME TOGGLE
-// ══════════════════════════════════════
-(function() {
-  const saved = localStorage.getItem('theme');
-  if (saved === 'light') {
-    document.documentElement.classList.add('light');
-    const icon = document.getElementById('themeIcon');
-    if (icon) { icon.className = 'fas fa-sun'; }
-  }
-})();
-function toggleTheme() {
-  const html = document.documentElement;
-  const icon = document.getElementById('themeIcon');
-  const isLight = html.classList.toggle('light');
-  localStorage.setItem('theme', isLight ? 'light' : 'dark');
-  if (icon) icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
-  // Rebuild charts with new theme colors
-  if (allData.length) {
-    setTimeout(() => { buildMainChart(); buildBarChart(); buildDonutChart(); }, 100);
-  }
-}
-
-// ══════════════════════════════════════
-// QUICK ADD FEATURE
-// ══════════════════════════════════════
-function openQuickAdd() {
-  if (!uid) { toast('Inicia sesión para añadir entradas', 'warn'); return; }
-  document.getElementById('quickAddModal').classList.add('open');
-  document.getElementById('qa-type').focus();
-}
-function closeQuickAdd() {
-  document.getElementById('quickAddModal').classList.remove('open');
-  document.getElementById('qa-amount').value = '';
-  document.getElementById('qa-concept').value = '';
-}
-function submitQuickAdd() {
-  const type = document.getElementById('qa-type').value;
-  const amountRaw = document.getElementById('qa-amount').value.replace(',', '.');
-  const amount = parseFloat(amountRaw);
-  const concept = document.getElementById('qa-concept').value.trim();
-
-  if (isNaN(amount) || amount <= 0) {
-    toast('Introduce un importe válido', 'err');
-    return;
-  }
-
-  const entry = {
-    tipo: type,
-    importe: type === 'retiro' ? -Math.abs(amount) : Math.abs(amount),
-    concepto: concept || getDefaultConcept(type),
-    fecha: new Date().toISOString(),
-    timestamp: Date.now()
-  };
-
-  if (!uid) return;
-  db.ref(`users/${uid}/surveys`).push(entry)
-    .then(() => {
-      closeQuickAdd();
-      toast('Entrada guardada');
-      refreshData();
-    })
-    .catch(e => toast('Error: ' + e.message, 'err'));
-}
-function getDefaultConcept(type) {
-  const map = {
-    encuesta: 'Encuesta manual',
-    retiro: 'Retiro manual',
-    bonus: 'Bono manual',
-    screener: 'Screener manual',
-    descalificado: 'Descalificado manual'
-  };
-  return map[type] || 'Entrada manual';
-}
-
-// ══════════════════════════════════════
-// DEMO DATA MODE
-// ══════════════════════════════════════
-const DEMO_DATA = [
-  { tipo:'encuesta', importe:1.85, concepto:'Panel de opinión', fecha:new Date(Date.now()-1*86400000).toISOString() },
-  { tipo:'encuesta', importe:2.40, concepto:'Estudio de mercado', fecha:new Date(Date.now()-1*86400000-3600000).toISOString() },
-  { tipo:'screener', importe:0, concepto:'Screener filtrado', fecha:new Date(Date.now()-2*86400000).toISOString() },
-  { tipo:'encuesta', importe:3.10, concepto:'Encuesta de productos', fecha:new Date(Date.now()-2*86400000-7200000).toISOString() },
-  { tipo:'bonus', importe:0.50, concepto:'Bono por completar 5 encuestas', fecha:new Date(Date.now()-3*86400000).toISOString() },
-  { tipo:'encuesta', importe:1.20, concepto:'Encuesta rápida', fecha:new Date(Date.now()-3*86400000-5400000).toISOString() },
-  { tipo:'descalificado', importe:0, concepto:'No cumple perfil', fecha:new Date(Date.now()-4*86400000).toISOString() },
-  { tipo:'encuesta', importe:2.75, concepto:'Encuesta tecnológica', fecha:new Date(Date.now()-5*86400000).toISOString() },
-  { tipo:'encuesta', importe:4.00, concepto:'Focus group online', fecha:new Date(Date.now()-6*86400000).toISOString() },
-  { tipo:'retiro', importe:-5.00, concepto:'Retiro PayPal', fecha:new Date(Date.now()-7*86400000).toISOString() },
-  { tipo:'encuesta', importe:1.95, concepto:'Encuesta alimentaria', fecha:new Date(Date.now()-8*86400000).toISOString() },
-  { tipo:'encuesta', importe:2.20, concepto:'Encuesta de transporte', fecha:new Date(Date.now()-10*86400000).toISOString() },
-  { tipo:'bonus', importe:1.00, concepto:'Bono de bienvenida', fecha:new Date(Date.now()-12*86400000).toISOString() },
-  { tipo:'encuesta', importe:3.50, concepto:'Encuesta de salud', fecha:new Date(Date.now()-15*86400000).toISOString() },
-  { tipo:'encuesta', importe:1.60, concepto:'Encuesta de educación', fecha:new Date(Date.now()-18*86400000).toISOString() },
-  { tipo:'encuesta', importe:2.80, concepto:'Encuesta financiera', fecha:new Date(Date.now()-22*86400000).toISOString() },
-  { tipo:'retiro', importe:-10.00, concepto:'Retiro PayPal', fecha:new Date(Date.now()-25*86400000).toISOString() },
-  { tipo:'encuesta', importe:5.20, concepto:'Encuesta premium', fecha:new Date(Date.now()-30*86400000).toISOString() },
-  { tipo:'encuesta', importe:1.90, concepto:'Encuesta de ocio', fecha:new Date(Date.now()-35*86400000).toISOString() },
-  { tipo:'bonus', importe:0.75, concepto:'Bono semanal', fecha:new Date(Date.now()-40*86400000).toISOString() },
-];
-
-let isDemoMode = true;
-
-function loadDemoData() {
-  isDemoMode = true;
-  allData = DEMO_DATA.map((d, i) => ({
-    ...d, id: 'demo-' + i, fecha: new Date(d.fecha), timestamp: new Date(d.fecha).getTime()
-  })).sort((a, b) => b.fecha - a.fecha);
-
-  hide('authPrompt');
-  hide('loadingOverlay');
-  processAll();
-  renderHistory();
-  updateStatusBar();
-  buildMainChart();
-
-  // Show demo banner
-  const overview = document.getElementById('view-overview');
-  const existing = document.querySelector('.demo-banner');
-  if (!existing) {
-    const banner = document.createElement('div');
-    banner.className = 'demo-banner';
-    banner.innerHTML = '<i class="fas fa-flask"></i> Modo demostración — los datos son de ejemplo. <strong>Inicia sesión</strong> para ver tus datos reales.';
-    overview.insertBefore(banner, overview.firstChild);
-  }
-}
-
-// Update auth observer to load demo data when not authenticated
-// Override the existing onAuthStateChanged behavior
-const origAuthObserver = auth.onAuthStateChanged;
-
-// Status bar updater
-function updateStatusBar() {
-  const dot = document.getElementById('statusDot');
-  const text = document.getElementById('statusText');
-  const records = document.getElementById('statusRecords');
-  if (isDemoMode) {
-    dot.style.background = 'var(--yellow)';
-    dot.className = 'status-dot yellow pulse-live';
-    text.textContent = 'Modo demo';
-  } else if (uid) {
-    dot.style.background = 'var(--green)';
-    dot.className = 'status-dot green';
-    text.textContent = 'Conectado';
-  } else {
-    dot.style.background = 'var(--red)';
-    dot.className = 'status-dot red';
-    text.textContent = 'Desconectado';
-  }
-  records.textContent = allData.length + ' registros';
-}
-
-// ══════════════════════════════════════
-// ENHANCED KEYBOARD SHORTCUTS
-// ══════════════════════════════════════
-document.addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
-    if (e.key === 'Escape') {
-      closeQuickAdd();
-      closeExport();
-    }
-    return;
-  }
-  if (e.key === '1') { navigate('overview', document.querySelectorAll('.nav-item')[0]); document.querySelectorAll('.nav-item')[0]?.classList.add('active'); }
-  if (e.key === '2') { navigate('analytics', document.querySelectorAll('.nav-item')[1]); }
-  if (e.key === '3') { navigate('history', document.querySelectorAll('.nav-item')[2]); }
-  if (e.key === '4') { navigate('goals', document.querySelectorAll('.nav-item')[3]); }
-  if (e.key === 'r' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); refreshData(); }
-  if (e.key === 'Escape') { closeQuickAdd(); closeExport(); closeMobileSidebar(); }
-  if (e.key === 't' || e.key === 'T') { toggleTheme(); }
-  if (e.key === 'n' || e.key === 'N') { openQuickAdd(); }
-});
-
-// ══════════════════════════════════════
-// INIT - Load demo data on start
-// ══════════════════════════════════════
-// Load demo mode immediately so the dashboard looks alive
-setTimeout(() => {
-  loadDemoData();
-  // Hide FAB in demo mode (show it but it'll warn on click)
-  document.getElementById('fabBtn').style.opacity = '0.6';
-}, 300);
 </script>
 </body>
 </html>
