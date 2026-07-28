@@ -55,6 +55,7 @@
         .main { grid-area: main; background: var(--bg-main); border-radius: var(--radius-md) 0 0 0; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; gap: 16px; background: rgba(10,10,10,0.7); backdrop-filter: blur(20px); flex-shrink: 0; }
         .topbar-nav { display: flex; gap: 8px; }
+        .topbar-nav button { width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.7); border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
         .search-bar { flex: 1; max-width: 450px; position: relative; }
         .search-bar i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-3); font-size: 0.9rem; }
         .search-bar input { width: 100%; background: var(--bg-hover); border: 2px solid transparent; border-radius: 500px; padding: 10px 16px 10px 40px; font-size: 0.9rem; color: var(--text-1); outline: none; transition: var(--transition); font-family: inherit; }
@@ -163,37 +164,32 @@
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* MOBILE LAYOUT CLASS (Controlado por JS para iPads) */
+        /* MOBILE LAYOUT */
         .mobile-nav { display: none; }
-        body.mobile-layout {
-            grid-template-areas: "main main" "player player";
-            grid-template-rows: 1fr auto;
-            grid-template-columns: 1fr;
-            padding-bottom: calc(var(--player-h) + var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px));
+        @media (max-width: 1024px) {
+            body { grid-template-areas: "main main" "player player"; grid-template-rows: 1fr auto; grid-template-columns: 1fr; padding-bottom: calc(var(--player-h) + var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px)); }
+            .sidebar { display: none; }
+            .player-center, .player-right { display: none; }
+            .player-btns-mobile { display: flex; align-items: center; gap: 16px; }
+            .main { border-radius: 0; margin: 0; } 
+            .topbar { border-radius: 0; }
+            .player { grid-template-columns: 1fr; position: fixed; bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px)); left: 0; width: 100%; z-index: 1000; height: var(--player-h); border: none; background: var(--bg-card); }
+            .player-left { justify-content: space-between; padding: 0 16px; }
+            .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); background: linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0.9)); backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; z-index: 1000; border-top: 1px solid var(--border); }
+            .mobile-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-3); text-decoration: none; font-size: 0.68rem; font-weight: 600; }
+            .mobile-nav-item.active { color: var(--text-1); }
+            .mobile-nav-item i { font-size: 1.4rem; }
+            .playlist-title { font-size: 2rem; }
+            .tracklist-header { display: none; }
+            .tracklist-row { grid-template-columns: 40px 1fr auto; }
+            .track-album { display: none; }
         }
-        body.mobile-layout .sidebar { display: none; }
-        body.mobile-layout .player-center, body.mobile-layout .player-right { display: none; }
-        body.mobile-layout .player-btns-mobile { display: flex; align-items: center; gap: 16px; }
-        body.mobile-layout .main { border-radius: 0; margin: 0; } 
-        body.mobile-layout .topbar { border-radius: 0; }
-        body.mobile-layout .player { grid-template-columns: 1fr; position: fixed; bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px)); left: 0; width: 100%; z-index: 1000; height: var(--player-h); border: none; background: var(--bg-card); }
-        body.mobile-layout .player-left { justify-content: space-between; padding: 0 16px; }
-        body.mobile-layout .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); background: linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0.9)); backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; z-index: 1000; border-top: 1px solid var(--border); }
-        body.mobile-layout .mobile-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-3); text-decoration: none; font-size: 0.68rem; font-weight: 600; }
-        body.mobile-layout .mobile-nav-item.active { color: var(--text-1); }
-        body.mobile-layout .mobile-nav-item i { font-size: 1.4rem; }
-        body.mobile-layout .playlist-title { font-size: 2rem; }
-        body.mobile-layout .tracklist-header { display: none; }
-        body.mobile-layout .tracklist-row { grid-template-columns: 40px 1fr auto; }
-        body.mobile-layout .track-album { display: none; }
-        
-        @media (max-width: 480px) { body.mobile-layout .stations-grid { gap: 16px; grid-template-columns: repeat(2, 1fr); } body.mobile-layout .player-loc { display: none; } }
+        @media (max-width: 480px) { .stations-grid { gap: 16px; grid-template-columns: repeat(2, 1fr); } .player-loc { display: none; } }
         ::-webkit-scrollbar { width: 10px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 5px; }
     </style>
 </head>
 <body class="logged-out">
 
-    <!-- Elemento de audio nativo en el DOM (Mejor compatibilidad con iOS Safari) -->
     <audio id="audio-player" preload="none"></audio>
 
     <aside class="sidebar">
@@ -236,7 +232,6 @@
             <div id="view-lyrics" class="view-container"><div class="lyrics-view" id="lyrics-content"></div></div>
         </div>
 
-        <!-- DEVICE POPUP -->
         <div class="device-popup" id="device-popup">
             <div class="device-popup-title">Conectar a un dispositivo</div>
             <div id="device-list-popup"></div>
@@ -291,7 +286,7 @@
         const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getDatabase(app), provider = new GoogleAuthProvider();
 
         let radioStations = []; 
-        const currentAudio = document.getElementById('audio-player'); // Audio en el DOM
+        const currentAudio = document.getElementById('audio-player');
         let currentStation = null, isPlaying = false, currentUser = null, isShuffle = false;
         let favorites = [], filteredStations = [];
         let lastVolume = 80, muted = false;
@@ -321,30 +316,6 @@
             remoteIndicator: document.getElementById('remote-indicator'), remoteDeviceName: document.getElementById('remote-device-name')
         };
 
-        // --- DETECCIÓN DE IPAD/MÓVIL PARA FORZAR CSS ---
-        function checkMobileLayout() {
-            const isiPad = (navigator.userAgent.match(/(iPad)/) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
-            const isSmallScreen = window.innerWidth <= 1024;
-            if (isSmallScreen || isiPad) {
-                document.body.classList.add('mobile-layout');
-            } else {
-                document.body.classList.remove('mobile-layout');
-            }
-        }
-        window.addEventListener('resize', checkMobileLayout);
-        checkMobileLayout(); // Ejecutar al cargar
-
-        // --- TRUCO PARA SAFARI (iOS/iPadOS): Desbloquear audio en la primera interacción ---
-        function unlockAudio() {
-            currentAudio.play().then(() => {
-                currentAudio.pause();
-            }).catch(e => {});
-            document.body.removeEventListener('click', unlockAudio);
-            document.body.removeEventListener('touchstart', unlockAudio);
-        }
-        document.body.addEventListener('click', unlockAudio);
-        document.body.addEventListener('touchstart', unlockAudio);
-
         function getDeviceName() {
             let ua = navigator.userAgent;
             let browser = "Navegador";
@@ -362,7 +333,6 @@
             return `${browser} - ${os}`;
         }
 
-        /* ── API FETCH (España + Globales filtradas) ── */
         async function fetchStations() {
             try {
                 const [esRes, globalRes] = await Promise.all([
@@ -387,7 +357,6 @@
             }
         }
 
-        /* ── Auth & Device Registration ── */
         onAuthStateChanged(auth, user => {
             currentUser = user;
             if (user) {
@@ -418,7 +387,6 @@
             
             window.addEventListener('beforeunload', () => remove(devRef));
 
-            // Latido cada 10s
             setInterval(() => {
                 update(devRef, { lastSeen: Date.now() });
             }, 10000);
@@ -432,20 +400,23 @@
                 updateVolumeUI(vol);
             });
 
-            // --- LIMPIEZA DE DISPOSITIVOS FANTASMA ---
             onValue(ref(db, `users/${uid}/devices`), snap => {
                 const dbDevices = snap.val() || {};
                 const now = Date.now();
                 let updatedDevices = {};
                 
                 Object.keys(dbDevices).forEach(id => {
-                    // Si el dispositivo lleva más de 25 segundos sin reportar, se borra
                     if (now - dbDevices[id].lastSeen < 25000) {
                         updatedDevices[id] = dbDevices[id];
                     } else {
-                        remove(ref(db, `users/${uid}/devices/${id}`)); // Eliminar de Firebase
+                        remove(ref(db, `users/${uid}/devices/${id}`));
                     }
                 });
+                
+                // Asegurar que el dispositivo local siempre esté en la lista
+                if (!updatedDevices[deviceId]) {
+                    updatedDevices[deviceId] = { name: getDeviceName(), lastSeen: now };
+                }
                 
                 registeredDevices = updatedDevices;
                 renderDevicePopup();
@@ -472,18 +443,16 @@
                 renderDevicePopup();
                 updateRemoteIndicator();
 
-                // LÓGICA DE AUDIO LOCAL
                 if (activeDeviceId === deviceId) {
                     if (station && station.streamUrl) {
                         if (currentAudio.src !== station.streamUrl) {
                             currentAudio.src = station.streamUrl;
-                            currentAudio.load(); // Importante para Safari
+                            currentAudio.load(); 
                         }
                         currentAudio.volume = dom.volSlider.value / 100;
                         if (isPlaying) {
                             currentAudio.play().catch(e => {
                                 console.error("Safari bloqueó autoplay. El usuario debe interactuar.");
-                                // Mostrar botón de play pulsable para que el usuario lo desbloquee
                                 updatePlayBtn(); 
                             });
                         } else {
@@ -498,7 +467,6 @@
                 if (currentView === 'queue') renderQueue();
                 renderFavorites();
                 
-                // --- MEDIA SESSION API (Botones físicos de volumen en iOS) ---
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.metadata = new MediaMetadata({
                         title: currentStation?.name || 'RadioStream',
@@ -523,7 +491,6 @@
 
         function toggleFavorite(id) { if (!currentUser) return alert("Inicia sesión."); const favRef = ref(db, `users/${currentUser.uid}/favorites/${id}`); favorites.includes(id) ? remove(favRef) : set(favRef, true); }
 
-        /* ── Volume UI ── */
         function updateVolumeUI(value) {
             const icon = value == 0 ? 'fa-volume-mute' : (value < 50 ? 'fa-volume-down' : 'fa-volume-up');
             dom.volIcon.querySelector('i').className = `fas ${icon}`;
@@ -532,7 +499,6 @@
         dom.volSlider.addEventListener('input', () => { if (!currentUser) return; set(ref(db, `users/${currentUser.uid}/settings/volume`), parseInt(dom.volSlider.value)); });
         dom.volIcon.addEventListener('click', () => { dom.volSlider.value = muted ? (lastVolume > 0 ? lastVolume : 80) : 0; dom.volSlider.dispatchEvent(new Event('input')); });
 
-        /* ── Views ── */
         function showView(viewId) {
             currentView = viewId;
             document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
@@ -548,7 +514,6 @@
             item.addEventListener('click', (e) => { e.preventDefault(); navigateTo(item.dataset.view); if (item.dataset.view === 'search') dom.searchInput.focus(); });
         });
 
-        /* ── Render Home & Playlist ── */
         function getCollectionCover(name) { return radioStations.find(s => s.favicon && s.favicon.trim() !== '' && (s.genre === name || s.location === name))?.favicon || ''; }
         function renderHomeGrids() {
             renderGrid([...new Set(radioStations.map(s => s.genre))].filter(g => g).slice(0, 12), 'genres-grid', 'genre');
@@ -615,7 +580,6 @@
             content.innerHTML = `<div class="lyrics-view"><div class="lyrics-art">${imgHtml}</div><div class="lyrics-title">${currentStation.name}</div><div class="lyrics-subtitle">${currentStation.location} • ${currentStation.genre}</div><div class="lyrics-live"><div class="live-dot"></div> En directo</div></div>`;
         }
 
-        /* ── Player Logic & Spotify Connect Actions ── */
         function updatePlayerUI() {
             if (currentStation) {
                 dom.playerArt.innerHTML = currentStation.favicon ? `<img src="${currentStation.favicon}" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=&quot;fas fa-music&quot;></i>'">` : `<i class="fas fa-music"></i>`;
@@ -644,7 +608,6 @@
 
         function togglePlayPause() {
             if (!currentUser || !currentStation) return;
-            // Si es el dispositivo activo, intentamos reproducir/pausar localmente inmediatamente
             if (activeDeviceId === deviceId) {
                 if (currentAudio.paused) {
                     currentAudio.play().catch(e => console.error("Error al reanudar:", e));
@@ -652,7 +615,6 @@
                     currentAudio.pause();
                 }
             }
-            // Actualizamos Firebase
             update(ref(db, `users/${currentUser.uid}/playback`), { isPlaying: !isPlaying });
         }
 
@@ -681,7 +643,6 @@
             renderQueue();
         }
 
-        /* ── Device Popup Logic ── */
         function renderDevicePopup() {
             const popupList = document.getElementById('device-list-popup');
             if (!currentUser) return;
@@ -713,7 +674,6 @@
             if (!currentUser) return;
             update(ref(db, `users/${currentUser.uid}/playback`), { activeDevice: targetDeviceId });
             
-            // TRUCO PARA SAFARI: Si transfiero a ESTE dispositivo, fuerzo el play local inmediatamente
             if (targetDeviceId === deviceId && currentStation && currentStation.streamUrl) {
                 if (currentAudio.src !== currentStation.streamUrl) {
                     currentAudio.src = currentStation.streamUrl;
@@ -743,7 +703,6 @@
         document.addEventListener('click', (e) => { if (!dom.devicePopup.contains(e.target) && e.target !== dom.deviceBtn) dom.devicePopup.classList.remove('visible'); });
         dom.remoteIndicator.addEventListener('click', () => { dom.devicePopup.classList.toggle('visible'); renderDevicePopup(); });
 
-        /* ── Event Listeners ── */
         document.addEventListener('DOMContentLoaded', () => {
             fetchStations(); updateVolumeUI(dom.volSlider.value);
             dom.searchInput.addEventListener('input', applyFilters);
