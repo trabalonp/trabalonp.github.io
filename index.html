@@ -339,6 +339,7 @@
       border-color: var(--accent); 
       box-shadow: 0 20px 50px rgba(0,0,0,0.5);
       z-index: 10 !important;
+      transform: scale(1.03);
     }
 
     .pc-head {
@@ -655,37 +656,37 @@
     </div>
 
     <div class="projects-desk reveal" id="projectsDesk">
-      <a href="academicos" class="project-card" data-id="1">
+      <a href="academicos" class="project-card" style="left: 2%; top: 15%;">
         <div class="pc-head"><span>PROY / 01</span><span>ACADÉMICO</span></div>
         <div class="pc-title">UPCT-Datos</div>
         <div class="pc-desc">Acceso rápido y organizado a datos y recursos académicos de la UPCT.</div>
         <div class="pc-footer"><span>Visitar</span><i class="fas fa-arrow-up-right-from-square"></i></div>
       </a>
-      <a href="mecanografia" class="project-card" data-id="2">
+      <a href="mecanografia" class="project-card" style="left: 25%; top: 5%;">
         <div class="pc-head"><span>PROY / 02</span><span>HERRAMIENTA</span></div>
         <div class="pc-title">Mecanografía</div>
         <div class="pc-desc">Practica y mejora tu velocidad de escritura con ejercicios adaptados.</div>
         <div class="pc-footer"><span>Visitar</span><i class="fas fa-arrow-up-right-from-square"></i></div>
       </a>
-      <a href="comparador-graficas" class="project-card" data-id="3">
+      <a href="comparador-graficas" class="project-card" style="left: 50%; top: 25%;">
         <div class="pc-head"><span>PROY / 03</span><span>TECH</span></div>
         <div class="pc-title">Comparador Gráficas</div>
         <div class="pc-desc">Compara rendimiento, precio y especificaciones de tarjetas gráficas al instante.</div>
         <div class="pc-footer"><span>Visitar</span><i class="fas fa-arrow-up-right-from-square"></i></div>
       </a>
-      <a href="compresor-online" class="project-card" data-id="4">
+      <a href="compresor-online" class="project-card" style="left: 10%; top: 55%;">
         <div class="pc-head"><span>PROY / 04</span><span>UTILIDADES</span></div>
         <div class="pc-title">Compresor Online</div>
         <div class="pc-desc">Comprime imágenes y archivos directamente desde el navegador.</div>
         <div class="pc-footer"><span>Visitar</span><i class="fas fa-arrow-up-right-from-square"></i></div>
       </a>
-      <a href="traductor" class="project-card" data-id="5">
+      <a href="traductor" class="project-card" style="left: 38%; top: 60%;">
         <div class="pc-head"><span>PROY / 05</span><span>IA / UTILS</span></div>
         <div class="pc-title">Traductor</div>
         <div class="pc-desc">Traduce textos entre múltiples idiomas con traducción inteligente y rápida.</div>
         <div class="pc-footer"><span>Visitar</span><i class="fas fa-arrow-up-right-from-square"></i></div>
       </a>
-      <a href="radio-stream" class="project-card" data-id="6">
+      <a href="radio-stream" class="project-card" style="left: 65%; top: 45%;">
         <div class="pc-head"><span>PROY / 06</span><span>MEDIA</span></div>
         <div class="pc-title">Radio Stream</div>
         <div class="pc-desc">Escucha emisoras de radio en directo desde cualquier parte del mundo.</div>
@@ -963,44 +964,6 @@
       });
     }, { threshold: 0.1 });
     revealEls.forEach(el => revealObs.observe(el));
-
-    /* ===== Random Project Cards Positioning ===== */
-    function positionCardsRandomly() {
-      const desk = document.getElementById('projectsDesk');
-      const cards = desk.querySelectorAll('.project-card');
-      
-      // Reset si ya estaban puestos
-      cards.forEach(card => {
-        card.style.left = '';
-        card.style.top = '';
-        card.style.transform = '';
-      });
-
-      const deskRect = desk.getBoundingClientRect();
-      const padding = 30; // Espacio del borde
-      
-      cards.forEach(card => {
-        const cardWidth = card.offsetWidth;
-        const cardHeight = card.offsetHeight;
-        
-        const maxLeft = deskRect.width - cardWidth - padding;
-        const maxTop = deskRect.height - cardHeight - padding;
-        
-        const left = Math.max(padding, Math.random() * maxLeft);
-        const top = Math.max(padding, Math.random() * maxTop);
-        
-        const rot = (Math.random() - 0.5) * 6; // Rotación sutil aleatoria
-        
-        card.style.left = left + 'px';
-        card.style.top = top + 'px';
-        card.style.transform = `rotate(${rot}deg)`;
-        card.style.zIndex = Math.floor(Math.random() * 5) + 1;
-      });
-    }
-
-    // Posicionar al cargar y al redimensionar la ventana
-    window.addEventListener('load', positionCardsRandomly);
-    window.addEventListener('resize', positionCardsRandomly);
   </script>
 </body>
 </html>
