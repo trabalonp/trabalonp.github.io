@@ -322,8 +322,9 @@
             localStorage.setItem('radio_device_id', deviceId);
         }
         let activeDeviceId = null;
-        let previousActiveDeviceId = null; // Para detectar cambios de dispositivo y recargar el stream
+        let previousActiveDeviceId = null;
         let registeredDevices = {};
+        let latestPlaybackState = null; // Guardar el estado si las emisoras no han cargado
 
         const dom = {
             loginBtn: document.getElementById('login-btn'), logoutBtn: document.getElementById('logout-btn'),
@@ -375,6 +376,20 @@
                 
                 filteredStations = [...radioStations];
                 renderHomeGrids(); renderQueue(); renderFavorites();
+                
+                // Si Firebase ya envió un estado de reproducción mientras cargaban las emisoras, lo aplicamos ahora
+                if (latestPlaybackState && latestPlaybackState.stationId) {
+                    const station = radioStations.find(s => s.id === latestPlaybackState.stationId);
+                    if (station) {
+                        currentStation = station;
+                        updatePlayerUI();
+                        isPlaying = latestPlaybackState.isPlaying;
+                        activeDeviceId = latestPlaybackState.activeDevice;
+                        updatePlayBtn();
+                        updateRemoteIndicator();
+                        renderFavorites();
+                    }
+                }
             } catch (error) {
                 document.getElementById('genres-grid').innerHTML = `<div class="loading-state" style="color: var(--red);">Error al cargar.</div>`;
             }
@@ -397,7 +412,7 @@
                 if (deviceId && activeDeviceId === deviceId) {
                     update(ref(db, `users/${user?.uid || ''}/playback`), { activeDevice: null });
                 }
-                registeredDevices = {}; activeDeviceId = null; previousActiveDeviceId = null; updateRemoteIndicator();
+                registeredDevices = {}; activeDeviceId = null; previousActiveDeviceId = null; latestPlaybackState = null; updateRemoteIndicator();
             }
         });
 
@@ -446,6 +461,8 @@
 
             onValue(ref(db, `users/${uid}/playback`), snap => {
                 const state = snap.val();
+                latestPlaybackState = state; // Guardar por si las emisoras no han cargado
+                
                 if (!state || !state.stationId) {
                     currentStation = null; isPlaying = false; updatePlayerUI();
                     currentAudio.pause();
@@ -456,15 +473,21 @@
                 }
                 
                 const station = radioStations.find(s => s.id === state.stationId);
-                if (station) {
-                    currentStation = station;
-                    updatePlayerUI();
-                }
                 
+                // Actualizar estados globales
                 isPlaying = state.isPlaying;
                 const newActiveDeviceId = state.activeDevice;
                 const justBecameActive = newActiveDeviceId === deviceId && previousActiveDeviceId !== deviceId;
                 activeDeviceId = newActiveDeviceId;
+                
+                // Si la emisora existe en la lista local, actualizamos la UI
+                if (station) {
+                    currentStation = station;
+                    updatePlayerUI();
+                } else {
+                    // Si no existe, esperamos a que fetchStations() termine y lo actualizará
+                    return; 
+                }
                 
                 updatePlayBtn();
                 renderDevicePopup();
