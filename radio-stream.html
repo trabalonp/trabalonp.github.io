@@ -44,7 +44,7 @@
         .favorites-scroll { overflow-y: auto; flex: 1; padding: 0 8px 8px 8px; }
         .fav-item { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); }
         .fav-item:hover, .fav-item.playing { background: var(--bg-hover); }
-        .fav-thumb { width: 48px; height: 48px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; position: relative; background: #333; overflow: hidden; }
+        .fav-thumb { width: 48px; height: 48px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; position: relative; background: #333; overflow: hidden; color: #fff; }
         .fav-item.playing .playing-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: var(--accent); }
         .fav-info { overflow: hidden; flex: 1; }
         .fav-name { font-size: 0.95rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow:ellipsis; }
@@ -80,12 +80,13 @@
         .section-title { display: flex; justify-content: space-between; align-items: center; padding: 20px 0 12px; }
         .section-title h2 { font-size: 1.4rem; font-weight: 700; }
         
-        /* STATION GRID */
+        /* STATION GRID (Cards) */
         .stations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 24px; }
         .station-card { background: var(--bg-card); border-radius: var(--radius-md); padding: 16px; cursor: pointer; transition: background 0.3s ease; position: relative; }
         .station-card:hover { background: var(--bg-hover); }
-        .station-art { width: 100%; aspect-ratio: 1; border-radius: var(--radius-md); margin-bottom: 16px; position: relative; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.5); background: #333; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: #fff; }
+        .station-art { width: 100%; aspect-ratio: 1; border-radius: var(--radius-md); margin-bottom: 16px; position: relative; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.5); background: #333; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: #fff; text-align: center; }
         .station-art img { width: 100%; height: 100%; object-fit: cover; }
+        .station-art i { opacity: 0.7; }
         .play-overlay { position: absolute; bottom: 8px; right: 8px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #000; opacity: 0; transform: translateY(8px); transition: all 0.2s ease; box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
         .station-card:hover .play-overlay { opacity: 1; transform: translateY(0); }
         .station-card-name { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow:ellipsis; }
@@ -94,21 +95,34 @@
         .station-card:hover .card-fav-btn, .card-fav-btn.favorited { opacity: 1; }
         .card-fav-btn.favorited { color: var(--accent); } .card-fav-btn:hover { transform: scale(1.1); }
 
-        /* QUEUE VIEW */
-        .queue-header { padding: 24px 0 16px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
-        .queue-header h2 { font-size: 1.5rem; font-weight: 700; }
-        .queue-list { display: flex; flex-direction: column; gap: 2px; }
-        .queue-item { display: grid; grid-template-columns: 48px 1fr auto; gap: 16px; align-items: center; padding: 8px 12px; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); }
-        .queue-item:hover { background: var(--bg-hover); }
-        .queue-item.playing { background: rgba(29, 185, 84, 0.1); }
-        .queue-item-art { width: 40px; height: 40px; border-radius: 4px; background: #333; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: #fff; overflow: hidden; }
-        .queue-item-art img { width: 100%; height: 100%; object-fit: cover; }
-        .queue-item.playing .queue-item-art { color: var(--accent); }
-        .queue-item-info { overflow: hidden; }
-        .queue-item-name { font-size: 0.95rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow:ellipsis; }
-        .queue-item.playing .queue-item-name { color: var(--accent); }
-        .queue-item-loc { font-size: 0.82rem; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow:ellipsis; text-transform: capitalize; }
-        .queue-item-duration { font-size: 0.82rem; color: var(--text-2); text-transform: capitalize; }
+        /* PLAYLIST / ALBUM VIEW (Spotify Style Tracklist) */
+        .playlist-view { background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 100%); padding: 24px; border-radius: var(--radius-md); margin-top: 16px; }
+        .playlist-header { display: flex; align-items: flex-end; gap: 24px; margin-bottom: 32px; }
+        .playlist-cover { width: 180px; height: 180px; border-radius: var(--radius-md); box-shadow: 0 8px 24px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: #fff; background: #333; overflow: hidden; flex-shrink: 0; }
+        .playlist-cover img { width: 100%; height: 100%; object-fit: cover; }
+        .playlist-meta { display: flex; flex-direction: column; gap: 8px; }
+        .playlist-type { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-1); }
+        .playlist-title { font-size: 4rem; font-weight: 900; line-height: 1; letter-spacing: -0.04em; }
+        .playlist-desc { color: var(--text-2); font-size: 0.9rem; }
+        
+        .playlist-controls { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+        .play-large-btn { width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #000; border: none; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.1s ease; }
+        .play-large-btn:hover { transform: scale(1.05); background: var(--accent-hover); }
+
+        .tracklist-header { display: grid; grid-template-columns: 40px 1fr 1fr 80px; gap: 16px; padding: 8px 16px; border-bottom: 1px solid var(--border); color: var(--text-3); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+        .tracklist-row { display: grid; grid-template-columns: 40px 1fr 1fr 80px; gap: 16px; padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); align-items: center; }
+        .tracklist-row:hover { background: rgba(255,255,255,0.1); }
+        .tracklist-row.playing { background: rgba(29, 185, 84, 0.1); }
+        .tracklist-row.playing .track-title { color: var(--accent); }
+        .track-index { display: flex; align-items: center; justify-content: center; color: var(--text-2); font-size: 0.9rem; }
+        .tracklist-row:hover .track-index { color: #fff; }
+        .track-info { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+        .track-thumb { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; background: #333; flex-shrink: 0; }
+        .track-details { overflow: hidden; }
+        .track-title { font-size: 0.95rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow:ellipsis; }
+        .track-subtitle { font-size: 0.82rem; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow:ellipsis; }
+        .track-album { font-size: 0.9rem; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow:ellipsis; }
+        .track-duration { font-size: 0.82rem; color: var(--text-2); text-align: right; }
 
         /* LOADING & LYRICS */
         .loading-state { text-align: center; padding: 40px; color: var(--text-2); }
@@ -168,6 +182,10 @@
             .mobile-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-3); text-decoration: none; font-size: 0.68rem; font-weight: 600; transition: var(--transition); }
             .mobile-nav-item.active { color: var(--text-1); }
             .mobile-nav-item i { font-size: 1.4rem; }
+            .playlist-title { font-size: 2rem; }
+            .tracklist-header { display: none; }
+            .tracklist-row { grid-template-columns: 40px 1fr auto; }
+            .track-album { display: none; }
         }
         @media (max-width: 480px) { .stations-grid { gap: 16px; grid-template-columns: repeat(2, 1fr); } .player-loc { display: none; } }
         ::-webkit-scrollbar { width: 10px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 5px; }
@@ -208,20 +226,44 @@
         </div>
 
         <div class="content">
+            <!-- HOME VIEW -->
             <div id="view-home" class="view-container active">
-                <div class="section-title"><h2>Emisoras Globales Destacadas</h2></div>
-                <div class="stations-grid" id="stations-grid">
-                    <div class="loading-state"><i class="fas fa-spinner fa-spin"></i> Cargando emisoras de todo el mundo...</div>
+                <div class="section-title"><h2>Descubre por Género</h2></div>
+                <div class="stations-grid" id="genres-grid">
+                    <div class="loading-state"><i class="fas fa-spinner fa-spin"></i> Cargando géneros...</div>
+                </div>
+                
+                <div class="section-title"><h2>Explora por País</h2></div>
+                <div class="stations-grid" id="countries-grid">
+                    <div class="loading-state"><i class="fas fa-spinner fa-spin"></i> Cargando países...</div>
                 </div>
             </div>
+
+            <!-- SEARCH VIEW -->
             <div id="view-search" class="view-container">
                 <div class="section-title"><h2>Resultados de búsqueda</h2></div>
                 <div class="stations-grid" id="search-grid"></div>
             </div>
-            <div id="view-queue" class="view-container">
-                <div class="queue-header"><h2>Cola de reproducción</h2></div>
-                <div class="queue-list" id="queue-list"></div>
+
+            <!-- PLAYLIST/ALBUM VIEW -->
+            <div id="view-playlist" class="view-container">
+                <div class="playlist-view" id="playlist-content"></div>
             </div>
+
+            <!-- QUEUE VIEW -->
+            <div id="view-queue" class="view-container">
+                <div class="section-title" style="padding-top: 32px;"><h2>Cola de reproducción</h2></div>
+                <div id="queue-list">
+                    <div class="tracklist-header">
+                        <div>#</div>
+                        <div>Título</div>
+                        <div>Álbum / Género</div>
+                        <div style="text-align: right;"><i class="fas fa-clock"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LYRICS VIEW -->
             <div id="view-lyrics" class="view-container">
                 <div class="lyrics-view" id="lyrics-content"></div>
             </div>
@@ -273,13 +315,13 @@
         const firebaseConfig = { apiKey: "AIzaSyDCm1pFZLRXk34UIGU3UY0ltLkyHkElsIg", authDomain: "onelife-cec55.firebaseapp.com", databaseURL: "https://onelife-cec55-default-rtdb.europe-west1.firebasedatabase.app", projectId: "onelife-cec55", storageBucket: "onelife-cec55.firebasestorage.app", messagingSenderId: "599128086819", appId: "1:599128086819:web:af149214fe5b68a12ad496" };
         const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getDatabase(app), provider = new GoogleAuthProvider();
 
-        // Estado dinámico
         let radioStations = []; 
         let currentAudio = null, currentStation = null, isPlaying = false, currentUser = null, isShuffle = false;
         let favorites = [], filteredStations = [];
         let lastVolume = 80, muted = false;
         let currentView = 'home';
         let viewHistory = ['home'];
+        let currentCollectionView = null; // Guarda qué lista se está viendo en la playlist
 
         const dom = {
             loginBtn: document.getElementById('login-btn'), logoutBtn: document.getElementById('logout-btn'),
@@ -294,30 +336,28 @@
             btnBack: document.getElementById('btn-back')
         };
 
-        /* ── API FETCH (Radio Browser) ── */
+        /* ── API FETCH (Radio Browser - 500 Top) ── */
         async function fetchStations() {
-            const grid = document.getElementById('stations-grid');
             try {
-                // Obtenemos las 150 emisoras más votadas globalmente
-                const res = await fetch('https://de1.api.radio-browser.info/json/stations/topvote/150');
+                const res = await fetch('https://de1.api.radio-browser.info/json/stations/topvote/500');
                 let data = await res.json();
                 
-                // Mapeamos a la estructura que usa la app
                 radioStations = data.map(s => ({
                     id: s.stationuuid,
                     name: s.name.trim() || "Estación Desconocida",
                     location: s.country || "Desconocido",
                     genre: s.tags.split(',')[0] || 'music',
                     streamUrl: s.url_resolved,
-                    favicon: s.favicon
-                })).filter(s => s.streamUrl); // Filtramos las que no tienen URL de stream válida
+                    favicon: s.favicon,
+                    bitrate: s.bitrate || 'N/A'
+                })).filter(s => s.streamUrl);
                 
                 filteredStations = [...radioStations];
-                renderGrid(filteredStations, 'stations-grid');
+                renderHomeGrids();
                 renderQueue();
                 renderFavorites();
             } catch (error) {
-                grid.innerHTML = `<div class="loading-state" style="color: var(--red);">Error al cargar las emisoras. Revisa tu conexión a internet.</div>`;
+                document.getElementById('genres-grid').innerHTML = `<div class="loading-state" style="color: var(--red);">Error al cargar.</div>`;
             }
         }
 
@@ -343,9 +383,11 @@
         function loadFavoritesFromFirebase(uid) { 
             onValue(ref(db, `users/${uid}/favorites`), snapshot => { 
                 favorites = snapshot.val() ? Object.keys(snapshot.val()) : []; 
-                renderGrid(filteredStations, 'stations-grid'); 
+                renderHomeGrids(); 
                 renderFavorites(); 
                 updatePlayerHeart(); 
+                if (currentView === 'playlist' && currentCollectionView) openCollectionView(currentCollectionView.type, currentCollectionView.name, false);
+                if (currentView === 'search') applyFilters();
             }); 
         }
         function toggleFavorite(id) { if (!currentUser) { alert("Inicia sesión para guardar favoritas."); return; } const favRef = ref(db, `users/${currentUser.uid}/favorites/${id}`); if (favorites.includes(id)) remove(favRef); else set(favRef, true); }
@@ -381,40 +423,126 @@
             });
         });
 
-        /* ── Render Functions ── */
-        function renderGrid(stations, gridId) {
-            const grid = document.getElementById(gridId); 
+        /* ── Render Home Grids (Spotify Style Cards) ── */
+        function getCollectionCover(collectionName) {
+            // Simulate getting a cover by using the first station found with a favicon, else default
+            const stationWithFav = radioStations.find(s => s.favicon && s.favicon.trim() !== '' && (s.genre === collectionName || s.location === collectionName));
+            return stationWithFav?.favicon || '';
+        }
+
+        function renderHomeGrids() {
+            // Extract Genres
+            const genres = [...new Set(radioStations.map(s => s.genre))].filter(g => g).slice(0, 12);
+            renderGrid(genres, 'genres-grid', 'genre');
+            
+            // Extract Countries
+            const countries = [...new Set(radioStations.map(s => s.location))].filter(c => c).slice(0, 12);
+            renderGrid(countries, 'countries-grid', 'country');
+        }
+
+        function renderGrid(items, gridId, type) {
+            const grid = document.getElementById(gridId);
             if (!grid) return;
-            if (stations.length === 0) {
-                grid.innerHTML = '<div class="loading-state">No se encontraron emisoras.</div>';
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="loading-state">No hay datos.</div>';
                 return;
             }
-            grid.innerHTML = stations.map(s => {
-                const fav = favorites.includes(s.id), active = currentStation && currentStation.id === s.id;
-                const imgHtml = s.favicon ? `<img src="${s.favicon}" alt="" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=&quot;fas fa-music&quot;></i>'">` : `<i class="fas fa-music"></i>`;
-                return `<div class="station-card ${active ? 'active' : ''}" data-id="${s.id}">
-                    <div class="station-art">${imgHtml}
-                        <button class="play-overlay"><i class="fas ${active && isPlaying ? 'fa-pause' : 'fa-play'}"></i></button>
-                    </div>
-                    <button class="card-fav-btn ${fav ? 'favorited' : ''}" data-id="${s.id}" title="${fav ? 'Quitar' : 'Añadir'}"><i class="fas fa-heart"></i></button>
-                    <div class="station-card-name">${s.name}</div><div class="station-card-loc">${s.location} • ${s.genre}</div>
+            grid.innerHTML = items.map(itemName => {
+                const cover = getCollectionCover(itemName);
+                const imgHtml = cover ? `<img src="${cover}" alt="" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=&quot;fas fa-music&quot;></i>'">` : `<i class="fas fa-music"></i>`;
+                return `<div class="station-card" data-type="${type}" data-name="${itemName}">
+                    <div class="station-art">${imgHtml}</div>
+                    <div class="station-card-name">${itemName}</div>
+                    <div class="station-card-loc">${type === 'genre' ? 'Género Musical' : 'País'}</div>
                 </div>`;
             }).join('');
-            grid.querySelectorAll('.station-card').forEach(card => card.addEventListener('click', e => { if (e.target.closest('.card-fav-btn')) return; const station = radioStations.find(s => s.id === card.dataset.id); if (station) handleCardClick(station); }));
-            grid.querySelectorAll('.card-fav-btn').forEach(btn => btn.addEventListener('click', () => toggleFavorite(btn.dataset.id)));
+            
+            grid.querySelectorAll('.station-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    openCollectionView(card.dataset.type, card.dataset.name, true);
+                });
+            });
+        }
+
+        /* ── Render Playlist View (Album/Artist Tracks) ── */
+        function openCollectionView(type, name, addToHistory) {
+            currentCollectionView = { type, name };
+            let tracks = [];
+            if (type === 'genre') tracks = radioStations.filter(s => s.genre === name);
+            if (type === 'country') tracks = radioStations.filter(s => s.location === name);
+            
+            const cover = getCollectionCover(name);
+            const imgHtml = cover ? `<img src="${cover}" alt="" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=&quot;fas fa-music&quot;></i>'">` : `<i class="fas fa-music"></i>`;
+            
+            const html = `
+                <div class="playlist-header">
+                    <div class="playlist-cover">${imgHtml}</div>
+                    <div class="playlist-meta">
+                        <div class="playlist-type">${type === 'genre' ? 'Género' : 'País'}</div>
+                        <h1 class="playlist-title">${name}</h1>
+                        <div class="playlist-desc">${tracks.length} emisoras disponibles</div>
+                    </div>
+                </div>
+                <div class="playlist-controls">
+                    <button class="play-large-btn" id="play-collection-btn"><i class="fas fa-play"></i></button>
+                </div>
+                <div class="tracklist-header">
+                    <div>#</div>
+                    <div>Título</div>
+                    <div>Género / País</div>
+                    <div style="text-align: right;">Bitrate</div>
+                </div>
+                <div class="tracklist-body">
+                    ${tracks.map((s, i) => {
+                        const isCurrent = currentStation && currentStation.id === s.id;
+                        const trackImg = s.favicon ? `<img src="${s.favicon}" class="track-thumb" alt="" onerror="this.style.display='none'">` : `<div class="track-thumb" style="background:#333;display:flex;align-items:center;justify-content:center;"><i class="fas fa-music" style="font-size:0.8rem;color:#888"></i></div>`;
+                        return `
+                        <div class="tracklist-row ${isCurrent ? 'playing' : ''}" data-id="${s.id}">
+                            <div class="track-index">${isCurrent && isPlaying ? '<i class="fas fa-volume-up" style="color:var(--accent)"></i>' : i + 1}</div>
+                            <div class="track-info">
+                                ${trackImg}
+                                <div class="track-details">
+                                    <div class="track-title">${s.name}</div>
+                                    <div class="track-subtitle">${s.location}</div>
+                                </div>
+                            </div>
+                            <div class="track-album">${s.genre}</div>
+                            <div class="track-duration">${s.bitrate} kbps</div>
+                        </div>`;
+                    }).join('')}
+                </div>
+            `;
+            
+            document.getElementById('playlist-content').innerHTML = html;
+            
+            // Add track click events
+            document.querySelectorAll('.tracklist-row').forEach(row => {
+                row.addEventListener('click', () => {
+                    const station = radioStations.find(s => s.id === row.dataset.id);
+                    if (station) handleCardClick(station);
+                });
+            });
+
+            // Play collection button
+            document.getElementById('play-collection-btn').addEventListener('click', () => {
+                if (tracks.length > 0) playStation(tracks[0]);
+            });
+
+            if (addToHistory) navigateTo('playlist');
+            else showView('playlist');
         }
 
         function renderFavorites() {
             const list = document.getElementById('favorites-list'); if (!list) return;
             if (!favorites.length) {
-                const msg = currentUser ? '<strong>Crea tu primera playlist</strong><p>¡Es muy fácil! Pulsa el corazón en una emisora.</p>' : '<strong>Inicia sesión</strong><p>Guarda tus emisoras favoritas en la nube.</p>';
+                const msg = currentUser ? '<strong>Tus favoritas</strong><p>Pulsa el corazón en una emisora para guardarla aquí.</p>' : '<strong>Inicia sesión</strong><p>Guarda tus emisoras favoritas en la nube.</p>';
                 list.innerHTML = `<div class="fav-empty">${msg}</div>`; return;
             }
             list.innerHTML = favorites.map(id => {
                 const s = radioStations.find(r => r.id === id); 
-                if (!s) return ''; // Por si la emisora favorita ya no está en la lista cargada
+                if (!s) return '';
                 const active = currentStation && currentStation.id === s.id;
-                const imgHtml = s.favicon ? `<img src="${s.favicon}" alt="" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=&quot;fas fa-music&quot;></i>'">` : `<i class="fas fa-music"></i>`;
+                const imgHtml = s.favicon ? `<img src="${s.favicon}" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=&quot;fas fa-music&quot;></i>'">` : `<i class="fas fa-music"></i>`;
                 return `<div class="fav-item ${active ? 'playing' : ''}" data-id="${s.id}">
                     <div class="fav-thumb">${imgHtml}${active ? '<div class="playing-overlay"><i class="fas fa-volume-up"></i></div>' : ''}</div>
                     <div class="fav-info"><div class="fav-name">${s.name}</div><div class="fav-location">${s.location}</div></div>
@@ -426,16 +554,32 @@
         function renderQueue() {
             const list = document.getElementById('queue-list'); if (!list) return;
             if (filteredStations.length === 0) return;
-            list.innerHTML = filteredStations.map(s => {
+            const header = `<div class="tracklist-header">
+                <div>#</div>
+                <div>Título</div>
+                <div>Género / País</div>
+                <div style="text-align: right;">Bitrate</div>
+            </div>`;
+            list.innerHTML = header + filteredStations.map((s, i) => {
                 const active = currentStation && currentStation.id === s.id;
-                const imgHtml = s.favicon ? `<img src="${s.favicon}" alt="" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=&quot;fas fa-music&quot;></i>'">` : `<i class="fas fa-music"></i>`;
-                return `<div class="queue-item ${active ? 'playing' : ''}" data-id="${s.id}">
-                    <div class="queue-item-art">${imgHtml}</div>
-                    <div class="queue-item-info"><div class="queue-item-name">${s.name}</div><div class="queue-item-loc">${s.location}</div></div>
-                    <div class="queue-item-duration">${s.genre}</div>
+                const trackImg = s.favicon ? `<img src="${s.favicon}" class="track-thumb" alt="" onerror="this.style.display='none'">` : `<div class="track-thumb" style="background:#333;display:flex;align-items:center;justify-content:center;"><i class="fas fa-music" style="font-size:0.8rem;color:#888"></i></div>`;
+                return `<div class="tracklist-row ${active ? 'playing' : ''}" data-id="${s.id}">
+                    <div class="track-index">${active && isPlaying ? '<i class="fas fa-volume-up" style="color:var(--accent)"></i>' : i + 1}</div>
+                    <div class="track-info">
+                        ${trackImg}
+                        <div class="track-details">
+                            <div class="track-title">${s.name}</div>
+                            <div class="track-subtitle">${s.location}</div>
+                        </div>
+                    </div>
+                    <div class="track-album">${s.genre}</div>
+                    <div class="track-duration">${s.bitrate} kbps</div>
                 </div>`;
             }).join('');
-            list.querySelectorAll('.queue-item').forEach(item => item.addEventListener('click', () => { const station = radioStations.find(s => s.id === item.dataset.id); if (station) playStation(station); }));
+            
+            list.querySelectorAll('.tracklist-row').forEach(row => {
+                row.addEventListener('click', () => { const station = radioStations.find(s => s.id === row.dataset.id); if (station) playStation(station); });
+            });
         }
 
         function renderLyrics() {
@@ -477,11 +621,11 @@
             currentAudio.play().catch(() => { isPlaying = false; updatePlayBtn(); });
             currentAudio.addEventListener('error', () => { isPlaying = false; updatePlayBtn(); });
             
-            renderGrid(filteredStations, 'stations-grid'); 
-            if (currentView === 'search') renderGrid(filteredStations, 'search-grid');
+            // Re-render views to show playing state
             renderFavorites();
-            if (currentView === 'lyrics') renderLyrics();
+            if (currentView === 'playlist' && currentCollectionView) openCollectionView(currentCollectionView.type, currentCollectionView.name, false);
             if (currentView === 'queue') renderQueue();
+            if (currentView === 'lyrics') renderLyrics();
         }
 
         function togglePlayPause() {
@@ -489,8 +633,8 @@
             if (!currentAudio) { playStation(currentStation); return; }
             isPlaying ? currentAudio.pause() : currentAudio.play().catch(()=>{});
             isPlaying = !isPlaying; updatePlayBtn(); 
-            renderGrid(filteredStations, 'stations-grid'); 
-            if (currentView === 'search') renderGrid(filteredStations, 'search-grid');
+            if (currentView === 'playlist' && currentCollectionView) openCollectionView(currentCollectionView.type, currentCollectionView.name, false);
+            if (currentView === 'queue') renderQueue();
         }
 
         function updatePlayBtn() {
@@ -529,8 +673,24 @@
                 s.location.toLowerCase().includes(search) ||
                 s.genre.toLowerCase().includes(search)
             );
-            renderGrid(filteredStations, 'stations-grid');
-            renderGrid(filteredStations, 'search-grid');
+            const grid = document.getElementById('search-grid');
+            if (filteredStations.length === 0) {
+                grid.innerHTML = '<div class="loading-state">No se encontraron emisoras.</div>';
+                return;
+            }
+            grid.innerHTML = filteredStations.map(s => {
+                const fav = favorites.includes(s.id), active = currentStation && currentStation.id === s.id;
+                const imgHtml = s.favicon ? `<img src="${s.favicon}" alt="" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=&quot;fas fa-music&quot;></i>'">` : `<i class="fas fa-music"></i>`;
+                return `<div class="station-card ${active ? 'active' : ''}" data-id="${s.id}">
+                    <div class="station-art">${imgHtml}
+                        <button class="play-overlay"><i class="fas ${active && isPlaying ? 'fa-pause' : 'fa-play'}"></i></button>
+                    </div>
+                    <button class="card-fav-btn ${fav ? 'favorited' : ''}" data-id="${s.id}" title="${fav ? 'Quitar' : 'Añadir'}"><i class="fas fa-heart"></i></button>
+                    <div class="station-card-name">${s.name}</div><div class="station-card-loc">${s.location} • ${s.genre}</div>
+                </div>`;
+            }).join('');
+            grid.querySelectorAll('.station-card').forEach(card => card.addEventListener('click', e => { if (e.target.closest('.card-fav-btn')) return; const station = radioStations.find(s => s.id === card.dataset.id); if (station) handleCardClick(station); }));
+            grid.querySelectorAll('.card-fav-btn').forEach(btn => btn.addEventListener('click', () => toggleFavorite(btn.dataset.id)));
             renderQueue();
         }
 
