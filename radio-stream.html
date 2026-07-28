@@ -171,7 +171,7 @@
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* MOBILE & TABLET LAYOUT (REDEDISEÑADO) */
+        /* MOBILE & TABLET LAYOUT (REDEDISEÑADO PARA INCLUIR TODOS LOS BOTONES) */
         .mobile-nav { display: none; }
         @media (max-width: 1024px) {
             body { grid-template-areas: "main main" "player player"; grid-template-rows: 1fr auto; grid-template-columns: 1fr; padding-bottom: calc(var(--player-h) + var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px)); }
@@ -181,8 +181,8 @@
             .topbar { border-radius: 0; padding: 12px 16px; }
             
             /* Ajustar Reproductor para mostrar todos los controles */
-            .player { grid-template-columns: 1fr auto 1fr; padding: 0 8px; gap: 8px; }
-            .player-left { gap: 10px; min-width: 0; }
+            .player { grid-template-columns: 1fr auto 1fr; padding: 0 8px; gap: 4px; }
+            .player-left { gap: 8px; min-width: 0; }
             .player-art { width: 44px; height: 44px; font-size: 1rem; }
             .player-info { min-width: 0; }
             .player-name { font-size: 0.8rem; }
@@ -190,7 +190,7 @@
             .player-heart { padding: 4px; font-size: 0.9rem; }
             
             .player-center { display: flex; flex-direction: row; gap: 4px; }
-            .player-btns { gap: 8px; }
+            .player-btns { gap: 4px; }
             .live-badge { display: none !important; } /* Ocultar "EN DIRECTO" para ahorrar espacio */
             .ctrl-btn { width: 28px; height: 28px; font-size: 0.8rem; }
             .play-pause-btn { width: 32px; height: 32px; font-size: 0.9rem; }
@@ -322,6 +322,7 @@
             localStorage.setItem('radio_device_id', deviceId);
         }
         let activeDeviceId = null;
+        let previousActiveDeviceId = null; // Para detectar cambios de dispositivo y recargar el stream
         let registeredDevices = {};
 
         const dom = {
@@ -396,7 +397,7 @@
                 if (deviceId && activeDeviceId === deviceId) {
                     update(ref(db, `users/${user?.uid || ''}/playback`), { activeDevice: null });
                 }
-                registeredDevices = {}; activeDeviceId = null; updateRemoteIndicator();
+                registeredDevices = {}; activeDeviceId = null; previousActiveDeviceId = null; updateRemoteIndicator();
             }
         });
 
@@ -448,6 +449,9 @@
                 if (!state || !state.stationId) {
                     currentStation = null; isPlaying = false; updatePlayerUI();
                     currentAudio.pause();
+                    currentAudio.removeAttribute('src');
+                    currentAudio.load();
+                    previousActiveDeviceId = null;
                     return;
                 }
                 
@@ -458,22 +462,26 @@
                 }
                 
                 isPlaying = state.isPlaying;
-                activeDeviceId = state.activeDevice;
+                const newActiveDeviceId = state.activeDevice;
+                const justBecameActive = newActiveDeviceId === deviceId && previousActiveDeviceId !== deviceId;
+                activeDeviceId = newActiveDeviceId;
                 
                 updatePlayBtn();
                 renderDevicePopup();
                 updateRemoteIndicator();
 
                 if (activeDeviceId === deviceId) {
+                    // ESTE DISPOSITIVO ES EL ACTIVO
                     if (station && station.streamUrl) {
-                        if (currentAudio.src !== station.streamUrl) {
+                        // Forzar recarga limpia si acaba de recibir el control o si cambia la emisora
+                        if (justBecameActive || currentAudio.src !== station.streamUrl) {
                             currentAudio.src = station.streamUrl;
                             currentAudio.load(); 
                         }
                         currentAudio.volume = dom.volSlider.value / 100;
                         if (isPlaying) {
                             currentAudio.play().catch(e => {
-                                console.warn("Safari bloqueó autoplay. El usuario debe pulsar Play manualmente.");
+                                console.warn("Safari bloqueó autoplay. El usuario debe pulsar Play.");
                                 updatePlayBtn(); 
                             });
                         } else {
@@ -481,9 +489,17 @@
                         }
                     }
                 } else {
-                    currentAudio.pause();
+                    // ESTE DISPOSITIVO ES INACTIVO (CONTROL REMOTO)
+                    // Cortar el audio de raíz para evitar desincronización
+                    if (currentAudio.src) {
+                        currentAudio.pause();
+                        currentAudio.removeAttribute('src');
+                        currentAudio.load();
+                    }
                 }
                 
+                previousActiveDeviceId = activeDeviceId; // Guardar para el próximo evento
+
                 if (currentView === 'playlist' && currentCollectionView) openCollectionView(currentCollectionView.type, currentCollectionView.name, false);
                 if (currentView === 'queue') renderQueue();
                 renderFavorites();
@@ -702,16 +718,6 @@
         function transferPlayback(targetDeviceId) {
             if (!currentUser) return;
             update(ref(db, `users/${currentUser.uid}/playback`), { activeDevice: targetDeviceId });
-            
-            if (targetDeviceId === deviceId && currentStation && currentStation.streamUrl) {
-                if (currentAudio.src !== currentStation.streamUrl) {
-                    currentAudio.src = currentStation.streamUrl;
-                }
-                currentAudio.play().catch(e => {
-                    console.log("Safari requiere interacción táctil para reproducir. El usuario debe pulsar Play.");
-                });
-            }
-            
             dom.devicePopup.classList.remove('visible');
         }
 
