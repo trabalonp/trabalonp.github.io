@@ -170,8 +170,8 @@
 
         /* MOBILE & TABLET (iPad) FIX */
         .mobile-nav { display: none; }
-        @media (max-width: 1024px) {
-            body { grid-template-areas: "main main" "player player"; grid-template-rows: 1fr auto; grid-template-columns: 1fr; padding-bottom: calc(var(--player-h) + var(--mobile-nav-h)); }
+        @media (max-width: 1200px) {
+            body { grid-template-areas: "main main" "player player"; grid-template-rows: 1fr auto; grid-template-columns: 1fr; padding-bottom: calc(var(--player-h) + var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px)); }
             .sidebar { display: none; }
             
             /* Ocultar controles de escritorio, mostrar controles móviles */
@@ -180,10 +180,10 @@
             
             .main { border-radius: 0; margin: 0; } 
             .topbar { border-radius: 0; }
-            .player { grid-template-columns: 1fr; position: fixed; bottom: var(--mobile-nav-h); left: 0; width: 100%; z-index: 1000; height: var(--player-h); border: none; background: var(--bg-card); padding-bottom: env(safe-area-inset-bottom, 0); }
+            .player { grid-template-columns: 1fr; position: fixed; bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px)); left: 0; width: 100%; z-index: 1000; height: var(--player-h); border: none; background: var(--bg-card); }
             .player-left { justify-content: space-between; padding: 0 16px; }
             
-            .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0)); padding-bottom: env(safe-area-inset-bottom, 0); background: linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0.9)); backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; z-index: 1000; border-top: 1px solid var(--border); }
+            .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); background: linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0.9)); backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; z-index: 1000; border-top: 1px solid var(--border); }
             .mobile-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-3); text-decoration: none; font-size: 0.68rem; font-weight: 600; }
             .mobile-nav-item.active { color: var(--text-1); }
             .mobile-nav-item i { font-size: 1.4rem; }
@@ -287,7 +287,9 @@
         const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getDatabase(app), provider = new GoogleAuthProvider();
 
         let radioStations = []; 
-        let currentAudio = null, currentStation = null, isPlaying = false, currentUser = null, isShuffle = false;
+        // Se inicializa el objeto Audio globalmente para que iOS/iPadOS permita su uso después
+        let currentAudio = new Audio();
+        let currentStation = null, isPlaying = false, currentUser = null, isShuffle = false;
         let favorites = [], filteredStations = [];
         let lastVolume = 80, muted = false;
         let currentView = 'home';
@@ -316,6 +318,19 @@
             remoteIndicator: document.getElementById('remote-indicator'), remoteDeviceName: document.getElementById('remote-device-name')
         };
 
+        // --- TRUCO PARA SAFARI (iOS/iPadOS): Desbloquear audio en la primera interacción ---
+        function unlockAudio() {
+            if (currentAudio) {
+                currentAudio.play().then(() => {
+                    currentAudio.pause();
+                }).catch(e => {});
+            }
+            document.body.removeEventListener('click', unlockAudio);
+            document.body.removeEventListener('touchstart', unlockAudio);
+        }
+        document.body.addEventListener('click', unlockAudio);
+        document.body.addEventListener('touchstart', unlockAudio);
+
         function getDeviceName() {
             let ua = navigator.userAgent;
             let browser = "Navegador";
@@ -336,7 +351,6 @@
         /* ── API FETCH (España + Globales filtradas) ── */
         async function fetchStations() {
             try {
-                // Hacemos dos peticiones a la vez: 250 de España y 250 globales (suelen ser europeas/USA)
                 const [esRes, globalRes] = await Promise.all([
                     fetch('https://de1.api.radio-browser.info/json/stations/topvote/250?countrycode=ES'),
                     fetch('https://de1.api.radio-browser.info/json/stations/topvote/250')
@@ -344,7 +358,6 @@
                 const esData = await esRes.json();
                 const globalData = await globalRes.json();
                 
-                // Combinar, priorizando España y eliminando duplicados
                 const combined = [...esData, ...globalData];
                 const uniqueStations = Array.from(new Map(combined.map(s => [s.stationuuid, s])).values());
                 
@@ -374,19 +387,16 @@
                 document.body.classList.add('logged-out');
                 dom.loginBtn.style.display = 'inline-flex'; dom.userProfile.style.display = 'none'; dom.logoutBtn.style.display = 'none';
                 favorites = []; renderFavorites(); updatePlayerHeart();
-                if (currentAudio) currentAudio.pause(); currentAudio = null; isPlaying = false; updatePlayBtn();
+                currentAudio.pause(); isPlaying = false; updatePlayBtn();
                 if (deviceId && activeDeviceId === deviceId) {
                     update(ref(db, `users/${user?.uid || ''}/playback`), { activeDevice: null });
                 }
-                // Limpiar localmente al cerrar sesión
                 registeredDevices = {}; activeDeviceId = null; updateRemoteIndicator();
             }
         });
 
         async function registerDevice(uid) {
             const devName = getDeviceName();
-            
-            // 1. Instancia local inmediata para que aparezca al instante en el popup
             registeredDevices[deviceId] = { name: devName, lastSeen: Date.now() };
             
             const devRef = ref(db, `users/${uid}/devices/${deviceId}`);
@@ -396,7 +406,6 @@
                 remove(devRef);
             });
 
-            // 2. Latido cada 10s para mantenerse vivo y limpiar fantasmas
             setInterval(() => {
                 update(devRef, { lastSeen: Date.now() });
                 registeredDevices[deviceId] = { name: devName, lastSeen: Date.now() };
@@ -411,28 +420,24 @@
         }
 
         function setupSyncListeners(uid) {
-            // 1. Sync Volume
             onValue(ref(db, `users/${uid}/settings/volume`), snap => {
                 const vol = snap.val() !== null ? snap.val() : 80;
                 dom.volSlider.value = vol; lastVolume = vol; muted = vol == 0;
-                if (currentAudio) currentAudio.volume = vol / 100;
+                currentAudio.volume = vol / 100;
                 updateVolumeUI(vol);
             });
 
-            // 2. Sync Devices List
             onValue(ref(db, `users/${uid}/devices`), snap => {
                 const dbDevices = snap.val() || {};
-                // Sincronizar sin perder el local si acaba de actualizarse
                 registeredDevices = { ...registeredDevices, ...dbDevices };
                 renderDevicePopup();
             });
 
-            // 3. Sync Playback State
             onValue(ref(db, `users/${uid}/playback`), snap => {
                 const state = snap.val();
                 if (!state || !state.stationId) {
                     currentStation = null; isPlaying = false; updatePlayerUI();
-                    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+                    currentAudio.pause();
                     return;
                 }
                 
@@ -449,18 +454,22 @@
                 renderDevicePopup();
                 updateRemoteIndicator();
 
+                // LÓGICA DE AUDIO LOCAL
                 if (activeDeviceId === deviceId) {
                     if (station && station.streamUrl) {
-                        if (!currentAudio || currentAudio.src !== station.streamUrl) {
-                            if (currentAudio) currentAudio.pause();
-                            currentAudio = new Audio(station.streamUrl);
-                            currentAudio.volume = dom.volSlider.value / 100;
+                        if (currentAudio.src !== station.streamUrl) {
+                            currentAudio.src = station.streamUrl;
+                            currentAudio.load(); // Importante para Safari
                         }
-                        if (isPlaying) currentAudio.play().catch(()=>{});
-                        else currentAudio.pause();
+                        currentAudio.volume = dom.volSlider.value / 100;
+                        if (isPlaying) {
+                            currentAudio.play().catch(e => console.error("Error al reproducir:", e));
+                        } else {
+                            currentAudio.pause();
+                        }
                     }
                 } else {
-                    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+                    currentAudio.pause();
                 }
                 
                 if (currentView === 'playlist' && currentCollectionView) openCollectionView(currentCollectionView.type, currentCollectionView.name, false);
@@ -468,7 +477,6 @@
                 renderFavorites();
             });
 
-            // 4. Sync Favorites
             onValue(ref(db, `users/${uid}/favorites`), snap => {
                 favorites = snap.val() ? Object.keys(snap.val()) : [];
                 renderHomeGrids(); renderFavorites(); updatePlayerHeart();
@@ -635,7 +643,6 @@
             const popupList = document.getElementById('device-list-popup');
             if (!currentUser) return;
             
-            // Asegurar que el dispositivo local está siempre presente al renderizar
             if (!registeredDevices[deviceId]) {
                 registeredDevices[deviceId] = { name: getDeviceName(), lastSeen: Date.now() };
             }
@@ -666,6 +673,16 @@
         function transferPlayback(targetDeviceId) {
             if (!currentUser) return;
             update(ref(db, `users/${currentUser.uid}/playback`), { activeDevice: targetDeviceId });
+            
+            // TRUCO PARA SAFARI: Si transfiero a ESTE dispositivo, fuerzo el play local inmediatamente
+            // para que Safari crea que es el usuario el que ha pulsado y permita el audio.
+            if (targetDeviceId === deviceId && currentStation && currentStation.streamUrl) {
+                if (currentAudio.src !== currentStation.streamUrl) {
+                    currentAudio.src = currentStation.streamUrl;
+                }
+                currentAudio.play().catch(e => console.log("Esperando sync de Firebase para reproducir..."));
+            }
+            
             dom.devicePopup.classList.remove('visible');
         }
 
@@ -681,7 +698,7 @@
         dom.deviceBtn.addEventListener('click', (e) => { 
             e.stopPropagation(); 
             dom.devicePopup.classList.toggle('visible'); 
-            renderDevicePopup(); // Forzar renderizado instantáneo al abrir
+            renderDevicePopup();
         });
         document.addEventListener('click', (e) => { if (!dom.devicePopup.contains(e.target) && e.target !== dom.deviceBtn) dom.devicePopup.classList.remove('visible'); });
         dom.remoteIndicator.addEventListener('click', () => { dom.devicePopup.classList.toggle('visible'); renderDevicePopup(); });
