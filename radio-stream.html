@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>RadioStream Global</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -149,6 +149,7 @@
         .vol-slider:hover { background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--volume-progress, 80%), #535353 var(--volume-progress, 80%), #535353 100%); }
         .vol-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; cursor: pointer; opacity: 0; transition: opacity 0.15s; }
         .vol-slider:hover::-webkit-slider-thumb { opacity: 1; }
+        .player-btns-mobile { display: none; }
 
         /* DEVICE POPUP & REMOTE INDICATOR */
         .device-popup { position: absolute; bottom: calc(var(--player-h) + 12px); right: 16px; width: 320px; background: #282828; border-radius: var(--radius-md); padding: 20px; box-shadow: 0 16px 24px rgba(0,0,0,0.5); z-index: 200; display: none; }
@@ -167,15 +168,22 @@
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* MOBILE */
+        /* MOBILE & TABLET (iPad) FIX */
         .mobile-nav { display: none; }
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             body { grid-template-areas: "main main" "player player"; grid-template-rows: 1fr auto; grid-template-columns: 1fr; padding-bottom: calc(var(--player-h) + var(--mobile-nav-h)); }
             .sidebar { display: none; }
+            
+            /* Ocultar controles de escritorio, mostrar controles móviles */
             .player-center, .player-right { display: none; }
-            .player { grid-template-columns: 1fr; position: fixed; bottom: var(--mobile-nav-h); left: 0; width: 100%; z-index: 1000; height: var(--player-h); border: none; background: var(--bg-card); }
-            .player-left { justify-content: space-between; }
-            .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: var(--mobile-nav-h); background: linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0.9)); backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; z-index: 1000; border-top: 1px solid var(--border); }
+            .player-btns-mobile { display: flex; align-items: center; gap: 16px; }
+            
+            .main { border-radius: 0; margin: 0; } 
+            .topbar { border-radius: 0; }
+            .player { grid-template-columns: 1fr; position: fixed; bottom: var(--mobile-nav-h); left: 0; width: 100%; z-index: 1000; height: var(--player-h); border: none; background: var(--bg-card); padding-bottom: env(safe-area-inset-bottom, 0); }
+            .player-left { justify-content: space-between; padding: 0 16px; }
+            
+            .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0)); padding-bottom: env(safe-area-inset-bottom, 0); background: linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0.9)); backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; z-index: 1000; border-top: 1px solid var(--border); }
             .mobile-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-3); text-decoration: none; font-size: 0.68rem; font-weight: 600; }
             .mobile-nav-item.active { color: var(--text-1); }
             .mobile-nav-item i { font-size: 1.4rem; }
@@ -184,6 +192,7 @@
             .tracklist-row { grid-template-columns: 40px 1fr auto; }
             .track-album { display: none; }
         }
+        @media (max-width: 480px) { .stations-grid { gap: 16px; grid-template-columns: repeat(2, 1fr); } .player-loc { display: none; } }
         ::-webkit-scrollbar { width: 10px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 5px; }
     </style>
 </head>
@@ -245,6 +254,10 @@
                 <div class="remote-indicator" id="remote-indicator"><i class="fas fa-volume-up"></i> Escuchando en <span id="remote-device-name">Otro dispositivo</span></div>
             </div>
             <button class="player-heart" id="player-heart-desktop"><i class="fas fa-heart"></i></button>
+            <div class="player-btns-mobile">
+                <button class="player-heart" id="player-heart-mobile"><i class="fas fa-heart"></i></button>
+                <button class="ctrl-btn play-pause-btn" id="play-btn-mobile"><i class="fas fa-play"></i></button>
+            </div>
         </div>
         <div class="player-center">
             <div class="player-btns">
@@ -295,8 +308,8 @@
             loginBtn: document.getElementById('login-btn'), logoutBtn: document.getElementById('logout-btn'),
             userProfile: document.getElementById('user-profile'), userAvatar: document.getElementById('user-avatar'), userName: document.getElementById('user-name'),
             volSlider: document.getElementById('vol-slider'), volIcon: document.getElementById('vol-icon'),
-            playBtnDesktop: document.getElementById('play-btn-desktop'),
-            heartBtnDesktop: document.getElementById('player-heart-desktop'),
+            playBtnDesktop: document.getElementById('play-btn-desktop'), playBtnMobile: document.getElementById('play-btn-mobile'),
+            heartBtnDesktop: document.getElementById('player-heart-desktop'), heartBtnMobile: document.getElementById('player-heart-mobile'),
             shuffleBtn: document.getElementById('shuffle-btn'), repeatBtn: document.getElementById('repeat-btn'),
             lyricsBtn: document.getElementById('lyrics-btn'), queueBtn: document.getElementById('queue-btn'), deviceBtn: document.getElementById('device-btn'),
             playerArt: document.getElementById('player-art'), playerName: document.getElementById('player-name'), playerLoc: document.getElementById('player-loc'),
@@ -317,7 +330,7 @@
             if (ua.includes("Windows")) os = "Windows";
             else if (ua.includes("Mac")) os = "Mac";
             else if (ua.includes("Android")) os = "Android";
-            else if (ua.includes("iPhone")) os = "iPhone";
+            else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
             
             return `${browser} - ${os}`;
         }
@@ -353,7 +366,6 @@
                 dom.loginBtn.style.display = 'inline-flex'; dom.userProfile.style.display = 'none'; dom.logoutBtn.style.display = 'none';
                 favorites = []; renderFavorites(); updatePlayerHeart();
                 if (currentAudio) currentAudio.pause(); currentAudio = null; isPlaying = false; updatePlayBtn();
-                // Limpiar dispositivo al cerrar sesión
                 if (deviceId && activeDeviceId === deviceId) {
                     update(ref(db, `users/${user?.uid || ''}/playback`), { activeDevice: null });
                 }
@@ -364,15 +376,12 @@
             const devRef = ref(db, `users/${uid}/devices/${deviceId}`);
             await set(devRef, { name: getDeviceName(), lastSeen: Date.now() });
             
-            // Eliminar el dispositivo si se cierra la pestaña
             window.addEventListener('beforeunload', () => {
                 remove(devRef);
             });
 
-            // Heartbeat para mantenerlo vivo y limpiar fantasmas
             setInterval(() => {
                 update(devRef, { lastSeen: Date.now() });
-                // Limpiar inactivos (30s)
                 Object.keys(registeredDevices).forEach(id => {
                     if (Date.now() - registeredDevices[id].lastSeen > 30000 && id !== deviceId) {
                         remove(ref(db, `users/${uid}/devices/${id}`));
@@ -396,7 +405,7 @@
                 renderDevicePopup();
             });
 
-            // 3. Sync Playback State (Spotify Connect Core)
+            // 3. Sync Playback State
             onValue(ref(db, `users/${uid}/playback`), snap => {
                 const state = snap.val();
                 if (!state || !state.stationId) {
@@ -418,9 +427,7 @@
                 renderDevicePopup();
                 updateRemoteIndicator();
 
-                // LÓGICA DE AUDIO LOCAL
                 if (activeDeviceId === deviceId) {
-                    // ESTE DISPOSITIVO ES EL REPRODUCTOR
                     if (station && station.streamUrl) {
                         if (!currentAudio || currentAudio.src !== station.streamUrl) {
                             if (currentAudio) currentAudio.pause();
@@ -431,11 +438,9 @@
                         else currentAudio.pause();
                     }
                 } else {
-                    // ESTE DISPOSITIVO ES CONTROL REMOTO
                     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
                 }
                 
-                // Re-renderizar vistas activas para mostrar estado "playing"
                 if (currentView === 'playlist' && currentCollectionView) openCollectionView(currentCollectionView.type, currentCollectionView.name, false);
                 if (currentView === 'queue') renderQueue();
                 renderFavorites();
@@ -566,11 +571,10 @@
 
         function playStation(station) {
             if (!currentUser) return alert("Inicia sesión para reproducir.");
-            // Enviar orden a Firebase. El listener setupSyncListeners hará el resto.
             set(ref(db, `users/${currentUser.uid}/playback`), {
                 stationId: station.id,
                 isPlaying: true,
-                activeDevice: deviceId // El dispositivo que elige la canción asume el control
+                activeDevice: deviceId 
             });
         }
 
@@ -579,8 +583,8 @@
             update(ref(db, `users/${currentUser.uid}/playback`), { isPlaying: !isPlaying });
         }
 
-        function updatePlayBtn() { const icon = isPlaying ? 'fa-pause' : 'fa-play'; dom.playBtnDesktop.innerHTML = `<i class="fas ${icon}"></i>`; }
-        function updatePlayerHeart() { if (currentStation) dom.heartBtnDesktop.classList.toggle('favorited', favorites.includes(currentStation.id)); }
+        function updatePlayBtn() { const icon = isPlaying ? 'fa-pause' : 'fa-play'; dom.playBtnDesktop.innerHTML = `<i class="fas ${icon}"></i>`; dom.playBtnMobile.innerHTML = `<i class="fas ${icon}"></i>`; }
+        function updatePlayerHeart() { if (currentStation) { dom.heartBtnDesktop.classList.toggle('favorited', favorites.includes(currentStation.id)); dom.heartBtnMobile.classList.toggle('favorited', favorites.includes(currentStation.id)); } }
 
         function playAdjacent(dir) {
             if (!currentStation) return;
@@ -656,10 +660,18 @@
             fetchStations(); updateVolumeUI(dom.volSlider.value);
             dom.searchInput.addEventListener('input', applyFilters);
             dom.searchInput.addEventListener('focus', () => navigateTo('search'));
+            
+            // Soporte para click en escritorio y móvil
             dom.playBtnDesktop.addEventListener('click', togglePlayPause);
+            dom.playBtnMobile.addEventListener('click', togglePlayPause);
+            
             document.getElementById('prev-btn').addEventListener('click', () => playAdjacent(-1));
             document.getElementById('next-btn').addEventListener('click', () => playAdjacent(1));
+            
+            // Soporte para favoritos en escritorio y móvil
             dom.heartBtnDesktop.addEventListener('click', () => { if(currentStation) toggleFavorite(currentStation.id); });
+            dom.heartBtnMobile.addEventListener('click', () => { if(currentStation) toggleFavorite(currentStation.id); });
+            
             dom.shuffleBtn.addEventListener('click', () => { isShuffle = !isShuffle; dom.shuffleBtn.classList.toggle('active', isShuffle); });
             dom.repeatBtn.addEventListener('click', () => { if (currentStation) playStation(currentStation); });
             dom.lyricsBtn.addEventListener('click', () => { navigateTo(currentView === 'lyrics' ? (viewHistory.length > 1 ? viewHistory[viewHistory.length-2] : 'home') : 'lyrics'); });
