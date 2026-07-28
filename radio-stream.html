@@ -97,8 +97,10 @@
         .playlist-desc { color: var(--text-2); font-size: 0.9rem; }
         .play-large-btn { width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #000; border: none; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.1s ease; margin-bottom: 24px; }
         .play-large-btn:hover { transform: scale(1.05); background: var(--accent-hover); }
-        .tracklist-header { display: grid; grid-template-columns: 40px 1fr 1fr 80px; gap: 16px; padding: 8px 16px; border-bottom: 1px solid var(--border); color: var(--text-3); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
-        .tracklist-row { display: grid; grid-template-columns: 40px 1fr 1fr 80px; gap: 16px; padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); align-items: center; }
+        
+        /* TRACKLIST ROWS */
+        .tracklist-header { display: grid; grid-template-columns: 40px 1fr 1fr 40px 80px; gap: 16px; padding: 8px 16px; border-bottom: 1px solid var(--border); color: var(--text-3); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+        .tracklist-row { display: grid; grid-template-columns: 40px 1fr 1fr 40px 80px; gap: 16px; padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); align-items: center; }
         .tracklist-row:hover { background: rgba(255,255,255,0.1); }
         .tracklist-row.playing { background: rgba(29, 185, 84, 0.1); }
         .tracklist-row.playing .track-title { color: var(--accent); }
@@ -110,6 +112,12 @@
         .track-subtitle { font-size: 0.82rem; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow:ellipsis; }
         .track-album { font-size: 0.9rem; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow:ellipsis; }
         .track-duration { font-size: 0.82rem; color: var(--text-2); text-align: right; }
+        
+        /* TRACK FAV BUTTON */
+        .track-fav-btn { background: none; border: none; color: var(--text-3); font-size: 0.9rem; cursor: pointer; opacity: 0; transition: var(--transition); }
+        .tracklist-row:hover .track-fav-btn { opacity: 1; }
+        .track-fav-btn.favorited { color: var(--accent); opacity: 1; }
+        .track-fav-btn:hover { transform: scale(1.1); }
 
         /* LOADING & LYRICS */
         .loading-state { text-align: center; padding: 40px; color: var(--text-2); }
@@ -145,7 +153,6 @@
         .vol-slider:hover { background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--volume-progress, 80%), #535353 var(--volume-progress, 80%), #535353 100%); }
         .vol-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; cursor: pointer; opacity: 0; transition: opacity 0.15s; }
         .vol-slider:hover::-webkit-slider-thumb { opacity: 1; }
-        .player-btns-mobile { display: none; }
 
         /* DEVICE POPUP & REMOTE INDICATOR */
         .device-popup { position: absolute; bottom: calc(var(--player-h) + 12px); right: 16px; width: 320px; background: #282828; border-radius: var(--radius-md); padding: 20px; box-shadow: 0 16px 24px rgba(0,0,0,0.5); z-index: 200; display: none; }
@@ -164,17 +171,34 @@
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* MOBILE LAYOUT */
+        /* MOBILE & TABLET LAYOUT (REDEDISEÑADO) */
         .mobile-nav { display: none; }
         @media (max-width: 1024px) {
             body { grid-template-areas: "main main" "player player"; grid-template-rows: 1fr auto; grid-template-columns: 1fr; padding-bottom: calc(var(--player-h) + var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px)); }
             .sidebar { display: none; }
-            .player-center, .player-right { display: none; }
-            .player-btns-mobile { display: flex; align-items: center; gap: 16px; }
+            
             .main { border-radius: 0; margin: 0; } 
-            .topbar { border-radius: 0; }
-            .player { grid-template-columns: 1fr; position: fixed; bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px)); left: 0; width: 100%; z-index: 1000; height: var(--player-h); border: none; background: var(--bg-card); }
-            .player-left { justify-content: space-between; padding: 0 16px; }
+            .topbar { border-radius: 0; padding: 12px 16px; }
+            
+            /* Ajustar Reproductor para mostrar todos los controles */
+            .player { grid-template-columns: 1fr auto 1fr; padding: 0 8px; gap: 8px; }
+            .player-left { gap: 10px; min-width: 0; }
+            .player-art { width: 44px; height: 44px; font-size: 1rem; }
+            .player-info { min-width: 0; }
+            .player-name { font-size: 0.8rem; }
+            .player-loc { font-size: 0.65rem; }
+            .player-heart { padding: 4px; font-size: 0.9rem; }
+            
+            .player-center { display: flex; flex-direction: row; gap: 4px; }
+            .player-btns { gap: 8px; }
+            .live-badge { display: none !important; } /* Ocultar "EN DIRECTO" para ahorrar espacio */
+            .ctrl-btn { width: 28px; height: 28px; font-size: 0.8rem; }
+            .play-pause-btn { width: 32px; height: 32px; font-size: 0.9rem; }
+            
+            .player-right { display: flex; justify-content: flex-end; gap: 0; }
+            /* Ocultar volumen y lyrics en móvil para que quepan los otros */
+            #vol-slider, #vol-icon, #lyrics-btn { display: none; }
+            
             .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); background: linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0.9)); backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; z-index: 1000; border-top: 1px solid var(--border); }
             .mobile-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-3); text-decoration: none; font-size: 0.68rem; font-weight: 600; }
             .mobile-nav-item.active { color: var(--text-1); }
@@ -183,6 +207,8 @@
             .tracklist-header { display: none; }
             .tracklist-row { grid-template-columns: 40px 1fr auto; }
             .track-album { display: none; }
+            /* En móvil, mostrar siempre el corazón en las listas */
+            .track-fav-btn { opacity: 1; }
         }
         @media (max-width: 480px) { .stations-grid { gap: 16px; grid-template-columns: repeat(2, 1fr); } .player-loc { display: none; } }
         ::-webkit-scrollbar { width: 10px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 5px; }
@@ -247,10 +273,6 @@
                 <div class="remote-indicator" id="remote-indicator"><i class="fas fa-volume-up"></i> Escuchando en <span id="remote-device-name">Otro dispositivo</span></div>
             </div>
             <button class="player-heart" id="player-heart-desktop"><i class="fas fa-heart"></i></button>
-            <div class="player-btns-mobile">
-                <button class="player-heart" id="player-heart-mobile"><i class="fas fa-heart"></i></button>
-                <button class="ctrl-btn play-pause-btn" id="play-btn-mobile"><i class="fas fa-play"></i></button>
-            </div>
         </div>
         <div class="player-center">
             <div class="player-btns">
@@ -306,8 +328,8 @@
             loginBtn: document.getElementById('login-btn'), logoutBtn: document.getElementById('logout-btn'),
             userProfile: document.getElementById('user-profile'), userAvatar: document.getElementById('user-avatar'), userName: document.getElementById('user-name'),
             volSlider: document.getElementById('vol-slider'), volIcon: document.getElementById('vol-icon'),
-            playBtnDesktop: document.getElementById('play-btn-desktop'), playBtnMobile: document.getElementById('play-btn-mobile'),
-            heartBtnDesktop: document.getElementById('player-heart-desktop'), heartBtnMobile: document.getElementById('player-heart-mobile'),
+            playBtnDesktop: document.getElementById('play-btn-desktop'),
+            heartBtnDesktop: document.getElementById('player-heart-desktop'),
             shuffleBtn: document.getElementById('shuffle-btn'), repeatBtn: document.getElementById('repeat-btn'),
             lyricsBtn: document.getElementById('lyrics-btn'), queueBtn: document.getElementById('queue-btn'), deviceBtn: document.getElementById('device-btn'),
             playerArt: document.getElementById('player-art'), playerName: document.getElementById('player-name'), playerLoc: document.getElementById('player-loc'),
@@ -451,7 +473,7 @@
                         currentAudio.volume = dom.volSlider.value / 100;
                         if (isPlaying) {
                             currentAudio.play().catch(e => {
-                                console.error("Safari bloqueó autoplay. El usuario debe interactuar.");
+                                console.warn("Safari bloqueó autoplay. El usuario debe pulsar Play manualmente.");
                                 updatePlayBtn(); 
                             });
                         } else {
@@ -538,14 +560,19 @@
             document.getElementById('playlist-content').innerHTML = `
                 <div class="playlist-header"><div class="playlist-cover">${imgHtml}</div><div class="playlist-meta"><div class="playlist-type">${type === 'genre' ? 'Género' : 'País'}</div><h1 class="playlist-title">${name}</h1><div class="playlist-desc">${tracks.length} emisoras</div></div></div>
                 <button class="play-large-btn" id="play-collection-btn"><i class="fas fa-play"></i></button>
-                <div class="tracklist-header"><div>#</div><div>Título</div><div>Género / País</div><div style="text-align: right;">Bitrate</div></div>
+                <div class="tracklist-header"><div>#</div><div>Título</div><div>Género / País</div><div>♥</div><div style="text-align: right;">Bitrate</div></div>
                 <div class="tracklist-body">${tracks.map((s, i) => {
                     const isCurrent = currentStation && currentStation.id === s.id;
+                    const isFav = favorites.includes(s.id);
                     const trackImg = s.favicon ? `<img src="${s.favicon}" class="track-thumb" onerror="this.style.display='none'">` : `<div class="track-thumb" style="background:#333;display:flex;align-items:center;justify-content:center;"><i class="fas fa-music" style="font-size:0.8rem;color:#888"></i></div>`;
-                    return `<div class="tracklist-row ${isCurrent ? 'playing' : ''}" data-id="${s.id}"><div class="track-index">${isCurrent && isPlaying ? '<i class="fas fa-volume-up" style="color:var(--accent)"></i>' : i + 1}</div><div class="track-info">${trackImg}<div class="track-details"><div class="track-title">${s.name}</div><div class="track-subtitle">${s.location}</div></div></div><div class="track-album">${s.genre}</div><div class="track-duration">${s.bitrate} kbps</div></div>`;
+                    return `<div class="tracklist-row ${isCurrent ? 'playing' : ''}" data-id="${s.id}"><div class="track-index">${isCurrent && isPlaying ? '<i class="fas fa-volume-up" style="color:var(--accent)"></i>' : i + 1}</div><div class="track-info">${trackImg}<div class="track-details"><div class="track-title">${s.name}</div><div class="track-subtitle">${s.location}</div></div></div><div class="track-album">${s.genre}</div><button class="track-fav-btn ${isFav ? 'favorited' : ''}" data-id="${s.id}"><i class="fas fa-heart"></i></button><div class="track-duration">${s.bitrate} kbps</div></div>`;
                 }).join('')}</div>`;
             
-            document.querySelectorAll('.tracklist-row').forEach(row => row.addEventListener('click', () => { const station = radioStations.find(s => s.id === row.dataset.id); if (station) handleCardClick(station); }));
+            document.querySelectorAll('.tracklist-row').forEach(row => row.addEventListener('click', (e) => { 
+                if (e.target.closest('.track-fav-btn')) return; // No reproducir si se pulsa el corazón
+                const station = radioStations.find(s => s.id === row.dataset.id); if (station) handleCardClick(station); 
+            }));
+            document.querySelectorAll('.track-fav-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(btn.dataset.id); }));
             document.getElementById('play-collection-btn').addEventListener('click', () => { if (tracks.length > 0) playStation(tracks[0]); });
             if (addToHistory) navigateTo('playlist'); else showView('playlist');
         }
@@ -564,12 +591,17 @@
 
         function renderQueue() {
             const list = document.getElementById('queue-list'); if (!list) return;
-            list.innerHTML = `<div class="tracklist-header"><div>#</div><div>Título</div><div>Género / País</div><div style="text-align: right;">Bitrate</div></div>` + filteredStations.map((s, i) => {
+            list.innerHTML = `<div class="tracklist-header"><div>#</div><div>Título</div><div>Género / País</div><div>♥</div><div style="text-align: right;">Bitrate</div></div>` + filteredStations.map((s, i) => {
                 const active = currentStation && currentStation.id === s.id;
+                const isFav = favorites.includes(s.id);
                 const trackImg = s.favicon ? `<img src="${s.favicon}" class="track-thumb" onerror="this.style.display='none'">` : `<div class="track-thumb" style="background:#333;display:flex;align-items:center;justify-content:center;"><i class="fas fa-music" style="font-size:0.8rem;color:#888"></i></div>`;
-                return `<div class="tracklist-row ${active ? 'playing' : ''}" data-id="${s.id}"><div class="track-index">${active && isPlaying ? '<i class="fas fa-volume-up" style="color:var(--accent)"></i>' : i + 1}</div><div class="track-info">${trackImg}<div class="track-details"><div class="track-title">${s.name}</div><div class="track-subtitle">${s.location}</div></div></div><div class="track-album">${s.genre}</div><div class="track-duration">${s.bitrate} kbps</div></div>`;
+                return `<div class="tracklist-row ${active ? 'playing' : ''}" data-id="${s.id}"><div class="track-index">${active && isPlaying ? '<i class="fas fa-volume-up" style="color:var(--accent)"></i>' : i + 1}</div><div class="track-info">${trackImg}<div class="track-details"><div class="track-title">${s.name}</div><div class="track-subtitle">${s.location}</div></div></div><div class="track-album">${s.genre}</div><button class="track-fav-btn ${isFav ? 'favorited' : ''}" data-id="${s.id}"><i class="fas fa-heart"></i></button><div class="track-duration">${s.bitrate} kbps</div></div>`;
             }).join('');
-            list.querySelectorAll('.tracklist-row').forEach(row => row.addEventListener('click', () => { const station = radioStations.find(s => s.id === row.dataset.id); if (station) playStation(station); }));
+            list.querySelectorAll('.tracklist-row').forEach(row => row.addEventListener('click', (e) => { 
+                if (e.target.closest('.track-fav-btn')) return;
+                const station = radioStations.find(s => s.id === row.dataset.id); if (station) playStation(station); 
+            }));
+            list.querySelectorAll('.track-fav-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(btn.dataset.id); }));
         }
 
         function renderLyrics() {
@@ -596,18 +628,10 @@
 
         function handleCardClick(station) { (currentStation && currentStation.id === station.id) ? togglePlayPause() : playStation(station); }
 
-        // --- LÓGICA DE SPOTIFY CONNECT CORREGIDA ---
         function playStation(station) {
             if (!currentUser) return alert("Inicia sesión para reproducir.");
-            const updates = {
-                stationId: station.id,
-                isPlaying: true
-            };
-            // Si no hay ningún dispositivo activo, este dispositivo toma el control.
-            // Si ya hay uno activo, solo cambia la canción en ese dispositivo.
-            if (!activeDeviceId) {
-                updates.activeDevice = deviceId;
-            }
+            const updates = { stationId: station.id, isPlaying: true };
+            if (!activeDeviceId) updates.activeDevice = deviceId;
             update(ref(db, `users/${currentUser.uid}/playback`), updates);
         }
 
@@ -623,8 +647,8 @@
             update(ref(db, `users/${currentUser.uid}/playback`), { isPlaying: !isPlaying });
         }
 
-        function updatePlayBtn() { const icon = isPlaying ? 'fa-pause' : 'fa-play'; dom.playBtnDesktop.innerHTML = `<i class="fas ${icon}"></i>`; dom.playBtnMobile.innerHTML = `<i class="fas ${icon}"></i>`; }
-        function updatePlayerHeart() { if (currentStation) { dom.heartBtnDesktop.classList.toggle('favorited', favorites.includes(currentStation.id)); dom.heartBtnMobile.classList.toggle('favorited', favorites.includes(currentStation.id)); } }
+        function updatePlayBtn() { const icon = isPlaying ? 'fa-pause' : 'fa-play'; dom.playBtnDesktop.innerHTML = `<i class="fas ${icon}"></i>`; }
+        function updatePlayerHeart() { if (currentStation) dom.heartBtnDesktop.classList.toggle('favorited', favorites.includes(currentStation.id)); }
 
         function playAdjacent(dir) {
             if (!currentStation) return;
@@ -714,13 +738,11 @@
             dom.searchInput.addEventListener('focus', () => navigateTo('search'));
             
             dom.playBtnDesktop.addEventListener('click', togglePlayPause);
-            dom.playBtnMobile.addEventListener('click', togglePlayPause);
             
             document.getElementById('prev-btn').addEventListener('click', () => playAdjacent(-1));
             document.getElementById('next-btn').addEventListener('click', () => playAdjacent(1));
             
             dom.heartBtnDesktop.addEventListener('click', () => { if(currentStation) toggleFavorite(currentStation.id); });
-            dom.heartBtnMobile.addEventListener('click', () => { if(currentStation) toggleFavorite(currentStation.id); });
             
             dom.shuffleBtn.addEventListener('click', () => { isShuffle = !isShuffle; dom.shuffleBtn.classList.toggle('active', isShuffle); });
             dom.repeatBtn.addEventListener('click', () => { if (currentStation) playStation(currentStation); });
