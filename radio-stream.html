@@ -286,7 +286,6 @@
         const firebaseConfig = { apiKey: "AIzaSyDCm1pFZLRXk34UIGU3UY0ltLkyHkElsIg", authDomain: "onelife-cec55.firebaseapp.com", databaseURL: "https://onelife-cec55-default-rtdb.europe-west1.firebasedatabase.app", projectId: "onelife-cec55", storageBucket: "onelife-cec55.firebasestorage.app", messagingSenderId: "599128086819", appId: "1:599128086819:web:af149214fe5b68a12ad496" };
         const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getDatabase(app), provider = new GoogleAuthProvider();
 
-        // --- DYNAMIC STATE & DEVICE ID ---
         let radioStations = []; 
         let currentAudio = null, currentStation = null, isPlaying = false, currentUser = null, isShuffle = false;
         let favorites = [], filteredStations = [];
@@ -295,14 +294,13 @@
         let viewHistory = ['home'];
         let currentCollectionView = null;
         
-        // Generar ID único para esta pestaña/dispositivo
         let deviceId = localStorage.getItem('radio_device_id');
         if (!deviceId) {
             deviceId = 'dev_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
             localStorage.setItem('radio_device_id', deviceId);
         }
-        let activeDeviceId = null; // Dispositivo que está reproduciendo activamente
-        let registeredDevices = {}; // Lista de dispositivos conectados
+        let activeDeviceId = null;
+        let registeredDevices = {};
 
         const dom = {
             loginBtn: document.getElementById('login-btn'), logoutBtn: document.getElementById('logout-btn'),
@@ -335,15 +333,26 @@
             return `${browser} - ${os}`;
         }
 
-        /* ── API FETCH ── */
+        /* ── API FETCH (España + Globales filtradas) ── */
         async function fetchStations() {
             try {
-                const res = await fetch('https://de1.api.radio-browser.info/json/stations/topvote/500');
-                let data = await res.json();
-                radioStations = data.map(s => ({
+                // Hacemos dos peticiones a la vez: 250 de España y 250 globales (suelen ser europeas/USA)
+                const [esRes, globalRes] = await Promise.all([
+                    fetch('https://de1.api.radio-browser.info/json/stations/topvote/250?countrycode=ES'),
+                    fetch('https://de1.api.radio-browser.info/json/stations/topvote/250')
+                ]);
+                const esData = await esRes.json();
+                const globalData = await globalRes.json();
+                
+                // Combinar, priorizando España y eliminando duplicados
+                const combined = [...esData, ...globalData];
+                const uniqueStations = Array.from(new Map(combined.map(s => [s.stationuuid, s])).values());
+                
+                radioStations = uniqueStations.map(s => ({
                     id: s.stationuuid, name: s.name.trim() || "Estación", location: s.country || "Desconocido",
                     genre: s.tags.split(',')[0] || 'music', streamUrl: s.url_resolved, favicon: s.favicon, bitrate: s.bitrate || 'N/A'
                 })).filter(s => s.streamUrl);
+                
                 filteredStations = [...radioStations];
                 renderHomeGrids(); renderQueue(); renderFavorites();
             } catch (error) {
@@ -369,25 +378,36 @@
                 if (deviceId && activeDeviceId === deviceId) {
                     update(ref(db, `users/${user?.uid || ''}/playback`), { activeDevice: null });
                 }
+                // Limpiar localmente al cerrar sesión
+                registeredDevices = {}; activeDeviceId = null; updateRemoteIndicator();
             }
         });
 
         async function registerDevice(uid) {
+            const devName = getDeviceName();
+            
+            // 1. Instancia local inmediata para que aparezca al instante en el popup
+            registeredDevices[deviceId] = { name: devName, lastSeen: Date.now() };
+            
             const devRef = ref(db, `users/${uid}/devices/${deviceId}`);
-            await set(devRef, { name: getDeviceName(), lastSeen: Date.now() });
+            await set(devRef, { name: devName, lastSeen: Date.now() });
             
             window.addEventListener('beforeunload', () => {
                 remove(devRef);
             });
 
+            // 2. Latido cada 10s para mantenerse vivo y limpiar fantasmas
             setInterval(() => {
                 update(devRef, { lastSeen: Date.now() });
+                registeredDevices[deviceId] = { name: devName, lastSeen: Date.now() };
+                
                 Object.keys(registeredDevices).forEach(id => {
                     if (Date.now() - registeredDevices[id].lastSeen > 30000 && id !== deviceId) {
                         remove(ref(db, `users/${uid}/devices/${id}`));
+                        delete registeredDevices[id];
                     }
                 });
-            }, 15000);
+            }, 10000);
         }
 
         function setupSyncListeners(uid) {
@@ -401,7 +421,9 @@
 
             // 2. Sync Devices List
             onValue(ref(db, `users/${uid}/devices`), snap => {
-                registeredDevices = snap.val() || {};
+                const dbDevices = snap.val() || {};
+                // Sincronizar sin perder el local si acaba de actualizarse
+                registeredDevices = { ...registeredDevices, ...dbDevices };
                 renderDevicePopup();
             });
 
@@ -613,6 +635,11 @@
             const popupList = document.getElementById('device-list-popup');
             if (!currentUser) return;
             
+            // Asegurar que el dispositivo local está siempre presente al renderizar
+            if (!registeredDevices[deviceId]) {
+                registeredDevices[deviceId] = { name: getDeviceName(), lastSeen: Date.now() };
+            }
+            
             const devicesArray = Object.entries(registeredDevices).sort((a, b) => b[1].lastSeen - a[1].lastSeen);
             if (devicesArray.length === 0) {
                 popupList.innerHTML = '<div class="device-empty">No hay dispositivos conectados.</div>';
@@ -651,7 +678,11 @@
             }
         }
 
-        dom.deviceBtn.addEventListener('click', (e) => { e.stopPropagation(); dom.devicePopup.classList.toggle('visible'); renderDevicePopup(); });
+        dom.deviceBtn.addEventListener('click', (e) => { 
+            e.stopPropagation(); 
+            dom.devicePopup.classList.toggle('visible'); 
+            renderDevicePopup(); // Forzar renderizado instantáneo al abrir
+        });
         document.addEventListener('click', (e) => { if (!dom.devicePopup.contains(e.target) && e.target !== dom.deviceBtn) dom.devicePopup.classList.remove('visible'); });
         dom.remoteIndicator.addEventListener('click', () => { dom.devicePopup.classList.toggle('visible'); renderDevicePopup(); });
 
@@ -661,14 +692,12 @@
             dom.searchInput.addEventListener('input', applyFilters);
             dom.searchInput.addEventListener('focus', () => navigateTo('search'));
             
-            // Soporte para click en escritorio y móvil
             dom.playBtnDesktop.addEventListener('click', togglePlayPause);
             dom.playBtnMobile.addEventListener('click', togglePlayPause);
             
             document.getElementById('prev-btn').addEventListener('click', () => playAdjacent(-1));
             document.getElementById('next-btn').addEventListener('click', () => playAdjacent(1));
             
-            // Soporte para favoritos en escritorio y móvil
             dom.heartBtnDesktop.addEventListener('click', () => { if(currentStation) toggleFavorite(currentStation.id); });
             dom.heartBtnMobile.addEventListener('click', () => { if(currentStation) toggleFavorite(currentStation.id); });
             
