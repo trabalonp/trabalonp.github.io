@@ -413,7 +413,6 @@
                     }
                 });
                 
-                // Asegurar que el dispositivo local siempre esté en la lista
                 if (!updatedDevices[deviceId]) {
                     updatedDevices[deviceId] = { name: getDeviceName(), lastSeen: now };
                 }
@@ -597,13 +596,19 @@
 
         function handleCardClick(station) { (currentStation && currentStation.id === station.id) ? togglePlayPause() : playStation(station); }
 
+        // --- LÓGICA DE SPOTIFY CONNECT CORREGIDA ---
         function playStation(station) {
             if (!currentUser) return alert("Inicia sesión para reproducir.");
-            set(ref(db, `users/${currentUser.uid}/playback`), {
+            const updates = {
                 stationId: station.id,
-                isPlaying: true,
-                activeDevice: deviceId 
-            });
+                isPlaying: true
+            };
+            // Si no hay ningún dispositivo activo, este dispositivo toma el control.
+            // Si ya hay uno activo, solo cambia la canción en ese dispositivo.
+            if (!activeDeviceId) {
+                updates.activeDevice = deviceId;
+            }
+            update(ref(db, `users/${currentUser.uid}/playback`), updates);
         }
 
         function togglePlayPause() {
