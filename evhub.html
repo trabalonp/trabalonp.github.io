@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EV HUB — Comparador Eléctricos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src='https://cdn.jsdelivr.net/npm/lenis@1.3.13/dist/lenis.min.js'></script>
+  
+  <style>
+    :root {
+      --bg: #0A0A0A; --bg-darker: #050505; --surface: #111111;
+      --fg: #F5F5F5; --fg-dim: #A0A0A0; --muted: #555555;
+      --accent: #C6FF00; --red: #ff4d4d; --border: rgba(255, 255, 255, 0.08);
+      --serif: 'Instrument Serif', serif; --sans: 'Inter', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: auto; }
+    body {
+      background: var(--bg); color: var(--fg); font-family: var(--sans);
+      font-weight: 300; line-height: 1.6; overflow-x: hidden; cursor: none;
+      -webkit-font-smoothing: antialiased;
+    }
+    @media (pointer: coarse) { body { cursor: auto; } }
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: var(--sans); }
+
+    /* Custom Cursor */
+    .cursor-outline { position: fixed; top: 0; left: 0; width: 24px; height: 24px; border: 1px solid var(--fg); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); mix-blend-mode: difference; transition: width 0.2s, height 0.2s, border-color 0.2s, opacity 0.3s; opacity: 0; }
+    .cursor-hover .cursor-outline { width: 40px; height: 40px; border-color: var(--accent); }
+
+    /* Grain & BG */
+    .grain { position: fixed; inset: 0; pointer-events: none; z-index: 9000; opacity: 0.06; mix-blend-mode: overlay; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='250'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+    .bg-text { position: absolute; top: 8rem; right: -2rem; font-family: var(--serif); font-style: italic; font-size: clamp(8rem, 20vw, 20rem); color: rgba(255,255,255,0.015); pointer-events: none; z-index: 0; letter-spacing: -0.04em; white-space: nowrap; }
+
+    /* Header */
+    header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px); background: rgba(10, 10, 10, 0.6); border-bottom: 1px solid var(--border); }
+    .logo { font-family: var(--serif); font-size: 1.8rem; letter-spacing: -0.02em; display: flex; align-items: center; gap: 0.5rem; }
+    .logo i { color: var(--accent); font-size: 1.2rem; }
+    .nav-links { display: flex; gap: 1.5rem; font-family: var(--mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; }
+    .nav-links button { background: none; border: none; color: var(--fg-dim); cursor: none; transition: color 0.3s; font-family: var(--mono); }
+    .nav-links button:hover, .nav-links button.active { color: var(--accent); }
+    @media (pointer: coarse) { .nav-links button { cursor: pointer; } }
+
+    /* Main */
+    .main-content { position: relative; z-index: 2; max-width: 1400px; margin: 0 auto; padding: 8rem 2rem 6rem; }
+    .section-header { display: grid; grid-template-columns: 1fr 2fr; gap: 4rem; margin-bottom: 4rem; border-bottom: 1px solid var(--border); padding-bottom: 2rem; position: relative; z-index: 1; }
+    .section-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.2em; }
+    .section-title { font-family: var(--serif); font-size: clamp(2.5rem, 6vw, 4.5rem); line-height: 1; letter-spacing: -0.02em; }
+    .section-title em { font-style: italic; color: var(--muted); }
+
+    /* Controls & Filters */
+    .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap; position: relative; }
+    .search-bar { flex: 1; min-width: 200px; max-width: 400px; position: relative; }
+    .search-bar i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.9rem; }
+    .search-bar input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem 1rem 0.8rem 2.5rem; color: var(--fg); font-family: var(--mono); font-size: 0.85rem; outline: none; transition: border-color 0.3s; }
+    .search-bar input:focus { border-color: var(--accent); }
+    
+    .filter-wrapper { position: relative; }
+    .filter-btn-main { background: var(--surface); border: 1px solid var(--border); color: var(--fg-dim); padding: 0.8rem 1.2rem; font-family: var(--mono); font-size: 0.85rem; cursor: none; border-radius: 8px; transition: all 0.3s; display: flex; align-items: center; gap: 0.5rem; }
+    .filter-btn-main:hover { border-color: var(--accent); color: var(--fg); }
+    .filter-btn-main.has-filters { border-color: var(--accent); color: var(--accent); }
+    @media (pointer: coarse) { .filter-btn-main { cursor: pointer; } }
+
+    .filter-dropdown { position: absolute; top: calc(100% + 10px); right: 0; width: 320px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; z-index: 50; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; flex-direction: column; gap: 1.5rem; }
+    .filter-dropdown.visible { display: flex; animation: slideDown 0.2s ease; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .filter-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .filter-title { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .filter-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .pill { background: var(--bg-darker); border: 1px solid var(--border); color: var(--fg-dim); padding: 0.4rem 0.8rem; font-family: var(--mono); font-size: 0.75rem; cursor: none; border-radius: 4px; transition: all 0.3s; text-align: center; flex: 1; }
+    .pill:hover { border-color: var(--accent); color: var(--fg); }
+    .pill.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+    @media (pointer: coarse) { .pill { cursor: pointer; } }
+    
+    .clear-filters-btn { background: transparent; border: 1px solid var(--border); color: var(--fg-dim); padding: 0.5rem 0.9rem; font-family: var(--mono); font-size: 0.75rem; cursor: none; border-radius: 4px; transition: all 0.3s; width: 100%; margin-top: 0.5rem; }
+    .clear-filters-btn:hover { border-color: var(--red); color: var(--red); }
+    @media (pointer: coarse) { .clear-filters-btn { cursor: pointer; } }
+
+    /* Active Filters Bar */
+    .active-filters-bar { display: none; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; align-items: center; }
+    .active-filters-bar.visible { display: flex; }
+    .active-filters-label { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); text-transform: uppercase; margin-right: 0.5rem; }
+    .active-filter-tag { background: rgba(198, 255, 0, 0.1); border: 1px solid var(--accent); color: var(--accent); padding: 0.3rem 0.6rem; border-radius: 4px; font-family: var(--mono); font-size: 0.7rem; display: flex; align-items: center; gap: 0.5rem; }
+    .remove-filter { cursor: none; opacity: 0.7; transition: opacity 0.2s; }
+    .remove-filter:hover { opacity: 1; }
+    @media (pointer: coarse) { .remove-filter { cursor: pointer; } }
+
+    /* Catalog Grid */
+    .car-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+    .car-card { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; transition: all 0.3s cubic-bezier(.22,1,.36,1); cursor: none; display: flex; flex-direction: column; gap: 1rem; position: relative; }
+    @media (pointer: coarse) { .car-card { cursor: pointer; } }
+    .car-card:hover { border-color: var(--accent); transform: translateY(-5px); }
+    .car-img-container { width: 100%; height: 180px; background: var(--bg-darker); border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .car-img-container img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(40%) contrast(1.1); transition: filter 0.3s; }
+    .car-card:hover .car-img-container img { filter: grayscale(0%) contrast(1.1); }
+    .car-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+    .car-name { font-family: var(--serif); font-size: 1.4rem; line-height: 1.1; }
+    .car-price { font-family: var(--mono); font-size: 0.85rem; color: var(--accent); white-space: nowrap; }
+    .car-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+    .spec-item { display: flex; flex-direction: column; gap: 2px; }
+    .spec-label { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .spec-val { font-family: var(--mono); font-size: 0.85rem; color: var(--fg-dim); }
+    .card-actions { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+    .compare-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--fg-dim); padding: 0.5rem 1rem; font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; cursor: none; border-radius: 4px; transition: all 0.3s; }
+    .compare-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .compare-btn.selected { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+    @media (pointer: coarse) { .compare-btn { cursor: pointer; } }
+    .star-rating { color: var(--accent); font-size: 0.8rem; letter-spacing: 2px; }
+
+    /* Ranking List */
+    .ranking-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .rank-item { display: grid; grid-template-columns: 40px 1fr 2fr 60px; gap: 1.5rem; align-items: center; background: var(--surface); border: 1px solid var(--border); padding: 1rem 1.5rem; transition: all 0.3s; cursor: none; }
+    @media (pointer: coarse) { .rank-item { cursor: pointer; } }
+    .rank-item:hover { background: rgba(198, 255, 0, 0.02); border-color: var(--accent); }
+    .rank-num { font-family: var(--serif); font-size: 2rem; color: var(--muted); }
+    .rank-item.top-3 .rank-num { color: var(--accent); }
+    .rank-info h3 { font-family: var(--serif); font-size: 1.4rem; line-height: 1.1; }
+    .rank-info p { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
+    .rank-bar-container { width: 100%; height: 8px; background: var(--bg-darker); border-radius: 4px; overflow: hidden; }
+    .rank-bar { height: 100%; background: var(--accent); border-radius: 4px; transition: width 1s cubic-bezier(.22,1,.36,1); }
+    .rank-score { font-family: var(--mono); font-size: 1.2rem; font-weight: 700; color: var(--fg); text-align: right; }
+    @media (max-width: 768px) { .rank-item { grid-template-columns: 30px 1fr 50px; gap: 1rem; } .rank-bar-container { display: none; } }
+
+    /* Comparison Tray & Modal */
+    .comp-tray { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(150%); background: var(--surface); border: 1px solid var(--accent); border-radius: 12px; padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1.5rem; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: transform 0.4s cubic-bezier(.22,1,.36,1); width: 90%; max-width: 600px; justify-content: space-between; }
+    .comp-tray.visible { transform: translateX(-50%) translateY(0); }
+    .comp-tray-info { display: flex; flex-direction: column; gap: 2px; }
+    .comp-tray-title { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); text-transform: uppercase; }
+    .comp-tray-count { font-family: var(--serif); font-size: 1.4rem; color: var(--fg); }
+    .comp-btn-final { background: var(--accent); color: var(--bg); border: none; padding: 0.8rem 1.5rem; font-family: var(--mono); font-size: 0.75rem; text-transform: uppercase; cursor: none; border-radius: 8px; transition: transform 0.2s; }
+    .comp-btn-final:hover { transform: scale(1.05); }
+    .comp-btn-clear { background: transparent; border: none; color: var(--fg-dim); cursor: none; font-size: 1rem; padding: 0.5rem; }
+    @media (pointer: coarse) { .comp-btn-final, .comp-btn-clear { cursor: pointer; } }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 2rem; }
+    .modal-overlay.visible { display: flex; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal-content { background: var(--bg-darker); border: 1px solid var(--border); border-radius: 12px; max-width: 1000px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 2rem; position: relative; }
+    .modal-close { position: absolute; top: 1rem; right: 1rem; background: var(--surface); border: 1px solid var(--border); width: 32px; height: 32px; border-radius: 50%; color: var(--fg); cursor: none; display: flex; align-items: center; justify-content: center; font-size: 1rem; z-index: 10; }
+    .modal-close:hover { background: var(--accent); color: var(--bg); }
+    @media (pointer: coarse) { .modal-close { cursor: pointer; } }
+    
+    .comp-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    .comp-table th, .comp-table td { padding: 1rem; text-align: center; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 0.85rem; }
+    .comp-table th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; }
+    .comp-table td:first-child { text-align: left; color: var(--accent); font-weight: 700; }
+    .comp-table tr:hover { background: rgba(255,255,255,0.02); }
+    .comp-table .best { color: var(--accent); font-weight: 700; position: relative; }
+    .comp-table .best::after { content: '★'; position: absolute; top: 2px; right: 2px; font-size: 0.6rem; color: var(--accent); }
+    .comp-header-row { display: flex; gap: 1rem; margin-bottom: 1rem; overflow-x: auto; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+    .comp-header-card { flex: 1; min-width: 150px; text-align: center; }
+    .comp-header-card img { width: 100%; height: 80px; object-fit: cover; border-radius: 4px; margin-bottom: 0.5rem; }
+    .comp-header-card h4 { font-family: var(--serif); font-size: 1.1rem; }
+
+    /* Footer */
+    footer { padding: 4rem 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 0.75rem; text-transform: uppercase; color: var(--muted); position: relative; z-index: 2; margin-top: 4rem; }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-darker); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .section-header { grid-template-columns: 1fr; gap: 1rem; }
+      .main-content { padding: 7rem 1.5rem 4rem; }
+      .car-specs { grid-template-columns: 1fr; }
+      .filter-dropdown { right: -50px; width: 280px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="grain"></div>
+  <div class="cursor-outline"></div>
+
+  <!-- HEADER -->
+  <header>
+    <a href="#" class="logo">EV HUB <i class="fas fa-bolt"></i></a>
+    <nav class="nav-links">
+      <button class="active" id="btn-catalog">Catálogo</button>
+      <button id="btn-ranking">Ranking</button>
+    </nav>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <div class="bg-text">EV</div>
+
+    <div class="section-header">
+      <div class="section-num">01 — Movilidad</div>
+      <h1 class="section-title">Coches <em>Eléctricos.</em></h1>
+    </div>
+
+    <div class="controls-bar">
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" id="search-input" placeholder="Buscar modelo...">
+      </div>
+      
+      <div class="filter-wrapper">
+        <button id="filter-btn" class="filter-btn-main">
+          <i class="fas fa-sliders-h"></i> Filtros
+        </button>
+        
+        <div class="filter-dropdown" id="filter-dropdown">
+          <div class="filter-group">
+            <span class="filter-title">Precio</span>
+            <div class="filter-pills">
+              <button class="pill" data-cat="price" data-val="0-35000">< 35k €</button>
+              <button class="pill" data-cat="price" data-val="35000-45000">35k - 45k €</button>
+              <button class="pill" data-cat="price" data-val="45000-999999">+45k €</button>
+            </div>
+          </div>
+          
+          <div class="filter-group">
+            <span class="filter-title">Autonomía</span>
+            <div class="filter-pills">
+              <button class="pill" data-cat="wltp" data-val="0-500">< 500 km</button>
+              <button class="pill" data-cat="wltp" data-val="500-600">500 - 600 km</button>
+              <button class="pill" data-cat="wltp" data-val="600-9999">+600 km</button>
+            </div>
+          </div>
+          
+          <div class="filter-group">
+            <span class="filter-title">Potencia</span>
+            <div class="filter-pills">
+              <button class="pill" data-cat="cv" data-val="0-200">< 200 CV</button>
+              <button class="pill" data-cat="cv" data-val="200-300">200 - 300 CV</button>
+              <button class="pill" data-cat="cv" data-val="300-9999">+300 CV</button>
+            </div>
+          </div>
+          
+          <div class="filter-group">
+            <span class="filter-title">Batería</span>
+            <div class="filter-pills">
+              <button class="pill" data-cat="battery" data-val="0-75">< 75 kWh</button>
+              <button class="pill" data-cat="battery" data-val="75-85">75 - 85 kWh</button>
+              <button class="pill" data-cat="battery" data-val="85-9999">+85 kWh</button>
+            </div>
+          </div>
+          
+          <button id="clear-filters" class="clear-filters-btn"><i class="fas fa-trash"></i> Limpiar todos</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Filters Bar -->
+    <div class="active-filters-bar" id="active-filters-bar"></div>
+
+    <!-- Catalog View -->
+    <div id="catalog-view" class="car-grid"></div>
+    
+    <!-- Ranking View -->
+    <div id="ranking-view" class="ranking-list" style="display: none;"></div>
+
+  </main>
+
+  <!-- Comparison Tray -->
+  <div class="comp-tray" id="comp-tray">
+    <div class="comp-tray-info">
+      <span class="comp-tray-title">Seleccionados</span>
+      <span class="comp-tray-count" id="comp-count">0 / 4</span>
+    </div>
+    <div style="display: flex; gap: 1rem;">
+      <button class="comp-btn-clear" id="clear-comp"><i class="fas fa-trash"></i></button>
+      <button class="comp-btn-final" id="show-comp">Comparar</button>
+    </div>
+  </div>
+
+  <!-- Comparison Modal -->
+  <div class="modal-overlay" id="comp-modal">
+    <div class="modal-content">
+      <button class="modal-close" id="close-modal"><i class="fas fa-times"></i></button>
+      <h2 style="font-family: var(--serif); font-size: 2rem; margin-bottom: 1rem;">Comparativa <em style="color:var(--muted)">Directa</em></h2>
+      <div id="comp-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>© 2025 EV HUB</span>
+    <span>Datos extraídos de pruebas reales.</span>
+  </footer>
+
+  <script>
+    /* ===== Data ===== */
+    const evData = [
+      { name: "Hyundai Ioniq 6 84 kWh RWD", priceText: "45.000-55.000 €", priceNum: 50000, wltpText: "680 km", wltpNum: 680, realMixto: "550-620 km", autovia: "450-520 km", cd: 0.21, cv: 229, battery: 84, consumoText: "14-16 kWh/100", consumoNum: 15, garantia: "5 años / 8 bat", rating: 5, img: "https://loremflickr.com/400/300/electric,car?lock=1" },
+      { name: "Tesla Model 3 LR RWD", priceText: "45.000-50.000 €", priceNum: 47500, wltpText: "650-700 km", wltpNum: 675, realMixto: "550-600 km", autovia: "450-550 km", cd: 0.219, cv: 300, battery: 78, consumoText: "13-15 kWh/100", consumoNum: 14, garantia: "4 años / 8 bat", rating: 5, img: "https://loremflickr.com/400/300/electric,car?lock=2" },
+      { name: "Kia EV4 Fastback LR", priceText: "37.000-45.000 €", priceNum: 41000, wltpText: "633 km", wltpNum: 633, realMixto: "480-520 km", autovia: "380-450 km", cd: 0.23, cv: 204, battery: 81.4, consumoText: "14,4 kWh/100", consumoNum: 14.4, garantia: "7 años / 8 bat", rating: 5, img: "https://loremflickr.com/400/300/electric,car?lock=3" },
+      { name: "BYD Seal Design RWD", priceText: "40.000-46.000 €", priceNum: 43000, wltpText: "570 km", wltpNum: 570, realMixto: "480-530 km", autovia: "400-450 km", cd: 0.219, cv: 313, battery: 82.5, consumoText: "16-18 kWh/100", consumoNum: 17, garantia: "6 años / 8 bat", rating: 4, img: "https://loremflickr.com/400/300/electric,car?lock=4" },
+      { name: "Mazda 6e Long Range", priceText: "43.000-50.000 €", priceNum: 46500, wltpText: "552 km", wltpNum: 552, realMixto: "450-500 km", autovia: "380-450 km", cd: 0.23, cv: 245, battery: 80, consumoText: "16 kWh/100", consumoNum: 16, garantia: "6 años", rating: 4, img: "https://loremflickr.com/400/300/electric,car?lock=5" },
+      { name: "XPENG P7 Long Range", priceText: "45.000-55.000 €", priceNum: 50000, wltpText: "600 km", wltpNum: 600, realMixto: "500-550 km", autovia: "430-500 km", cd: 0.21, cv: 276, battery: 86, consumoText: "15-17 kWh/100", consumoNum: 16, garantia: "5 años", rating: 4, img: "https://loremflickr.com/400/300/electric,car?lock=6" },
+      { name: "Volkswagen ID.3 Pro S", priceText: "38.000-45.000 €", priceNum: 41500, wltpText: "628 km", wltpNum: 628, realMixto: "470-520 km", autovia: "400-470 km", cd: 0.27, cv: 204, battery: 77, consumoText: "15-16 kWh/100", consumoNum: 15.5, garantia: "3 años / 8 bat", rating: 4, img: "https://loremflickr.com/400/300/electric,car?lock=7" },
+      { name: "Kia EV3 Long Range", priceText: "35.000-42.000 €", priceNum: 38500, wltpText: "605 km", wltpNum: 605, realMixto: "450-500 km", autovia: "380-430 km", cd: 0.28, cv: 204, battery: 81.4, consumoText: "15-17 kWh/100", consumoNum: 16, garantia: "7 años", rating: 4, img: "https://loremflickr.com/400/300/electric,car?lock=8" },
+      { name: "Renault Scenic E-Tech", priceText: "40.000-45.000 €", priceNum: 42500, wltpText: "625 km", wltpNum: 625, realMixto: "500 km", autovia: "400-450 km", cd: 0.30, cv: 220, battery: 87, consumoText: "16-18 kWh/100", consumoNum: 17, garantia: "5 años / 8 bat", rating: 4, img: "https://loremflickr.com/400/300/electric,car?lock=9" },
+      { name: "Cupra Born 77 kWh", priceText: "40.000 €", priceNum: 40000, wltpText: "550 km", wltpNum: 550, realMixto: "430-480 km", autovia: "370-420 km", cd: 0.29, cv: 231, battery: 77, consumoText: "16 kWh/100", consumoNum: 16, garantia: "3 años", rating: 3, img: "https://loremflickr.com/400/300/electric,car?lock=10" },
+      { name: "MG4 Extended Range", priceText: "32.000-38.000 €", priceNum: 35000, wltpText: "545 km", wltpNum: 545, realMixto: "430-480 km", autovia: "350-420 km", cd: 0.27, cv: 245, battery: 77, consumoText: "16-18 kWh/100", consumoNum: 17, garantia: "7 años", rating: 4, img: "https://loremflickr.com/400/300/electric,car?lock=11" },
+      { name: "Leapmotor C10 BEV", priceText: "35.000-40.000 €", priceNum: 37500, wltpText: "420-530 km", wltpNum: 475, realMixto: "400-470 km", autovia: "350-400 km", cd: 0.29, cv: 218, battery: 69.9, consumoText: "17 kWh/100", consumoNum: 17, garantia: "4 años", rating: 3, img: "https://loremflickr.com/400/300/electric,car?lock=12" },
+      { name: "Tesla Model Y LR", priceText: "50.000 €", priceNum: 50000, wltpText: "600 km", wltpNum: 600, realMixto: "500 km", autovia: "400-450 km", cd: 0.235, cv: 350, battery: 78, consumoText: "16-18 kWh/100", consumoNum: 17, garantia: "4 años", rating: 4, img: "https://loremflickr.com/400/300/electric,car?lock=13" },
+      { name: "BYD Sealion 7", priceText: "45.000 €", priceNum: 45000, wltpText: "500 km", wltpNum: 500, realMixto: "420-470 km", autovia: "350-400 km", cd: 0.27, cv: 313, battery: 82.5, consumoText: "18-20 kWh/100", consumoNum: 19, garantia: "6 años", rating: 3, img: "https://loremflickr.com/400/300/electric,car?lock=14" }
+    ];
+
+    /* ===== Scoring Logic ===== */
+    function calculateScore(car) {
+      const wltpScore = (car.wltpNum / 700) * 25;
+      const cvScore = (car.cv / 350) * 15;
+      const batScore = (car.battery / 90) * 15;
+      const cdScore = ((0.30 - car.cd) / 0.10) * 15; 
+      const conScore = ((20 - car.consumoNum) / 7) * 15; 
+      const ratScore = (car.rating / 5) * 15;
+      
+      let total = wltpScore + cvScore + batScore + cdScore + conScore + ratScore;
+      return Math.max(0, Math.min(100, total.toFixed(1)));
+    }
+
+    let compareList = [];
+    let activeFilters = { price: null, wltp: null, cv: null, battery: null };
+
+    /* ===== Init ===== */
+    document.addEventListener('DOMContentLoaded', () => {
+      applyFilters();
+
+      document.getElementById('btn-catalog').addEventListener('click', () => switchView('catalog'));
+      document.getElementById('btn-ranking').addEventListener('click', () => switchView('ranking'));
+      document.getElementById('search-input').addEventListener('input', applyFilters);
+      
+      // Filter Dropdown Logic
+      const filterBtn = document.getElementById('filter-btn');
+      const filterDropdown = document.getElementById('filter-dropdown');
+      
+      filterBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        filterDropdown.classList.toggle('visible');
+      });
+      
+      document.addEventListener('click', (e) => {
+        if (!filterDropdown.contains(e.target) && e.target !== filterBtn) {
+          filterDropdown.classList.remove('visible');
+        }
+      });
+
+      document.querySelectorAll('.pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          const cat = pill.dataset.cat;
+          const val = pill.dataset.val;
+          
+          if (activeFilters[cat] === val) {
+            activeFilters[cat] = null;
+            pill.classList.remove('active');
+          } else {
+            document.querySelectorAll(`.pill[data-cat="${cat}"]`).forEach(p => p.classList.remove('active'));
+            activeFilters[cat] = val;
+            pill.classList.add('active');
+          }
+          applyFilters();
+        });
+      });
+
+      document.getElementById('clear-filters').addEventListener('click', () => {
+        activeFilters = { price: null, wltp: null, cv: null, battery: null };
+        document.querySelectorAll('.pill.active').forEach(p => p.classList.remove('active'));
+        applyFilters();
+      });
+
+      document.getElementById('clear-comp').addEventListener('click', clearComparison);
+      document.getElementById('show-comp').addEventListener('click', showComparisonModal);
+      document.getElementById('close-modal').addEventListener('click', () => document.getElementById('comp-modal').classList.remove('visible'));
+    });
+
+    /* ===== Rendering ===== */
+    function applyFilters() {
+      let filtered = [...evData];
+      const searchTerm = document.getElementById('search-input').value.toLowerCase();
+      
+      if (searchTerm) {
+        filtered = filtered.filter(c => c.name.toLowerCase().includes(searchTerm));
+      }
+      if (activeFilters.price) {
+        const [min, max] = activeFilters.price.split('-').map(Number);
+        filtered = filtered.filter(c => c.priceNum >= min && c.priceNum <= max);
+      }
+      if (activeFilters.wltp) {
+        const [min, max] = activeFilters.wltp.split('-').map(Number);
+        filtered = filtered.filter(c => c.wltpNum >= min && c.wltpNum <= max);
+      }
+      if (activeFilters.cv) {
+        const [min, max] = activeFilters.cv.split('-').map(Number);
+        filtered = filtered.filter(c => c.cv >= min && c.cv <= max);
+      }
+      if (activeFilters.battery) {
+        const [min, max] = activeFilters.battery.split('-').map(Number);
+        filtered = filtered.filter(c => c.battery >= min && c.battery <= max);
+      }
+
+      renderCatalog(filtered);
+      renderRanking(filtered);
+      renderActiveFilters();
+    }
+
+    function renderActiveFilters() {
+      const bar = document.getElementById('active-filters-bar');
+      const filterBtn = document.getElementById('filter-btn');
+      bar.innerHTML = '';
+      let hasFilters = false;
+
+      for (const cat in activeFilters) {
+        if (activeFilters[cat]) {
+          hasFilters = true;
+          const val = activeFilters[cat];
+          const pill = document.querySelector(`.pill[data-cat="${cat}"][data-val="${val}"]`);
+          const text = pill ? pill.textContent : val;
+          
+          const tag = document.createElement('div');
+          tag.className = 'active-filter-tag';
+          tag.innerHTML = `${text} <i class="fas fa-times remove-filter" data-cat="${cat}"></i>`;
+          bar.appendChild(tag);
+        }
+      }
+
+      if (hasFilters) {
+        bar.classList.add('visible');
+        filterBtn.classList.add('has-filters');
+        const label = document.createElement('span');
+        label.className = 'active-filters-label';
+        label.textContent = 'Filtros activos:';
+        bar.insertBefore(label, bar.firstChild);
+      } else {
+        bar.classList.remove('visible');
+        filterBtn.classList.remove('has-filters');
+      }
+
+      document.querySelectorAll('.remove-filter').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cat = btn.dataset.cat;
+          activeFilters[cat] = null;
+          document.querySelectorAll(`.pill[data-cat="${cat}"]`).forEach(p => p.classList.remove('active'));
+          applyFilters();
+        });
+      });
+    }
+
+    function renderCatalog(cars) {
+      const grid = document.getElementById('catalog-view');
+      if (cars.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 4rem; font-family: var(--mono);">No se encontraron coches con los filtros seleccionados.</div>`;
+        return;
+      }
+
+      grid.innerHTML = cars.map(car => {
+        const isSelected = compareList.includes(car.name);
+        const stars = '★'.repeat(car.rating) + '☆'.repeat(5 - car.rating);
+        return `
+          <div class="car-card">
+            <div class="car-img-container">
+              <img src="${car.img}" alt="${car.name}">
+            </div>
+            <div class="car-header">
+              <h3 class="car-name">${car.name}</h3>
+              <span class="car-price">${car.priceText}</span>
+            </div>
+            <div class="car-specs">
+              <div class="spec-item"><span class="spec-label">Autonomía WLTP</span><span class="spec-val">${car.wltpText}</span></div>
+              <div class="spec-item"><span class="spec-label">Potencia</span><span class="spec-val">${car.cv} CV</span></div>
+              <div class="spec-item"><span class="spec-label">Batería</span><span class="spec-val">${car.battery} kWh</span></div>
+              <div class="spec-item"><span class="spec-label">Aerodinámica</span><span class="spec-val">Cd ${car.cd}</span></div>
+              <div class="spec-item"><span class="spec-label">Consumo</span><span class="spec-val">${car.consumoText}</span></div>
+              <div class="spec-item"><span class="spec-label">Garantía</span><span class="spec-val">${car.garantia}</span></div>
+            </div>
+            <div class="card-actions">
+              <span class="star-rating">${stars}</span>
+              <button class="compare-btn ${isSelected ? 'selected' : ''}" data-name="${car.name}">
+                ${isSelected ? 'Seleccionado' : 'Comparar'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      grid.querySelectorAll('.compare-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleCompare(btn.dataset.name);
+        });
+      });
+    }
+
+    function renderRanking(cars) {
+      const list = document.getElementById('ranking-view');
+      if (cars.length === 0) {
+        list.innerHTML = `<div style="text-align: center; color: var(--muted); padding: 4rem; font-family: var(--mono);">No hay coches para hacer ranking.</div>`;
+        return;
+      }
+
+      const sorted = [...cars].sort((a, b) => calculateScore(b) - calculateScore(a));
+      
+      list.innerHTML = sorted.map((car, index) => {
+        const score = calculateScore(car);
+        const isTop3 = index < 3;
+        return `
+          <div class="rank-item ${isTop3 ? 'top-3' : ''}">
+            <div class="rank-num">${index + 1}</div>
+            <div class="rank-info">
+              <h3>${car.name}</h3>
+              <p>${car.priceText} • ${car.wltpText} • ${car.cv} CV</p>
+            </div>
+            <div class="rank-bar-container">
+              <div class="rank-bar" style="width: ${score}%"></div>
+            </div>
+            <div class="rank-score">${score}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ===== Logic ===== */
+    function switchView(view) {
+      document.getElementById('btn-catalog').classList.toggle('active', view === 'catalog');
+      document.getElementById('btn-ranking').classList.toggle('active', view === 'ranking');
+      document.getElementById('catalog-view').style.display = view === 'catalog' ? 'grid' : 'none';
+      document.getElementById('ranking-view').style.display = view === 'ranking' ? 'flex' : 'none';
+    }
+
+    function toggleCompare(name) {
+      const index = compareList.indexOf(name);
+      if (index > -1) {
+        compareList.splice(index, 1);
+      } else {
+        if (compareList.length >= 4) {
+          alert("Solo puedes comparar hasta 4 coches a la vez.");
+          return;
+        }
+        compareList.push(name);
+      }
+      updateTray();
+      applyFilters(); 
+    }
+
+    function updateTray() {
+      const tray = document.getElementById('comp-tray');
+      const count = document.getElementById('comp-count');
+      count.textContent = `${compareList.length} / 4`;
+      tray.classList.toggle('visible', compareList.length > 0);
+    }
+
+    function clearComparison() {
+      compareList = [];
+      updateTray();
+      applyFilters();
+    }
+
+    function showComparisonModal() {
+      if (compareList.length < 2) {
+        alert("Selecciona al menos 2 coches para comparar.");
+        return;
+      }
+
+      const carsToCompare = evData.filter(c => compareList.includes(c.name));
+      const modalBody = document.getElementById('comp-modal-body');
+      
+      let html = `<div class="comp-header-row">
+        <div style="flex: 0 0 150px;"></div>
+        ${carsToCompare.map(c => `<div class="comp-header-card"><img src="${c.img}" alt="${c.name}"><h4>${c.name}</h4></div>`).join('')}
+      </div>`;
+
+      const getBest = (key, lowerIsBetter = false) => {
+        const values = carsToCompare.map(c => c[key]);
+        return lowerIsBetter ? Math.min(...values) : Math.max(...values);
+      };
+
+      const bestPrice = getBest('priceNum', true);
+      const bestWltp = getBest('wltpNum');
+      const bestCd = getBest('cd', true);
+      const bestCv = getBest('cv');
+      const bestBat = getBest('battery');
+      const bestConsumo = getBest('consumoNum', true);
+      const bestRating = getBest('rating');
+
+      html += `<table class="comp-table">
+        <tr><th>Precio</th>${carsToCompare.map(c => `<td class="${c.priceNum === bestPrice ? 'best' : ''}">${c.priceText}</td>`).join('')}</tr>
+        <tr><th>Autonomía WLTP</th>${carsToCompare.map(c => `<td class="${c.wltpNum === bestWltp ? 'best' : ''}">${c.wltpText}</td>`).join('')}</tr>
+        <tr><th>Real Mixto</th>${carsToCompare.map(c => `<td>${c.realMixto}</td>`).join('')}</tr>
+        <tr><th>Autovía 120</th>${carsToCompare.map(c => `<td>${c.autovia}</td>`).join('')}</tr>
+        <tr><th>Aerodinámica (Cd)</th>${carsToCompare.map(c => `<td class="${c.cd === bestCd ? 'best' : ''}">${c.cd}</td>`).join('')}</tr>
+        <tr><th>Potencia (CV)</th>${carsToCompare.map(c => `<td class="${c.cv === bestCv ? 'best' : ''}">${c.cv}</td>`).join('')}</tr>
+        <tr><th>Batería (kWh)</th>${carsToCompare.map(c => `<td class="${c.battery === bestBat ? 'best' : ''}">${c.battery}</td>`).join('')}</tr>
+        <tr><th>Consumo</th>${carsToCompare.map(c => `<td class="${c.consumoNum === bestConsumo ? 'best' : ''}">${c.consumoText}</td>`).join('')}</tr>
+        <tr><th>Garantía</th>${carsToCompare.map(c => `<td>${c.garantia}</td>`).join('')}</tr>
+        <tr><th>Valoración</th>${carsToCompare.map(c => `<td class="${c.rating === bestRating ? 'best' : ''}">${'★'.repeat(c.rating)}</td>`).join('')}</tr>
+        <tr><th>Puntuación Global</th>${carsToCompare.map(c => `<td style="color:var(--accent); font-weight:700; font-size:1.1rem;">${calculateScore(c)}</td>`).join('')}</tr>
+      </table>`;
+
+      modalBody.innerHTML = html;
+      document.getElementById('comp-modal').classList.add('visible');
+    }
+
+    /* ===== Custom Cursor ===== */
+    const outline = document.querySelector('.cursor-outline');
+    let hideTimer;
+    function moveCursor(e) {
+      outline.style.left = e.clientX + 'px';
+      outline.style.top = e.clientY + 'px';
+      outline.style.opacity = '1';
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => { outline.style.opacity = '0'; }, 3000);
+    }
+    window.addEventListener('mousemove', moveCursor);
+    document.querySelectorAll('a, button, .car-card, input').forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+    });
+  </script>
+</body>
+</html>
