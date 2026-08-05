@@ -30,15 +30,10 @@
     html { scroll-behavior: auto; }
 
     body {
-      background: var(--bg);
-      color: var(--fg);
-      font-family: var(--sans);
-      font-weight: 300;
-      line-height: 1.6;
-      overflow-x: hidden;
-      cursor: none;
+      background: var(--bg); color: var(--fg); font-family: var(--sans);
+      font-weight: 300; line-height: 1.6; overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
-    }
+}
 
     @media (pointer: coarse) { body { cursor: auto; } }
 
@@ -932,7 +927,7 @@
     requestAnimationFrame(raf);
 
     /* ===== Custom Cursor (Instantáneo y Ocultable) ===== */
-    const outline = document.querySelector('.cursor-outline');
+    /* const outline = document.querySelector('.cursor-outline');
     let hideTimer;
 
     function moveCursor(e) {
