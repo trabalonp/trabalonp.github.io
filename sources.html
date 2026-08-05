@@ -35,7 +35,7 @@
       font-weight: 300;
       line-height: 1.6;
       overflow-x: hidden;
-      cursor: none;
+      /* cursor: none; */ /* Eliminado para usar el cursor del sistema */
       -webkit-font-smoothing: antialiased;
     }
 
@@ -44,7 +44,8 @@
     ::selection { background: var(--accent); color: var(--bg); }
     a { color: inherit; text-decoration: none; }
 
-    /* Custom Cursor */
+    /* Custom Cursor - Desactivado */
+    /*
     .cursor-outline {
       position: fixed; top: 0; left: 0; width: 24px; height: 24px;
       border: 1px solid var(--fg); border-radius: 50%;
@@ -54,6 +55,7 @@
       opacity: 0;
     }
     .cursor-hover .cursor-outline { width: 40px; height: 40px; border-color: var(--accent); }
+    */
 
     /* Grain Overlay */
     .grain {
@@ -95,18 +97,16 @@
       background: transparent; border: 1px solid var(--fg); color: var(--bg);
       background: var(--fg); padding: 0.6rem 1.2rem;
       font-family: var(--mono); font-size: 0.75rem; text-transform: uppercase;
-      letter-spacing: 0.1em; cursor: none; transition: all 0.3s;
+      letter-spacing: 0.1em; cursor: pointer; transition: all 0.3s;
       display: flex; align-items: center; gap: 0.5rem;
     }
     #loginBtn:hover { background: var(--accent); border-color: var(--accent); color: var(--bg); }
-    @media (pointer: coarse) { #loginBtn { cursor: pointer; } }
 
     #userAvatar {
       width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--accent);
-      cursor: none; display: none; object-fit: cover; transition: transform 0.3s;
+      cursor: pointer; display: none; object-fit: cover; transition: transform 0.3s;
     }
     #userAvatar:hover { transform: scale(1.1); }
-    @media (pointer: coarse) { #userAvatar { cursor: pointer; } }
 
     /* Layout */
     .sources-container {
@@ -139,9 +139,8 @@
     .left-nav a {
       font-family: var(--mono); font-size: 0.8rem; color: var(--fg-dim);
       display: block; padding: 0.5rem 0.8rem; border-radius: 6px;
-      transition: all 0.3s; cursor: none;
+      transition: all 0.3s; cursor: pointer;
     }
-    @media (pointer: coarse) { .left-nav a { cursor: pointer; } }
     .left-nav a:hover { color: var(--fg); background: rgba(255,255,255,0.03); }
     .left-nav a.active { color: var(--accent); background: rgba(198, 255, 0, 0.05); }
 
@@ -180,12 +179,11 @@
       position: absolute; top: 0.8rem; right: 0.8rem;
       background: rgba(255,255,255,0.05); border: 1px solid var(--border);
       color: var(--fg-dim); border-radius: 6px;
-      padding: 0.3rem 0.6rem; font-size: 0.7rem; cursor: none;
+      padding: 0.3rem 0.6rem; font-size: 0.7rem; cursor: pointer;
       transition: all 0.3s; font-family: var(--mono);
       display: flex; align-items: center; gap: 0.4rem;
     }
     .copy-btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
-    @media (pointer: coarse) { .copy-btn { cursor: pointer; } }
 
     .explanation { margin: 1.5rem 0; color: var(--fg-dim); }
     .explanation ul { margin-left: 1.5rem; margin-top: 0.5rem; }
@@ -200,9 +198,8 @@
       background: var(--surface); border: 1px solid var(--border);
       padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;
       transition: all 0.3s cubic-bezier(.22,1,.36,1); text-decoration: none; color: var(--fg);
-      cursor: none;
+      cursor: pointer;
     }
-    @media (pointer: coarse) { .card { cursor: pointer; } }
     .card:hover {
       border-color: var(--accent); background: rgba(198, 255, 0, 0.02);
       transform: translateY(-5px);
@@ -262,11 +259,10 @@
     .sb-title { font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.75rem; color: var(--accent); }
     .sb-close {
       background: rgba(255,255,255,0.05); border: none; color: var(--fg-dim); 
-      width: 32px; height: 32px; border-radius: 50%; cursor: none; transition: all 0.3s;
+      width: 32px; height: 32px; border-radius: 50%; cursor: pointer; transition: all 0.3s;
       display: flex; align-items: center; justify-content: center;
     }
     .sb-close:hover { background: var(--accent); color: var(--bg); }
-    @media (pointer: coarse) { .sb-close { cursor: pointer; } }
 
     .sb-body { flex: 1; overflow-y: auto; padding: 1rem 1.5rem 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
 
@@ -282,11 +278,10 @@
     #editAvatarBtn {
       position: absolute; bottom: 0; right: 0; width: 28px; height: 28px; border-radius: 50%;
       background: var(--fg); color: var(--bg); border: 3px solid var(--surface);
-      cursor: none; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
       font-size: 0.6rem; transition: transform 0.2s;
     }
     #editAvatarBtn:hover { transform: scale(1.1); background: var(--accent); }
-    @media (pointer: coarse) { #editAvatarBtn { cursor: pointer; } }
 
     .profile-name { font-family: var(--serif); font-size: 1.8rem; line-height: 1; }
     .profile-email { font-family: var(--mono); font-size: 0.7rem; color: var(--fg-dim); }
@@ -306,10 +301,9 @@
     #avatarUrlInput:focus { border-color: var(--accent); }
     .avatar-actions { display: flex; gap: 0.5rem; }
     .btn-av {
-      flex: 1; padding: 0.6rem; border: none; cursor: none; font-family: var(--mono);
+      flex: 1; padding: 0.6rem; border: none; cursor: pointer; font-family: var(--mono);
       font-size: 0.7rem; text-transform: uppercase; border-radius: 8px;
     }
-    @media (pointer: coarse) { .btn-av { cursor: pointer; } }
     #applyAvatarBtn { background: var(--accent); color: var(--bg); }
     #cancelAvatarBtn { background: rgba(255,255,255,0.05); color: var(--fg-dim); }
 
@@ -324,10 +318,9 @@
     .sb-footer { padding: 1rem 1.5rem 1.5rem; }
     #logoutBtn {
       width: 100%; padding: 0.8rem; background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--fg-dim);
-      font-family: var(--mono); text-transform: uppercase; font-size: 0.7rem; cursor: none; transition: all 0.3s; border-radius: 12px;
+      font-family: var(--mono); text-transform: uppercase; font-size: 0.7rem; cursor: pointer; transition: all 0.3s; border-radius: 12px;
     }
     #logoutBtn:hover { border-color: #ff4d4d; color: #ff4d4d; background: rgba(255,77,77,0.05); }
-    @media (pointer: coarse) { #logoutBtn { cursor: pointer; } }
 
     /* Toast */
     #toast {
@@ -354,7 +347,7 @@
 <body>
 
   <div class="grain"></div>
-  <div class="cursor-outline"></div>
+  <!-- <div class="cursor-outline"></div> --> <!-- Desactivado -->
 
   <!-- HEADER -->
   <header>
@@ -833,7 +826,8 @@ ifconfig / ip</code></pre>
     }
     requestAnimationFrame(raf);
 
-    /* ===== Custom Cursor (Instantáneo y Ocultable) ===== */
+    /* ===== Custom Cursor - Desactivado ===== */
+    /*
     const outline = document.querySelector('.cursor-outline');
     let hideTimer;
 
@@ -854,6 +848,7 @@ ifconfig / ip</code></pre>
       el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
       el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
     });
+    */
 
     /* ===== Copy Code Block ===== */
     function copyCode(button) {

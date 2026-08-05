@@ -36,7 +36,7 @@
       font-weight: 300;
       line-height: 1.6;
       overflow-x: hidden;
-      cursor: none;
+      /* cursor: none; */ /* Eliminado para usar el cursor del sistema */
       -webkit-font-smoothing: antialiased;
     }
 
@@ -46,7 +46,8 @@
     a { color: inherit; text-decoration: none; }
     button { font-family: var(--sans); }
 
-    /* Custom Cursor */
+    /* Custom Cursor - Desactivado */
+    /*
     .cursor-outline {
       position: fixed; top: 0; left: 0; width: 24px; height: 24px;
       border: 1px solid var(--fg); border-radius: 50%;
@@ -56,6 +57,7 @@
       opacity: 0;
     }
     .cursor-hover .cursor-outline { width: 40px; height: 40px; border-color: var(--accent); }
+    */
 
     /* Grain Overlay */
     .grain {
@@ -113,9 +115,8 @@
       border: 1px dashed var(--border); background: var(--surface);
       padding: 4rem 2rem; text-align: center; transition: all 0.3s;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      min-height: 300px; cursor: none; position: relative; overflow: hidden;
+      min-height: 300px; cursor: pointer; position: relative; overflow: hidden;
     }
-    @media (pointer: coarse) { .upload-zone { cursor: pointer; } }
     .upload-zone.dragover { border-color: var(--accent); background: rgba(198, 255, 0, 0.02); }
     .upload-icon { font-size: 3rem; color: var(--muted); margin-bottom: 1.5rem; transition: color 0.3s; }
     .upload-zone:hover .upload-icon { color: var(--accent); }
@@ -123,10 +124,9 @@
     .upload-btn {
       background: var(--fg); color: var(--bg); padding: 0.8rem 1.5rem;
       font-family: var(--mono); font-size: 0.75rem; text-transform: uppercase;
-      letter-spacing: 0.1em; border: none; cursor: none; transition: all 0.3s;
+      letter-spacing: 0.1em; border: none; cursor: pointer; transition: all 0.3s;
     }
     .upload-btn:hover { background: var(--accent); }
-    @media (pointer: coarse) { .upload-btn { cursor: pointer; } }
     #fileInput { display: none; }
 
     /* Preview Area */
@@ -150,26 +150,22 @@
     .input-row { display: flex; gap: 1rem; align-items: center; }
     .input-box { flex: 1; background: var(--bg-darker); border: 1px solid var(--border); padding: 0.6rem; color: var(--fg); font-family: var(--mono); font-size: 0.85rem; outline: none; transition: border-color 0.3s; width: 100%; }
     .input-box:focus { border-color: var(--accent); }
-    select.input-box { cursor: none; }
-    @media (pointer: coarse) { select.input-box { cursor: pointer; } }
+    select.input-box { cursor: pointer; }
 
     .range-wrap { display: flex; flex-direction: column; gap: 0.5rem; }
-    input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; background: var(--border); outline: none; border-radius: 2px; cursor: none; }
-    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; background: var(--accent); cursor: none; border-radius: 50%; }
-    @media (pointer: coarse) { input[type="range"], input[type="range"]::-webkit-slider-thumb { cursor: pointer; } }
+    input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; background: var(--border); outline: none; border-radius: 2px; cursor: pointer; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; background: var(--accent); cursor: pointer; border-radius: 50%; }
     .range-val { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); text-align: right; }
 
-    .check-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; font-size: 0.8rem; color: var(--fg-dim); font-family: var(--mono); cursor: none; }
-    @media (pointer: coarse) { .check-row { cursor: pointer; } }
-    input[type="checkbox"] { accent-color: var(--accent); cursor: none; }
-    @media (pointer: coarse) { input[type="checkbox"] { cursor: pointer; } }
+    .check-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; font-size: 0.8rem; color: var(--fg-dim); font-family: var(--mono); cursor: pointer; }
+    input[type="checkbox"] { accent-color: var(--accent); cursor: pointer; }
 
     /* Actions */
     .actions-row { display: flex; gap: 1rem; flex-wrap: wrap; }
     .btn {
       background: transparent; border: 1px solid var(--border); color: var(--fg);
       padding: 0.8rem 1.5rem; font-family: var(--mono); font-size: 0.75rem;
-      text-transform: uppercase; letter-spacing: 0.1em; cursor: none; transition: all 0.3s;
+      text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: all 0.3s;
       display: flex; align-items: center; gap: 0.5rem;
     }
     .btn:hover { border-color: var(--accent); color: var(--accent); }
@@ -178,7 +174,6 @@
     .btn.success { background: var(--accent); color: var(--bg); border-color: var(--accent); }
     .btn.success:hover { background: transparent; color: var(--accent); }
     .btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
-    @media (pointer: coarse) { .btn { cursor: pointer; } }
 
     /* Results */
     .result-panel { background: var(--surface); border: 1px solid var(--border); padding: 2rem; display: none; }
@@ -209,7 +204,7 @@
 <body>
 
   <div class="grain"></div>
-  <div class="cursor-outline"></div>
+  <!-- <div class="cursor-outline"></div> --> <!-- Desactivado -->
 
   <!-- HEADER -->
   <header>
@@ -356,7 +351,8 @@
     function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
     requestAnimationFrame(raf);
 
-    /* ===== Custom Cursor ===== */
+    /* ===== Custom Cursor - Desactivado ===== */
+    /*
     const outline = document.querySelector('.cursor-outline');
     let hideTimer;
     function moveCursor(e) {
@@ -371,6 +367,7 @@
       el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
       el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
     });
+    */
 
     /* ===== Compressor Logic ===== */
     let originalFile = null;
