@@ -33,14 +33,15 @@
       background: var(--bg); color: var(--fg); font-family: var(--sans);
       font-weight: 300; line-height: 1.6; overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
-}
+    }
 
     @media (pointer: coarse) { body { cursor: auto; } }
 
     ::selection { background: var(--accent); color: var(--bg); }
     a { color: inherit; text-decoration: none; }
 
-    /* Custom Cursor (Instantáneo y Ocultable) */
+    /* Custom Cursor (Instantáneo y Ocultable) - DESACTIVADO */
+    /*
     .cursor-outline {
       position: fixed;
       top: 0; left: 0;
@@ -58,6 +59,7 @@
       width: 40px; height: 40px; 
       border-color: var(--accent);
     }
+    */
 
     /* Grain Overlay */
     .grain {
@@ -140,24 +142,22 @@
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      cursor: none;
+      cursor: pointer;
       transition: all 0.3s;
       display: flex; align-items: center; gap: 0.5rem;
     }
     #loginBtn:hover { background: var(--accent); border-color: var(--accent); color: var(--bg); }
-    @media (pointer: coarse) { #loginBtn { cursor: pointer; } }
 
     #userAvatar {
       width: 36px; height: 36px;
       border-radius: 50%;
       border: 1px solid var(--accent);
-      cursor: none;
+      cursor: pointer;
       display: none;
       object-fit: cover;
       transition: transform 0.3s;
     }
     #userAvatar:hover { transform: scale(1.1); }
-    @media (pointer: coarse) { #userAvatar { cursor: pointer; } }
 
     /* Hero Section */
     .hero {
@@ -277,9 +277,8 @@
       padding: 2rem 0;
       border-bottom: 1px solid var(--border);
       transition: padding 0.4s ease, background 0.4s ease;
-      cursor: none;
+      cursor: pointer;
     }
-    @media (pointer: coarse) { .index-item { cursor: pointer; } }
     .index-item:hover {
       padding-left: 2rem;
       padding-right: 2rem;
@@ -321,7 +320,7 @@
       background: var(--surface);
       border: 1px solid var(--border);
       padding: 1.5rem;
-      cursor: none;
+      cursor: pointer;
       transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
       display: flex;
       flex-direction: column;
@@ -329,7 +328,6 @@
       text-decoration: none;
       color: var(--fg);
     }
-    @media (pointer: coarse) { .project-card { cursor: pointer; } }
     .project-card:hover { 
       border-color: var(--accent); 
       box-shadow: 0 20px 50px rgba(0,0,0,0.5);
@@ -431,12 +429,11 @@
       color: var(--fg-dim); 
       width: 32px; height: 32px;
       border-radius: 50%;
-      cursor: none; 
+      cursor: pointer; 
       transition: all 0.3s;
       display: flex; align-items: center; justify-content: center;
     }
     .sb-close:hover { background: var(--accent); color: var(--bg); }
-    @media (pointer: coarse) { .sb-close { cursor: pointer; } }
 
     .sb-body {
       flex: 1; overflow-y: auto;
@@ -465,13 +462,12 @@
       width: 28px; height: 28px; border-radius: 50%;
       background: var(--fg); color: var(--bg);
       border: 3px solid var(--surface);
-      cursor: none; 
+      cursor: pointer; 
       display: flex; align-items: center; justify-content: center;
       font-size: 0.6rem;
       transition: transform 0.2s;
     }
     #editAvatarBtn:hover { transform: scale(1.1); background: var(--accent); }
-    @media (pointer: coarse) { #editAvatarBtn { cursor: pointer; } }
 
     .profile-name { 
       font-family: var(--serif); 
@@ -503,11 +499,10 @@
     #avatarUrlInput:focus { border-color: var(--accent); }
     .avatar-actions { display: flex; gap: 0.5rem; }
     .btn-av {
-      flex: 1; padding: 0.6rem; border: none; cursor: none;
+      flex: 1; padding: 0.6rem; border: none; cursor: pointer;
       font-family: var(--mono); font-size: 0.7rem; 
       text-transform: uppercase; border-radius: 8px;
     }
-    @media (pointer: coarse) { .btn-av { cursor: pointer; } }
     #applyAvatarBtn { background: var(--accent); color: var(--bg); }
     #cancelAvatarBtn { background: rgba(255,255,255,0.05); color: var(--fg-dim); }
 
@@ -534,10 +529,9 @@
       width: 100%; padding: 0.8rem; background: transparent;
       border: 1px solid rgba(255,255,255,0.1); color: var(--fg-dim);
       font-family: var(--mono); text-transform: uppercase; font-size: 0.7rem;
-      cursor: none; transition: all 0.3s; border-radius: 12px;
+      cursor: pointer; transition: all 0.3s; border-radius: 12px;
     }
     #logoutBtn:hover { border-color: #ff4d4d; color: #ff4d4d; background: rgba(255,77,77,0.05); }
-    @media (pointer: coarse) { #logoutBtn { cursor: pointer; } }
 
     /* Toast */
     #toast {
@@ -568,7 +562,7 @@
 <body>
 
   <div class="grain"></div>
-  <div class="cursor-outline"></div>
+  <!-- <div class="cursor-outline"></div> --> <!-- Desactivado -->
 
   <!-- HEADER -->
   <header>
@@ -926,8 +920,9 @@
     }
     requestAnimationFrame(raf);
 
-    /* ===== Custom Cursor (Instantáneo y Ocultable) ===== */
-    /* const outline = document.querySelector('.cursor-outline');
+    /* ===== Custom Cursor (desactivado) ===== */
+    /*
+    const outline = document.querySelector('.cursor-outline');
     let hideTimer;
 
     function moveCursor(e) {
@@ -947,6 +942,7 @@
       el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
       el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
     });
+    */
 
     /* ===== Scroll Reveal ===== */
     const revealEls = document.querySelectorAll('.reveal');
