@@ -324,7 +324,8 @@
         let activeDeviceId = null;
         let previousActiveDeviceId = null;
         let registeredDevices = {};
-        let latestPlaybackState = null; // Guardar el estado si las emisoras no han cargado
+        let latestPlaybackState = null;
+        let currentLoadedUrl = null; // Prevenir recargas innecesarias y stuttering
 
         const dom = {
             loginBtn: document.getElementById('login-btn'), logoutBtn: document.getElementById('logout-btn'),
@@ -388,6 +389,7 @@
                         updatePlayBtn();
                         updateRemoteIndicator();
                         renderFavorites();
+                        syncAudioPlayback(); // Lanzar audio si este dispositivo es el activo
                     }
                 }
             } catch (error) {
@@ -457,17 +459,30 @@
                 
                 registeredDevices = updatedDevices;
                 renderDevicePopup();
+
+                // LÓGICA DE AUTO-RECLAMACIÓN
+                const numDevices = Object.keys(registeredDevices).length;
+                if (numDevices === 1) {
+                    // Si solo hay un dispositivo conectado, debe ser el activo automáticamente
+                    if (activeDeviceId !== deviceId) {
+                        update(ref(db, `users/${uid}/playback`), { activeDevice: deviceId });
+                    }
+                } else if (activeDeviceId && !registeredDevices[activeDeviceId]) {
+                    // Si el dispositivo activo se desconectó y hay varios conectados, se limpia para que el próximo en dar play lo reclame
+                    update(ref(db, `users/${uid}/playback`), { activeDevice: null });
+                }
             });
 
             onValue(ref(db, `users/${uid}/playback`), snap => {
                 const state = snap.val();
-                latestPlaybackState = state; // Guardar por si las emisoras no han cargado
+                latestPlaybackState = state;
                 
                 if (!state || !state.stationId) {
                     currentStation = null; isPlaying = false; updatePlayerUI();
                     currentAudio.pause();
                     currentAudio.removeAttribute('src');
                     currentAudio.load();
+                    currentLoadedUrl = null;
                     previousActiveDeviceId = null;
                     return;
                 }
@@ -477,7 +492,6 @@
                 // Actualizar estados globales
                 isPlaying = state.isPlaying;
                 const newActiveDeviceId = state.activeDevice;
-                const justBecameActive = newActiveDeviceId === deviceId && previousActiveDeviceId !== deviceId;
                 activeDeviceId = newActiveDeviceId;
                 
                 // Si la emisora existe en la lista local, actualizamos la UI
@@ -493,35 +507,9 @@
                 renderDevicePopup();
                 updateRemoteIndicator();
 
-                if (activeDeviceId === deviceId) {
-                    // ESTE DISPOSITIVO ES EL ACTIVO
-                    if (station && station.streamUrl) {
-                        // Forzar recarga limpia si acaba de recibir el control o si cambia la emisora
-                        if (justBecameActive || currentAudio.src !== station.streamUrl) {
-                            currentAudio.src = station.streamUrl;
-                            currentAudio.load(); 
-                        }
-                        currentAudio.volume = dom.volSlider.value / 100;
-                        if (isPlaying) {
-                            currentAudio.play().catch(e => {
-                                console.warn("Safari bloqueó autoplay. El usuario debe pulsar Play.");
-                                updatePlayBtn(); 
-                            });
-                        } else {
-                            currentAudio.pause();
-                        }
-                    }
-                } else {
-                    // ESTE DISPOSITIVO ES INACTIVO (CONTROL REMOTO)
-                    // Cortar el audio de raíz para evitar desincronización
-                    if (currentAudio.src) {
-                        currentAudio.pause();
-                        currentAudio.removeAttribute('src');
-                        currentAudio.load();
-                    }
-                }
+                syncAudioPlayback(); // Sincronizar el audio basándose en los nuevos estados
                 
-                previousActiveDeviceId = activeDeviceId; // Guardar para el próximo evento
+                previousActiveDeviceId = activeDeviceId;
 
                 if (currentView === 'playlist' && currentCollectionView) openCollectionView(currentCollectionView.type, currentCollectionView.name, false);
                 if (currentView === 'queue') renderQueue();
@@ -608,7 +596,7 @@
                 }).join('')}</div>`;
             
             document.querySelectorAll('.tracklist-row').forEach(row => row.addEventListener('click', (e) => { 
-                if (e.target.closest('.track-fav-btn')) return; // No reproducir si se pulsa el corazón
+                if (e.target.closest('.track-fav-btn')) return;
                 const station = radioStations.find(s => s.id === row.dataset.id); if (station) handleCardClick(station); 
             }));
             document.querySelectorAll('.track-fav-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(btn.dataset.id); }));
@@ -667,23 +655,97 @@
 
         function handleCardClick(station) { (currentStation && currentStation.id === station.id) ? togglePlayPause() : playStation(station); }
 
+        function shouldClaimPlayback() {
+            const numDevices = Object.keys(registeredDevices).length;
+            // Reclamar si: no hay dispositivo activo, O el activo se desconectó, O solo hay un dispositivo (este mismo)
+            return !activeDeviceId || !registeredDevices[activeDeviceId] || numDevices === 1;
+        }
+
         function playStation(station) {
             if (!currentUser) return alert("Inicia sesión para reproducir.");
             const updates = { stationId: station.id, isPlaying: true };
-            if (!activeDeviceId) updates.activeDevice = deviceId;
+            if (shouldClaimPlayback()) {
+                updates.activeDevice = deviceId;
+                // Reproducción optimista: arrancamos el audio inmediatamente en el clic para evitar bloqueos del navegador
+                currentStation = station;
+                if (currentLoadedUrl !== station.streamUrl) {
+                    currentLoadedUrl = station.streamUrl;
+                    currentAudio.src = station.streamUrl;
+                    currentAudio.load();
+                }
+                currentAudio.volume = dom.volSlider.value / 100;
+                currentAudio.play().catch(e => console.warn("Autoplay bloqueado:", e));
+                updatePlayerUI();
+                isPlaying = true;
+                updatePlayBtn();
+            }
             update(ref(db, `users/${currentUser.uid}/playback`), updates);
         }
 
         function togglePlayPause() {
             if (!currentUser || !currentStation) return;
-            if (activeDeviceId === deviceId) {
-                if (currentAudio.paused) {
+            
+            const wantToPlay = !isPlaying;
+            const willClaim = wantToPlay && shouldClaimPlayback();
+            
+            if (willClaim) {
+                // Reproducción optimista
+                if (currentLoadedUrl !== currentStation.streamUrl) {
+                    currentLoadedUrl = currentStation.streamUrl;
+                    currentAudio.src = currentStation.streamUrl;
+                    currentAudio.load();
+                }
+                currentAudio.volume = dom.volSlider.value / 100;
+                currentAudio.play().catch(e => console.error("Error al reanudar:", e));
+                
+                update(ref(db, `users/${currentUser.uid}/playback`), { isPlaying: true, activeDevice: deviceId });
+            } else if (activeDeviceId === deviceId) {
+                if (wantToPlay) {
                     currentAudio.play().catch(e => console.error("Error al reanudar:", e));
                 } else {
                     currentAudio.pause();
                 }
+                update(ref(db, `users/${currentUser.uid}/playback`), { isPlaying: wantToPlay });
+            } else {
+                // Control remoto
+                update(ref(db, `users/${currentUser.uid}/playback`), { isPlaying: wantToPlay });
             }
-            update(ref(db, `users/${currentUser.uid}/playback`), { isPlaying: !isPlaying });
+            
+            // Actualizar UI inmediatamente
+            isPlaying = wantToPlay;
+            updatePlayBtn();
+        }
+
+        function syncAudioPlayback() {
+            if (!currentStation || !currentStation.streamUrl) return;
+            
+            if (activeDeviceId === deviceId) {
+                // ESTE DISPOSITIVO ES EL ACTIVO
+                if (currentLoadedUrl !== currentStation.streamUrl) {
+                    currentLoadedUrl = currentStation.streamUrl;
+                    currentAudio.src = currentStation.streamUrl;
+                    currentAudio.load(); 
+                }
+                currentAudio.volume = dom.volSlider.value / 100;
+                if (isPlaying) {
+                    if (currentAudio.paused) {
+                        currentAudio.play().catch(e => {
+                            console.warn("Safari bloqueó autoplay. El usuario debe pulsar Play.");
+                            updatePlayBtn(); 
+                        });
+                    }
+                } else {
+                    currentAudio.pause();
+                }
+            } else {
+                // ESTE DISPOSITIVO ES INACTIVO (CONTROL REMOTO)
+                if (currentAudio.src || currentLoadedUrl) {
+                    currentAudio.pause();
+                    currentAudio.removeAttribute('src');
+                    currentAudio.load();
+                    currentLoadedUrl = null;
+                }
+            }
         }
 
         function updatePlayBtn() { const icon = isPlaying ? 'fa-pause' : 'fa-play'; dom.playBtnDesktop.innerHTML = `<i class="fas ${icon}"></i>`; }
