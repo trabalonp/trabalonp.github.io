@@ -325,7 +325,11 @@
         let previousActiveDeviceId = null;
         let registeredDevices = {};
         let latestPlaybackState = null;
-        let currentLoadedUrl = null; // Prevenir recargas innecesarias y stuttering
+        let currentLoadedUrl = null;
+
+        // Variables para la pantalla de Reanudación (Autoplay Unblocker)
+        let resumeOverlay = null;
+        let resumeHandler = null;
 
         const dom = {
             loginBtn: document.getElementById('login-btn'), logoutBtn: document.getElementById('logout-btn'),
@@ -358,6 +362,39 @@
             return `${browser} - ${os}`;
         }
 
+        // --- SISTEMA DE OVERLAY PARA DESBLOQUEAR AUDIO EN IOS / SAFARI ---
+        function hideResumeOverlay() {
+            if (resumeOverlay) {
+                resumeOverlay.remove();
+                resumeOverlay = null;
+            }
+            if (resumeHandler) {
+                document.removeEventListener('click', resumeHandler);
+                resumeHandler = null;
+            }
+        }
+
+        function showResumeOverlay() {
+            if (resumeOverlay) return; // Ya está visible
+            resumeOverlay = document.createElement('div');
+            resumeOverlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:16px;color:white;text-align:center;padding:20px;';
+            resumeOverlay.innerHTML = `
+                <i class="fas fa-play-circle" style="font-size: 4rem; color: var(--accent);"></i>
+                <h2 style="font-size: 1.5rem; font-weight: 800;">Toca para reproducir</h2>
+                <p style="color: #b3b3b3; max-width: 300px;">Tu navegador bloqueó la reproducción automática. Toca en cualquier lugar para empezar a escuchar.</p>
+            `;
+            document.body.appendChild(resumeOverlay);
+            
+            resumeHandler = () => {
+                currentAudio.play().then(() => {
+                    hideResumeOverlay();
+                }).catch(err => console.error("Aún bloqueado:", err));
+            };
+            
+            document.addEventListener('click', resumeHandler);
+        }
+        // -----------------------------------------------------------------
+
         async function fetchStations() {
             try {
                 const [esRes, globalRes] = await Promise.all([
@@ -378,7 +415,6 @@
                 filteredStations = [...radioStations];
                 renderHomeGrids(); renderQueue(); renderFavorites();
                 
-                // Si Firebase ya envió un estado de reproducción mientras cargaban las emisoras, lo aplicamos ahora
                 if (latestPlaybackState && latestPlaybackState.stationId) {
                     const station = radioStations.find(s => s.id === latestPlaybackState.stationId);
                     if (station) {
@@ -389,7 +425,7 @@
                         updatePlayBtn();
                         updateRemoteIndicator();
                         renderFavorites();
-                        syncAudioPlayback(); // Lanzar audio si este dispositivo es el activo
+                        syncAudioPlayback();
                     }
                 }
             } catch (error) {
@@ -411,6 +447,7 @@
                 dom.loginBtn.style.display = 'inline-flex'; dom.userProfile.style.display = 'none'; dom.logoutBtn.style.display = 'none';
                 favorites = []; renderFavorites(); updatePlayerHeart();
                 currentAudio.pause(); isPlaying = false; updatePlayBtn();
+                hideResumeOverlay();
                 if (deviceId && activeDeviceId === deviceId) {
                     update(ref(db, `users/${user?.uid || ''}/playback`), { activeDevice: null });
                 }
@@ -460,15 +497,12 @@
                 registeredDevices = updatedDevices;
                 renderDevicePopup();
 
-                // LÓGICA DE AUTO-RECLAMACIÓN
                 const numDevices = Object.keys(registeredDevices).length;
                 if (numDevices === 1) {
-                    // Si solo hay un dispositivo conectado, debe ser el activo automáticamente
                     if (activeDeviceId !== deviceId) {
                         update(ref(db, `users/${uid}/playback`), { activeDevice: deviceId });
                     }
                 } else if (activeDeviceId && !registeredDevices[activeDeviceId]) {
-                    // Si el dispositivo activo se desconectó y hay varios conectados, se limpia para que el próximo en dar play lo reclame
                     update(ref(db, `users/${uid}/playback`), { activeDevice: null });
                 }
             });
@@ -480,26 +514,22 @@
                 if (!state || !state.stationId) {
                     currentStation = null; isPlaying = false; updatePlayerUI();
                     currentAudio.pause();
-                    currentAudio.removeAttribute('src');
-                    currentAudio.load();
                     currentLoadedUrl = null;
                     previousActiveDeviceId = null;
+                    hideResumeOverlay();
                     return;
                 }
                 
                 const station = radioStations.find(s => s.id === state.stationId);
                 
-                // Actualizar estados globales
                 isPlaying = state.isPlaying;
                 const newActiveDeviceId = state.activeDevice;
                 activeDeviceId = newActiveDeviceId;
                 
-                // Si la emisora existe en la lista local, actualizamos la UI
                 if (station) {
                     currentStation = station;
                     updatePlayerUI();
                 } else {
-                    // Si no existe, esperamos a que fetchStations() termine y lo actualizará
                     return; 
                 }
                 
@@ -507,7 +537,7 @@
                 renderDevicePopup();
                 updateRemoteIndicator();
 
-                syncAudioPlayback(); // Sincronizar el audio basándose en los nuevos estados
+                syncAudioPlayback(); 
                 
                 previousActiveDeviceId = activeDeviceId;
 
@@ -657,7 +687,6 @@
 
         function shouldClaimPlayback() {
             const numDevices = Object.keys(registeredDevices).length;
-            // Reclamar si: no hay dispositivo activo, O el activo se desconectó, O solo hay un dispositivo (este mismo)
             return !activeDeviceId || !registeredDevices[activeDeviceId] || numDevices === 1;
         }
 
@@ -666,7 +695,6 @@
             const updates = { stationId: station.id, isPlaying: true };
             if (shouldClaimPlayback()) {
                 updates.activeDevice = deviceId;
-                // Reproducción optimista: arrancamos el audio inmediatamente en el clic para evitar bloqueos del navegador
                 currentStation = station;
                 if (currentLoadedUrl !== station.streamUrl) {
                     currentLoadedUrl = station.streamUrl;
@@ -674,7 +702,9 @@
                     currentAudio.load();
                 }
                 currentAudio.volume = dom.volSlider.value / 100;
-                currentAudio.play().catch(e => console.warn("Autoplay bloqueado:", e));
+                currentAudio.play().then(() => {
+                    hideResumeOverlay();
+                }).catch(e => console.warn("Autoplay bloqueado:", e));
                 updatePlayerUI();
                 isPlaying = true;
                 updatePlayBtn();
@@ -689,38 +719,42 @@
             const willClaim = wantToPlay && shouldClaimPlayback();
             
             if (willClaim) {
-                // Reproducción optimista
                 if (currentLoadedUrl !== currentStation.streamUrl) {
                     currentLoadedUrl = currentStation.streamUrl;
                     currentAudio.src = currentStation.streamUrl;
                     currentAudio.load();
                 }
                 currentAudio.volume = dom.volSlider.value / 100;
-                currentAudio.play().catch(e => console.error("Error al reanudar:", e));
+                currentAudio.play().then(() => {
+                    hideResumeOverlay();
+                }).catch(e => console.error("Error al reanudar:", e));
                 
                 update(ref(db, `users/${currentUser.uid}/playback`), { isPlaying: true, activeDevice: deviceId });
             } else if (activeDeviceId === deviceId) {
                 if (wantToPlay) {
-                    currentAudio.play().catch(e => console.error("Error al reanudar:", e));
+                    currentAudio.play().then(() => {
+                        hideResumeOverlay();
+                    }).catch(e => console.error("Error al reanudar:", e));
                 } else {
                     currentAudio.pause();
+                    hideResumeOverlay();
                 }
                 update(ref(db, `users/${currentUser.uid}/playback`), { isPlaying: wantToPlay });
             } else {
-                // Control remoto
                 update(ref(db, `users/${currentUser.uid}/playback`), { isPlaying: wantToPlay });
             }
             
-            // Actualizar UI inmediatamente
             isPlaying = wantToPlay;
             updatePlayBtn();
         }
 
         function syncAudioPlayback() {
-            if (!currentStation || !currentStation.streamUrl) return;
+            if (!currentStation || !currentStation.streamUrl) {
+                hideResumeOverlay();
+                return;
+            }
             
             if (activeDeviceId === deviceId) {
-                // ESTE DISPOSITIVO ES EL ACTIVO
                 if (currentLoadedUrl !== currentStation.streamUrl) {
                     currentLoadedUrl = currentStation.streamUrl;
                     currentAudio.src = currentStation.streamUrl;
@@ -730,21 +764,21 @@
                 if (isPlaying) {
                     if (currentAudio.paused) {
                         currentAudio.play().catch(e => {
-                            console.warn("Safari bloqueó autoplay. El usuario debe pulsar Play.");
-                            updatePlayBtn(); 
+                            console.warn("Autoplay bloqueado. Esperando interacción del usuario.");
+                            showResumeOverlay();
                         });
                     }
                 } else {
                     currentAudio.pause();
+                    hideResumeOverlay();
                 }
             } else {
                 // ESTE DISPOSITIVO ES INACTIVO (CONTROL REMOTO)
-                if (currentAudio.src || currentLoadedUrl) {
+                // Solo pausamos, no eliminamos el src para mantener el desbloqueo del navegador
+                if (!currentAudio.paused) {
                     currentAudio.pause();
-                    currentAudio.removeAttribute('src');
-                    currentAudio.load();
-                    currentLoadedUrl = null;
                 }
+                hideResumeOverlay();
             }
         }
 
