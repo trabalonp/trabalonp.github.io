@@ -24,19 +24,12 @@
     body {
       background: var(--bg); color: var(--fg); font-family: var(--sans);
       font-weight: 300; line-height: 1.6; overflow-x: hidden;
-      /* cursor: none; */ /* Eliminado para usar el cursor del sistema */
       -webkit-font-smoothing: antialiased;
     }
     @media (pointer: coarse) { body { cursor: auto; } }
     ::selection { background: var(--accent); color: var(--bg); }
     a { color: inherit; text-decoration: none; }
     button { font-family: var(--sans); }
-
-    /* Custom Cursor - Desactivado */
-    /*
-    .cursor-outline { position: fixed; top: 0; left: 0; width: 24px; height: 24px; border: 1px solid var(--fg); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); mix-blend-mode: difference; transition: width 0.2s, height 0.2s, border-color 0.2s, opacity 0.3s; opacity: 0; }
-    .cursor-hover .cursor-outline { width: 40px; height: 40px; border-color: var(--accent); }
-    */
 
     /* Grain & BG */
     .grain { position: fixed; inset: 0; pointer-events: none; z-index: 9000; opacity: 0.06; mix-blend-mode: overlay; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='250'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
@@ -100,7 +93,14 @@
     .car-card:hover .car-img-container img { filter: grayscale(0%) contrast(1.1); }
     .car-header, .web-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
     .car-name, .web-name { font-family: var(--serif); font-size: 1.4rem; line-height: 1.1; }
-    .car-price, .web-url { font-family: var(--mono); font-size: 0.85rem; color: var(--accent); white-space: nowrap; }
+    
+    /* Price Block Styles */
+    .price-block { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .price-original { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); text-decoration: line-through; }
+    .price-final { font-family: var(--mono); font-size: 1rem; color: var(--accent); white-space: nowrap; font-weight: 700; }
+    .subvencion-tag { font-family: var(--mono); font-size: 0.6rem; color: var(--bg); background: var(--accent); padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+    .web-url { font-family: var(--mono); font-size: 0.85rem; color: var(--accent); white-space: nowrap; }
+
     .car-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; border-top: 1px solid var(--border); padding-top: 1rem; }
     .spec-item { display: flex; flex-direction: column; gap: 2px; }
     .spec-label { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
@@ -165,9 +165,9 @@
     .detail-img { flex: 1; min-width: 300px; height: 450px; border-radius: 8px; overflow: hidden; background: var(--bg-darker); }
     .detail-img img { width: 100%; height: 100%; object-fit: cover; }
     .detail-info { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; }
-    .detail-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
-    .detail-name { font-family: var(--serif); font-size: 2.5rem; line-height: 1; }
-    .detail-price { font-family: var(--mono); font-size: 1.5rem; color: var(--accent); white-space: nowrap; }
+    .detail-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; flex-wrap: wrap; }
+    .detail-name { font-family: var(--serif); font-size: 2.5rem; line-height: 1; flex: 1; min-width: 200px; }
+    .detail-price-block { display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; }
     .detail-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .detail-spec-item { background: var(--surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); }
     .detail-spec-label { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 0.5rem; }
@@ -201,7 +201,6 @@
 <body>
 
   <div class="grain"></div>
-  <!-- <div class="cursor-outline"></div> --> <!-- Desactivado -->
 
   <!-- HEADER -->
   <header>
@@ -351,8 +350,8 @@
       
       // --- VOLKSWAGEN ---
       { name: "VW ID.3 Neo Life (170 CV 50 kWh)", type: "ev", priceText: "~25.980 €", priceNum: 25980, wltpText: "415 km", wltpNum: 415, realMixto: "~350 km", autovia: "~320 km", cd: 0.27, cv: 170, battery: 50, consumoText: "14.0 kWh/100", consumoNum: 14.0, garantia: "2 / 8 años", rating: 4, img: "https://imgs.search.brave.com/tNHuPvQwpz8ps5Uo87fvKxO01h9wFd-yr59335CEWvM/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93d3cu/ZWxlY3RyaWZ5aW5n/LmNvbS9maWxlcy9Q/U3hsbkJ1djdaY3RI/RFpOL1ZXJTIwSUQz/JTIwTmVvJTIwMi5q/cGc" },
-      { name: "VW ID.3 Neo Life (190 CV 58 kWh)", type: "ev", priceText: "~28.720 €", priceNum: 28720, wltpText: "492 km", wltpNum: 492, realMixto: "~420 km", autovia: "~380 km", cd: 0.27, cv: 190, battery: 58, consumoText: "13.9 kWh/100", consumoNum: 13.9, garantia: "2 / 8 años", rating: 4, img: "https://imgs.search.brave.com/tNHuPvQwpz8ps5Uo87fvKxO01h9wFd-yr59335CEWvM/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93d3cu/ZWxlY3RyaWZ5aW5n/LmNvbS9maWxlcy9Q/U3hsbkJ1djdaY3RI/RFpOL1ZXJTIwSUQz/JTIwTmVvJTIwMi5q/cGc" },
-      { name: "VW ID.3 Neo Life (231 CV 79 kWh)", type: "ev", priceText: "~33.720 €", priceNum: 33720, wltpText: "628 km", wltpNum: 628, realMixto: "~520 km", autovia: "~450 km", cd: 0.27, cv: 231, battery: 79, consumoText: "14.4 kWh/100", consumoNum: 14.4, garantia: "2 / 8 años", rating: 4, img: "https://imgs.search.brave.com/tNHuPvQwpz8ps5Uo87fvKxO01h9wFd-yr59335CEWvM/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93d3cu/ZWxlY3RyaWZ5aW5n/LmNvbS9maWxlcy9Q/U3hsbkJ1djdaY3RI/RFpOL1ZXJTIwSUQz/JTIwTmVvJTIwMi5q/cGc" },
+      { name: "VW ID.3 Neo Life (190 CV 58 kWh)", type: "ev", priceText: "~28.720 €", priceNum: 28720, wltpText: "492 km", wltpNum: 492, realMixto: "~420 km", autovia: "~380 km", cd: 0.27, cv: 190, battery: 58, consumoText: "13.9 kWh/100", consumoNum: 13.9, garantia: "2 / 8 años", rating: 4, img: "https://imgs.search.brave.com/tNHuPvQwpz8ps5Uo87fvKxO01h9wFd-yr59335CEWvM/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93d3cu/ZWxlY3RyaWZ5aW5n/LmNvbS9maWxlcy9Q/U3hsbkJ1djdaY3RI/RFpOL1ZXJTIwSUQz/JTIwMi5q/cGc" },
+      { name: "VW ID.3 Neo Life (231 CV 79 kWh)", type: "ev", priceText: "~33.720 €", priceNum: 33720, wltpText: "628 km", wltpNum: 628, realMixto: "~520 km", autovia: "~450 km", cd: 0.27, cv: 231, battery: 79, consumoText: "14.4 kWh/100", consumoNum: 14.4, garantia: "2 / 8 años", rating: 4, img: "https://imgs.search.brave.com/tNHuPvQwpz8ps5Uo87fvKxO01h9wFd-yr59335CEWvM/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93d3cu/ZWxlY3RyaWZ5aW5n/LmNvbS9maWxlcy9Q/U3hsbkJ1djdaY3RI/RFpOL1ZXJTIwSUQz/JTIwMi5q/cGc" },
       { name: "VW ID.3 Neo Style (190 CV 58 kWh)", type: "ev", priceText: "~32.305 €", priceNum: 32305, wltpText: "485 km", wltpNum: 485, realMixto: "~410 km", autovia: "~370 km", cd: 0.27, cv: 190, battery: 58, consumoText: "14.2 kWh/100", consumoNum: 14.2, garantia: "2 / 8 años", rating: 4, img: "https://imgs.search.brave.com/s7yZcE97UudnrfsKUDiigH7gpkpJZ0fq5nWspsJOiGQ/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMwLmF1dG9jYXNp/b24uY29tL3Vuc2Fm/ZS84MjB4L2ZpbHRl/cnM6d2F0ZXJtYXJr/KHdhdGVybWFyay5w/bmcsLTMwLC0zMCww/KTpmb3JtYXQoanBl/Zyk6cXVhbGl0eSg4/MCkvdW5vYXV0by8w/Ny8yMjc4LzAzYThh/YjE5NWVhMzdiOWQw/ZDY1ZTAyMDMzZGI2/NzliNjA3MjY4ODEu/anBlZz9tdj0xNTk5/NDgwOTQ4" },
       { name: "VW ID.3 Neo Style (231 CV 79 kWh)", type: "ev", priceText: "~37.300 €", priceNum: 37300, wltpText: "627 km", wltpNum: 627, realMixto: "~520 km", autovia: "~450 km", cd: 0.27, cv: 231, battery: 79, consumoText: "14.4 kWh/100", consumoNum: 14.4, garantia: "2 / 8 años", rating: 4, img: "https://imgs.search.brave.com/s7yZcE97UudnrfsKUDiigH7gpkpJZ0fq5nWspsJOiGQ/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMwLmF1dG9jYXNp/b24uY29tL3Vuc2Fm/ZS84MjB4L2ZpbHRl/cnM6d2F0ZXJtYXJr/KHdhdGVybWFyay5w/bmcsLTMwLC0zMCww/KTpmb3JtYXQoanBl/Zyk6cXVhbGl0eSg4/MCkvdW5vYXV0by8w/Ny8yMjc4LzAzYThh/YjE5NWVhMzdiOWQw/ZDY1ZTAyMDMzZGI2/NzliNjA3MjY4ODEu/anBlZz9tdj0xNTk5/NDgwOTQ4" },
       
@@ -370,10 +369,10 @@
       
       // --- STELLANTIS ---
       { name: "Citroën ë-C5 Aircross (130)", type: "ev", priceText: "~33.550 €", priceNum: 33550, wltpText: "511 km", wltpNum: 511, realMixto: "491 km", autovia: "491 km", cd: 0.29, cv: 136, battery: 73, consumoText: "16.5 kWh/100", consumoNum: 16.5, garantia: "2 / 8 años", rating: 3, img: "https://imgs.search.brave.com/tpv9GRP2ARrkTuutT4b8tQXtamxtnFduyVs1slPl03A/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jZG4t/eHkuZHJpdmVrLmNv/bS9leUppZFdOclpY/UWlPaUprWVhSaGF5/MWpaRzR0ZUhraUxD/SnJaWGtpT2lKamIy/NW1hV2QxY21GMGIz/SXRhVzFuY3k5allY/SnpMMnR0TnpkZlpY/TXZiM0pwWjJsdVlX/d3ZRMGxVVWs5RlRp/OUZMVU0xTFVGSlVr/TlNUMU5UTHpVd056/a3pYMVJQUkU5VVJW/SlNSVTVQTFRVdFVG/VkZVbFJCVXk5dWRX/VjJieTFsTFdNMUxX/RnBjbU55YjNOekxU/QXVhbkJuSWl3aVpX/UnBkSE1pT25zaWNt/VnphWHBsSWpwN0lu/ZHBaSFJvSWpveE1E/STBMQ0pvWldsbmFI/UWlPbTUxYkd3c0lt/WnBkQ0k2SW1OdmRt/VnlJbjE5ZlE9PQ" },
-      { name: "Citroën ë-C5 Aircross (230)", type: "ev", priceText: "~40.000 €", priceNum: 40000, wltpText: "680 km", wltpNum: 680, realMixto: "~550 km", autovia: "~550 km", cd: 0.29, cv: 231, battery: 97, consumoText: "16.0 kWh/100", consumoNum: 16, garantia: "2 / 8 años", rating: 4, img: "https://imgs.search.brave.com/bwIaIIHcNL9lksI9pGhyhesgFSiRLuACLv7QKBglBcQ/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jZG4t/aW1hZ2VzLm1vdG9y/LmVzL2ltYWdlL20v/NzU2dzUwNGgvZm90/b3MtamF0by9jaXRy/b2VuL3VwbG9hZHMv/Y2l0cm9lbi1jNS1h/aXJjcm9zcy02ODdl/YjBjOWVmYjgwLmpw/Zw" },
+      { name: "Citroën ë-C5 Aircross (230)", type: "ev", priceText: "~40.000 €", priceNum: 40000, wltpText: "680 km", wltpNum: 680, realMixto: "~550 km", autovia: "~550 km", cd: 0.29, cv: 231, battery: 97, consumoText: "16.0 kWh/100", consumoNum: 16, garantia: "2 / 8 años", rating: 4, img: "https://imgs.search.brave.com/bwIaIIHcNL9lksI9pGhyhesgFSiRLuACLv7QKBglBcQ/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jZG4t/aW1hZ2VzLm1vdG9y/LmVzL2ltYWdlL20v/NzU2dzUwNGgvZm90/b3MtamF0by9jaXRr/b2VuL3VwbG9hZHMv/Y2l0cm9lbi1jNS1h/aXJjcm9zcy02ODdl/YjBjOWVmYjgwLmpw/Zw" },
       { name: "Peugeot e-3008 (73 kWh)", type: "ev", priceText: "~41.700 €", priceNum: 41700, wltpText: "612 km", wltpNum: 612, realMixto: "468 km", autovia: "468 km", cd: 0.28, cv: 210, battery: 73, consumoText: "17.0 kWh/100", consumoNum: 17, garantia: "2 / 8 años", rating: 4, img: "https://imgs.search.brave.com/NjVPtZzb-_lxjDcFD5w5FWAsDxfaJTiNFf0mxZGLXGw/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9zdC5h/cmVuYWV2LmNvbS9u/ZXdzLzI1LzAzL3Bl/dWdlb3QtZS0zMDA4/LXJldmlldy9nYWxs/ZXJ5Ly0xMjAwdzEv/YXJlbmFldl8wNjku/anBn" },
       { name: "Opel Grandland Electric", type: "ev", priceText: "~46.700 €", priceNum: 46700, wltpText: "597 km", wltpNum: 597, realMixto: "499 km", autovia: "499 km", cd: 0.29, cv: 210, battery: 73, consumoText: "17.0 kWh/100", consumoNum: 17, garantia: "2 / 8 años", rating: 3, img: "https://imgs.search.brave.com/vhbMOVk_OzwA-ERfvjQCp1SInefty2-Qr_r8koEbw6c/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jZG4t/aW1hZ2VzLm1vdG9y/LmVzL2ltYWdlL20v/NzU2dzUwNGgvZm90/b3MtamF0by9vcGVs/L3VwbG9hZHMvb3Bl/bC1ncmFuZGxhbmQt/Njc3ZGE1YjhlZDU3/ZS5qcGc" },
-      { name: "Opel Astra Electric", type: "ev", priceText: "~37.000 €", priceNum: 37000, wltpText: "468 km", wltpNum: 468, realMixto: "412 km", autovia: "412 km", cd: 0.29, cv: 156, battery: 54, consumoText: "16.0 kWh/100", consumoNum: 16, garantia: "2 / 8 años", rating: 3, img: "https://imgs.search.brave.com/4I24cO9gejrPBfhgaXGJrGWXXqPkht-C8q1TCkaMpEA/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jZG4t/ZGF0YWsubW90b3Jr/Lm5ldC9jb25maWd1/cmF0b3ItaW1ncy9j/YXJzL2VzLzgwMC9P/UEVML0FTVFJBLUVM/RUNUUklDLzQzMDgz/X0hBVENIQkFDSy01/LURPT1JTL29wZWwt/YXN0cmEtZWxlY3Ry/aWMtZnJvbnQtdmll/dy5qcGc" },
+      { name: "Opel Astra Electric", type: "ev", priceText: "~37.000 €", priceNum: 37000, wltpText: "468 km", wltpNum: 468, realMixto: "412 km", autovia: "412 km", cd: 0.29, cv: 156, battery: 54, consumoText: "16.0 kWh/100", consumoNum: 16, garantia: "2 / 8 años", rating: 3, img: "https://imgs.search.brave.com/4I24cO9gejrPBfhgaXGJrGWXXqPkht-C8q1TCkaMpEA/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jZG4t/ZGF0YWsubW90b3Jr/Lm5ldC9jb25maWd1/cmF0b3ItaW1ncy9j/YXJzL2VzLzgwMC9P/UEVML0FTVFJBLUVM/RUNUUklDLzQzMDgz/X0hBVENIQkFDSy01/LURPT1JTL29wZWwt/YXN0cmEtZWxlY3Rr/aWMtZnJvbnQtdmll/dy5qcGc" },
       
       // --- FORD ---
       { name: "Ford Explorer EV (Rango Ext.)", type: "ev", priceText: "~41.300 €", priceNum: 41300, wltpText: "602 km", wltpNum: 602, realMixto: "~480 km", autovia: "~480 km", cd: 0.25, cv: 286, battery: 77, consumoText: "16.0 kWh/100", consumoNum: 16, garantia: "2 / 8 años", rating: 4, img: "https://imgs.search.brave.com/z6ri1rrjpGdB2qHzWcyzqNI34SxQGrxYBVeYp_VVHJE/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMwLmF1dG9jYXNp/b24uY29tL3Vuc2Fm/ZS81MDB4L2ZpbHRl/cnM6d2F0ZXJtYXJr/KHdhdGVybWFyay5w/bmcsLTMwLC0zMCww/KTpmb3JtYXQoanBl/Zyk6cXVhbGl0eSg4/MCkvYXBpLWNhci8x/NTI3MDA1LzM5MTgt/MzQ2MDMxMS0wLzI0/MDQyMDI2L2MxZTBl/ZmYxLTFmNjMtNDM0/OS04MTlkLThjMDFj/NjVhMjVlZC5qcGc" },
@@ -382,7 +381,7 @@
       // --- JAPONESES ---
       { name: "Toyota bZ4X (FWD)", type: "ev", priceText: "~39.400 €", priceNum: 39400, wltpText: "518 km", wltpNum: 518, realMixto: "480 km", autovia: "480 km", cd: 0.28, cv: 218, battery: 71.4, consumoText: "17.5 kWh/100", consumoNum: 17.5, garantia: "3 / 8 años", rating: 3, img: "https://imgs.search.brave.com/Tj98do506XNSQzf-hRM8OQAzIUsK_b8nYjPs08GXnsM/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9tLmF0/Y2RuLmNvLnVrL2Ev/bWVkaWEvdzM4NWgy/ODkvNzQ5YzkwMmFm/ZDhmNGVlYWE1ZmFi/MGMxNjk2MzA0MjAu/anBn" },
       { name: "Toyota C-HR+ (Advance)", type: "ev", priceText: "~42.700 €", priceNum: 42700, wltpText: "603 km", wltpNum: 603, realMixto: "~480 km", autovia: "~480 km", cd: 0.30, cv: 218, battery: 77, consumoText: "16.5 kWh/100", consumoNum: 16.5, garantia: "3 / 8 años", rating: 4, img: "https://imgs.search.brave.com/5uZMsww5UBtvS5Cdue3c-R7iocHcCwvMaYiPsx7UHw4/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9zdG9y/YWdlLmdvb2dsZWFw/aXMuY29tL2NsaWNh/cnMtc3RvcmFnZS1w/cm9kLXB1YmxpYy9w/aG90b3MvMjQvNjAv/MTcvNzVmZjRmZDEx/OTNlYjFhZWU3MGY0/YTA2ZWYzMTg3MmIt/MzMzNzIwMzEtNzg4/ZmYzZTQ3NzMzOTQz/YWI0ZGMyNmJlOGJj/MTk2ZDVkYmRiMDEy/MS12ZWhpY2xlLWdh/bGxlcnktbWVkaXVt/LmpwZw" },
-      { name: "Mazda 6e (Gran Autonomía)", type: "ev", priceText: "~33.700 €", priceNum: 33700, wltpText: "552 km", wltpNum: 552, realMixto: "437 km", autovia: "437 km", cd: 0.23, cv: 245, battery: 80, consumoText: "16.0 kWh/100", consumoNum: 16, garantia: "6 / 8 años", rating: 4, img: "https://imgs.search.brave.com/rQH3VWWlU0NgGgSERfMj8CoGH43Qr8R178_6QGr8HBc/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWcu/YXV0b2Rlc2N1ZW50/by5jb20vX25pXy9t/YXpkYS82L2YwYjJj/NDlkMTBhZTIyNzNj/YzRkNTdhYzg3ZmE3/MGM1LmpwZz9wPWNj/X25pX21lZGl1bQ" },
+      { name: "Mazda 6e (Gran Autonomía)", type: "ev", priceText: "~33.700 €", priceNum: 33700, wltpText: "552 km", wltpNum: 552, realMixto: "437 km", autovia: "437 km", cd: 0.23, cv: 245, battery: 80, consumoText: "16.0 kWh/100", consumoNum: 16, garantia: "6 / 8 años", rating: 4, img: "https://imgs.search.brave.com/rQH3VWWlU0NgGgSERfMj8CoGH43Qr8R178_6QGr8HBc/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWcv/YXV0b2Rlc2N1ZW50/by5jb20vX25pXy9t/YXpkYS82L2YwYjJj/NDlkMTBhZTIyNzNj/YzRkNTdhYzg3ZmE3/MGM1LmpwZz9wPWNj/X25pX21lZGl1bQ" },
       { name: "MINI Countryman E", type: "ev", priceText: "~36.600 €", priceNum: 36600, wltpText: "501 km", wltpNum: 501, realMixto: "~400 km", autovia: "~400 km", cd: 0.26, cv: 204, battery: 66, consumoText: "16.0 kWh/100", consumoNum: 16, garantia: "2 / 8 años", rating: 3, img: "https://imgs.search.brave.com/zXjUqq602BuoPwIy-ydRTwvTrsgFGLSxqI5B3ki2CDg/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jZG4t/aW1hZ2VzLm1vdG9y/LmVzL2ltYWdlL20v/NzU2dzUwNGgvZm90/b3MtamF0by9taW5p/L3VwbG9hZHMvbWlu/aS1jb3VudHJ5bWFu/LTY1ODczZmI5OTg1/MzEuanBn" },
       { name: "Nissan Ariya (87 kWh)", type: "ev", priceText: "~45.400 €", priceNum: 45400, wltpText: "512 km", wltpNum: 512, realMixto: "~430 km", autovia: "~430 km", cd: 0.29, cv: 242, battery: 87, consumoText: "18.0 kWh/100", consumoNum: 18, garantia: "3 / 8 años", rating: 3, img: "https://imgs.search.brave.com/7Ux_9mPo1lR8Zhjo1KJHWn-Xjz0aLZSTPPiVMMr318Q/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9ldi5t/b3RvcndhdHQuY29t/L21lZGlhL2RqY2F0/YWxvZzIvaW1hZ2Vz/L2l0ZW0vMC9uaXNz/YW4tYXJpeWEtZndk/LTg3LWt3aC43Lmpw/Zw" },
       { name: "Polestar 2 LR Single Motor", type: "ev", priceText: "~41.900 €", priceNum: 41900, wltpText: "646 km", wltpNum: 646, realMixto: "450 km", autovia: "450 km", cd: 0.30, cv: 299, battery: 82, consumoText: "17.5 kWh/100", consumoNum: 17.5, garantia: "4 / 8 años", rating: 4, img: "https://imgs.search.brave.com/Pz8HvRN4UAIze2RLnpiZF6RfPx109nserTZcg5Tsg9U/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMuY3RmYXNzZXRz/Lm5ldC84bmNsemFp/cTFubXUvZjJhYmIz/M2MtZjJiNC0zYzU3/LWE1MzUtY2QyODNi/Yzk0ZDk0L2FkN2Y4/NDBiNDI0YWZhMWE1/NzBjMDY0N2E0NGE3/YmJjL1BvbGVzdGFy/LTItTFItU2luZ2xl/LU1vdG9yLTE3Lmpw/Zz9mbT13ZWJwJnc9/Mzg0MA" },
@@ -390,7 +389,7 @@
       { name: "Lexus RZ 300e", type: "ev", priceText: "~49.000 €", priceNum: 49000, wltpText: "512 km", wltpNum: 512, realMixto: "~420 km", autovia: "~420 km", cd: 0.29, cv: 245, battery: 71.4, consumoText: "18.0 kWh/100", consumoNum: 18, garantia: "6 / 8 años", rating: 3, img: "https://imgs.search.brave.com/FDA-KrIdg53eecxbkiEGfZ0b9muEuHWYmHQHMiT7aO4/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jZG4t/aW1hZ2VzLm1vdG9y/LmVzL2ltYWdlL20v/MTMyMHcvZm90b3Mt/bm90aWNpYXMvMjAy/NC8wNS9wcmVjaW8t/bGV4dXMtcnotMzAw/ZS0yMDI0MTAyMjEy/LTE3MTYzNzI1MTdf/Mi5qcGc" },
       
       // --- CHINOS ---
-      { name: "BYD Atto 3 Evo", type: "ev", priceText: "~29.500 €", priceNum: 29500, wltpText: "510 km", wltpNum: 510, realMixto: "470 km", autovia: "470 km", cd: 0.28, cv: 204, battery: 60.5, consumoText: "16.0 kWh/100", consumoNum: 16, garantia: "6 / 8 años", rating: 3, img: "https://imgs.search.brave.com/c3aPmmdKsJThDf5xPjrr_No_73pxW5en2xP2z8ja6_k/rs:fit:0:180:1:0/g:ce/aHR0cHM6Ly93d3cu/Z3J1cG9nYW1ib2Eu/Y29tL2ltZy9nYW1h/L2J5ZC9hdHRvLTMt/ZXZvL2J5ZC1hdHRv/LTMtZXZvLmpwZz92/bj00NzJiZTEwMS1l/MDJiLTRlNzMtOTc1/MC04NzZlZWY2ZGM3/ZmY" },
+      { name: "BYD Atto 3 Evo", type: "ev", priceText: "~29.500 €", priceNum: 29500, wltpText: "510 km", wltpNum: 510, realMixto: "470 km", autovia: "470 km", cd: 0.28, cv: 204, battery: 60.5, consumoText: "16.0 kWh/100", consumoNum: 16, garantia: "6 / 8 años", rating: 3, img: "https://imgs.search.brave.com/c3aPmmdKsJThDf5xPjrr_No_73pxW5en2xP2z8ja6_k/rs:fit:0:180:1:0/g:ce/aHR0cHM6Ly93d3cu/Z3J1cG9nYW1ib2Eu/Y29tL2ltZy9nYW1h/L2J5ZC9hdHRvLTMt/ZXZvL2J5ZC1hdHRo/LTMtZXZvLmpwZz92/bj00NzJiZTEwMS1l/MDJiLTRlNzMtOTc1/MC04NzZlZWY2ZGM3/ZmY" },
       { name: "BYD Seal (Design RWD)", type: "ev", priceText: "~40.000 €", priceNum: 40000, wltpText: "570 km", wltpNum: 570, realMixto: "571 km", autovia: "571 km", cd: 0.219, cv: 313, battery: 82.5, consumoText: "17.5 kWh/100", consumoNum: 17.5, garantia: "6 / 8 años", rating: 4, img: "https://imgs.search.brave.com/LI0PKch4huQkmqX3_caUKDEp5Z7XlwrgwpeW4c2PWuo/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9hLmNj/ZG4uZXMvY25ldC92/ZWhpY2xlcy8yMDIz/NDg3NC8yOWYwZTUz/MS0wMmVhLTRkYTYt/YjlmZS02ODAzNTQ2/NDZhMzcuanBnLzU2/MHg0MjFjdXQv" },
       { name: "BYD Sealion 7 (Comfort)", type: "ev", priceText: "~39.900 €", priceNum: 39900, wltpText: "502 km", wltpNum: 502, realMixto: "431 km", autovia: "431 km", cd: 0.27, cv: 313, battery: 82.5, consumoText: "19.0 kWh/100", consumoNum: 19, garantia: "6 / 8 años", rating: 4, img: "https://imgs.search.brave.com/xXx2kYtXUMsNBKhgdpnLyDzaWyI-voDEWiao4c-b53w/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWFn/ZS1wcm94eS5rd3Mu/a2FhdmFuLmVzL2kv/NDgwLTMyMC92ZWhp/Y2xlcy8xNTM5NTdj/Yi03MDJmLTQxYTUt/ODMyYS05MGZhYjIy/NTZjZTUvbWVkaWFz/LzQ1MTcyMDYuanBn/P2Zvcm1hdD13ZWJw" },
       { name: "BYD Seal U DM-i (PHEV)", type: "hibrido", priceText: "~31.500 €", priceNum: 31500, wltpText: "120 km (EV)", wltpNum: 120, realMixto: "N/A (Híbrido)", autovia: "N/A", cd: 0.29, cv: 218, battery: 18.3, consumoText: "N/A (Híbrido)", consumoNum: 20, garantia: "6 / 8 años", rating: 3, img: "https://imgs.search.brave.com/M-YXAlL2f11cTY3begf4EIAzkqc3f5p1I_uxf8rSwVY/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jZG4t/aW1hZ2VzLm1vdG9y/LmVzL2ltYWdlL20v/MzAwdzIwMGgud2Vi/cC9mb3Rvcy1ub3Rp/Y2lhcy8yMDI0LzA1/L3ByZWNpby1ieWQt/c2VhbC11LWRtLWkt/MjAyNDEwMjA2MS0x/NzE2MTIwNDA4XzEu/anBn" },
@@ -404,7 +403,7 @@
       { name: "Omoda 5 EV", type: "ev", priceText: "~30.400 €", priceNum: 30400, wltpText: "430 km", wltpNum: 430, realMixto: "~360 km", autovia: "~360 km", cd: 0.29, cv: 204, battery: 61, consumoText: "17.5 kWh/100", consumoNum: 17.5, garantia: "7 / 8 años", rating: 3, img: "https://imgs.search.brave.com/_4NUaqObUz1d4hpA59qqcF1f0VwniyzTnMxwx2kI5_I/rs:fit:0:180:1:0/g:ce/aHR0cHM6Ly9jZG4t/eHkuZHJpdmVrLmNv/bS9leUppZFdOclpY/UWlPaUprWVhSaGF5/MWpaRzR0ZUhraUxD/SnJaWGtpT2lKamIy/NW1hV2QxY21GMGIz/SXRZMjkyWlhJdlky/RnljeTlsY3k5dmNt/bG5hVzVoYkM5UFRV/OUVRUzlQVFU5RVFT/MDFMVVZXTHpRME1q/QTFYMVJQUkU5VVJW/SlNSVTVQTFRVdFVG/VkZVbFJCVXk5dmJX/OWtZUzFsTlMxamIz/WmxjaTVxY0djaUxD/SmxaR2wwY3lJNmV5/SnlaWE5wZW1VaU9u/c2lkMmxrZEdnaU9q/RXdNalFzSW1obGFX/ZG9kQ0k2Ym5Wc2JD/d2labWwwSWpvaVky/OTJaWElpZlgwOQ" },
       { name: "Zeekr X (LR RWD)", type: "ev", priceText: "~41.700 €", priceNum: 41700, wltpText: "425 km", wltpNum: 425, realMixto: "~380 km", autovia: "~380 km", cd: 0.27, cv: 272, battery: 66, consumoText: "18.0 kWh/100", consumoNum: 18, garantia: "5 / 8 años", rating: 3, img: "https://imgs.search.brave.com/LYOrNiYXwFXQwVrOKpmAOty-Zj3_sUAgc1SDVzF9CcA/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jZG4u/YXV0b3RyYWNrLm5s/L2Nkbi1jZ2kvaW1h/Z2Uvd2lkdGg9MzIw/LzU5MTQxNzcyLzAt/NmRiZWViZmM1OTM5/Mzc0MmNkYzkxOTg1/ZjkxMzg5N2MuanBn" },
       { name: "Zeekr 7X", type: "ev", priceText: "~37.990 €", priceNum: 37990, wltpText: "500 km", wltpNum: 500, realMixto: "~420 km", autovia: "~420 km", cd: 0.25, cv: 422, battery: 100, consumoText: "18.5 kWh/100", consumoNum: 18.5, garantia: "5 / 8 años", rating: 4, img: "https://imgs.search.brave.com/5Wep0Viy8bK0j49DtJiiAyApu7IpH-wHNwoNGgYRpFE/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMuZm9yb2NvY2hl/c2VsZWN0cmljb3Mu/Y29tL2ltYWdlL2wv/MTMyMHcvZWRpdG9y/aWFsLzhmNmI2ODZm/MzIyZmY1MWI1ZDBj/NzVhNDFmZjY0ZWJi/MGQwZGI1ZWZlZmQx/YjZiZmFkYTQ5ZDkw/NTlmODE1NDAuanBl/Zw" },
-      { name: "Smart #5 (Pro+)", type: "ev", priceText: "~38.650 €", priceNum: 38650, wltpText: "515 km", wltpNum: 515, realMixto: "531 km", autovia: "531 km", cd: 0.27, cv: 428, battery: 100, consumoText: "18.0 kWh/100", consumoNum: 18, garantia: "3 / 8 años", rating: 4, img: "https://imgs.search.brave.com/0C5LZ_M1Wo6pKRcZY0211qJGPp2BTlNeMzT314iKJJc/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9hdmFu/dGlyZW50aW5nLmVz/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDI1/LzEwL1NtYXJ0LTUt/UHJvLXNpbi1mb25k/by1wcmluY2lwYWwt/YXZhbnRpLndlYnA" },
+      { name: "Smart #5 (Pro+)", type: "ev", priceText: "~38.650 €", priceNum: 38650, wltpText: "515 km", wltpNum: 515, realMixto: "531 km", autovia: "531 km", cd: 0.27, cv: 428, battery: 100, consumoText: "18.0 kWh/100", consumoNum: 18, garantia: "3 / 8 años", rating: 4, img: "https://imgs.search.brave.com/0C5LZ_M1Wo6pKRcZY0211qJGPp2BTlNeMzT314iKJJc/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9hdmFu/dGlyZW50aW5nLmVz/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDI1/LzEwL1NtYXJ0LTUt/UHJvLXNpbi1mb25k/by1wcmluY2lwYWwt/YXZhbnRpRndlYnA" },
       
       // --- TESLA ---
       { name: "Tesla Model 3 (Standard RWD)", type: "ev", priceText: "~39.990 €", priceNum: 39990, wltpText: "534 km", wltpNum: 534, realMixto: "476 km", autovia: "476 km", cd: 0.219, cv: 299, battery: 60, consumoText: "14.0 kWh/100", consumoNum: 14, garantia: "4 / 8 años", rating: 5, img: "https://imgs.search.brave.com/WW-qRu_qgCFlViPkozYjS6kkCzpbgmdULd6lHvHKiyY/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9zdG9y/YWdlLmdvb2dsZWFw/aXMuY29tL2NsaWNh/cnMtc3RvcmFnZS1w/cm9kLXB1YmxpYy9w/aG90b3MvODQvMjkv/MTcvNDA2ZWI4NDE4/ZjgyNmYxZjE4OGRh/ZDdmNmUxYWZmOWQt/MzIyNjc0NDMtNzg4/ZmYzZTQ3NzMzOTQz/YWI0ZGMyNmJlOGJj/MTk2ZDVkYmRiMDEy/MS12ZWhpY2xlLWdh/bGxlcnktbWVkaXVt/LmpwZw" },
@@ -420,6 +419,25 @@
       { name: "EV-Database", url: "https://ev-database.org", desc: "Base de datos internacional con especificaciones detalladas y comparativas de vehículos eléctricos." },
       { name: "Qué Coche Me Compro", url: "https://www.quecochemecompro.com", desc: "Guía y comparativa especializada para ayudarte a elegir el coche eléctrico ideal según tus necesidades." }
     ];
+
+    /* ===== Helper Functions ===== */
+    function getPriceInfo(car) {
+      const isEV = car.type === "ev";
+      const subvencionBase = isEV ? 7000 : 5000;
+      const subvencionText = `${subvencionBase.toLocaleString('es-ES')}€ (MOVES III)`;
+      
+      // Asumimos que el priceNum actual es el precio FINAL (con subvención aplicada)
+      const precioFinal = car.priceNum;
+      const precioOriginal = car.priceNum + subvencionBase;
+      
+      const formatEUR = (num) => `~${num.toLocaleString('es-ES')} €`;
+      
+      return {
+        original: formatEUR(precioOriginal),
+        final: formatEUR(precioFinal),
+        subvencion: subvencionText
+      };
+    }
 
     /* ===== Scoring Logic ===== */
     function calculateScore(car) {
@@ -576,6 +594,7 @@
       grid.innerHTML = cars.map(car => {
         const isSelected = compareList.includes(car.name);
         const stars = '★'.repeat(car.rating) + '☆'.repeat(5 - car.rating);
+        const priceInfo = getPriceInfo(car);
         return `
           <div class="car-card">
             <div class="car-img-container">
@@ -583,7 +602,11 @@
             </div>
             <div class="car-header">
               <h3 class="car-name">${car.name}</h3>
-              <span class="car-price">${car.priceText}</span>
+              <div class="price-block">
+                <span class="price-original">${priceInfo.original}</span>
+                <span class="price-final">${priceInfo.final}</span>
+                <span class="subvencion-tag">${priceInfo.subvencion}</span>
+              </div>
             </div>
             <div class="car-specs">
               <div class="spec-item"><span class="spec-label">Autonomía WLTP</span><span class="spec-val">${car.wltpText}</span></div>
@@ -632,12 +655,13 @@
       list.innerHTML = sorted.map((car, index) => {
         const score = calculateScore(car);
         const isTop3 = index < 3;
+        const priceInfo = getPriceInfo(car);
         return `
           <div class="rank-item ${isTop3 ? 'top-3' : ''}">
             <div class="rank-num">${index + 1}</div>
             <div class="rank-info">
               <h3>${car.name}</h3>
-              <p>${car.priceText} • ${car.wltpText} • ${car.cv} CV</p>
+              <p>${priceInfo.final} • ${car.wltpText} • ${car.cv} CV</p>
             </div>
             <div class="rank-bar-container">
               <div class="rank-bar" style="width: ${score}%"></div>
@@ -740,7 +764,9 @@
       const bestRating = getBest('rating');
 
       html += `<table class="comp-table">
-        <tr><th>Precio</th>${carsToCompare.map(c => `<td class="${c.priceNum === bestPrice ? 'best' : ''}">${c.priceText}</td>`).join('')}</tr>
+        <tr><th>Precio Original</th>${carsToCompare.map(c => `<td>${getPriceInfo(c).original}</td>`).join('')}</tr>
+        <tr><th>Subvención</th>${carsToCompare.map(c => `<td>${getPriceInfo(c).subvencion}</td>`).join('')}</tr>
+        <tr><th>Precio Final</th>${carsToCompare.map(c => `<td class="${c.priceNum === bestPrice ? 'best' : ''}">${getPriceInfo(c).final}</td>`).join('')}</tr>
         <tr><th>Autonomía WLTP</th>${carsToCompare.map(c => `<td class="${c.wltpNum === bestWltp ? 'best' : ''}">${c.wltpText}</td>`).join('')}</tr>
         <tr><th>Real Mixto</th>${carsToCompare.map(c => `<td>${c.realMixto}</td>`).join('')}</tr>
         <tr><th>Autovía 120</th>${carsToCompare.map(c => `<td>${c.autovia}</td>`).join('')}</tr>
@@ -765,6 +791,7 @@
       const score = calculateScore(car);
       const stars = '★'.repeat(car.rating) + '☆'.repeat(5 - car.rating);
       const isAlreadySelected = compareList.includes(car.name);
+      const priceInfo = getPriceInfo(car);
 
       modalBody.innerHTML = `
         <div class="detail-content">
@@ -774,7 +801,13 @@
           <div class="detail-info">
             <div class="detail-header">
               <h2 class="detail-name">${car.name}</h2>
-              <span class="detail-price">${car.priceText}</span>
+              <div class="detail-price-block">
+                <div class="price-block">
+                  <span class="price-original">${priceInfo.original}</span>
+                  <span class="price-final" style="font-size: 1.4rem;">${priceInfo.final}</span>
+                </div>
+                <span class="subvencion-tag" style="align-self: flex-end;">${priceInfo.subvencion}</span>
+              </div>
             </div>
             <div class="detail-score">
               <span class="star-rating" style="font-size: 1.2rem;">${stars}</span>
@@ -843,24 +876,6 @@
       requestAnimationFrame(raf);
     }
     requestAnimationFrame(raf);
-
-    /* ===== Custom Cursor - Desactivado ===== */
-    /*
-    const outline = document.querySelector('.cursor-outline');
-    let hideTimer;
-    function moveCursor(e) {
-      outline.style.left = e.clientX + 'px';
-      outline.style.top = e.clientY + 'px';
-      outline.style.opacity = '1';
-      clearTimeout(hideTimer);
-      hideTimer = setTimeout(() => { outline.style.opacity = '0'; }, 3000);
-    }
-    window.addEventListener('mousemove', moveCursor);
-    document.querySelectorAll('a, button, .car-card, .web-card, input').forEach(el => {
-      el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
-      el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
-    });
-    */
   </script>
 </body>
 </html>
