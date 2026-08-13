@@ -117,18 +117,37 @@
     .chat-input:focus { border-color: var(--accent); }
     .chat-send { background: var(--accent); border: none; color: var(--bg); border-radius: 6px; padding: 0 16px; cursor: pointer; font-weight: 700; }
 
+    /* SOCIAL PANEL - CHESS.COM STYLE */
+    .social-tabs { display: flex; gap: 4px; background: var(--surface-2); padding: 4px; border-radius: 8px; margin-bottom: 20px; }
+    .social-tab { flex: 1; padding: 10px; text-align: center; background: transparent; border: none; color: var(--fg-dim); font-family: inherit; font-weight: 600; font-size: 0.9rem; border-radius: 6px; cursor: pointer; transition: all 0.2s; position: relative; }
+    .social-tab:hover { color: var(--fg); }
+    .social-tab.active { background: var(--bg); color: var(--accent); }
+    #reqBadge { display: none; position: absolute; top: 5px; right: 10px; background: var(--danger); color: white; width: 18px; height: 18px; border-radius: 50%; font-size: 0.65rem; line-height: 18px; text-align: center; }
+    
     .search-box { position: relative; margin-bottom: 20px; }
-    .search-box input { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px 12px 42px; color: var(--fg); outline: none; font-family: inherit; }
+    .search-box input { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px 14px 44px; color: var(--fg); outline: none; font-family: inherit; font-size: 0.95rem; }
     .search-box input:focus { border-color: var(--accent); }
     .search-box i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); }
-    .user-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-radius: 8px; background: var(--surface-2); margin-bottom: 8px; }
+
+    .social-list { display: flex; flex-direction: column; gap: 8px; }
+    .user-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-radius: 8px; background: var(--surface-2); transition: background 0.2s; }
+    .user-row:hover { background: var(--surface-3); }
     .user-info { display: flex; align-items: center; gap: 12px; }
-    .user-avatar-sm { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; }
+    .user-avatar-sm { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background: var(--surface-3); }
+    .user-name { font-weight: 600; font-size: 0.95rem; }
+    .user-email { font-size: 0.8rem; color: var(--fg-dim); }
+    .user-elo { font-size: 0.75rem; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+    
     .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 0.85rem; font-family: inherit; transition: all 0.2s; }
     .btn-primary { background: var(--accent); color: var(--fg); }
     .btn-primary:hover { background: var(--accent-hover); }
     .btn-danger { background: var(--danger); color: var(--fg); }
+    .btn-success { background: var(--accent); color: var(--fg); }
     .btn-ghost { background: transparent; color: var(--fg-dim); border: 1px solid var(--border); }
+    
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--fg-dim); }
+    .empty-state i { font-size: 3rem; color: var(--surface-3); margin-bottom: 16px; display: block; }
+    .empty-state p { font-size: 0.95rem; margin-bottom: 20px; }
 
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
     .modal-overlay.open { display: flex; }
@@ -235,14 +254,31 @@
 
         <!-- SOCIAL VIEW -->
         <div class="view-panel" id="socialPanel">
-          <div class="panel-title">Buscar Jugadores</div>
+          <div class="social-tabs">
+            <button class="social-tab active" data-social-tab="friends">Amigos</button>
+            <button class="social-tab" data-social-tab="requests">Solicitudes <span id="reqBadge">0</span></button>
+          </div>
+          
           <div class="search-box">
             <i class="fas fa-search"></i>
-            <input type="text" id="searchInput" placeholder="Por nombre o correo...">
+            <input type="text" id="searchInput" placeholder="Buscar por nombre o correo...">
           </div>
-          <div id="searchResults" style="margin-bottom: 30px;"></div>
-          <div class="panel-title">Mis Amigos</div>
-          <div id="friendsList"></div>
+          
+          <div id="searchResults" style="display:none; margin-bottom: 20px;"></div>
+          
+          <div id="friendsContainer" class="social-list">
+            <div class="empty-state">
+              <i class="fas fa-user-friends"></i>
+              <p>El ajedrez es mejor con amigos. ¡Busca y añade a tus amigos arriba!</p>
+            </div>
+          </div>
+          
+          <div id="requestsContainer" class="social-list" style="display:none;">
+            <div class="empty-state">
+              <i class="fas fa-inbox"></i>
+              <p>No tienes nuevas solicitudes de amistad.</p>
+            </div>
+          </div>
         </div>
 
         <!-- PROFILE VIEW -->
@@ -366,6 +402,173 @@
       tab.addEventListener('click', () => switchView(tab.dataset.view));
     });
 
+    // SOCIAL TABS
+    document.querySelectorAll('.social-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.social-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const target = tab.dataset.socialTab;
+        document.getElementById('friendsContainer').style.display = target === 'friends' ? 'flex' : 'none';
+        document.getElementById('requestsContainer').style.display = target === 'requests' ? 'flex' : 'none';
+        document.getElementById('searchInput').value = '';
+        document.getElementById('searchResults').style.display = 'none';
+      });
+    });
+
+    // SEARCH LOGIC
+    document.getElementById('searchInput')?.addEventListener('input', async (e) => {
+      const term = e.target.value.trim().toLowerCase();
+      const resEl = document.getElementById('searchResults');
+      if (!resEl || !currentUser) return;
+      
+      if (term.length < 2) {
+        resEl.style.display = 'none';
+        resEl.innerHTML = '';
+        return;
+      }
+      
+      resEl.style.display = 'block';
+      resEl.innerHTML = '<div style="color: var(--muted); text-align:center; padding:10px; font-size:0.9rem;"><i class="fas fa-spinner fa-spin"></i> Buscando...</div>';
+      
+      try {
+        const snap = await get(ref(db, 'users'));
+        const users = snap.val() || {};
+        
+        // Filtramos por nombre o email
+        const filtered = Object.entries(users).filter(([uid, u]) => {
+          const name = (u.name || "").toLowerCase();
+          const email = (u.email || "").toLowerCase();
+          return (name.includes(term) || email.includes(term)) && uid !== currentUser.uid;
+        });
+        
+        if (filtered.length === 0) {
+          resEl.innerHTML = '<div style="color: var(--muted); text-align:center; padding:10px; font-size:0.9rem;">No se encontraron jugadores. (Recuerda que deben haber iniciado sesión al menos una vez).</div>';
+          return;
+        }
+        
+        resEl.innerHTML = filtered.map(([uid, u]) => `
+          <div class="user-row">
+            <div class="user-info">
+              <img src="${u.photo}" class="user-avatar-sm" alt="" onerror="this.src='https://via.placeholder.com/40'">
+              <div>
+                <div class="user-name">${u.name}</div>
+                <div class="user-email">${u.email}</div>
+                <div class="user-elo">ELO: ${u.elo || 1200}</div>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="window.sendFriendRequest('${uid}')">Añadir</button>
+          </div>
+        `).join('');
+      } catch (error) {
+        resEl.innerHTML = '<div style="color: var(--danger); text-align:center; padding:10px; font-size:0.9rem;">Error al buscar. Revisa las reglas de Firebase.</div>';
+      }
+    });
+
+    // FRIEND REQUESTS LOGIC
+    window.sendFriendRequest = async (toUid) => {
+      if (!currentUser) return;
+      await set(ref(db, `requests/${toUid}/${currentUser.uid}`), {
+        from: currentUser.uid,
+        name: currentUser.displayName,
+        photo: currentUser.photoURL,
+        timestamp: Date.now()
+      });
+      showToast('Solicitud de amistad enviada');
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchResults').style.display = 'none';
+    };
+
+    function listenForRequests() {
+      if (!currentUser) return;
+      onValue(ref(db, `requests/${currentUser.uid}`), (snap) => {
+        const reqs = snap.val() || {};
+        const reqEntries = Object.entries(reqs);
+        const badge = document.getElementById('reqBadge');
+        const container = document.getElementById('requestsContainer');
+        
+        if (reqEntries.length > 0) {
+          if (badge) {
+            badge.style.display = 'block';
+            badge.textContent = reqEntries.length;
+          }
+          if (container) {
+            container.innerHTML = reqEntries.map(([fromUid, req]) => `
+              <div class="user-row">
+                <div class="user-info">
+                  <img src="${req.photo}" class="user-avatar-sm" alt="" onerror="this.src='https://via.placeholder.com/40'">
+                  <div>
+                    <div class="user-name">${req.name}</div>
+                    <div class="user-email">Quiere ser tu amigo</div>
+                  </div>
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <button class="btn btn-success" onclick="window.acceptRequest('${fromUid}')"><i class="fas fa-check"></i></button>
+                  <button class="btn btn-danger" onclick="window.rejectRequest('${fromUid}')"><i class="fas fa-times"></i></button>
+                </div>
+              </div>
+            `).join('');
+          }
+        } else {
+          if (badge) badge.style.display = 'none';
+          if (container) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No tienes nuevas solicitudes de amistad.</p></div>';
+          }
+        }
+      });
+    }
+
+    window.acceptRequest = async (fromUid) => {
+      if (!currentUser) return;
+      // Añadir a ambas listas de amigos
+      await set(ref(db, `users/${currentUser.uid}/friends/${fromUid}`), true);
+      await set(ref(db, `users/${fromUid}/friends/${currentUser.uid}`), true);
+      // Eliminar solicitud
+      await remove(ref(db, `requests/${currentUser.uid}/${fromUid}`));
+      showToast('Amigo añadido');
+      renderFriends();
+    };
+
+    window.rejectRequest = async (fromUid) => {
+      if (!currentUser) return;
+      await remove(ref(db, `requests/${currentUser.uid}/${fromUid}`));
+      showToast('Solicitud rechazada');
+    };
+
+    async function renderFriends() {
+      if (!currentUser) return;
+      const listEl = document.getElementById('friendsContainer');
+      if (!listEl) return;
+      const snap = await get(ref(db, `users/${currentUser.uid}/friends`));
+      const friends = snap.val() || {};
+      const friendUids = Object.keys(friends);
+      
+      if (friendUids.length === 0) {
+        listEl.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>El ajedrez es mejor con amigos. ¡Busca y añade a tus amigos arriba!</p></div>';
+        return;
+      }
+      
+      const htmlArr = [];
+      for (const uid of friendUids) {
+        const uSnap = await get(ref(db, `users/${uid}`));
+        const u = uSnap.val();
+        if (u) {
+          htmlArr.push(`
+            <div class="user-row">
+              <div class="user-info">
+                <img src="${u.photo}" class="user-avatar-sm" alt="" onerror="this.src='https://via.placeholder.com/40'">
+                <div>
+                  <div class="user-name">${u.name}</div>
+                  <div class="user-elo">ELO: ${u.elo || 1200}</div>
+                </div>
+              </div>
+              <button class="btn btn-primary" onclick="window.challengeFriend('${uid}')"><i class="fas fa-chess"></i> Retar</button>
+            </div>
+          `);
+        }
+      }
+      listEl.innerHTML = htmlArr.join('');
+    }
+
     // AUTH
     document.getElementById('loginBtn')?.addEventListener('click', async () => {
       try { await signInWithPopup(auth, provider); } 
@@ -411,6 +614,7 @@
         
         updateProfileUI();
         renderFriends();
+        listenForRequests();
         listenForChallenges();
       } else {
         currentUser = null;
@@ -707,7 +911,7 @@
       document.getElementById('opElo').textContent = 'Pendiente';
       document.getElementById('myAvatar').innerHTML = `<img src="${currentUser.photoURL}" alt="">`;
       document.getElementById('myName').textContent = currentUser.displayName.split(' ')[0];
-      get(ref(db, 'users/' + currentUser.uid)).then(s => document.getElementById('myElo').textContent = `ELO: ${s.val().elo}`);
+      get(ref(db, 'users/' + currentUser.uid)).then(s => document.getElementById('myElo').textContent = `ELO: ${s.val().elo}`));
       
       renderBoard();
 
@@ -854,84 +1058,8 @@
       }
     });
 
-    // SOCIAL
+    // SOCIAL TRIGGERS
     document.getElementById('playFriendCard')?.addEventListener('click', () => switchView('social'));
-
-    document.getElementById('searchInput')?.addEventListener('input', async (e) => {
-      const term = e.target.value.trim().toLowerCase();
-      const resEl = document.getElementById('searchResults');
-      if (!resEl) return;
-      if (term.length < 2) { resEl.innerHTML = ''; return; }
-      
-      const snap = await get(ref(db, 'users'));
-      const users = snap.val() || {};
-      
-      const filtered = Object.entries(users).filter(([uid, u]) => {
-        const name = (u.name || "").toLowerCase();
-        const email = (u.email || "").toLowerCase();
-        return (name.includes(term) || email.includes(term)) && uid !== currentUser?.uid;
-      });
-      
-      if (filtered.length === 0) {
-        resEl.innerHTML = '<div style="color: var(--muted); text-align:center; padding:10px; font-size:0.9rem;">No se encontraron jugadores.</div>';
-        return;
-      }
-      
-      resEl.innerHTML = filtered.map(([uid, u]) => `
-        <div class="user-row">
-          <div class="user-info">
-            <img src="${u.photo}" class="user-avatar-sm" alt="">
-            <div>
-              <div style="font-weight:600; font-size:0.9rem">${u.name}</div>
-              <div style="font-size:0.8rem; color:var(--fg-dim)">${u.email}</div>
-            </div>
-          </div>
-          <button class="btn btn-primary" onclick="window.addFriend('${uid}')">Añadir</button>
-        </div>
-      `).join('');
-    });
-
-    window.addFriend = async (uid) => {
-      if (!currentUser) return showToast('Inicia sesión', true);
-      await set(ref(db, `users/${currentUser.uid}/friends/${uid}`), true);
-      showToast('Amigo añadido');
-      renderFriends();
-    };
-
-    async function renderFriends() {
-      if (!currentUser) return;
-      const listEl = document.getElementById('friendsList');
-      if (!listEl) return;
-      const snap = await get(ref(db, `users/${currentUser.uid}/friends`));
-      const friends = snap.val() || {};
-      const friendUids = Object.keys(friends);
-      
-      if (friendUids.length === 0) {
-        listEl.innerHTML = '<div style="color: var(--muted); text-align:center; padding:10px; font-size:0.9rem;">No tienes amigos aún.</div>';
-        return;
-      }
-      
-      const htmlArr = [];
-      for (const uid of friendUids) {
-        const uSnap = await get(ref(db, `users/${uid}`));
-        const u = uSnap.val();
-        if (u) {
-          htmlArr.push(`
-            <div class="user-row">
-              <div class="user-info">
-                <img src="${u.photo}" class="user-avatar-sm" alt="">
-                <div>
-                  <div style="font-weight:600; font-size:0.9rem">${u.name}</div>
-                  <div style="font-size:0.8rem; color:var(--fg-dim)">ELO: ${u.elo}</div>
-                </div>
-              </div>
-              <button class="btn btn-primary" onclick="window.challengeFriend('${uid}')"><i class="fas fa-chess"></i> Retar</button>
-            </div>
-          `);
-        }
-      }
-      listEl.innerHTML = htmlArr.join('');
-    }
 
     window.challengeFriend = (uid) => startOnlineGame(uid);
 
@@ -939,7 +1067,6 @@
       if (!currentUser) return;
       onValue(ref(db, `notifications/${currentUser.uid}`), async (snap) => {
         const notifs = snap.val() || {};
-        // Cambiado a for...of para soportar await correctamente sin errores en VSCode
         for (const [key, notif] of Object.entries(notifs)) {
           if (notif.type === 'challenge') {
             if (confirm(`${notif.fromName} te ha retado a una partida. ¿Aceptar?`)) {
