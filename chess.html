@@ -45,7 +45,7 @@
     .nav-item i { width: 20px; text-align: center; font-size: 1.1rem; }
 
     .auth-area { margin-top: auto; padding: 20px 12px; border-top: 1px solid var(--border); }
-    #loginBtn { width: 100%; background: var(--fg); color: var(--bg); border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; margin: 0 12px; }
+    #loginBtn { width: calc(100% - 24px); background: var(--fg); color: var(--bg); border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; margin: 0 12px; }
     #userProfileBtn { width: calc(100% - 24px); display: flex; align-items: center; gap: 12px; background: var(--surface-2); padding: 8px; border-radius: 8px; border: none; cursor: pointer; color: var(--fg); margin: 0 12px; }
     #userProfileBtn img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; }
     #userProfileBtn .u-info { text-align: left; flex: 1; }
@@ -290,7 +290,7 @@
         <strong>Avanzado</strong>
         <span>ELO ~1600. Algoritmo Minimax profundo.</span>
       </button>
-      <button class="btn btn-ghost" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('aiModal').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-ghost" style="width: 100%; margin-top: 10px;" id="cancelAiBtn">Cancelar</button>
     </div>
   </div>
 
@@ -343,44 +343,48 @@
 
     function showToast(msg, isError = false) {
       const toast = document.getElementById('toast');
+      if (!toast) return;
       toast.textContent = msg;
       toast.style.borderColor = isError ? 'var(--danger)' : 'var(--accent)';
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
-    window.showToast = showToast;
 
     function switchView(viewId) {
       document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(t => t.classList.toggle('active', t.dataset.view === viewId));
-      document.getElementById(`${viewId}Panel`).classList.add('active');
+      const panel = document.getElementById(`${viewId}Panel`);
+      if (panel) panel.classList.add('active');
       
-      // Si no estamos en partida, el tablero no es interactivo
       if (viewId !== 'game') {
-        document.getElementById('board').classList.remove('interactive');
+        const board = document.getElementById('board');
+        if (board) board.classList.remove('interactive');
       }
     }
-    window.switchView = switchView;
 
     document.querySelectorAll('.nav-item[data-view]').forEach(tab => {
       tab.addEventListener('click', () => switchView(tab.dataset.view));
     });
 
     // AUTH
-    document.getElementById('loginBtn').addEventListener('click', async () => {
+    document.getElementById('loginBtn')?.addEventListener('click', async () => {
       try { await signInWithPopup(auth, provider); } 
       catch (err) { showToast('Error: ' + err.message, true); }
     });
 
-    document.getElementById('logoutIcon').addEventListener('click', async (e) => {
+    document.getElementById('logoutIcon')?.addEventListener('click', async (e) => {
       e.stopPropagation();
       await signOut(auth);
       showToast('Sesión cerrada');
     });
 
-    document.getElementById('goHomeBtn').addEventListener('click', () => {
-      document.getElementById('gameOverModal').classList.remove('open');
+    document.getElementById('goHomeBtn')?.addEventListener('click', () => {
+      document.getElementById('gameOverModal')?.classList.remove('open');
       switchView('play');
+    });
+
+    document.getElementById('cancelAiBtn')?.addEventListener('click', () => {
+      document.getElementById('aiModal')?.classList.remove('open');
     });
 
     onAuthStateChanged(auth, async (user) => {
@@ -391,7 +395,6 @@
         document.getElementById('userAvatar').src = user.photoURL;
         document.getElementById('userName').textContent = user.displayName.split(' ')[0];
         
-        // FIX ELO UNDEFINED: Comprobar y reparar la base de datos si faltan campos
         const userRef = ref(db, 'users/' + user.uid);
         const snap = await get(userRef);
         if (!snap.exists()) {
@@ -413,11 +416,14 @@
         currentUser = null;
         document.getElementById('loginBtn').style.display = 'block';
         document.getElementById('userProfileBtn').style.display = 'none';
-        document.getElementById('playPanel').querySelector('.profile-card').innerHTML = `
-          <div class="pc-avatar"><i class="fas fa-user" style="font-size:2rem; color:var(--muted)"></i></div>
-          <div class="pc-name">Invitado</div>
-          <div style="font-size:0.85rem; color:var(--muted); margin-top:4px;">Inicia sesión para ver tu perfil</div>
-        `;
+        const playProfile = document.getElementById('playPanel')?.querySelector('.profile-card');
+        if (playProfile) {
+          playProfile.innerHTML = `
+            <div class="pc-avatar"><i class="fas fa-user" style="font-size:2rem; color:var(--muted)"></i></div>
+            <div class="pc-name">Invitado</div>
+            <div style="font-size:0.85rem; color:var(--muted); margin-top:4px;">Inicia sesión para ver tu perfil</div>
+          `;
+        }
       }
     });
 
@@ -426,7 +432,8 @@
       const snap = await get(ref(db, 'users/' + currentUser.uid));
       const data = snap.val();
       
-      document.getElementById('userElo').textContent = `ELO: ${data.elo}`;
+      const userEloEl = document.getElementById('userElo');
+      if (userEloEl) userEloEl.textContent = `ELO: ${data.elo}`;
       
       const profileHtml = `
         <div class="profile-card">
@@ -439,13 +446,17 @@
           </div>
         </div>
       `;
-      document.getElementById('playPanel').querySelector('.profile-card').innerHTML = profileHtml;
-      document.getElementById('profileContent').innerHTML = profileHtml;
+      const playPanelProfile = document.getElementById('playPanel')?.querySelector('.profile-card');
+      if (playPanelProfile) playPanelProfile.innerHTML = profileHtml;
+      
+      const profileContent = document.getElementById('profileContent');
+      if (profileContent) profileContent.innerHTML = profileHtml;
     }
 
     // BOARD RENDER
     function renderBoard() {
       const boardEl = document.getElementById('board');
+      if (!boardEl) return;
       boardEl.innerHTML = '';
       const board = game.board();
       
@@ -470,7 +481,7 @@
           }
 
           if (selectedSquare === square.dataset.square) square.classList.add('selected');
-          if (selectedSquare && document.getElementById('board').classList.contains('interactive')) {
+          if (selectedSquare && boardEl.classList.contains('interactive')) {
             const moves = game.moves({ square: selectedSquare, verbose: true });
             if (moves.some(m => m.to === square.dataset.square)) {
               if (piece) square.classList.add('legal-capture');
@@ -502,7 +513,8 @@
     }
 
     function handleSquareClick(square) {
-      if (!document.getElementById('board').classList.contains('interactive')) return;
+      const boardEl = document.getElementById('board');
+      if (!boardEl || !boardEl.classList.contains('interactive')) return;
       if (gameMode === 'ai' && game.turn() === 'b') return;
       if (gameMode === 'online' && !isMyTurn) return;
 
@@ -542,6 +554,7 @@
 
     function updateMoveList() {
       const list = document.getElementById('moveList');
+      if (!list) return;
       const history = game.history();
       let html = '';
       for (let i = 0; i < history.length; i += 2) {
@@ -614,15 +627,15 @@
     }
 
     // GAME START
-    document.getElementById('playAiCard').addEventListener('click', () => {
+    document.getElementById('playAiCard')?.addEventListener('click', () => {
       if (!currentUser) return showToast('Inicia sesión para jugar', true);
-      document.getElementById('aiModal').classList.add('open');
+      document.getElementById('aiModal')?.classList.add('open');
     });
 
     document.querySelectorAll('.difficulty-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         startAIGame(parseInt(btn.dataset.diff));
-        document.getElementById('aiModal').classList.remove('open');
+        document.getElementById('aiModal')?.classList.remove('open');
       });
     });
 
@@ -631,10 +644,10 @@
       gameMode = 'ai';
       game = new Chess();
       selectedSquare = null;
-      boardFlipped = false; // Blancas abajo por defecto
+      boardFlipped = false;
       
       switchView('game');
-      document.getElementById('board').classList.add('interactive');
+      document.getElementById('board')?.classList.add('interactive');
       document.getElementById('chatPanel').style.display = 'none';
       
       document.getElementById('opAvatar').innerHTML = '<i class="fas fa-robot"></i>';
@@ -658,12 +671,13 @@
     async function startOnlineGame(friendUid) {
       if (!currentUser) return;
       const gameId = push(ref(db, 'games')).key;
+      if (!gameId) return;
       currentGameId = gameId;
       gameMode = 'online';
       game = new Chess();
       
       const iAmWhite = Math.random() < 0.5;
-      boardFlipped = !iAmWhite; // Girar tablero si soy negras
+      boardFlipped = !iAmWhite;
       
       await set(ref(db, `games/${gameId}`), {
         white: iAmWhite ? currentUser.uid : friendUid,
@@ -685,7 +699,7 @@
 
       showToast('Reto enviado. Esperando respuesta...');
       switchView('game');
-      document.getElementById('board').classList.add('interactive');
+      document.getElementById('board')?.classList.add('interactive');
       document.getElementById('chatPanel').style.display = 'flex';
       
       document.getElementById('opAvatar').innerHTML = '<i class="fas fa-hourglass-half"></i>';
@@ -693,7 +707,7 @@
       document.getElementById('opElo').textContent = 'Pendiente';
       document.getElementById('myAvatar').innerHTML = `<img src="${currentUser.photoURL}" alt="">`;
       document.getElementById('myName').textContent = currentUser.displayName.split(' ')[0];
-      get(ref(db, 'users/' + currentUser.uid)).then(s => document.getElementById('myElo').textContent = `ELO: ${s.val().elo}`));
+      get(ref(db, 'users/' + currentUser.uid)).then(s => document.getElementById('myElo').textContent = `ELO: ${s.val().elo}`);
       
       renderBoard();
 
@@ -723,18 +737,19 @@
         }
       });
 
-      // CHAT LISTENER
       onValue(ref(db, `games/${gameId}/chat`), (snap) => {
         const msgs = snap.val() || {};
         const chatEl = document.getElementById('chatMessages');
-        chatEl.innerHTML = '';
-        Object.values(msgs).forEach(msg => {
-          const div = document.createElement('div');
-          div.className = `chat-msg ${msg.sender === currentUser.uid ? 'me' : 'them'}`;
-          div.textContent = msg.text;
-          chatEl.appendChild(div);
-        });
-        chatEl.scrollTop = chatEl.scrollHeight;
+        if (chatEl) {
+          chatEl.innerHTML = '';
+          Object.values(msgs).forEach(msg => {
+            const div = document.createElement('div');
+            div.className = `chat-msg ${msg.sender === currentUser.uid ? 'me' : 'them'}`;
+            div.textContent = msg.text;
+            chatEl.appendChild(div);
+          });
+          chatEl.scrollTop = chatEl.scrollHeight;
+        }
       });
     }
 
@@ -746,23 +761,26 @@
       });
     }
 
-    document.getElementById('chatSendBtn').addEventListener('click', sendChat);
-    document.getElementById('chatInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendChat(); });
+    document.getElementById('chatSendBtn')?.addEventListener('click', sendChat);
+    document.getElementById('chatInput')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendChat(); });
     
     async function sendChat() {
       const input = document.getElementById('chatInput');
+      if (!input) return;
       const text = input.value.trim();
-      if (!text || !currentGameId) return;
+      if (!text || !currentGameId || !currentUser) return;
       const msgRef = push(ref(db, `games/${currentGameId}/chat`));
       await set(msgRef, { sender: currentUser.uid, text: text });
       input.value = '';
     }
 
     function updateTimersUI() {
-      document.getElementById('myTimer').textContent = formatTime(myTime);
-      document.getElementById('opTimer').textContent = formatTime(opTime);
-      document.getElementById('myTimer').classList.toggle('active', isMyTurn && gameMode === 'online');
-      document.getElementById('opTimer').classList.toggle('active', !isMyTurn && gameMode === 'online');
+      const myTimer = document.getElementById('myTimer');
+      const opTimer = document.getElementById('opTimer');
+      if (myTimer) myTimer.textContent = formatTime(myTime);
+      if (opTimer) opTimer.textContent = formatTime(opTime);
+      if (myTimer) myTimer.classList.toggle('active', isMyTurn && gameMode === 'online');
+      if (opTimer) opTimer.classList.toggle('active', !isMyTurn && gameMode === 'online');
     }
 
     function formatTime(sec) {
@@ -778,13 +796,16 @@
         if (game.in_checkmate()) result = game.turn() === 'b' ? 'win' : 'loss';
         else if (game.in_draw() || game.in_stalemate() || game.in_threefold_repetition()) result = 'draw';
         
-        document.getElementById('gameOverTitle').textContent = result === 'win' ? '¡Victoria!' : result === 'loss' ? 'Derrota' : 'Empate';
-        document.getElementById('gameOverDesc').textContent = result === 'win' ? 'Has ganado a la máquina.' : result === 'loss' ? 'Mejor suerte la próxima.' : 'Tablas.';
-        document.getElementById('gameOverModal').classList.add('open');
+        const titleEl = document.getElementById('gameOverTitle');
+        const descEl = document.getElementById('gameOverDesc');
+        if (titleEl) titleEl.textContent = result === 'win' ? '¡Victoria!' : result === 'loss' ? 'Derrota' : 'Empate';
+        if (descEl) descEl.textContent = result === 'win' ? 'Has ganado a la máquina.' : result === 'loss' ? 'Mejor suerte la próxima.' : 'Tablas.';
+        document.getElementById('gameOverModal')?.classList.add('open');
         
-      } else if (gameMode === 'online') {
-        const gameData = (await get(ref(db, `games/${currentGameId}`))).val();
-        if (!gameData) return; // Prevenir errores si se borra
+      } else if (gameMode === 'online' && currentGameId) {
+        const gameSnap = await get(ref(db, `games/${currentGameId}`));
+        const gameData = gameSnap.val();
+        if (!gameData) return;
         const myColor = gameData.white === currentUser.uid ? 'w' : 'b';
         
         if (game.in_checkmate()) result = (game.turn() === myColor) ? 'loss' : 'win';
@@ -792,13 +813,15 @@
         
         await updateElo(result, gameData.white === currentUser.uid ? gameData.black : gameData.white);
         
-        document.getElementById('gameOverTitle').textContent = result === 'win' ? '¡Victoria!' : result === 'loss' ? 'Derrota' : 'Empate';
-        document.getElementById('gameOverDesc').textContent = result === 'win' ? 'Has ganado puntos ELO.' : result === 'loss' ? 'Has perdido puntos ELO.' : 'Tablas.';
-        document.getElementById('gameOverModal').classList.add('open');
+        const titleEl = document.getElementById('gameOverTitle');
+        const descEl = document.getElementById('gameOverDesc');
+        if (titleEl) titleEl.textContent = result === 'win' ? '¡Victoria!' : result === 'loss' ? 'Derrota' : 'Empate';
+        if (descEl) descEl.textContent = result === 'win' ? 'Has ganado puntos ELO.' : result === 'loss' ? 'Has perdido puntos ELO.' : 'Tablas.';
+        document.getElementById('gameOverModal')?.classList.add('open');
         
         update(ref(db, `games/${currentGameId}`), { status: 'finished' });
       }
-      document.getElementById('board').classList.remove('interactive');
+      document.getElementById('board')?.classList.remove('interactive');
     }
 
     async function updateElo(result, opUid) {
@@ -820,10 +843,10 @@
       updateProfileUI();
     }
 
-    document.getElementById('resignBtn').addEventListener('click', () => {
+    document.getElementById('resignBtn')?.addEventListener('click', () => {
       if (!gameMode) return;
       if (confirm('¿Seguro que quieres rendirte?')) {
-        if (gameMode === 'online') {
+        if (gameMode === 'online' && currentGameId) {
           update(ref(db, `games/${currentGameId}`), { status: 'finished' });
           updateElo('loss', game.turn() === 'w' ? 'black' : 'white');
         }
@@ -832,17 +855,17 @@
     });
 
     // SOCIAL
-    document.getElementById('playFriendCard').addEventListener('click', () => switchView('social'));
+    document.getElementById('playFriendCard')?.addEventListener('click', () => switchView('social'));
 
-    document.getElementById('searchInput').addEventListener('input', async (e) => {
+    document.getElementById('searchInput')?.addEventListener('input', async (e) => {
       const term = e.target.value.trim().toLowerCase();
       const resEl = document.getElementById('searchResults');
+      if (!resEl) return;
       if (term.length < 2) { resEl.innerHTML = ''; return; }
       
       const snap = await get(ref(db, 'users'));
       const users = snap.val() || {};
       
-      // FIX BÚSQUEDA: Filtrar por nombre O email
       const filtered = Object.entries(users).filter(([uid, u]) => {
         const name = (u.name || "").toLowerCase();
         const email = (u.email || "").toLowerCase();
@@ -863,7 +886,7 @@
               <div style="font-size:0.8rem; color:var(--fg-dim)">${u.email}</div>
             </div>
           </div>
-          <button class="btn btn-primary" onclick="addFriend('${uid}')">Añadir</button>
+          <button class="btn btn-primary" onclick="window.addFriend('${uid}')">Añadir</button>
         </div>
       `).join('');
     });
@@ -878,6 +901,7 @@
     async function renderFriends() {
       if (!currentUser) return;
       const listEl = document.getElementById('friendsList');
+      if (!listEl) return;
       const snap = await get(ref(db, `users/${currentUser.uid}/friends`));
       const friends = snap.val() || {};
       const friendUids = Object.keys(friends);
@@ -901,7 +925,7 @@
                   <div style="font-size:0.8rem; color:var(--fg-dim)">ELO: ${u.elo}</div>
                 </div>
               </div>
-              <button class="btn btn-primary" onclick="challengeFriend('${uid}')"><i class="fas fa-chess"></i> Retar</button>
+              <button class="btn btn-primary" onclick="window.challengeFriend('${uid}')"><i class="fas fa-chess"></i> Retar</button>
             </div>
           `);
         }
@@ -913,9 +937,10 @@
 
     function listenForChallenges() {
       if (!currentUser) return;
-      onValue(ref(db, `notifications/${currentUser.uid}`), (snap) => {
+      onValue(ref(db, `notifications/${currentUser.uid}`), async (snap) => {
         const notifs = snap.val() || {};
-        Object.entries(notifs).forEach(async ([key, notif]) => {
+        // Cambiado a for...of para soportar await correctamente sin errores en VSCode
+        for (const [key, notif] of Object.entries(notifs)) {
           if (notif.type === 'challenge') {
             if (confirm(`${notif.fromName} te ha retado a una partida. ¿Aceptar?`)) {
               await remove(ref(db, `notifications/${currentUser.uid}/${key}`));
@@ -923,12 +948,14 @@
               gameMode = 'online';
               game = new Chess();
               
-              const gameData = (await get(ref(db, `games/${currentGameId}`))).val();
+              const gameSnap = await get(ref(db, `games/${currentGameId}`));
+              const gameData = gameSnap.val();
+              if (!gameData) continue;
               const myColor = gameData.white === currentUser.uid ? 'w' : 'b';
-              boardFlipped = myColor === 'b'; // Girar si soy negras
+              boardFlipped = myColor === 'b';
               
               switchView('game');
-              document.getElementById('board').classList.add('interactive');
+              document.getElementById('board')?.classList.add('interactive');
               document.getElementById('chatPanel').style.display = 'flex';
               
               const opUid = myColor === 'w' ? gameData.black : gameData.white;
@@ -940,7 +967,9 @@
               document.getElementById('opElo').textContent = `ELO: ${opData.elo}`;
               document.getElementById('myAvatar').innerHTML = `<img src="${currentUser.photoURL}" alt="">`;
               document.getElementById('myName').textContent = currentUser.displayName.split(' ')[0];
-              get(ref(db, 'users/' + currentUser.uid)).then(s => document.getElementById('myElo').textContent = `ELO: ${s.val().elo}`));
+              get(ref(db, 'users/' + currentUser.uid)).then(s => {
+                document.getElementById('myElo').textContent = `ELO: ${s.val().elo}`;
+              });
 
               onValue(ref(db, `games/${currentGameId}`), (gSnap) => {
                 const data = gSnap.val();
@@ -959,14 +988,16 @@
               onValue(ref(db, `games/${currentGameId}/chat`), (cSnap) => {
                 const msgs = cSnap.val() || {};
                 const chatEl = document.getElementById('chatMessages');
-                chatEl.innerHTML = '';
-                Object.values(msgs).forEach(msg => {
-                  const div = document.createElement('div');
-                  div.className = `chat-msg ${msg.sender === currentUser.uid ? 'me' : 'them'}`;
-                  div.textContent = msg.text;
-                  chatEl.appendChild(div);
-                });
-                chatEl.scrollTop = chatEl.scrollHeight;
+                if (chatEl) {
+                  chatEl.innerHTML = '';
+                  Object.values(msgs).forEach(msg => {
+                    const div = document.createElement('div');
+                    div.className = `chat-msg ${msg.sender === currentUser.uid ? 'me' : 'them'}`;
+                    div.textContent = msg.text;
+                    chatEl.appendChild(div);
+                  });
+                  chatEl.scrollTop = chatEl.scrollHeight;
+                }
               });
 
             } else {
@@ -974,7 +1005,7 @@
               await remove(ref(db, `games/${notif.gameId}`));
             }
           }
-        });
+        }
       });
     }
 
