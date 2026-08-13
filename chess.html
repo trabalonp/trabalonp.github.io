@@ -117,7 +117,7 @@
     .chat-input:focus { border-color: var(--accent); }
     .chat-send { background: var(--accent); border: none; color: var(--bg); border-radius: 6px; padding: 0 16px; cursor: pointer; font-weight: 700; }
 
-    /* SOCIAL PANEL - CHESS.COM STYLE */
+    /* SOCIAL PANEL */
     .social-tabs { display: flex; gap: 4px; background: var(--surface-2); padding: 4px; border-radius: 8px; margin-bottom: 20px; }
     .social-tab { flex: 1; padding: 10px; text-align: center; background: transparent; border: none; color: var(--fg-dim); font-family: inherit; font-weight: 600; font-size: 0.9rem; border-radius: 6px; cursor: pointer; transition: all 0.2s; position: relative; }
     .social-tab:hover { color: var(--fg); }
@@ -343,7 +343,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getDatabase, ref, get, set, update, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -360,6 +360,9 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
     const provider = new GoogleAuthProvider();
+
+    // Forzar persistencia local para que la sesión no se pierda
+    setPersistence(auth, browserLocalPersistence).catch(err => console.error("Error de persistencia:", err));
 
     let currentUser = null;
     let currentGameId = null;
@@ -383,7 +386,7 @@
       toast.textContent = msg;
       toast.style.borderColor = isError ? 'var(--danger)' : 'var(--accent)';
       toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
+      setTimeout(() => toast.classList.remove('show'), 4000);
     }
 
     function switchView(viewId) {
@@ -434,7 +437,6 @@
         const snap = await get(ref(db, 'users'));
         const users = snap.val() || {};
         
-        // Filtramos por nombre o email
         const filtered = Object.entries(users).filter(([uid, u]) => {
           const name = (u.name || "").toLowerCase();
           const email = (u.email || "").toLowerCase();
@@ -442,7 +444,7 @@
         });
         
         if (filtered.length === 0) {
-          resEl.innerHTML = '<div style="color: var(--muted); text-align:center; padding:10px; font-size:0.9rem;">No se encontraron jugadores. (Recuerda que deben haber iniciado sesión al menos una vez).</div>';
+          resEl.innerHTML = '<div style="color: var(--muted); text-align:center; padding:10px; font-size:0.9rem;">No se encontraron jugadores.</div>';
           return;
         }
         
@@ -460,22 +462,26 @@
           </div>
         `).join('');
       } catch (error) {
-        resEl.innerHTML = '<div style="color: var(--danger); text-align:center; padding:10px; font-size:0.9rem;">Error al buscar. Revisa las reglas de Firebase.</div>';
+        resEl.innerHTML = '<div style="color: var(--danger); text-align:center; padding:10px; font-size:0.9rem;">Error de permisos en la base de datos.</div>';
       }
     });
 
     // FRIEND REQUESTS LOGIC
     window.sendFriendRequest = async (toUid) => {
       if (!currentUser) return;
-      await set(ref(db, `requests/${toUid}/${currentUser.uid}`), {
-        from: currentUser.uid,
-        name: currentUser.displayName,
-        photo: currentUser.photoURL,
-        timestamp: Date.now()
-      });
-      showToast('Solicitud de amistad enviada');
-      document.getElementById('searchInput').value = '';
-      document.getElementById('searchResults').style.display = 'none';
+      try {
+        await set(ref(db, `requests/${toUid}/${currentUser.uid}`), {
+          from: currentUser.uid,
+          name: currentUser.displayName,
+          photo: currentUser.photoURL,
+          timestamp: Date.now()
+        });
+        showToast('Solicitud de amistad enviada');
+        document.getElementById('searchInput').value = '';
+        document.getElementById('searchResults').style.display = 'none';
+      } catch (err) {
+        showToast('Error al enviar solicitud: ' + err.message, true);
+      }
     };
 
     function listenForRequests() {
@@ -519,66 +525,84 @@
 
     window.acceptRequest = async (fromUid) => {
       if (!currentUser) return;
-      // Añadir a ambas listas de amigos
-      await set(ref(db, `users/${currentUser.uid}/friends/${fromUid}`), true);
-      await set(ref(db, `users/${fromUid}/friends/${currentUser.uid}`), true);
-      // Eliminar solicitud
-      await remove(ref(db, `requests/${currentUser.uid}/${fromUid}`));
-      showToast('Amigo añadido');
-      renderFriends();
+      try {
+        await set(ref(db, `users/${currentUser.uid}/friends/${fromUid}`), true);
+        await set(ref(db, `users/${fromUid}/friends/${currentUser.uid}`), true);
+        await remove(ref(db, `requests/${currentUser.uid}/${fromUid}`));
+        showToast('Amigo añadido');
+        renderFriends();
+      } catch (err) {
+        showToast('Error: ' + err.message, true);
+      }
     };
 
     window.rejectRequest = async (fromUid) => {
       if (!currentUser) return;
-      await remove(ref(db, `requests/${currentUser.uid}/${fromUid}`));
-      showToast('Solicitud rechazada');
+      try {
+        await remove(ref(db, `requests/${currentUser.uid}/${fromUid}`));
+        showToast('Solicitud rechazada');
+      } catch (err) {
+        showToast('Error: ' + err.message, true);
+      }
     };
 
     async function renderFriends() {
       if (!currentUser) return;
       const listEl = document.getElementById('friendsContainer');
       if (!listEl) return;
-      const snap = await get(ref(db, `users/${currentUser.uid}/friends`));
-      const friends = snap.val() || {};
-      const friendUids = Object.keys(friends);
-      
-      if (friendUids.length === 0) {
-        listEl.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>El ajedrez es mejor con amigos. ¡Busca y añade a tus amigos arriba!</p></div>';
-        return;
-      }
-      
-      const htmlArr = [];
-      for (const uid of friendUids) {
-        const uSnap = await get(ref(db, `users/${uid}`));
-        const u = uSnap.val();
-        if (u) {
-          htmlArr.push(`
-            <div class="user-row">
-              <div class="user-info">
-                <img src="${u.photo}" class="user-avatar-sm" alt="" onerror="this.src='https://via.placeholder.com/40'">
-                <div>
-                  <div class="user-name">${u.name}</div>
-                  <div class="user-elo">ELO: ${u.elo || 1200}</div>
-                </div>
-              </div>
-              <button class="btn btn-primary" onclick="window.challengeFriend('${uid}')"><i class="fas fa-chess"></i> Retar</button>
-            </div>
-          `);
+      try {
+        const snap = await get(ref(db, `users/${currentUser.uid}/friends`));
+        const friends = snap.val() || {};
+        const friendUids = Object.keys(friends);
+        
+        if (friendUids.length === 0) {
+          listEl.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>El ajedrez es mejor con amigos. ¡Busca y añade a tus amigos arriba!</p></div>';
+          return;
         }
+        
+        const htmlArr = [];
+        for (const uid of friendUids) {
+          const uSnap = await get(ref(db, `users/${uid}`));
+          const u = uSnap.val();
+          if (u) {
+            htmlArr.push(`
+              <div class="user-row">
+                <div class="user-info">
+                  <img src="${u.photo}" class="user-avatar-sm" alt="" onerror="this.src='https://via.placeholder.com/40'">
+                  <div>
+                    <div class="user-name">${u.name}</div>
+                    <div class="user-elo">ELO: ${u.elo || 1200}</div>
+                  </div>
+                </div>
+                <button class="btn btn-primary" onclick="window.challengeFriend('${uid}')"><i class="fas fa-chess"></i> Retar</button>
+              </div>
+            `);
+          }
+        }
+        listEl.innerHTML = htmlArr.join('');
+      } catch (err) {
+        listEl.innerHTML = '<div class="empty-state" style="color:var(--danger);">Error al cargar amigos.</div>';
       }
-      listEl.innerHTML = htmlArr.join('');
     }
 
     // AUTH
     document.getElementById('loginBtn')?.addEventListener('click', async () => {
-      try { await signInWithPopup(auth, provider); } 
-      catch (err) { showToast('Error: ' + err.message, true); }
+      try { 
+        await signInWithPopup(auth, provider); 
+      } catch (err) { 
+        showToast('Error de inicio de sesión: ' + err.message, true); 
+        console.error(err);
+      }
     });
 
     document.getElementById('logoutIcon')?.addEventListener('click', async (e) => {
       e.stopPropagation();
-      await signOut(auth);
-      showToast('Sesión cerrada');
+      try {
+        await signOut(auth);
+        showToast('Sesión cerrada');
+      } catch (err) {
+        showToast('Error al cerrar sesión', true);
+      }
     });
 
     document.getElementById('goHomeBtn')?.addEventListener('click', () => {
@@ -593,29 +617,35 @@
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
+        // Actualizar UI inmediatamente para no dar sensación de fallo
         document.getElementById('loginBtn').style.display = 'none';
         document.getElementById('userProfileBtn').style.display = 'flex';
         document.getElementById('userAvatar').src = user.photoURL;
         document.getElementById('userName').textContent = user.displayName.split(' ')[0];
         
-        const userRef = ref(db, 'users/' + user.uid);
-        const snap = await get(userRef);
-        if (!snap.exists()) {
-          await set(userRef, { name: user.displayName, email: user.email, photo: user.photoURL, elo: 1200, wins: 0, losses: 0, draws: 0 });
-        } else {
-          const data = snap.val();
-          const updates = { name: user.displayName, email: user.email, photo: user.photoURL };
-          if (data.elo === undefined) updates.elo = 1200;
-          if (data.wins === undefined) updates.wins = 0;
-          if (data.losses === undefined) updates.losses = 0;
-          if (data.draws === undefined) updates.draws = 0;
-          await update(userRef, updates);
+        try {
+          const userRef = ref(db, 'users/' + user.uid);
+          const snap = await get(userRef);
+          if (!snap.exists()) {
+            await set(userRef, { name: user.displayName, email: user.email, photo: user.photoURL, elo: 1200, wins: 0, losses: 0, draws: 0 });
+          } else {
+            const data = snap.val();
+            const updates = { name: user.displayName, email: user.email, photo: user.photoURL };
+            if (data.elo === undefined) updates.elo = 1200;
+            if (data.wins === undefined) updates.wins = 0;
+            if (data.losses === undefined) updates.losses = 0;
+            if (data.draws === undefined) updates.draws = 0;
+            await update(userRef, updates);
+          }
+          
+          updateProfileUI();
+          renderFriends();
+          listenForRequests();
+          listenForChallenges();
+        } catch (dbError) {
+          console.error("Error de base de datos:", dbError);
+          showToast("Error al conectar con la base de datos. Revisa las reglas de Firebase.", true);
         }
-        
-        updateProfileUI();
-        renderFriends();
-        listenForRequests();
-        listenForChallenges();
       } else {
         currentUser = null;
         document.getElementById('loginBtn').style.display = 'block';
@@ -633,28 +663,33 @@
 
     async function updateProfileUI() {
       if (!currentUser) return;
-      const snap = await get(ref(db, 'users/' + currentUser.uid));
-      const data = snap.val();
-      
-      const userEloEl = document.getElementById('userElo');
-      if (userEloEl) userEloEl.textContent = `ELO: ${data.elo}`;
-      
-      const profileHtml = `
-        <div class="profile-card">
-          <div class="pc-avatar"><img src="${currentUser.photoURL}" alt=""></div>
-          <div class="pc-name">${currentUser.displayName.split(' ')[0]}</div>
-          <div style="font-size:0.85rem; color:var(--muted); margin-top:4px;">${data.email}</div>
-          <div class="pc-stats">
-            <div class="pc-stat"><span>ELO</span><strong>${data.elo}</strong></div>
-            <div class="pc-stat"><span>V/D/T</span><strong>${data.wins||0}/${data.losses||0}/${data.draws||0}</strong></div>
+      try {
+        const snap = await get(ref(db, 'users/' + currentUser.uid));
+        const data = snap.val();
+        if (!data) return;
+        
+        const userEloEl = document.getElementById('userElo');
+        if (userEloEl) userEloEl.textContent = `ELO: ${data.elo}`;
+        
+        const profileHtml = `
+          <div class="profile-card">
+            <div class="pc-avatar"><img src="${currentUser.photoURL}" alt=""></div>
+            <div class="pc-name">${currentUser.displayName.split(' ')[0]}</div>
+            <div style="font-size:0.85rem; color:var(--muted); margin-top:4px;">${data.email}</div>
+            <div class="pc-stats">
+              <div class="pc-stat"><span>ELO</span><strong>${data.elo}</strong></div>
+              <div class="pc-stat"><span>V/D/T</span><strong>${data.wins||0}/${data.losses||0}/${data.draws||0}</strong></div>
+            </div>
           </div>
-        </div>
-      `;
-      const playPanelProfile = document.getElementById('playPanel')?.querySelector('.profile-card');
-      if (playPanelProfile) playPanelProfile.innerHTML = profileHtml;
-      
-      const profileContent = document.getElementById('profileContent');
-      if (profileContent) profileContent.innerHTML = profileHtml;
+        `;
+        const playPanelProfile = document.getElementById('playPanel')?.querySelector('.profile-card');
+        if (playPanelProfile) playPanelProfile.innerHTML = profileHtml;
+        
+        const profileContent = document.getElementById('profileContent');
+        if (profileContent) profileContent.innerHTML = profileHtml;
+      } catch (err) {
+        console.error("Error actualizando perfil:", err);
+      }
     }
 
     // BOARD RENDER
@@ -861,7 +896,7 @@
       document.getElementById('myName').textContent = currentUser.displayName.split(' ')[0];
       
       get(ref(db, 'users/' + currentUser.uid)).then(s => {
-        document.getElementById('myElo').textContent = `ELO: ${s.val().elo}`;
+        if (s.exists()) document.getElementById('myElo').textContent = `ELO: ${s.val().elo}`;
       });
 
       clearInterval(timerInterval);
@@ -874,87 +909,95 @@
     // ONLINE GAME
     async function startOnlineGame(friendUid) {
       if (!currentUser) return;
-      const gameId = push(ref(db, 'games')).key;
-      if (!gameId) return;
-      currentGameId = gameId;
-      gameMode = 'online';
-      game = new Chess();
-      
-      const iAmWhite = Math.random() < 0.5;
-      boardFlipped = !iAmWhite;
-      
-      await set(ref(db, `games/${gameId}`), {
-        white: iAmWhite ? currentUser.uid : friendUid,
-        black: iAmWhite ? friendUid : currentUser.uid,
-        fen: game.fen(),
-        status: 'active',
-        whiteTime: 600,
-        blackTime: 600
-      });
+      try {
+        const gameId = push(ref(db, 'games')).key;
+        if (!gameId) return;
+        currentGameId = gameId;
+        gameMode = 'online';
+        game = new Chess();
+        
+        const iAmWhite = Math.random() < 0.5;
+        boardFlipped = !iAmWhite;
+        
+        await set(ref(db, `games/${gameId}`), {
+          white: iAmWhite ? currentUser.uid : friendUid,
+          black: iAmWhite ? friendUid : currentUser.uid,
+          fen: game.fen(),
+          status: 'active',
+          whiteTime: 600,
+          blackTime: 600
+        });
 
-      const notifRef = push(ref(db, `notifications/${friendUid}`));
-      await set(notifRef, {
-        type: 'challenge',
-        from: currentUser.uid,
-        fromName: currentUser.displayName,
-        fromPhoto: currentUser.photoURL,
-        gameId: gameId
-      });
+        const notifRef = push(ref(db, `notifications/${friendUid}`));
+        await set(notifRef, {
+          type: 'challenge',
+          from: currentUser.uid,
+          fromName: currentUser.displayName,
+          fromPhoto: currentUser.photoURL,
+          gameId: gameId
+        });
 
-      showToast('Reto enviado. Esperando respuesta...');
-      switchView('game');
-      document.getElementById('board')?.classList.add('interactive');
-      document.getElementById('chatPanel').style.display = 'flex';
-      
-      document.getElementById('opAvatar').innerHTML = '<i class="fas fa-hourglass-half"></i>';
-      document.getElementById('opName').textContent = 'Esperando...';
-      document.getElementById('opElo').textContent = 'Pendiente';
-      document.getElementById('myAvatar').innerHTML = `<img src="${currentUser.photoURL}" alt="">`;
-      document.getElementById('myName').textContent = currentUser.displayName.split(' ')[0];
-      get(ref(db, 'users/' + currentUser.uid)).then(s => document.getElementById('myElo').textContent = `ELO: ${s.val().elo}`));
-      
-      renderBoard();
+        showToast('Reto enviado. Esperando respuesta...');
+        switchView('game');
+        document.getElementById('board')?.classList.add('interactive');
+        document.getElementById('chatPanel').style.display = 'flex';
+        
+        document.getElementById('opAvatar').innerHTML = '<i class="fas fa-hourglass-half"></i>';
+        document.getElementById('opName').textContent = 'Esperando...';
+        document.getElementById('opElo').textContent = 'Pendiente';
+        document.getElementById('myAvatar').innerHTML = `<img src="${currentUser.photoURL}" alt="">`;
+        document.getElementById('myName').textContent = currentUser.displayName.split(' ')[0];
+        get(ref(db, 'users/' + currentUser.uid)).then(s => {
+          if (s.exists()) document.getElementById('myElo').textContent = `ELO: ${s.val().elo}`;
+        });
+        
+        renderBoard();
 
-      onValue(ref(db, `games/${gameId}`), (snap) => {
-        const data = snap.val();
-        if (!data) return;
-        if (data.status === 'active') {
-          game = new Chess(data.fen);
-          renderBoard();
-          updateMoveList();
-          
-          const myColor = data.white === currentUser.uid ? 'w' : 'b';
-          isMyTurn = (game.turn() === myColor);
-          updateTimersUI();
-          
-          const opUid = myColor === 'w' ? data.black : data.white;
-          if (document.getElementById('opName').textContent === 'Esperando...') {
-             get(ref(db, `users/${opUid}`)).then(opSnap => {
-               const opData = opSnap.val();
-               document.getElementById('opAvatar').innerHTML = `<img src="${opData.photo}" alt="">`;
-               document.getElementById('opName').textContent = opData.name;
-               document.getElementById('opElo').textContent = `ELO: ${opData.elo}`;
-             });
+        onValue(ref(db, `games/${gameId}`), (snap) => {
+          const data = snap.val();
+          if (!data) return;
+          if (data.status === 'active') {
+            game = new Chess(data.fen);
+            renderBoard();
+            updateMoveList();
+            
+            const myColor = data.white === currentUser.uid ? 'w' : 'b';
+            isMyTurn = (game.turn() === myColor);
+            updateTimersUI();
+            
+            const opUid = myColor === 'w' ? data.black : data.white;
+            if (document.getElementById('opName').textContent === 'Esperando...') {
+               get(ref(db, `users/${opUid}`)).then(opSnap => {
+                 const opData = opSnap.val();
+                 if (opData) {
+                   document.getElementById('opAvatar').innerHTML = `<img src="${opData.photo}" alt="">`;
+                   document.getElementById('opName').textContent = opData.name;
+                   document.getElementById('opElo').textContent = `ELO: ${opData.elo}`;
+                 }
+               });
+            }
+          } else if (data.status === 'finished') {
+            handleGameOver();
           }
-        } else if (data.status === 'finished') {
-          handleGameOver();
-        }
-      });
+        });
 
-      onValue(ref(db, `games/${gameId}/chat`), (snap) => {
-        const msgs = snap.val() || {};
-        const chatEl = document.getElementById('chatMessages');
-        if (chatEl) {
-          chatEl.innerHTML = '';
-          Object.values(msgs).forEach(msg => {
-            const div = document.createElement('div');
-            div.className = `chat-msg ${msg.sender === currentUser.uid ? 'me' : 'them'}`;
-            div.textContent = msg.text;
-            chatEl.appendChild(div);
-          });
-          chatEl.scrollTop = chatEl.scrollHeight;
-        }
-      });
+        onValue(ref(db, `games/${gameId}/chat`), (snap) => {
+          const msgs = snap.val() || {};
+          const chatEl = document.getElementById('chatMessages');
+          if (chatEl) {
+            chatEl.innerHTML = '';
+            Object.values(msgs).forEach(msg => {
+              const div = document.createElement('div');
+              div.className = `chat-msg ${msg.sender === currentUser.uid ? 'me' : 'them'}`;
+              div.textContent = msg.text;
+              chatEl.appendChild(div);
+            });
+            chatEl.scrollTop = chatEl.scrollHeight;
+          }
+        });
+      } catch (err) {
+        showToast('Error al crear partida: ' + err.message, true);
+      }
     }
 
     function syncGameStateToFirebase() {
@@ -973,9 +1016,13 @@
       if (!input) return;
       const text = input.value.trim();
       if (!text || !currentGameId || !currentUser) return;
-      const msgRef = push(ref(db, `games/${currentGameId}/chat`));
-      await set(msgRef, { sender: currentUser.uid, text: text });
-      input.value = '';
+      try {
+        const msgRef = push(ref(db, `games/${currentGameId}/chat`));
+        await set(msgRef, { sender: currentUser.uid, text: text });
+        input.value = '';
+      } catch (err) {
+        showToast('Error al enviar mensaje', true);
+      }
     }
 
     function updateTimersUI() {
@@ -1007,44 +1054,53 @@
         document.getElementById('gameOverModal')?.classList.add('open');
         
       } else if (gameMode === 'online' && currentGameId) {
-        const gameSnap = await get(ref(db, `games/${currentGameId}`));
-        const gameData = gameSnap.val();
-        if (!gameData) return;
-        const myColor = gameData.white === currentUser.uid ? 'w' : 'b';
-        
-        if (game.in_checkmate()) result = (game.turn() === myColor) ? 'loss' : 'win';
-        else result = 'draw';
-        
-        await updateElo(result, gameData.white === currentUser.uid ? gameData.black : gameData.white);
-        
-        const titleEl = document.getElementById('gameOverTitle');
-        const descEl = document.getElementById('gameOverDesc');
-        if (titleEl) titleEl.textContent = result === 'win' ? '¡Victoria!' : result === 'loss' ? 'Derrota' : 'Empate';
-        if (descEl) descEl.textContent = result === 'win' ? 'Has ganado puntos ELO.' : result === 'loss' ? 'Has perdido puntos ELO.' : 'Tablas.';
-        document.getElementById('gameOverModal')?.classList.add('open');
-        
-        update(ref(db, `games/${currentGameId}`), { status: 'finished' });
+        try {
+          const gameSnap = await get(ref(db, `games/${currentGameId}`));
+          const gameData = gameSnap.val();
+          if (!gameData) return;
+          const myColor = gameData.white === currentUser.uid ? 'w' : 'b';
+          
+          if (game.in_checkmate()) result = (game.turn() === myColor) ? 'loss' : 'win';
+          else result = 'draw';
+          
+          await updateElo(result, gameData.white === currentUser.uid ? gameData.black : gameData.white);
+          
+          const titleEl = document.getElementById('gameOverTitle');
+          const descEl = document.getElementById('gameOverDesc');
+          if (titleEl) titleEl.textContent = result === 'win' ? '¡Victoria!' : result === 'loss' ? 'Derrota' : 'Empate';
+          if (descEl) descEl.textContent = result === 'win' ? 'Has ganado puntos ELO.' : result === 'loss' ? 'Has perdido puntos ELO.' : 'Tablas.';
+          document.getElementById('gameOverModal')?.classList.add('open');
+          
+          update(ref(db, `games/${currentGameId}`), { status: 'finished' });
+        } catch (err) {
+          showToast('Error al finalizar partida', true);
+        }
       }
       document.getElementById('board')?.classList.remove('interactive');
     }
 
     async function updateElo(result, opUid) {
-      const mySnap = await get(ref(db, `users/${currentUser.uid}`));
-      const opSnap = await get(ref(db, `users/${opUid}`));
-      const myData = mySnap.val();
-      const opData = opSnap.val();
-      
-      const expected = 1 / (1 + Math.pow(10, (opData.elo - myData.elo) / 400));
-      const actual = result === 'win' ? 1 : result === 'loss' ? 0 : 0.5;
-      const newElo = Math.round(myData.elo + 32 * (actual - expected));
-      
-      await update(ref(db, `users/${currentUser.uid}`), {
-        elo: newElo,
-        wins: result === 'win' ? (myData.wins || 0) + 1 : myData.wins,
-        losses: result === 'loss' ? (myData.losses || 0) + 1 : myData.losses,
-        draws: result === 'draw' ? (myData.draws || 0) + 1 : myData.draws
-      });
-      updateProfileUI();
+      try {
+        const mySnap = await get(ref(db, `users/${currentUser.uid}`));
+        const opSnap = await get(ref(db, `users/${opUid}`));
+        const myData = mySnap.val();
+        const opData = opSnap.val();
+        if (!myData || !opData) return;
+        
+        const expected = 1 / (1 + Math.pow(10, (opData.elo - myData.elo) / 400));
+        const actual = result === 'win' ? 1 : result === 'loss' ? 0 : 0.5;
+        const newElo = Math.round(myData.elo + 32 * (actual - expected));
+        
+        await update(ref(db, `users/${currentUser.uid}`), {
+          elo: newElo,
+          wins: result === 'win' ? (myData.wins || 0) + 1 : myData.wins,
+          losses: result === 'loss' ? (myData.losses || 0) + 1 : myData.losses,
+          draws: result === 'draw' ? (myData.draws || 0) + 1 : myData.draws
+        });
+        updateProfileUI();
+      } catch (err) {
+        console.error("Error actualizando ELO:", err);
+      }
     }
 
     document.getElementById('resignBtn')?.addEventListener('click', () => {
@@ -1070,63 +1126,66 @@
         for (const [key, notif] of Object.entries(notifs)) {
           if (notif.type === 'challenge') {
             if (confirm(`${notif.fromName} te ha retado a una partida. ¿Aceptar?`)) {
-              await remove(ref(db, `notifications/${currentUser.uid}/${key}`));
-              currentGameId = notif.gameId;
-              gameMode = 'online';
-              game = new Chess();
-              
-              const gameSnap = await get(ref(db, `games/${currentGameId}`));
-              const gameData = gameSnap.val();
-              if (!gameData) continue;
-              const myColor = gameData.white === currentUser.uid ? 'w' : 'b';
-              boardFlipped = myColor === 'b';
-              
-              switchView('game');
-              document.getElementById('board')?.classList.add('interactive');
-              document.getElementById('chatPanel').style.display = 'flex';
-              
-              const opUid = myColor === 'w' ? gameData.black : gameData.white;
-              const opSnap = await get(ref(db, `users/${opUid}`));
-              const opData = opSnap.val();
-              
-              document.getElementById('opAvatar').innerHTML = `<img src="${opData.photo}" alt="">`;
-              document.getElementById('opName').textContent = opData.name;
-              document.getElementById('opElo').textContent = `ELO: ${opData.elo}`;
-              document.getElementById('myAvatar').innerHTML = `<img src="${currentUser.photoURL}" alt="">`;
-              document.getElementById('myName').textContent = currentUser.displayName.split(' ')[0];
-              get(ref(db, 'users/' + currentUser.uid)).then(s => {
-                document.getElementById('myElo').textContent = `ELO: ${s.val().elo}`;
-              });
+              try {
+                await remove(ref(db, `notifications/${currentUser.uid}/${key}`));
+                currentGameId = notif.gameId;
+                gameMode = 'online';
+                game = new Chess();
+                
+                const gameSnap = await get(ref(db, `games/${currentGameId}`));
+                const gameData = gameSnap.val();
+                if (!gameData) continue;
+                const myColor = gameData.white === currentUser.uid ? 'w' : 'b';
+                boardFlipped = myColor === 'b';
+                
+                switchView('game');
+                document.getElementById('board')?.classList.add('interactive');
+                document.getElementById('chatPanel').style.display = 'flex';
+                
+                const opUid = myColor === 'w' ? gameData.black : gameData.white;
+                const opSnap = await get(ref(db, `users/${opUid}`));
+                const opData = opSnap.val();
+                
+                document.getElementById('opAvatar').innerHTML = `<img src="${opData.photo}" alt="">`;
+                document.getElementById('opName').textContent = opData.name;
+                document.getElementById('opElo').textContent = `ELO: ${opData.elo}`;
+                document.getElementById('myAvatar').innerHTML = `<img src="${currentUser.photoURL}" alt="">`;
+                document.getElementById('myName').textContent = currentUser.displayName.split(' ')[0];
+                get(ref(db, 'users/' + currentUser.uid)).then(s => {
+                  if (s.exists()) document.getElementById('myElo').textContent = `ELO: ${s.val().elo}`;
+                });
 
-              onValue(ref(db, `games/${currentGameId}`), (gSnap) => {
-                const data = gSnap.val();
-                if (!data) return;
-                if (data.status === 'active') {
-                  game = new Chess(data.fen);
-                  renderBoard();
-                  updateMoveList();
-                  isMyTurn = (game.turn() === myColor);
-                  updateTimersUI();
-                } else if (data.status === 'finished') {
-                  handleGameOver();
-                }
-              });
+                onValue(ref(db, `games/${currentGameId}`), (gSnap) => {
+                  const data = gSnap.val();
+                  if (!data) return;
+                  if (data.status === 'active') {
+                    game = new Chess(data.fen);
+                    renderBoard();
+                    updateMoveList();
+                    isMyTurn = (game.turn() === myColor);
+                    updateTimersUI();
+                  } else if (data.status === 'finished') {
+                    handleGameOver();
+                  }
+                });
 
-              onValue(ref(db, `games/${currentGameId}/chat`), (cSnap) => {
-                const msgs = cSnap.val() || {};
-                const chatEl = document.getElementById('chatMessages');
-                if (chatEl) {
-                  chatEl.innerHTML = '';
-                  Object.values(msgs).forEach(msg => {
-                    const div = document.createElement('div');
-                    div.className = `chat-msg ${msg.sender === currentUser.uid ? 'me' : 'them'}`;
-                    div.textContent = msg.text;
-                    chatEl.appendChild(div);
-                  });
-                  chatEl.scrollTop = chatEl.scrollHeight;
-                }
-              });
-
+                onValue(ref(db, `games/${currentGameId}/chat`), (cSnap) => {
+                  const msgs = cSnap.val() || {};
+                  const chatEl = document.getElementById('chatMessages');
+                  if (chatEl) {
+                    chatEl.innerHTML = '';
+                    Object.values(msgs).forEach(msg => {
+                      const div = document.createElement('div');
+                      div.className = `chat-msg ${msg.sender === currentUser.uid ? 'me' : 'them'}`;
+                      div.textContent = msg.text;
+                      chatEl.appendChild(div);
+                    });
+                    chatEl.scrollTop = chatEl.scrollHeight;
+                  }
+                });
+              } catch (err) {
+                showToast('Error al aceptar reto', true);
+              }
             } else {
               await remove(ref(db, `notifications/${currentUser.uid}/${key}`));
               await remove(ref(db, `games/${notif.gameId}`));
