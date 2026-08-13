@@ -10,14 +10,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
   <style>
     :root {
-      --bg: #161512; /* Lichess dark bg */
+      --bg: #161512; 
       --surface: #262421;
       --surface-2: #2e2c28;
       --surface-3: #3d3a35;
       --fg: #ffffff;
       --fg-dim: #b8b6b2;
       --muted: #7a7770;
-      --accent: #629924; /* Board green accent */
+      --accent: #629924; 
       --accent-hover: #75b22e;
       --accent-2: #d4af37;
       --danger: #e74c3c;
@@ -32,7 +32,6 @@
     ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
     ::selection { background: var(--accent); color: var(--fg); }
 
-    /* LAYOUT LICHESS STYLE */
     .app-container { display: flex; width: 100%; height: 100vh; }
     
     /* LEFT SIDEBAR */
@@ -44,13 +43,19 @@
     .nav-item:hover { background: var(--surface-2); color: var(--fg); }
     .nav-item.active { background: var(--surface-2); color: var(--accent); }
     .nav-item i { width: 20px; text-align: center; font-size: 1.1rem; }
-    .left-footer { margin-top: auto; padding: 20px 24px; font-size: 0.8rem; color: var(--muted); }
 
-    /* MAIN AREA (Board + Right Panel) */
+    .auth-area { margin-top: auto; padding: 20px 12px; border-top: 1px solid var(--border); }
+    #loginBtn { width: 100%; background: var(--fg); color: var(--bg); border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; margin: 0 12px; }
+    #userProfileBtn { width: calc(100% - 24px); display: flex; align-items: center; gap: 12px; background: var(--surface-2); padding: 8px; border-radius: 8px; border: none; cursor: pointer; color: var(--fg); margin: 0 12px; }
+    #userProfileBtn img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; }
+    #userProfileBtn .u-info { text-align: left; flex: 1; }
+    #userProfileBtn .u-name { font-size: 0.85rem; font-weight: 600; }
+    #userProfileBtn .u-elo { font-size: 0.75rem; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+    /* MAIN AREA */
     .main-area { flex: 1; display: flex; overflow: hidden; }
     .board-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: relative; }
     
-    /* BOARD & PLAYERS */
     .board-wrapper { width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 12px; }
     .player-info { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 10px 16px; border-radius: 8px; border: 1px solid var(--border); }
     .p-info-left { display: flex; align-items: center; gap: 12px; }
@@ -69,7 +74,6 @@
     .white-piece { color: #fff; text-shadow: 0 0 3px #000, 0 1px 2px rgba(0,0,0,0.5); }
     .black-piece { color: #000; text-shadow: 0 1px 2px rgba(255,255,255,0.2); }
     
-    /* Board Interactivity States */
     #board.interactive .square { cursor: pointer; }
     #board.interactive .square.selected::after { content: ''; position: absolute; inset: 0; background: rgba(98, 153, 36, 0.5); }
     #board.interactive .square.legal-move::before { content: ''; width: 30%; height: 30%; background: rgba(0,0,0,0.2); border-radius: 50%; position: absolute; }
@@ -80,28 +84,22 @@
     .right-panel { width: 360px; background: var(--surface); border-left: 1px solid var(--border); padding: 24px; overflow-y: auto; flex-shrink: 0; }
     .panel-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; color: var(--fg); }
     
-    /* Home Menu Cards */
     .menu-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 16px; }
     .menu-card:hover { background: var(--surface-3); border-color: var(--accent); transform: translateY(-2px); }
-    .menu-card.disabled { opacity: 0.5; pointer-events: none; }
     .mc-icon { width: 48px; height: 48px; border-radius: 8px; background: rgba(98, 153, 36, 0.2); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
     .mc-text h3 { font-size: 1.05rem; margin-bottom: 4px; }
     .mc-text p { font-size: 0.85rem; color: var(--fg-dim); }
 
     .profile-card { background: var(--surface-2); border-radius: 12px; padding: 20px; margin-top: 24px; text-align: center; }
-    .pc-avatar { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 12px; border: 3px solid var(--accent); overflow: hidden; }
+    .pc-avatar { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 12px; border: 3px solid var(--accent); overflow: hidden; display: flex; align-items: center; justify-content: center; }
     .pc-avatar img { width: 100%; height: 100%; object-fit: cover; }
     .pc-name { font-size: 1.2rem; font-weight: 700; }
     .pc-stats { display: flex; justify-content: center; gap: 20px; margin-top: 12px; }
     .pc-stat span { display: block; font-size: 0.8rem; color: var(--muted); }
     .pc-stat strong { font-size: 1.1rem; color: var(--accent); }
 
-    /* Game View Right Panel */
-    .game-panel { display: none; }
-    .game-panel.active { display: block; }
-    .home-panel.active { display: block; }
-    .social-panel.active { display: block; }
-    .home-panel, .social-panel { display: none; }
+    .view-panel { display: none; }
+    .view-panel.active { display: block; }
 
     .moves-box { background: var(--surface-2); border-radius: 8px; height: 200px; overflow-y: auto; margin-bottom: 20px; font-family: 'JetBrains Mono', monospace; }
     .move-row { display: grid; grid-template-columns: 40px 1fr 1fr; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
@@ -119,7 +117,6 @@
     .chat-input:focus { border-color: var(--accent); }
     .chat-send { background: var(--accent); border: none; color: var(--bg); border-radius: 6px; padding: 0 16px; cursor: pointer; font-weight: 700; }
 
-    /* Social Panel */
     .search-box { position: relative; margin-bottom: 20px; }
     .search-box input { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px 12px 42px; color: var(--fg); outline: none; font-family: inherit; }
     .search-box input:focus { border-color: var(--accent); }
@@ -133,16 +130,6 @@
     .btn-danger { background: var(--danger); color: var(--fg); }
     .btn-ghost { background: transparent; color: var(--fg-dim); border: 1px solid var(--border); }
 
-    /* AUTH AREA */
-    .auth-area { padding: 20px; border-top: 1px solid var(--border); margin-top: auto; }
-    #loginBtn { width: 100%; background: var(--fg); color: var(--bg); border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
-    #userProfileBtn { width: 100%; display: flex; align-items: center; gap: 12px; background: var(--surface-2); padding: 8px; border-radius: 8px; border: none; cursor: pointer; color: var(--fg); }
-    #userProfileBtn img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; }
-    #userProfileBtn .u-info { text-align: left; flex: 1; }
-    #userProfileBtn .u-name { font-size: 0.85rem; font-weight: 600; }
-    #userProfileBtn .u-elo { font-size: 0.75rem; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
-
-    /* MODALS */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
     .modal-overlay.open { display: flex; }
     .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; max-width: 400px; width: 100%; }
@@ -152,7 +139,6 @@
     .difficulty-btn strong { display: block; font-size: 1rem; margin-bottom: 4px; }
     .difficulty-btn span { font-size: 0.8rem; color: var(--fg-dim); }
 
-    /* TOAST */
     #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--surface-3); border: 1px solid var(--accent); color: var(--fg); padding: 12px 24px; border-radius: 8px; z-index: 200; opacity: 0; transition: all 0.3s; font-size: 0.9rem; }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -162,7 +148,7 @@
       .left-sidebar { width: 100%; height: 60px; flex-direction: row; align-items: center; padding: 0 20px; }
       .logo { padding: 0; margin-right: auto; font-size: 1.2rem; }
       .nav-menu { flex-direction: row; width: auto; }
-      .left-footer, .auth-area { display: none; }
+      .auth-area { margin-top: 0; padding: 0; border: none; }
       .main-area { flex-direction: column; height: calc(100vh - 60px); }
       .right-panel { width: 100%; max-height: 40vh; border-left: none; border-top: 1px solid var(--border); }
     }
@@ -171,13 +157,12 @@
 <body>
 
   <div class="app-container">
-    <!-- LEFT SIDEBAR -->
     <aside class="left-sidebar">
       <div class="logo"><i class="fas fa-chess-knight"></i> ChessArena</div>
       <nav class="nav-menu">
-        <button class="nav-item active" data-view="home"><i class="fas fa-home"></i> Inicio</button>
+        <button class="nav-item active" data-view="play"><i class="fas fa-play"></i> Jugar</button>
         <button class="nav-item" data-view="social"><i class="fas fa-users"></i> Amigos</button>
-        <button class="nav-item" id="profileNavBtn"><i class="fas fa-user"></i> Perfil</button>
+        <button class="nav-item" data-view="profile"><i class="fas fa-user"></i> Perfil</button>
       </nav>
       
       <div class="auth-area">
@@ -193,9 +178,7 @@
       </div>
     </aside>
 
-    <!-- MAIN AREA -->
     <div class="main-area">
-      <!-- BOARD SECTION -->
       <div class="board-area">
         <div class="board-wrapper">
           <div class="player-info">
@@ -224,61 +207,63 @@
         </div>
       </div>
 
-      <!-- RIGHT PANEL -->
       <aside class="right-panel">
-        <!-- HOME PANEL -->
-        <div class="home-panel active" id="homePanel">
+        <!-- PLAY VIEW -->
+        <div class="view-panel active" id="playPanel">
           <div class="panel-title">Jugar Ajedrez</div>
-          
+          <div class="menu-card" id="playFriendCard">
+            <div class="mc-icon"><i class="fas fa-globe"></i></div>
+            <div class="mc-text">
+              <h3>Online</h3>
+              <p>Retar a un amigo online.</p>
+            </div>
+          </div>
           <div class="menu-card" id="playAiCard">
             <div class="mc-icon"><i class="fas fa-robot"></i></div>
             <div class="mc-text">
-              <h3>Contra la IA</h3>
-              <p>Practica contra el motor.</p>
+              <h3>Bots</h3>
+              <p>Jugar contra la máquina.</p>
             </div>
           </div>
-
-          <div class="menu-card" id="playFriendCard">
-            <div class="mc-icon"><i class="fas fa-user-plus"></i></div>
-            <div class="mc-text">
-              <h3>Jugar con Amigo</h3>
-              <p>Retar a un jugador online.</p>
-            </div>
-          </div>
-
-          <div class="profile-card" id="profileSummary">
+          
+          <div class="profile-card">
             <div class="pc-avatar"><i class="fas fa-user" style="font-size:2rem; color:var(--muted)"></i></div>
             <div class="pc-name">Invitado</div>
-            <div style="font-size:0.85rem; color:var(--muted); margin-top:4px;">Inicia sesión para guardar tu progreso</div>
+            <div style="font-size:0.85rem; color:var(--muted); margin-top:4px;">Inicia sesión para ver tu perfil</div>
           </div>
         </div>
 
-        <!-- SOCIAL PANEL -->
-        <div class="social-panel" id="socialPanel">
+        <!-- SOCIAL VIEW -->
+        <div class="view-panel" id="socialPanel">
           <div class="panel-title">Buscar Jugadores</div>
           <div class="search-box">
             <i class="fas fa-search"></i>
-            <input type="text" id="searchInput" placeholder="Nombre de jugador...">
+            <input type="text" id="searchInput" placeholder="Por nombre o correo...">
           </div>
           <div id="searchResults" style="margin-bottom: 30px;"></div>
-          
           <div class="panel-title">Mis Amigos</div>
           <div id="friendsList"></div>
         </div>
 
-        <!-- GAME PANEL -->
-        <div class="game-panel" id="gamePanel">
+        <!-- PROFILE VIEW -->
+        <div class="view-panel" id="profilePanel">
+          <div class="panel-title">Mi Perfil</div>
+          <div id="profileContent">
+            <div style="color: var(--muted); text-align: center; padding: 40px 0;">Inicia sesión para ver tus estadísticas.</div>
+          </div>
+        </div>
+
+        <!-- GAME VIEW -->
+        <div class="view-panel" id="gamePanel">
           <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
-            Partida en Curso
+            Partida
             <button class="btn btn-danger" id="resignBtn">Rendirse</button>
           </div>
-          
           <div class="moves-box" id="moveList">
             <div style="color: var(--muted); text-align: center; padding: 20px; font-family: 'Inter'; font-size: 0.9rem;">Sin movimientos aún.</div>
           </div>
-          
           <div class="chat-box" id="chatPanel" style="display:none;">
-            <div class="chat-header">Chat de Partida</div>
+            <div class="chat-header">Chat</div>
             <div class="chat-messages" id="chatMessages"></div>
             <div class="chat-input-area">
               <input type="text" id="chatInput" class="chat-input" placeholder="Mensaje...">
@@ -290,7 +275,6 @@
     </div>
   </div>
 
-  <!-- MODALS -->
   <div class="modal-overlay" id="aiModal">
     <div class="modal">
       <h2>Elige Dificultad</h2>
@@ -315,7 +299,7 @@
       <i class="fas fa-trophy" style="font-size: 3rem; color: var(--accent-2); margin-bottom: 16px;"></i>
       <h2 id="gameOverTitle">¡Jaque Mate!</h2>
       <p id="gameOverDesc" style="color: var(--fg-dim); margin: 12px 0 24px;"></p>
-      <button class="btn btn-primary" style="width: 100%;" onclick="document.getElementById('gameOverModal').classList.remove('open'); switchView('home');">Volver al Inicio</button>
+      <button class="btn btn-primary" style="width: 100%;" id="goHomeBtn">Volver al Inicio</button>
     </div>
   </div>
 
@@ -350,6 +334,7 @@
     let myTime = 600, opTime = 600;
     let isMyTurn = false;
     let currentDifficulty = 1;
+    let boardFlipped = false;
 
     const piecesUnicode = {
       'w': { 'p': '♟', 'n': '♞', 'b': '♝', 'r': '♜', 'q': '♛', 'k': '♚' },
@@ -366,15 +351,13 @@
     window.showToast = showToast;
 
     function switchView(viewId) {
-      document.querySelectorAll('.home-panel, .social-panel, .game-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(t => t.classList.toggle('active', t.dataset.view === viewId));
+      document.getElementById(`${viewId}Panel`).classList.add('active');
       
-      document.getElementById('board').classList.remove('interactive');
-      
-      if (viewId === 'home') document.getElementById('homePanel').classList.add('active');
-      else if (viewId === 'social') {
-        document.getElementById('socialPanel').classList.add('active');
-        renderFriends();
+      // Si no estamos en partida, el tablero no es interactivo
+      if (viewId !== 'game') {
+        document.getElementById('board').classList.remove('interactive');
       }
     }
     window.switchView = switchView;
@@ -385,11 +368,8 @@
 
     // AUTH
     document.getElementById('loginBtn').addEventListener('click', async () => {
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (err) {
-        showToast('Error al iniciar sesión: ' + err.message, true);
-      }
+      try { await signInWithPopup(auth, provider); } 
+      catch (err) { showToast('Error: ' + err.message, true); }
     });
 
     document.getElementById('logoutIcon').addEventListener('click', async (e) => {
@@ -398,11 +378,9 @@
       showToast('Sesión cerrada');
     });
 
-    document.getElementById('profileNavBtn').addEventListener('click', async () => {
-      if (!currentUser) return showToast('Inicia sesión primero', true);
-      const snap = await get(ref(db, 'users/' + currentUser.uid));
-      const data = snap.val();
-      showToast(`ELO: ${data.elo} | V: ${data.wins||0} | D: ${data.losses||0} | T: ${data.draws||0}`);
+    document.getElementById('goHomeBtn').addEventListener('click', () => {
+      document.getElementById('gameOverModal').classList.remove('open');
+      switchView('play');
     });
 
     onAuthStateChanged(auth, async (user) => {
@@ -413,46 +391,32 @@
         document.getElementById('userAvatar').src = user.photoURL;
         document.getElementById('userName').textContent = user.displayName.split(' ')[0];
         
-        // Sync to DB
+        // FIX ELO UNDEFINED: Comprobar y reparar la base de datos si faltan campos
         const userRef = ref(db, 'users/' + user.uid);
         const snap = await get(userRef);
         if (!snap.exists()) {
-          await set(userRef, { name: user.displayName, photo: user.photoURL, elo: 1200, wins: 0, losses: 0, draws: 0 });
+          await set(userRef, { name: user.displayName, email: user.email, photo: user.photoURL, elo: 1200, wins: 0, losses: 0, draws: 0 });
         } else {
-          await update(userRef, { name: user.displayName, photo: user.photoURL });
+          const data = snap.val();
+          const updates = { name: user.displayName, email: user.email, photo: user.photoURL };
+          if (data.elo === undefined) updates.elo = 1200;
+          if (data.wins === undefined) updates.wins = 0;
+          if (data.losses === undefined) updates.losses = 0;
+          if (data.draws === undefined) updates.draws = 0;
+          await update(userRef, updates);
         }
         
         updateProfileUI();
         renderFriends();
-        
-        // Listen for challenges
-        onValue(ref(db, `notifications/${user.uid}`), (snap) => {
-          const notifs = snap.val() || {};
-          Object.entries(notifs).forEach(async ([key, notif]) => {
-            if (notif.type === 'challenge') {
-              if (confirm(`${notif.fromName} te ha retado a una partida. ¿Aceptar?`)) {
-                await remove(ref(db, `notifications/${user.uid}/${key}`));
-                currentGameId = notif.gameId;
-                gameMode = 'online';
-                game = new Chess();
-                const gameData = (await get(ref(db, `games/${currentGameId}`))).val();
-                setupOnlineGameUI(gameData);
-              } else {
-                await remove(ref(db, `notifications/${user.uid}/${key}`));
-                await remove(ref(db, `games/${notif.gameId}`));
-              }
-            }
-          });
-        });
-
+        listenForChallenges();
       } else {
         currentUser = null;
         document.getElementById('loginBtn').style.display = 'block';
         document.getElementById('userProfileBtn').style.display = 'none';
-        document.getElementById('profileSummary').innerHTML = `
+        document.getElementById('playPanel').querySelector('.profile-card').innerHTML = `
           <div class="pc-avatar"><i class="fas fa-user" style="font-size:2rem; color:var(--muted)"></i></div>
           <div class="pc-name">Invitado</div>
-          <div style="font-size:0.85rem; color:var(--muted); margin-top:4px;">Inicia sesión para guardar tu progreso</div>
+          <div style="font-size:0.85rem; color:var(--muted); margin-top:4px;">Inicia sesión para ver tu perfil</div>
         `;
       }
     });
@@ -461,16 +425,22 @@
       if (!currentUser) return;
       const snap = await get(ref(db, 'users/' + currentUser.uid));
       const data = snap.val();
+      
       document.getElementById('userElo').textContent = `ELO: ${data.elo}`;
       
-      document.getElementById('profileSummary').innerHTML = `
-        <div class="pc-avatar"><img src="${currentUser.photoURL}" alt=""></div>
-        <div class="pc-name">${currentUser.displayName.split(' ')[0]}</div>
-        <div class="pc-stats">
-          <div class="pc-stat"><span>ELO</span><strong>${data.elo}</strong></div>
-          <div class="pc-stat"><span>V/D/T</span><strong>${data.wins||0}/${data.losses||0}/${data.draws||0}</strong></div>
+      const profileHtml = `
+        <div class="profile-card">
+          <div class="pc-avatar"><img src="${currentUser.photoURL}" alt=""></div>
+          <div class="pc-name">${currentUser.displayName.split(' ')[0]}</div>
+          <div style="font-size:0.85rem; color:var(--muted); margin-top:4px;">${data.email}</div>
+          <div class="pc-stats">
+            <div class="pc-stat"><span>ELO</span><strong>${data.elo}</strong></div>
+            <div class="pc-stat"><span>V/D/T</span><strong>${data.wins||0}/${data.losses||0}/${data.draws||0}</strong></div>
+          </div>
         </div>
       `;
+      document.getElementById('playPanel').querySelector('.profile-card').innerHTML = profileHtml;
+      document.getElementById('profileContent').innerHTML = profileHtml;
     }
 
     // BOARD RENDER
@@ -479,8 +449,11 @@
       boardEl.innerHTML = '';
       const board = game.board();
       
-      for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
+      const ranks = boardFlipped ? [0, 1, 2, 3, 4, 5, 6, 7] : [7, 6, 5, 4, 3, 2, 1, 0];
+      const files = boardFlipped ? [7, 6, 5, 4, 3, 2, 1, 0] : [0, 1, 2, 3, 4, 5, 6, 7];
+      
+      for (let r of ranks) {
+        for (let c of files) {
           const square = document.createElement('div');
           const isLight = (r + c) % 2 === 0;
           square.className = `square ${isLight ? 'light' : 'dark'}`;
@@ -534,7 +507,6 @@
       if (gameMode === 'online' && !isMyTurn) return;
 
       const piece = game.get(square);
-
       if (selectedSquare) {
         const move = game.move({ from: selectedSquare, to: square, promotion: 'q' });
         if (move) {
@@ -548,7 +520,6 @@
           return;
         }
       }
-
       if (piece && piece.color === game.turn()) {
         selectedSquare = square;
         renderBoard();
@@ -583,12 +554,10 @@
       list.scrollTop = list.scrollHeight;
     }
 
-    // AI LOGIC
     function makeAIMove() {
       if (game.game_over()) return;
       const moves = game.moves();
       if (moves.length === 0) return;
-
       let bestMove = null;
       if (currentDifficulty === 1) {
         bestMove = moves[Math.floor(Math.random() * moves.length)];
@@ -652,8 +621,7 @@
 
     document.querySelectorAll('.difficulty-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const diff = parseInt(btn.dataset.diff);
-        startAIGame(diff);
+        startAIGame(parseInt(btn.dataset.diff));
         document.getElementById('aiModal').classList.remove('open');
       });
     });
@@ -663,25 +631,25 @@
       gameMode = 'ai';
       game = new Chess();
       selectedSquare = null;
+      boardFlipped = false; // Blancas abajo por defecto
       
-      switchRightPanel('game');
+      switchView('game');
       document.getElementById('board').classList.add('interactive');
       document.getElementById('chatPanel').style.display = 'none';
       
       document.getElementById('opAvatar').innerHTML = '<i class="fas fa-robot"></i>';
-      document.getElementById('opName').textContent = `Computadora (Nivel ${diff})`;
+      document.getElementById('opName').textContent = `CPU (Nivel ${diff})`;
       document.getElementById('opElo').textContent = `ELO: ${diff === 1 ? '800' : diff === 2 ? '1200' : '1600'}`;
       document.getElementById('myAvatar').innerHTML = `<img src="${currentUser.photoURL}" alt="">`;
       document.getElementById('myName').textContent = currentUser.displayName.split(' ')[0];
       
-      get(ref(db, 'users/' + currentUser.uid + '/elo')).then(s => {
-        document.getElementById('myElo').textContent = `ELO: ${s.val()}`;
+      get(ref(db, 'users/' + currentUser.uid)).then(s => {
+        document.getElementById('myElo').textContent = `ELO: ${s.val().elo}`;
       });
 
       clearInterval(timerInterval);
       myTime = 600; opTime = 600;
       updateTimersUI();
-      
       renderBoard();
       updateMoveList();
     }
@@ -695,6 +663,8 @@
       game = new Chess();
       
       const iAmWhite = Math.random() < 0.5;
+      boardFlipped = !iAmWhite; // Girar tablero si soy negras
+      
       await set(ref(db, `games/${gameId}`), {
         white: iAmWhite ? currentUser.uid : friendUid,
         black: iAmWhite ? friendUid : currentUser.uid,
@@ -714,9 +684,7 @@
       });
 
       showToast('Reto enviado. Esperando respuesta...');
-      
-      // Setup UI immediately for sender, but wait for opponent move
-      switchRightPanel('game');
+      switchView('game');
       document.getElementById('board').classList.add('interactive');
       document.getElementById('chatPanel').style.display = 'flex';
       
@@ -725,7 +693,7 @@
       document.getElementById('opElo').textContent = 'Pendiente';
       document.getElementById('myAvatar').innerHTML = `<img src="${currentUser.photoURL}" alt="">`;
       document.getElementById('myName').textContent = currentUser.displayName.split(' ')[0];
-      get(ref(db, 'users/' + currentUser.uid + '/elo')).then(s => document.getElementById('myElo').textContent = `ELO: ${s.val()}`);
+      get(ref(db, 'users/' + currentUser.uid)).then(s => document.getElementById('myElo').textContent = `ELO: ${s.val().elo}`));
       
       renderBoard();
 
@@ -733,7 +701,6 @@
         const data = snap.val();
         if (!data) return;
         if (data.status === 'active') {
-          // Update game state
           game = new Chess(data.fen);
           renderBoard();
           updateMoveList();
@@ -742,7 +709,6 @@
           isMyTurn = (game.turn() === myColor);
           updateTimersUI();
           
-          // Update opp info if not done
           const opUid = myColor === 'w' ? data.black : data.white;
           if (document.getElementById('opName').textContent === 'Esperando...') {
              get(ref(db, `users/${opUid}`)).then(opSnap => {
@@ -752,14 +718,24 @@
                document.getElementById('opElo').textContent = `ELO: ${opData.elo}`;
              });
           }
+        } else if (data.status === 'finished') {
+          handleGameOver();
         }
       });
-    }
 
-    function switchRightPanel(view) {
-      document.querySelectorAll('.home-panel, .social-panel, .game-panel').forEach(p => p.classList.remove('active'));
-      document.getElementById(`${view}Panel`).classList.add('active');
-      document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+      // CHAT LISTENER
+      onValue(ref(db, `games/${gameId}/chat`), (snap) => {
+        const msgs = snap.val() || {};
+        const chatEl = document.getElementById('chatMessages');
+        chatEl.innerHTML = '';
+        Object.values(msgs).forEach(msg => {
+          const div = document.createElement('div');
+          div.className = `chat-msg ${msg.sender === currentUser.uid ? 'me' : 'them'}`;
+          div.textContent = msg.text;
+          chatEl.appendChild(div);
+        });
+        chatEl.scrollTop = chatEl.scrollHeight;
+      });
     }
 
     function syncGameStateToFirebase() {
@@ -770,7 +746,6 @@
       });
     }
 
-    // CHAT
     document.getElementById('chatSendBtn').addEventListener('click', sendChat);
     document.getElementById('chatInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendChat(); });
     
@@ -809,6 +784,7 @@
         
       } else if (gameMode === 'online') {
         const gameData = (await get(ref(db, `games/${currentGameId}`))).val();
+        if (!gameData) return; // Prevenir errores si se borra
         const myColor = gameData.white === currentUser.uid ? 'w' : 'b';
         
         if (game.in_checkmate()) result = (game.turn() === myColor) ? 'loss' : 'win';
@@ -849,7 +825,7 @@
       if (confirm('¿Seguro que quieres rendirte?')) {
         if (gameMode === 'online') {
           update(ref(db, `games/${currentGameId}`), { status: 'finished' });
-          updateElo('loss', game.turn() === 'w' ? 'black' : 'white'); // simplified
+          updateElo('loss', game.turn() === 'w' ? 'black' : 'white');
         }
         handleGameOver();
       }
@@ -865,7 +841,13 @@
       
       const snap = await get(ref(db, 'users'));
       const users = snap.val() || {};
-      const filtered = Object.entries(users).filter(([uid, u]) => u.name && u.name.toLowerCase().includes(term) && uid !== currentUser?.uid);
+      
+      // FIX BÚSQUEDA: Filtrar por nombre O email
+      const filtered = Object.entries(users).filter(([uid, u]) => {
+        const name = (u.name || "").toLowerCase();
+        const email = (u.email || "").toLowerCase();
+        return (name.includes(term) || email.includes(term)) && uid !== currentUser?.uid;
+      });
       
       if (filtered.length === 0) {
         resEl.innerHTML = '<div style="color: var(--muted); text-align:center; padding:10px; font-size:0.9rem;">No se encontraron jugadores.</div>';
@@ -878,7 +860,7 @@
             <img src="${u.photo}" class="user-avatar-sm" alt="">
             <div>
               <div style="font-weight:600; font-size:0.9rem">${u.name}</div>
-              <div style="font-size:0.8rem; color:var(--fg-dim)">ELO: ${u.elo}</div>
+              <div style="font-size:0.8rem; color:var(--fg-dim)">${u.email}</div>
             </div>
           </div>
           <button class="btn btn-primary" onclick="addFriend('${uid}')">Añadir</button>
@@ -929,7 +911,73 @@
 
     window.challengeFriend = (uid) => startOnlineGame(uid);
 
-    // INIT
+    function listenForChallenges() {
+      if (!currentUser) return;
+      onValue(ref(db, `notifications/${currentUser.uid}`), (snap) => {
+        const notifs = snap.val() || {};
+        Object.entries(notifs).forEach(async ([key, notif]) => {
+          if (notif.type === 'challenge') {
+            if (confirm(`${notif.fromName} te ha retado a una partida. ¿Aceptar?`)) {
+              await remove(ref(db, `notifications/${currentUser.uid}/${key}`));
+              currentGameId = notif.gameId;
+              gameMode = 'online';
+              game = new Chess();
+              
+              const gameData = (await get(ref(db, `games/${currentGameId}`))).val();
+              const myColor = gameData.white === currentUser.uid ? 'w' : 'b';
+              boardFlipped = myColor === 'b'; // Girar si soy negras
+              
+              switchView('game');
+              document.getElementById('board').classList.add('interactive');
+              document.getElementById('chatPanel').style.display = 'flex';
+              
+              const opUid = myColor === 'w' ? gameData.black : gameData.white;
+              const opSnap = await get(ref(db, `users/${opUid}`));
+              const opData = opSnap.val();
+              
+              document.getElementById('opAvatar').innerHTML = `<img src="${opData.photo}" alt="">`;
+              document.getElementById('opName').textContent = opData.name;
+              document.getElementById('opElo').textContent = `ELO: ${opData.elo}`;
+              document.getElementById('myAvatar').innerHTML = `<img src="${currentUser.photoURL}" alt="">`;
+              document.getElementById('myName').textContent = currentUser.displayName.split(' ')[0];
+              get(ref(db, 'users/' + currentUser.uid)).then(s => document.getElementById('myElo').textContent = `ELO: ${s.val().elo}`));
+
+              onValue(ref(db, `games/${currentGameId}`), (gSnap) => {
+                const data = gSnap.val();
+                if (!data) return;
+                if (data.status === 'active') {
+                  game = new Chess(data.fen);
+                  renderBoard();
+                  updateMoveList();
+                  isMyTurn = (game.turn() === myColor);
+                  updateTimersUI();
+                } else if (data.status === 'finished') {
+                  handleGameOver();
+                }
+              });
+
+              onValue(ref(db, `games/${currentGameId}/chat`), (cSnap) => {
+                const msgs = cSnap.val() || {};
+                const chatEl = document.getElementById('chatMessages');
+                chatEl.innerHTML = '';
+                Object.values(msgs).forEach(msg => {
+                  const div = document.createElement('div');
+                  div.className = `chat-msg ${msg.sender === currentUser.uid ? 'me' : 'them'}`;
+                  div.textContent = msg.text;
+                  chatEl.appendChild(div);
+                });
+                chatEl.scrollTop = chatEl.scrollHeight;
+              });
+
+            } else {
+              await remove(ref(db, `notifications/${currentUser.uid}/${key}`));
+              await remove(ref(db, `games/${notif.gameId}`));
+            }
+          }
+        });
+      });
+    }
+
     renderBoard();
   </script>
 </body>
