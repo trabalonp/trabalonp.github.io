@@ -12,7 +12,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
-/* ============ TOKENS ============ */
 :root{
   --bg:#08090c; --bg2:#0c0e13; --panel:#10131a; --panel2:#141824;
   --line:#1d2330; --line2:#2a3245;
@@ -25,7 +24,7 @@
   --ease:cubic-bezier(.22,.8,.24,1);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:auto} /* el scroll suave lo gestiona el JS (inercia) */
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 body.lock{overflow:hidden}
 ::selection{background:var(--acc);color:var(--acc-ink)}
@@ -36,11 +35,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 [hidden]{display:none!important}
 .wrap{width:min(1240px,92vw);margin-inline:auto}
 .mono{font-family:var(--mono)}
-.dim{color:var(--dim)}
 .skip{position:fixed;top:-60px;left:16px;z-index:999;background:var(--acc);color:var(--acc-ink);padding:.6rem 1rem;font-family:var(--mono);font-size:.8rem;transition:top .2s}
 .skip:focus{top:16px}
 
-/* grain */
 .noise{position:fixed;inset:-50%;z-index:1200;pointer-events:none;opacity:.038;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
   animation:grain 8s steps(10) infinite}
@@ -51,9 +48,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   padding:.85rem clamp(1rem,4vw,2.5rem);border-bottom:1px solid var(--line);
   background:rgba(8,9,12,.82);backdrop-filter:blur(10px);transition:box-shadow .3s}
 .topbar.scrolled{box-shadow:0 12px 40px -18px rgba(0,0,0,.9)}
-.logo{font-family:var(--disp);font-weight:900;font-size:1.05rem;letter-spacing:.06em;display:flex;align-items:center;gap:.15rem}
-.logo .cur{width:.55em;height:1em;background:var(--acc);animation:blink 1.1s steps(2) infinite;margin-left:.2em}
-@keyframes blink{50%{opacity:0}}
+.logo{font-family:var(--disp);font-weight:900;font-size:1.05rem;letter-spacing:.06em;display:flex;align-items:center}
+.logo .bolt{color:var(--acc);margin-left:.4rem;filter:drop-shadow(0 0 6px rgba(201,247,58,.55));animation:boltPulse 2.4s ease-in-out infinite}
+@keyframes boltPulse{50%{opacity:.45;filter:drop-shadow(0 0 1px rgba(201,247,58,.15))}}
 .mainnav{display:flex;gap:1.75rem;margin-left:1rem}
 .mainnav a{font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);position:relative;padding:.3rem 0;transition:color .2s}
 .mainnav a::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:100%;background:var(--acc);transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease)}
@@ -68,51 +65,27 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .btn-acc{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:500}
 .btn-acc:hover{transform:translateY(-2px);box-shadow:0 10px 30px -10px rgba(201,247,58,.5)}
 .btn-ghost:hover{border-color:var(--acc);color:var(--acc)}
-.avatar-chip{display:flex;align-items:center;gap:.55rem;border:1px solid var(--acc);border-radius:var(--r);padding:.4rem .7rem .4rem .45rem;font-family:var(--mono);font-size:.75rem;color:var(--acc)}
-.avatar-chip .av{width:26px;height:26px;border-radius:4px;background:var(--acc);color:var(--acc-ink);display:grid;place-items:center;font-weight:600}
+.avatar-chip{display:flex;align-items:center;gap:.55rem;border:1px solid var(--acc);border-radius:var(--r);padding:.4rem .7rem .4rem .45rem;font-family:var(--mono);font-size:.75rem;color:var(--acc);max-width:180px}
+.avatar-chip .av{flex:none;width:26px;height:26px;border-radius:4px;background:var(--acc);color:var(--acc-ink);display:grid;place-items:center;font-weight:600;overflow:hidden}
+.avatar-chip .av img{width:100%;height:100%;object-fit:cover}
+.avatar-chip span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .burger{display:none;flex-direction:column;gap:5px;padding:.5rem}
 .burger span{width:22px;height:2px;background:var(--ink);transition:.3s var(--ease)}
 .mobile-menu{display:none}
 
-/* ============ DECK / HERO ============ */
-.deck{position:relative;padding:clamp(3.5rem,8vh,6.5rem) 0 clamp(3rem,7vh,5rem);border-bottom:1px solid var(--line);overflow:hidden}
+/* ============ DECK ============ */
+.deck{position:relative;padding:clamp(4rem,10vh,7.5rem) 0 clamp(3rem,7vh,5rem);border-bottom:1px solid var(--line);overflow:hidden}
 .deck::before{content:"";position:absolute;inset:0;
   background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
   background-size:56px 56px;opacity:.28;
   -webkit-mask-image:radial-gradient(ellipse 90% 80% at 30% 20%,#000 20%,transparent 75%);
           mask-image:radial-gradient(ellipse 90% 80% at 30% 20%,#000 20%,transparent 75%)}
-.deck::after{content:"";position:absolute;inset:0;background:radial-gradient(600px 400px at 82% 30%,rgba(201,247,58,.07),transparent 70%)}
-.deck-grid{position:relative;z-index:2;display:grid;grid-template-columns:1.35fr .9fr;gap:clamp(2rem,5vw,4.5rem);align-items:center}
-.eyebrow{display:inline-flex;align-items:center;gap:.6rem;font-family:var(--mono);font-size:.75rem;letter-spacing:.22em;color:var(--dim);border:1px solid var(--line);padding:.45rem .9rem;border-radius:999px;margin-bottom:1.6rem}
-.eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--acc);animation:pulse 2.2s infinite}
-.brand{font-family:var(--disp);font-weight:900;font-size:clamp(3.2rem,10.5vw,7.6rem);line-height:.95;letter-spacing:-.015em}
-.brand em{font-style:normal;color:var(--acc)}
-.deck-sub{max-width:34rem;color:var(--dim);font-size:clamp(1rem,1.4vw,1.12rem);margin-top:1.4rem}
-.deck-sub strong{color:var(--ink);font-weight:600}
-.deck-cta{display:flex;gap:.9rem;flex-wrap:wrap;margin-top:2.1rem}
+.deck::after{content:"";position:absolute;inset:0;background:radial-gradient(600px 400px at 80% 30%,rgba(201,247,58,.07),transparent 70%)}
+.deck .wrap{position:relative;z-index:2}
+.brand{font-family:var(--disp);font-weight:900;font-size:clamp(3.4rem,11vw,8rem);line-height:.95;letter-spacing:-.015em}
+.deck-cta{display:flex;gap:.9rem;flex-wrap:wrap;margin-top:2.2rem}
 .deck-meta{display:flex;gap:1.8rem;flex-wrap:wrap;list-style:none;margin-top:2.4rem;font-size:.72rem;letter-spacing:.1em;color:var(--faint);text-transform:uppercase}
 .deck-meta b{color:var(--dim);font-weight:500}
-
-/* system panel */
-.sys-panel{position:relative;background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line2);border-radius:var(--r);padding:1.6rem 1.5rem 1.4rem;box-shadow:0 30px 80px -40px rgba(0,0,0,.9)}
-.cn{position:absolute;width:14px;height:14px;border:2px solid var(--acc)}
-.cn.tl{top:-2px;left:-2px;border-right:0;border-bottom:0}
-.cn.tr{top:-2px;right:-2px;border-left:0;border-bottom:0}
-.cn.bl{bottom:-2px;left:-2px;border-right:0;border-top:0}
-.cn.br{bottom:-2px;right:-2px;border-left:0;border-top:0}
-.sys-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.72rem;letter-spacing:.2em;color:var(--acc);border-bottom:1px solid var(--line);padding-bottom:.9rem;margin-bottom:.4rem}
-.sys-row{display:flex;align-items:baseline;gap:.7rem;padding:.72rem 0;border-bottom:1px dashed var(--line);font-family:var(--mono);font-size:.82rem}
-.sys-row:last-of-type{border-bottom:0}
-.sys-row .k{color:var(--faint);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase}
-.sys-row .fill{flex:1;border-bottom:1px dotted var(--line2);transform:translateY(-4px)}
-.sys-row .v{color:var(--ink)}
-.sys-row .v.ok{color:var(--acc)}
-.eq{display:flex;gap:4px;align-items:flex-end;height:26px}
-.eq i{width:5px;background:var(--acc);border-radius:1px;animation:eq 1.1s ease-in-out infinite alternate}
-.eq i:nth-child(1){height:40%;animation-delay:0s}.eq i:nth-child(2){height:85%;animation-delay:.15s}
-.eq i:nth-child(3){height:55%;animation-delay:.3s}.eq i:nth-child(4){height:95%;animation-delay:.1s}
-.eq i:nth-child(5){height:65%;animation-delay:.25s}
-@keyframes eq{to{transform:scaleY(.35)}}
 
 /* ============ TICKER ============ */
 .ticker{border-bottom:1px solid var(--line);background:var(--bg2);overflow:hidden;position:relative}
@@ -168,18 +141,25 @@ section{scroll-margin-top:80px}
 .card{position:relative;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
   transition:transform .4s var(--ease),border-color .4s,box-shadow .4s}
 .card::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;
-  background:radial-gradient(560px at var(--mx,50%) var(--my,50%),hsl(var(--h) 90% 62% / .12),transparent 65%)}
+  background:radial-gradient(560px at var(--mx,50%) var(--my,50%),hsl(var(--h) 90% 62% / .1),transparent 65%)}
 .card:hover{transform:translateY(-5px);border-color:hsl(var(--h) 80% 60% / .55);box-shadow:0 28px 60px -34px rgba(0,0,0,.95)}
 .card:hover::after{opacity:1}
 .card.hide{display:none}
 .card.pop{animation:pop .4s var(--ease) both}
 @keyframes pop{from{opacity:0;transform:translateY(10px) scale(.985)}}
 .card-link{display:flex;flex-direction:column;flex:1}
-.card-media{position:relative;height:215px;overflow:hidden;border-bottom:1px solid var(--line)}
-.s7 .card-media{height:255px}
-.card-media img{width:100%;height:100%;object-fit:cover;filter:saturate(.85) contrast(1.05);transform:scale(1.04);transition:transform 1.4s var(--ease),filter .6s}
-.card:hover .card-media img{transform:scale(1.12);filter:saturate(1.05)}
-.card-media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(8,9,12,.75))}
+
+/* Ilustración de proyecto (SVG) */
+.card-media{position:relative;height:210px;overflow:hidden;border-bottom:1px solid var(--line);
+  background:
+    radial-gradient(hsl(var(--h) 45% 60% / .13) 1px,transparent 1px) 0 0/22px 22px,
+    radial-gradient(440px 230px at 72% 18%,hsl(var(--h) 80% 55% / .14),transparent 70%),
+    linear-gradient(160deg,#0e1118,#0a0c10)}
+.s7 .card-media{height:235px}
+.card-media .art{position:absolute;inset:0;width:100%;height:100%;color:hsl(var(--h) 75% 68%);
+  transform:scale(1);transition:transform 1.2s var(--ease),opacity .5s;opacity:.92}
+.card:hover .card-media .art{transform:scale(1.06);opacity:1}
+.card-media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(8,9,12,.7))}
 .tagchip{position:absolute;top:12px;left:12px;z-index:2;font-family:var(--mono);font-size:.62rem;letter-spacing:.16em;padding:.35rem .7rem;border-radius:4px;
   color:hsl(var(--h) 90% 72%);border:1px solid hsl(var(--h) 90% 62% / .4);background:rgba(8,9,12,.72)}
 .card-media .pnum{position:absolute;bottom:10px;right:14px;z-index:2;font-family:var(--mono);font-size:.68rem;letter-spacing:.15em;color:rgba(237,239,242,.65)}
@@ -193,21 +173,6 @@ section{scroll-margin-top:80px}
 .go .a{transition:transform .3s var(--ease)}
 .card:hover .go .a{transform:translate(4px,-4px)}
 .card-foot .path{font-family:var(--mono);font-size:.68rem;color:var(--faint)}
-
-/* ============ NOVEDADES (sticky 2 col) ============ */
-.changelog{border-top:1px solid var(--line);background:var(--bg2);padding:clamp(4rem,9vh,7rem) 0}
-.cl-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(2rem,6vw,5rem);align-items:start}
-.cl-left{position:sticky;top:100px}
-.cl-ver{font-family:var(--disp);font-weight:900;font-size:clamp(3.4rem,8vw,6rem);line-height:1;color:transparent;-webkit-text-stroke:1.5px var(--acc);margin:.8rem 0 1.2rem}
-.cl-left p{color:var(--dim);max-width:26rem}
-.cl-badges{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:1.6rem}
-.cl-badges span{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;border:1px solid var(--line2);border-radius:999px;padding:.42rem .85rem;color:var(--dim)}
-.cl-badges span b{color:var(--acc);font-weight:500}
-.cl-item{display:grid;grid-template-columns:64px 1fr;gap:1.4rem;padding:1.7rem 0;border-top:1px solid var(--line)}
-.cl-item:last-child{border-bottom:1px solid var(--line)}
-.cl-item .n{font-family:var(--mono);color:var(--acc);font-size:.8rem;letter-spacing:.1em;padding-top:.3rem}
-.cl-item h4{font-family:var(--disp);font-weight:700;font-size:1.1rem;margin-bottom:.4rem}
-.cl-item p{color:var(--dim);font-size:.94rem}
 
 /* ============ FOOTER ============ */
 footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;overflow:hidden}
@@ -225,7 +190,6 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
   font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;color:var(--faint)}
 .foot-bottom .heart{color:var(--acc)}
 
-/* back to top */
 .totop{position:fixed;right:20px;bottom:20px;z-index:150;width:46px;height:46px;border:1px solid var(--line2);border-radius:var(--r);
   background:var(--panel);display:grid;place-items:center;font-size:1.1rem;color:var(--dim);
   opacity:0;transform:translateY(14px);pointer-events:none;transition:.35s var(--ease)}
@@ -240,7 +204,6 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
   box-shadow:0 40px 120px -30px rgba(0,0,0);opacity:0;transform:translateY(18px) scale(.98);transition:.3s var(--ease)}
 .ov.on .ov-box{opacity:1;transform:none}
 
-/* palette */
 .palette{align-items:start;padding-top:12vh}
 .palette .ov-box{width:min(640px,100%);overflow:hidden}
 .palette-input{display:flex;align-items:center;gap:.8rem;padding:1.1rem 1.3rem;border-bottom:1px solid var(--line)}
@@ -260,11 +223,11 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
 .pl-item.act .pl-go{color:var(--acc)}
 .palette-foot{display:flex;gap:1.2rem;padding:.75rem 1.3rem;border-top:1px solid var(--line);font-size:.66rem;letter-spacing:.1em;color:var(--faint)}
 
-/* profile modal */
 .modal-box{width:min(460px,100%)}
 .modal-head{display:flex;align-items:center;gap:1rem;padding:1.5rem 1.5rem 1.2rem;border-bottom:1px solid var(--line)}
-.big-av{width:52px;height:52px;border-radius:8px;background:linear-gradient(140deg,var(--acc),#8db32a);color:var(--acc-ink);
-  display:grid;place-items:center;font-family:var(--disp);font-weight:900;font-size:1.2rem}
+.big-av{flex:none;width:52px;height:52px;border-radius:8px;background:linear-gradient(140deg,var(--acc),#8db32a);color:var(--acc-ink);
+  display:grid;place-items:center;font-family:var(--disp);font-weight:900;font-size:1.2rem;overflow:hidden}
+.big-av img{width:100%;height:100%;object-fit:cover}
 .modal-head h3{font-family:var(--disp);font-weight:700;font-size:1.15rem}
 .modal-head .st{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;color:var(--faint)}
 .modal-head .st.ok{color:var(--acc)}
@@ -273,25 +236,24 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
 .modal-body{padding:1.4rem 1.5rem}
 .detail-row{display:flex;justify-content:space-between;gap:1rem;padding:.7rem 0;border-bottom:1px dashed var(--line);font-family:var(--mono);font-size:.8rem}
 .detail-row .k{color:var(--faint);letter-spacing:.1em;font-size:.68rem;text-transform:uppercase}
-.detail-row .v{color:var(--ink);text-align:right}
+.detail-row .v{color:var(--ink);text-align:right;word-break:break-word}
 .detail-row .v.ok{color:var(--acc)}
 .google-btn{display:flex;align-items:center;justify-content:center;gap:.7rem;width:100%;padding:.85rem;border:1px solid var(--line2);border-radius:var(--r);
   font-family:var(--mono);font-size:.85rem;transition:.25s var(--ease);background:var(--panel2)}
-.google-btn:hover{border-color:var(--acc);transform:translateY(-2px)}
+.google-btn:hover:not(:disabled){border-color:var(--acc);transform:translateY(-2px)}
+.google-btn:disabled{opacity:.7;cursor:wait}
 .google-btn .g{width:20px;height:20px;border-radius:50%;background:conic-gradient(#4285f4 0 25%,#ea4335 0 50%,#fbbc05 0 75%,#34a853 0);display:grid;place-items:center}
 .google-btn .g::after{content:"";width:12px;height:12px;background:var(--panel2);border-radius:50%}
 .modal-note{font-size:.8rem;color:var(--faint);text-align:center;margin-top:.9rem}
+.auth-err{margin-top:.9rem;font-family:var(--mono);font-size:.72rem;color:#ff8f8f;border:1px solid #5a2a2a;border-radius:var(--r);padding:.6rem .8rem;background:rgba(255,120,120,.06)}
 .modal-foot{display:flex;gap:.8rem;justify-content:flex-end;padding:1.1rem 1.5rem;border-top:1px solid var(--line)}
 .btn-danger{border-color:#5a2a2a;color:#ff8f8f}
 .btn-danger:hover{border-color:#ff8f8f;background:rgba(255,120,120,.08)}
 .spinner{width:14px;height:14px;border:2px solid var(--faint);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ============ RESPONSIVE ============ */
 @media (max-width:1000px){
-  .deck-grid{grid-template-columns:1fr}
   .s7,.s5{grid-column:span 6}.s4{grid-column:span 6}
-  .cl-grid{grid-template-columns:1fr}.cl-left{position:static}
   .foot-grid{grid-template-columns:1fr 1fr}
 }
 @media (max-width:760px){
@@ -308,7 +270,6 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
   .foot-grid{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.001s!important;animation-iteration-count:1!important;transition-duration:.001s!important}
   .ticker-track{animation:none;flex-wrap:wrap}
   .noise{animation:none}
@@ -321,27 +282,28 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
 <a class="skip" href="#main">Saltar al contenido</a>
 <div class="noise" aria-hidden="true"></div>
 
-<!-- ============ TOPBAR ============ -->
 <header class="topbar" id="topbar">
-  <a class="logo" href="#hub" aria-label="ONELIFE — inicio">ONELIFE<span class="cur" aria-hidden="true"></span></a>
+  <a class="logo" href="#hub" aria-label="ONELIFE — inicio">ONELIFE
+    <svg class="bolt" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 11-14h-6l1-6Z"/></svg>
+  </a>
   <nav class="mainnav" aria-label="Principal">
     <a href="#hub">Hub</a>
     <a href="#secciones">Secciones</a>
     <a href="#projects">Proyectos</a>
-    <a href="#novedades">Novedades</a>
   </nav>
   <div class="top-right">
     <span class="clockchip mono"><span class="dot" aria-hidden="true"></span><time id="clock">--:--:--</time></span>
     <a class="btn btn-ghost" href="https://github.com/trabalonp/trabalonp.github.io" target="_blank" rel="noopener">GitHub&nbsp;↗</a>
     <button class="btn btn-acc" data-open-profile id="loginBtn">Login</button>
-    <button class="avatar-chip" data-open-profile id="avatarChip" hidden><span class="av">T</span>MI CUENTA</button>
+    <button class="avatar-chip" data-open-profile id="avatarChip" hidden>
+      <span class="av" id="avBox">T</span><span id="avName">MI CUENTA</span>
+    </button>
     <button class="burger" id="burger" aria-expanded="false" aria-label="Abrir menú"><span></span><span></span><span></span></button>
   </div>
   <nav class="mobile-menu" aria-label="Menú móvil">
     <a href="#hub" class="mono">/ HUB</a>
     <a href="#secciones" class="mono">/ SECCIONES</a>
     <a href="#projects" class="mono">/ PROYECTOS</a>
-    <a href="#novedades" class="mono">/ NOVEDADES</a>
   </nav>
 </header>
 
@@ -349,35 +311,18 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
 
 <!-- ============ DECK ============ -->
 <section class="deck" id="hub">
-  <div class="wrap deck-grid">
-    <div>
-      <p class="eyebrow mono"><span class="dot" aria-hidden="true"></span>HUB PERSONAL · V3.0 — EST. 2025</p>
-      <h1 class="brand" id="brand">ONELIFE<em>_</em></h1>
-      <p class="deck-sub">Bienvenido a tu centro de operaciones. <strong>Siete proyectos</strong>, herramientas y recursos — organizados, rápidos y siempre a un clic (o a una pulsación de <strong class="mono">⌘K</strong>).</p>
-      <div class="deck-cta">
-        <a class="btn btn-acc" href="#projects">Explorar proyectos <span aria-hidden="true">↓</span></a>
-        <button class="btn btn-ghost" data-open-palette>Buscar rápido&nbsp;&nbsp;<span class="mono">⌘K</span></button>
-      </div>
-      <ul class="deck-meta mono">
-        <li>LAT <b>37.6051° N</b></li>
-        <li>LON <b>0.9862° O</b></li>
-        <li>BASE <b>CARTAGENA</b></li>
-        <li>UPTIME <b>99.9%</b></li>
-      </ul>
+  <div class="wrap">
+    <h1 class="brand" id="brand">ONELIFE</h1>
+    <div class="deck-cta">
+      <a class="btn btn-acc" href="#projects">Explorar proyectos <span aria-hidden="true">↓</span></a>
+      <button class="btn btn-ghost" data-open-palette>Buscar rápido&nbsp;&nbsp;<span class="mono">Ctrl + K</span></button>
     </div>
-
-    <aside class="sys-panel" aria-label="Estado del sistema">
-      <i class="cn tl"></i><i class="cn tr"></i><i class="cn bl"></i><i class="cn br"></i>
-      <div class="sys-head"><span id="sysTitle">SYSTEM / STATUS</span><span>v3.0</span></div>
-      <div class="sys-row"><span class="k">Módulos activos</span><span class="fill"></span><span class="v num" data-count="7">00</span></div>
-      <div class="sys-row"><span class="k">Secciones</span><span class="fill"></span><span class="v num" data-count="2">00</span></div>
-      <div class="sys-row"><span class="k">Estado</span><span class="fill"></span><span class="v ok">● OPERATIVO</span></div>
-      <div class="sys-row"><span class="k">Hora local</span><span class="fill"></span><span class="v" id="sysClock">--:--:--</span></div>
-      <div class="sys-row"><span class="k">Auth</span><span class="fill"></span><span class="v">Firebase listo</span></div>
-      <div class="sys-row"><span class="k">Actividad</span><span class="fill"></span>
-        <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-      </div>
-    </aside>
+    <ul class="deck-meta mono">
+      <li>LAT <b>37.6051° N</b></li>
+      <li>LON <b>0.9862° O</b></li>
+      <li>BASE <b>CARTAGENA</b></li>
+      <li>UPTIME <b>99.9%</b></li>
+    </ul>
   </div>
 </section>
 
@@ -414,12 +359,12 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
       <p class="sec-desc">Ruta directa a tus colecciones.</p>
     </div>
     <div class="sec-list">
-      <a class="sec-row" href="enlaces.html" data-reveal>
+      <a class="sec-row" href="enlaces" data-reveal>
         <span class="idx mono">/ 01</span>
         <div><h3>Enlaces</h3><p>Colección de recursos, herramientas y enlaces de interés que uso a diario.</p></div>
         <span class="arrow" aria-hidden="true">↗</span>
       </a>
-      <a class="sec-row" href="sources.html" data-reveal data-delay="120">
+      <a class="sec-row" href="sources" data-reveal data-delay="120">
         <span class="idx mono">/ 02</span>
         <div><h3>Sources</h3><p>Repositorios de código, snippets y fuentes técnicas para desarrolladores.</p></div>
         <span class="arrow" aria-hidden="true">↗</span>
@@ -428,13 +373,17 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
   </div>
 </section>
 
-<!-- ============ 02 · PROYECTOS ============ -->
+<!-- ============ 02 · PROYECTOS ============
+     ── RUTAS DE PROYECTOS ──
+     Si algún enlace devuelve 404, ajusta el href al nombre exacto de tu carpeta/página:
+     upct-datos · mecanografia · comparador-graficas · compresor · traductor · radio · comparador-ev
+-->
 <section class="projects" id="projects">
   <div class="wrap">
     <div class="sec-head">
       <span class="sec-num mono">02 — PROYECTOS</span>
       <h2 class="sec-title lm"><span class="lm-in">Proyectos destacados</span></h2>
-      <p class="sec-desc">Filtra por categoría o pulsa <span class="mono">⌘K</span>.</p>
+      <p class="sec-desc">Filtra por categoría o pulsa <span class="mono">Ctrl + K</span>.</p>
     </div>
 
     <div class="filters" role="group" aria-label="Filtrar proyectos">
@@ -451,41 +400,85 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
 
     <div class="grid" id="grid">
 
+      <!-- 01 · UPCT-Datos -->
       <article class="card s7" id="proy-01" data-cat="academico" style="--h:199" data-reveal>
-        <a class="card-link" href="upct-datos/" aria-label="Visitar UPCT-Datos">
-          <figure class="card-media">
-            <img src="https://picsum.photos/seed/upct-campus-datos/980/540" width="980" height="540" alt="UPCT-Datos" loading="lazy">
-            <span class="tagchip mono">ACADÉMICO</span><span class="pnum mono">PROY / 01</span>
+        <a class="card-link" href="upct-datos" aria-label="Visitar UPCT-Datos">
+          <figure class="card-media" aria-hidden="true">
+            <span class="tagchip mono">ACADÉMICO</span>
+            <svg class="art" viewBox="0 0 400 230" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="122" y="48" width="156" height="124" rx="8"/>
+              <line x1="122" y1="80" x2="278" y2="80" stroke-opacity=".7"/>
+              <line x1="122" y1="110" x2="278" y2="110" stroke-opacity=".45"/>
+              <line x1="122" y1="140" x2="278" y2="140" stroke-opacity=".45"/>
+              <line x1="182" y1="48" x2="182" y2="172" stroke-opacity=".45"/>
+              <circle cx="152" cy="64" r="4" fill="currentColor" stroke="none"/>
+              <path d="M196 64h58M196 95h42M196 125h50M196 155h34" stroke-opacity=".55"/>
+              <path d="M136 95h30M136 125h22M136 155h28" stroke-opacity=".8"/>
+              <circle cx="308" cy="66" r="7"/>
+              <line x1="278" y1="72" x2="301" y2="67" stroke-opacity=".5"/>
+              <circle cx="96" cy="150" r="7"/>
+              <line x1="103" y1="146" x2="122" y2="138" stroke-opacity=".5"/>
+            </svg>
+            <span class="pnum mono">PROY / 01</span>
           </figure>
           <div class="card-body">
             <h3>UPCT-Datos</h3>
-            <p>Acceso rápido y organizado a datos y recursos académicos de la UPCT: horarios, centros y utilidades para el día a día universitario.</p>
+            <p>Acceso rápido y organizado a datos y recursos académicos de la UPCT.</p>
             <div class="chips mono"><span>HTML</span><span>CSS</span><span>JS</span></div>
             <div class="card-foot"><span class="go">VISITAR <span class="a">↗</span></span><span class="path mono">/upct-datos</span></div>
           </div>
         </a>
       </article>
 
+      <!-- 02 · Mecanografía -->
       <article class="card s5" id="proy-02" data-cat="herramienta" style="--h:78" data-reveal data-delay="90">
-        <a class="card-link" href="mecanografia/" aria-label="Visitar Mecanografía">
-          <figure class="card-media">
-            <img src="https://picsum.photos/seed/teclado-mecanografia/760/540" width="760" height="540" alt="Mecanografía" loading="lazy">
-            <span class="tagchip mono">HERRAMIENTA</span><span class="pnum mono">PROY / 02</span>
+        <a class="card-link" href="mecanografia" aria-label="Visitar Mecanografía">
+          <figure class="card-media" aria-hidden="true">
+            <span class="tagchip mono">HERRAMIENTA</span>
+            <svg class="art" viewBox="0 0 400 230" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+              <rect x="99" y="62" width="34" height="30" rx="6" stroke-opacity=".55"/>
+              <rect x="141" y="62" width="34" height="30" rx="6" fill="currentColor" fill-opacity=".22"/>
+              <rect x="183" y="62" width="34" height="30" rx="6" stroke-opacity=".55"/>
+              <rect x="225" y="62" width="34" height="30" rx="6" stroke-opacity=".55"/>
+              <rect x="267" y="62" width="34" height="30" rx="6" stroke-opacity=".55"/>
+              <rect x="116" y="100" width="38" height="30" rx="6" stroke-opacity=".55"/>
+              <rect x="162" y="100" width="38" height="30" rx="6" stroke-opacity=".55"/>
+              <rect x="208" y="100" width="38" height="30" rx="6" stroke-opacity=".55"/>
+              <rect x="254" y="100" width="38" height="30" rx="6" stroke-opacity=".55"/>
+              <rect x="99" y="138" width="34" height="30" rx="6" stroke-opacity=".55"/>
+              <rect x="141" y="138" width="118" height="30" rx="6"/>
+              <rect x="267" y="138" width="34" height="30" rx="6" stroke-opacity=".55"/>
+              <path d="M158 40v12m0 0 5-6m-5 6-5-6" stroke-opacity=".9"/>
+            </svg>
+            <span class="pnum mono">PROY / 02</span>
           </figure>
           <div class="card-body">
             <h3>Mecanografía</h3>
-            <p>Practica y mejora tu velocidad de escritura con ejercicios adaptados a tu nivel.</p>
-            <div class="chips mono"><span>JS</span><span>LocalStorage</span></div>
+            <p>Practica y mejora tu velocidad de escritura con ejercicios adaptados.</p>
+            <div class="chips mono"><span>JS</span><span>LOCALSTORAGE</span></div>
             <div class="card-foot"><span class="go">VISITAR <span class="a">↗</span></span><span class="path mono">/mecanografia</span></div>
           </div>
         </a>
       </article>
 
+      <!-- 03 · Comparador Gráficas -->
       <article class="card s5" id="proy-03" data-cat="tech" style="--h:24" data-reveal>
-        <a class="card-link" href="comparador-graficas/" aria-label="Visitar Comparador de Gráficas">
-          <figure class="card-media">
-            <img src="https://picsum.photos/seed/gpu-tarjetas-graficas/760/540" width="760" height="540" alt="Comparador de tarjetas gráficas" loading="lazy">
-            <span class="tagchip mono">TECH</span><span class="pnum mono">PROY / 03</span>
+        <a class="card-link" href="comparador-graficas" aria-label="Visitar Comparador de Gráficas">
+          <figure class="card-media" aria-hidden="true">
+            <span class="tagchip mono">TECH</span>
+            <svg class="art" viewBox="0 0 400 230" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M112 46v130h180" stroke-opacity=".7"/>
+              <rect x="134" y="128" width="26" height="48" rx="3" fill="currentColor" fill-opacity=".12"/>
+              <rect x="172" y="102" width="26" height="74" rx="3" fill="currentColor" fill-opacity=".12"/>
+              <rect x="210" y="116" width="26" height="60" rx="3" fill="currentColor" fill-opacity=".12"/>
+              <rect x="248" y="84" width="26" height="92" rx="3" fill="currentColor" fill-opacity=".22"/>
+              <path d="M140 112l38-26 38 12 40-38" stroke-opacity=".95"/>
+              <circle cx="140" cy="112" r="3.5" fill="currentColor" stroke="none"/>
+              <circle cx="178" cy="86" r="3.5" fill="currentColor" stroke="none"/>
+              <circle cx="216" cy="98" r="3.5" fill="currentColor" stroke="none"/>
+              <circle cx="256" cy="60" r="3.5" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="pnum mono">PROY / 03</span>
           </figure>
           <div class="card-body">
             <h3>Comparador Gráficas</h3>
@@ -496,26 +489,44 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
         </a>
       </article>
 
+      <!-- 04 · Compresor Online -->
       <article class="card s7" id="proy-04" data-cat="utilidades" style="--h:258" data-reveal data-delay="90">
-        <a class="card-link" href="compresor/" aria-label="Visitar Compresor Online">
-          <figure class="card-media">
-            <img src="https://picsum.photos/seed/compresor-archivos/980/540" width="980" height="540" alt="Compresor online" loading="lazy">
-            <span class="tagchip mono">UTILIDADES</span><span class="pnum mono">PROY / 04</span>
+        <a class="card-link" href="compresor" aria-label="Visitar Compresor Online">
+          <figure class="card-media" aria-hidden="true">
+            <span class="tagchip mono">UTILIDADES</span>
+            <svg class="art" viewBox="0 0 400 230" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="102" y="40" width="196" height="150" rx="10" stroke-opacity=".3" stroke-dasharray="4 9"/>
+              <rect x="176" y="91" width="48" height="48" rx="7" fill="currentColor" fill-opacity=".14"/>
+              <path d="M124 58l38 26m0 0-12-2m12 2-2-12" stroke-opacity=".85"/>
+              <path d="M276 58l-38 26m0 0 12-2m-12 2 2-12" stroke-opacity=".85"/>
+              <path d="M124 172l38-26m0 0-12 2m12-2-2 12" stroke-opacity=".85"/>
+              <path d="M276 172l-38-26m0 0 12 2m-12-2 2 12" stroke-opacity=".85"/>
+            </svg>
+            <span class="pnum mono">PROY / 04</span>
           </figure>
           <div class="card-body">
             <h3>Compresor Online</h3>
-            <p>Comprime imágenes y archivos directamente desde el navegador: sin subidas a servidores, sin esperas, 100% en local.</p>
+            <p>Comprime imágenes y archivos directamente desde el navegador, sin subir nada a servidores.</p>
             <div class="chips mono"><span>CANVAS</span><span>OFFLINE</span><span>PRIVACY</span></div>
             <div class="card-foot"><span class="go">VISITAR <span class="a">↗</span></span><span class="path mono">/compresor</span></div>
           </div>
         </a>
       </article>
 
+      <!-- 05 · Traductor -->
       <article class="card s4" id="proy-05" data-cat="ia" style="--h:330" data-reveal>
-        <a class="card-link" href="traductor/" aria-label="Visitar Traductor">
-          <figure class="card-media">
-            <img src="https://picsum.photos/seed/traductor-idiomas/640/540" width="640" height="540" alt="Traductor" loading="lazy">
-            <span class="tagchip mono">IA / UTILS</span><span class="pnum mono">PROY / 05</span>
+        <a class="card-link" href="traductor" aria-label="Visitar Traductor">
+          <figure class="card-media" aria-hidden="true">
+            <span class="tagchip mono">IA / UTILS</span>
+            <svg class="art" viewBox="0 0 400 230" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+              <rect x="96" y="58" width="118" height="68" rx="10" fill="currentColor" fill-opacity=".07"/>
+              <path d="M126 126l-7 17 20-17"/>
+              <text x="155" y="106" text-anchor="middle" font-family="monospace" font-size="34" fill="currentColor" stroke="none">A</text>
+              <rect x="186" y="100" width="118" height="68" rx="10" fill="currentColor" fill-opacity=".1"/>
+              <path d="M282 168l8 17-21-17"/>
+              <text x="245" y="147" text-anchor="middle" font-family="sans-serif" font-size="30" fill="currentColor" stroke="none">文</text>
+            </svg>
+            <span class="pnum mono">PROY / 05</span>
           </figure>
           <div class="card-body">
             <h3>Traductor</h3>
@@ -526,11 +537,22 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
         </a>
       </article>
 
+      <!-- 06 · Radio Stream -->
       <article class="card s4" id="proy-06" data-cat="media" style="--h:42" data-reveal data-delay="90">
-        <a class="card-link" href="radio/" aria-label="Visitar Radio Stream">
-          <figure class="card-media">
-            <img src="https://picsum.photos/seed/radio-ondas-stream/640/540" width="640" height="540" alt="Radio Stream" loading="lazy">
-            <span class="tagchip mono">MEDIA</span><span class="pnum mono">PROY / 06</span>
+        <a class="card-link" href="radio" aria-label="Visitar Radio Stream">
+          <figure class="card-media" aria-hidden="true">
+            <span class="tagchip mono">MEDIA</span>
+            <svg class="art" viewBox="0 0 400 230" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="100" y="106" width="74" height="52" rx="9"/>
+              <circle cx="120" cy="132" r="10"/>
+              <path d="M142 122h22M142 132h22M142 142h22" stroke-opacity=".6"/>
+              <path d="M164 106L196 72"/>
+              <circle cx="198" cy="70" r="4" fill="currentColor" stroke="none"/>
+              <path d="M212 54a24 24 0 0 1 0 32" stroke-opacity=".9"/>
+              <path d="M224 42a40 40 0 0 1 0 56" stroke-opacity=".6"/>
+              <path d="M236 30a57 57 0 0 1 0 80" stroke-opacity=".35"/>
+            </svg>
+            <span class="pnum mono">PROY / 06</span>
           </figure>
           <div class="card-body">
             <h3>Radio Stream</h3>
@@ -541,11 +563,19 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
         </a>
       </article>
 
+      <!-- 07 · Comparador EV -->
       <article class="card s4" id="proy-07" data-cat="auto" style="--h:168" data-reveal data-delay="180">
-        <a class="card-link" href="comparador-ev/" aria-label="Visitar Comparador EV">
-          <figure class="card-media">
-            <img src="https://picsum.photos/seed/coche-electrico-ev/640/540" width="640" height="540" alt="Comparador de coches eléctricos" loading="lazy">
-            <span class="tagchip mono">AUTO</span><span class="pnum mono">PROY / 07</span>
+        <a class="card-link" href="comparador-ev" aria-label="Visitar Comparador EV">
+          <figure class="card-media" aria-hidden="true">
+            <span class="tagchip mono">AUTO</span>
+            <svg class="art" viewBox="0 0 400 230" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M72 152q8-32 48-38l50-8q58-8 98 14l26 14q16 8 16 18v6H72Z"/>
+              <circle cx="136" cy="156" r="15"/><circle cx="136" cy="156" r="6" stroke-opacity=".6"/>
+              <circle cx="260" cy="156" r="15"/><circle cx="260" cy="156" r="6" stroke-opacity=".6"/>
+              <path d="M64 184h272" stroke-opacity=".3" stroke-dasharray="3 11"/>
+              <path d="M203 66l-16 28h14l-10 26 28-32h-15l11-22Z" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="pnum mono">PROY / 07</span>
           </figure>
           <div class="card-body">
             <h3>Comparador EV</h3>
@@ -556,28 +586,6 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
         </a>
       </article>
 
-    </div>
-  </div>
-</section>
-
-<!-- ============ NOVEDADES ============ -->
-<section class="changelog" id="novedades">
-  <div class="wrap cl-grid">
-    <div class="cl-left">
-      <span class="sec-num mono">03 — BITÁCORA</span>
-      <div class="cl-ver" aria-hidden="true">v3.0</div>
-      <h2 class="sec-title lm"><span class="lm-in">El rediseño,<br>por dentro</span></h2>
-      <p style="margin-top:1rem">ONELIFE se reconstruye desde cero: misma esencia, mejor motor. Esto es lo que cambia en la nueva versión del hub.</p>
-      <div class="cl-badges mono">
-        <span><b>+60%</b> carga</span><span><b>AA</b> contraste</span><span><b>0</b> frameworks</span><span><b>1</b> archivo</span>
-      </div>
-    </div>
-    <div>
-      <div class="cl-item" data-reveal><span class="n mono">3.1</span><div><h4>Nuevo sistema visual</h4><p>Identidad renovada con tipografía Unbounded + IBM Plex, paleta carbono/lima y rejilla técnica. Cada módulo mantiene su propio color de categoría.</p></div></div>
-      <div class="cl-item" data-reveal data-delay="80"><span class="n mono">3.2</span><div><h4>Rendimiento primero</h4><p>Imágenes con carga diferida y dimensiones fijas (sin saltos de layout), un solo archivo, cero dependencias pesadas y animaciones solo por GPU.</p></div></div>
-      <div class="cl-item" data-reveal data-delay="160"><span class="n mono">3.3</span><div><h4>Acceso total a funcionalidades</h4><p>Buscador rápido ⌘K sobre los 7 proyectos y las 2 secciones, filtros por categoría, ticker navegable y menú móvil. Todo a un golpe de teclado.</p></div></div>
-      <div class="cl-item" data-reveal data-delay="240"><span class="n mono">3.4</span><div><h4>Accesibilidad</h4><p>Navegación completa por teclado, foco visible, contraste AA y respeto absoluto a <span class="mono">prefers-reduced-motion</span>.</p></div></div>
-      <div class="cl-item" data-reveal data-delay="320"><span class="n mono">3.5</span><div><h4>Cuenta y sincronización</h4><p>El panel de perfil integra acceso vía Google, verificación de autenticación y estado de sincronización en Firebase, con cierre de sesión.</p></div></div>
     </div>
   </div>
 </section>
@@ -598,26 +606,25 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
           <li><a href="#hub">Hub</a></li>
           <li><a href="#secciones">Secciones</a></li>
           <li><a href="#projects">Proyectos</a></li>
-          <li><a href="#novedades">Novedades v3.0</a></li>
-          <li><a href="enlaces.html">Enlaces</a></li>
-          <li><a href="sources.html">Sources</a></li>
+          <li><a href="enlaces">Enlaces</a></li>
+          <li><a href="sources">Sources</a></li>
         </ul>
       </div>
       <div>
         <h5>Módulos</h5>
         <ul>
-          <li><a href="upct-datos/">UPCT-Datos</a></li>
-          <li><a href="mecanografia/">Mecanografía</a></li>
-          <li><a href="comparador-graficas/">Comparador Gráficas</a></li>
-          <li><a href="compresor/">Compresor Online</a></li>
-          <li><a href="traductor/">Traductor</a></li>
-          <li><a href="radio/">Radio Stream</a></li>
-          <li><a href="comparador-ev/">Comparador EV</a></li>
+          <li><a href="upct-datos">UPCT-Datos</a></li>
+          <li><a href="mecanografia">Mecanografía</a></li>
+          <li><a href="comparador-graficas">Comparador Gráficas</a></li>
+          <li><a href="compresor">Compresor Online</a></li>
+          <li><a href="traductor">Traductor</a></li>
+          <li><a href="radio">Radio Stream</a></li>
+          <li><a href="comparador-ev">Comparador EV</a></li>
         </ul>
       </div>
     </div>
     <div class="foot-bottom">
-      <span>ONELIFE.SYS — BUILD 2025.3.0</span>
+      <span>ONELIFE.SYS — EST. 2025</span>
       <span>HECHO A MANO · SIN FRAMEWORKS · <span class="heart">◆</span></span>
       <a href="#hub">↑ VOLVER ARRIBA</a>
     </div>
@@ -653,18 +660,16 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
       <button class="modal-x" data-close aria-label="Cerrar">✕</button>
     </div>
     <div class="modal-body">
-      <!-- Sin sesión -->
       <div id="viewOut">
         <button class="google-btn" id="googleBtn"><span class="g" aria-hidden="true"></span><span id="gLabel">Acceso vía Google</span></button>
+        <p class="auth-err" id="authErr" hidden></p>
         <p class="modal-note">Autenticación segura · Datos sincronizados en Firebase</p>
       </div>
-      <!-- Con sesión -->
       <div id="viewIn" hidden>
-        <div class="detail-row"><span class="k">Usuario</span><span class="v">Usuario ONELIFE</span></div>
-        <div class="detail-row"><span class="k">Correo</span><span class="v">hola@onelife.dev</span></div>
+        <div class="detail-row"><span class="k">Usuario</span><span class="v" id="dName">—</span></div>
+        <div class="detail-row"><span class="k">Correo</span><span class="v" id="dMail">—</span></div>
         <div class="detail-row"><span class="k">Autenticación</span><span class="v ok">✔ Verificada (Google)</span></div>
-        <div class="detail-row"><span class="k">Firebase</span><span class="v" id="syncState">Sincronizando…</span></div>
-        <div class="detail-row"><span class="k">Plan</span><span class="v">HUB PERSONAL v3.0</span></div>
+        <div class="detail-row"><span class="k">Firebase</span><span class="v ok" id="syncState">● Sincronizado</span></div>
       </div>
     </div>
     <div class="modal-foot">
@@ -674,18 +679,46 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
   </div>
 </div>
 
+<!-- Firebase (auth de Google, igual que tu código original) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
 <script>
 (function(){
 "use strict";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* ============================================================
+   ⚠ CONFIGURACIÓN DE FIREBASE — IMPORTANTE
+   Pega aquí la configuración de tu código original
+   (Firebase Console → Configuración del proyecto → Tus apps).
+   Todo lo demás (login Google, sesión, logout) ya está cableado.
+   ============================================================ */
+const FIREBASE_CONFIG = {
+  apiKey: "PEGA_AQUI_TU_API_KEY",
+  authDomain: "PEGA_AQUI.firebaseapp.com",
+  projectId: "PEGA_AQUI",
+  storageBucket: "PEGA_AQUI.appspot.com",
+  messagingSenderId: "PEGA_AQUI",
+  appId: "PEGA_AQUI"
+};
+
+/* ---- Firebase Auth real ---- */
+let fbAuth=null;
+try{
+  if(window.firebase && FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes("PEGA_AQUI")){
+    firebase.initializeApp(FIREBASE_CONFIG);
+    fbAuth=firebase.auth();
+  }
+}catch(e){console.warn("Firebase:",e);}
+
 /* ---- Reloj ---- */
-const clock=$('#clock'), sysClock=$('#sysClock');
-function tick(){const t=new Date().toLocaleTimeString('es-ES',{hour12:false});clock.textContent=t;sysClock.textContent=t;}
+const clock=$('#clock');
+function tick(){clock.textContent=new Date().toLocaleTimeString('es-ES',{hour12:false});}
 tick();setInterval(tick,1000);
 
-/* ---- Scramble decode ---- */
+/* ---- Scramble decode del título ---- */
 const CH='█▓▒░#@$%&0123456789ONELIFE';
 function scramble(el,txt,dur){
   if(RM){el.textContent=txt;return;}
@@ -697,29 +730,56 @@ function scramble(el,txt,dur){
   })(start);
 }
 scramble($('#brand'),'ONELIFE',1100);
-setTimeout(()=>scramble($('#sysTitle'),'SYSTEM / STATUS',800),400);
 
-/* ---- Reveals + contadores ---- */
+/* ---- Reveals ---- */
 const io=new IntersectionObserver(es=>{es.forEach(e=>{if(!e.isIntersecting)return;
   const t=e.target,d=+t.dataset.delay||0;
-  setTimeout(()=>{t.classList.add('in');
-    if(t.classList.contains('num'))countUp(t);},RM?0:d);
+  setTimeout(()=>t.classList.add('in'),RM?0:d);
   io.unobserve(t);
 })},{threshold:.18});
-$$('[data-reveal],.lm,.num').forEach(el=>io.observe(el));
-function countUp(el){const t=+el.dataset.count,pad=n=>String(n).padStart(2,'0');
-  if(RM){el.textContent=pad(t);return;}
-  const s=performance.now();(function f(n){const p=Math.min(1,(n-s)/900);
-  el.textContent=pad(Math.round(t*(1-Math.pow(1-p,3))));if(p<1)requestAnimationFrame(f);})(s);}
+$$('[data-reveal],.lm').forEach(el=>io.observe(el));
 
 /* ---- Topbar / totop / menú móvil ---- */
 const topbar=$('#topbar'),totop=$('#totop'),burger=$('#burger');
-addEventListener('scroll',()=>{const y=scrollY;
-  topbar.classList.toggle('scrolled',y>10);
-  totop.classList.toggle('show',y>600);},{passive:true});
-totop.addEventListener('click',()=>scrollTo({top:0,behavior:RM?'auto':'smooth'}));
+addEventListener('scroll',()=>{
+  topbar.classList.toggle('scrolled',scrollY>10);
+  totop.classList.toggle('show',scrollY>600);
+},{passive:true});
 burger.addEventListener('click',()=>{const o=topbar.classList.toggle('open');burger.setAttribute('aria-expanded',o);});
 $$('.mobile-menu a').forEach(a=>a.addEventListener('click',()=>topbar.classList.remove('open')));
+
+/* ---- SCROLL SUAVE (inercia con la rueda del ratón) ---- */
+const Smooth=(()=>{
+  if(RM || matchMedia('(pointer:coarse)').matches) return {to:y=>scrollTo(0,y)};
+  let target=scrollY, current=scrollY, running=false;
+  const max=()=>document.documentElement.scrollHeight-innerHeight;
+  const clamp=v=>Math.max(0,Math.min(v,max()));
+  addEventListener('wheel',e=>{
+    if(document.body.classList.contains('lock'))return; /* modales abiertos: scroll nativo */
+    e.preventDefault();
+    const mult=e.deltaMode===1?16:1;
+    target=clamp(target+e.deltaY*mult);
+    if(!running){running=true;requestAnimationFrame(loop);}
+  },{passive:false});
+  function loop(){
+    current+=(target-current)*0.09;
+    if(Math.abs(target-current)<.4)current=target;
+    scrollTo(0,current);
+    if(current===target){running=false;return;}
+    requestAnimationFrame(loop);
+  }
+  /* resincroniza si el navegador desplaza por teclado/focus */
+  setInterval(()=>{if(!running){const y=scrollY;if(Math.abs(y-current)>1.5){current=target=y;}}},120);
+  return {to:y=>{target=clamp(y);if(!running){running=true;requestAnimationFrame(loop);}}};
+})();
+totop.addEventListener('click',()=>Smooth.to(0));
+document.addEventListener('click',e=>{
+  const a=e.target.closest('a[href^="#"]');if(!a)return;
+  const id=a.getAttribute('href');
+  if(id==='#'||id.length<2){e.preventDefault();Smooth.to(0);return;}
+  const el=document.querySelector(id);
+  if(el){e.preventDefault();Smooth.to(el.getBoundingClientRect().top+scrollY-72);}
+});
 
 /* ---- Spotlight en tarjetas ---- */
 $('#grid').addEventListener('pointermove',e=>{
@@ -740,7 +800,7 @@ $$('.chip').forEach(ch=>ch.addEventListener('click',()=>{
   fcount.textContent=String(n).padStart(2,'0');
 }));
 
-/* ---- Overlays genéricos ---- */
+/* ---- Overlays ---- */
 let lastFocus=null;
 function openOv(ov){lastFocus=document.activeElement;ov.hidden=false;
   requestAnimationFrame(()=>ov.classList.add('on'));
@@ -752,19 +812,18 @@ function closeOv(ov){if(ov.hidden)return;ov.classList.remove('on');
   lastFocus&&lastFocus.focus();}
 $$('.ov [data-close]').forEach(b=>b.addEventListener('click',()=>closeOv(b.closest('.ov'))));
 
-/* ---- Paleta ⌘K ---- */
+/* ---- Paleta (Ctrl + K) ---- */
 const palette=$('#palette'),plInput=$('#plInput'),plList=$('#plList');
 const INDEX=[
- {t:'UPCT-Datos',d:'Datos y recursos académicos de la UPCT',cat:'Académico',url:'upct-datos/'},
- {t:'Mecanografía',d:'Ejercicios para mejorar tu velocidad de escritura',cat:'Herramienta',url:'mecanografia/'},
- {t:'Comparador Gráficas',d:'Rendimiento, precio y specs de GPUs',cat:'Tech',url:'comparador-graficas/'},
- {t:'Compresor Online',d:'Comprime archivos en el navegador',cat:'Utilidades',url:'compresor/'},
- {t:'Traductor',d:'Traducción inteligente multi-idioma',cat:'IA / Utils',url:'traductor/'},
- {t:'Radio Stream',d:'Emisoras en directo de todo el mundo',cat:'Media',url:'radio/'},
- {t:'Comparador EV',d:'Especificaciones y ranking de eléctricos',cat:'Auto',url:'comparador-ev/'},
- {t:'Enlaces',d:'Recursos y herramientas de uso diario',cat:'Sección /01',url:'enlaces.html'},
- {t:'Sources',d:'Repositorios, snippets y fuentes técnicas',cat:'Sección /02',url:'sources.html'},
- {t:'Novedades v3.0',d:'Cambios del rediseño',cat:'Sección',url:'#novedades'},
+ {t:'UPCT-Datos',d:'Datos y recursos académicos de la UPCT',cat:'Académico',url:'upct-datos'},
+ {t:'Mecanografía',d:'Ejercicios para mejorar tu velocidad de escritura',cat:'Herramienta',url:'mecanografia'},
+ {t:'Comparador Gráficas',d:'Rendimiento, precio y specs de GPUs',cat:'Tech',url:'comparador-graficas'},
+ {t:'Compresor Online',d:'Comprime archivos en el navegador',cat:'Utilidades',url:'compresor'},
+ {t:'Traductor',d:'Traducción inteligente multi-idioma',cat:'IA / Utils',url:'traductor'},
+ {t:'Radio Stream',d:'Emisoras en directo de todo el mundo',cat:'Media',url:'radio'},
+ {t:'Comparador EV',d:'Especificaciones y ranking de eléctricos',cat:'Auto',url:'comparador-ev'},
+ {t:'Enlaces',d:'Recursos y herramientas de uso diario',cat:'Sección /01',url:'enlaces'},
+ {t:'Sources',d:'Repositorios, snippets y fuentes técnicas',cat:'Sección /02',url:'sources'},
  {t:'GitHub',d:'trabalonp.github.io',cat:'Externo',url:'https://github.com/trabalonp/trabalonp.github.io',ext:1},
  {t:'Tu Perfil',d:'Cuenta, sesión y sincronización',cat:'Acción',action:'profile'}
 ];
@@ -773,7 +832,7 @@ const norm=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 function renderPL(q){
   const f=norm(q||'');plList.innerHTML='';plAct=0;
   plItems=INDEX.filter(i=>!f||norm(i.t+' '+i.d+' '+i.cat).includes(f));
-  if(!plItems.length){plList.innerHTML='<li class="mono dim" style="padding:1rem;font-size:.8rem">Sin resultados para «'+(q||'')+'»</li>';return;}
+  if(!plItems.length){plList.innerHTML='<li class="mono" style="padding:1rem;font-size:.8rem;color:var(--dim)">Sin resultados para «'+(q||'')+'»</li>';return;}
   plItems.forEach((it,idx)=>{
     const li=document.createElement('li');
     li.innerHTML='<button class="pl-item'+(idx===0?' act':'')+'" data-i="'+idx+'">'
@@ -787,11 +846,11 @@ function markPL(){[...plList.querySelectorAll('.pl-item')].forEach((b,i)=>b.clas
 function execPL(it){
   closeOv(palette);
   if(it.action==='profile'){setTimeout(openProfile,RM?0:250);return;}
-  if(it.url.startsWith('#')){location.hash=it.url;return;}
+  if(it.ext){window.open(it.url,'_blank','noopener');return;}
   location.href=it.url;
 }
 function openPalette(){openOv(palette);plInput.value='';renderPL('');}
-plInput.addEventListener('input',()=>{renderPL(plInput.value);});
+plInput.addEventListener('input',()=>renderPL(plInput.value));
 plInput.addEventListener('keydown',e=>{
   if(e.key==='ArrowDown'){e.preventDefault();plAct=Math.min(plAct+1,plItems.length-1);markPL();}
   if(e.key==='ArrowUp'){e.preventDefault();plAct=Math.max(plAct-1,0);markPL();}
@@ -800,34 +859,52 @@ plInput.addEventListener('keydown',e=>{
 plList.addEventListener('click',e=>{const b=e.target.closest('.pl-item');if(b)execPL(plItems[+b.dataset.i]);});
 $$('[data-open-palette]').forEach(b=>b.addEventListener('click',openPalette));
 
-/* ---- Perfil ---- */
+/* ---- Perfil + Google Sign-In real ---- */
 const profile=$('#profile'),loginBtn=$('#loginBtn'),avatarChip=$('#avatarChip'),
       viewOut=$('#viewOut'),viewIn=$('#viewIn'),googleBtn=$('#googleBtn'),
       gLabel=$('#gLabel'),logoutBtn=$('#logoutBtn'),pStatus=$('#pStatus'),
-      syncState=$('#syncState'),pAv=$('#pAv');
-let logged=false;
-function openProfile(){openOv(profile);}
+      authErr=$('#authErr'),pAv=$('#pAv'),dName=$('#dName'),dMail=$('#dMail'),
+      avBox=$('#avBox'),avName=$('#avName');
+function openProfile(){authErr.hidden=true;openOv(profile);}
 $$('[data-open-profile]').forEach(b=>b.addEventListener('click',openProfile));
-function setLogged(v){
-  logged=v;
-  viewOut.hidden=v;viewIn.hidden=!v;logoutBtn.hidden=!v;
-  loginBtn.hidden=v;avatarChip.hidden=!v;
-  pStatus.textContent=v?'● SESIÓN ACTIVA':'SIN SESIÓN ACTIVA';
-  pStatus.classList.toggle('ok',v);
-  pAv.textContent=v?'✔':'T';
+
+function showErr(msg){authErr.textContent=msg;authErr.hidden=false;}
+function setUI(user){
+  viewOut.hidden=!!user;viewIn.hidden=!user;logoutBtn.hidden=!user;
+  loginBtn.hidden=!!user;avatarChip.hidden=!user;
+  if(user){
+    const name=user.displayName||'Usuario';
+    dName.textContent=name;
+    dMail.textContent=user.email||'—';
+    pStatus.textContent='● SESIÓN ACTIVA';pStatus.classList.add('ok');
+    avName.textContent=name.split(' ')[0].toUpperCase();
+    if(user.photoURL){avBox.innerHTML='<img src="'+user.photoURL+'" alt="">';pAv.innerHTML='<img src="'+user.photoURL+'" alt="">';}
+    else{const ini=(name[0]||'T').toUpperCase();avBox.textContent=ini;pAv.textContent=ini;}
+  }else{
+    pStatus.textContent='SIN SESIÓN ACTIVA';pStatus.classList.remove('ok');
+    avBox.textContent='T';pAv.textContent='T';
+  }
+}
+if(fbAuth){
+  fbAuth.onAuthStateChanged(setUI);
+}else{
+  googleBtn.addEventListener('click',()=>showErr('⚠ Falta tu configuración de Firebase: pega FIREBASE_CONFIG al inicio del <script> final (la tienes en tu código original).'));
 }
 googleBtn.addEventListener('click',()=>{
-  googleBtn.disabled=true;
-  gLabel.innerHTML='Conectando…';
+  if(!fbAuth)return;
+  authErr.hidden=true;googleBtn.disabled=true;
+  gLabel.textContent='Conectando…';
   const sp=document.createElement('span');sp.className='spinner';googleBtn.prepend(sp);
-  setTimeout(()=>{
-    sp.remove();gLabel.textContent='Acceso vía Google';googleBtn.disabled=false;
-    setLogged(true);
-    syncState.textContent='Sincronizando…';syncState.classList.remove('ok');
-    setTimeout(()=>{syncState.textContent='● Sincronizado — al día';syncState.classList.add('ok');},1200);
-  },900);
+  const provider=new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider)
+    .catch(err=>{
+      if(err.code!=='auth/popup-closed-by-user'&&err.code!=='auth/cancelled-popup-request'){
+        showErr('Error de autenticación: '+(err.message||err.code));
+      }
+    })
+    .finally(()=>{sp.remove();gLabel.textContent='Acceso vía Google';googleBtn.disabled=false;});
 });
-logoutBtn.addEventListener('click',()=>setLogged(false));
+logoutBtn.addEventListener('click',()=>{fbAuth&&fbAuth.signOut();});
 
 /* ---- Teclado global ---- */
 document.addEventListener('keydown',e=>{
@@ -838,7 +915,7 @@ document.addEventListener('keydown',e=>{
     else if(!profile.hidden)closeOv(profile);
     topbar.classList.remove('open');
   }
-  if(e.key==='Tab'){ /* focus trap */
+  if(e.key==='Tab'){
     const ov=document.querySelector('.ov.on');if(!ov)return;
     const f=[...ov.querySelectorAll('button:not([hidden]),input,a[href]')].filter(x=>x.offsetParent);
     if(!f.length)return;
