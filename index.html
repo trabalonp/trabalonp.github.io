@@ -24,13 +24,14 @@
   --ease:cubic-bezier(.22,.8,.24,1);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:auto} /* el scroll suave lo gestiona el JS (inercia) */
+html{scroll-behavior:auto}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 body.lock{overflow:hidden}
 ::selection{background:var(--acc);color:var(--acc-ink)}
 a{color:inherit;text-decoration:none}
 img{display:block;max-width:100%}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:disabled{opacity:.65;cursor:wait}
 :focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:2px}
 [hidden]{display:none!important}
 .wrap{width:min(1240px,92vw);margin-inline:auto}
@@ -63,7 +64,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .btn{display:inline-flex;align-items:center;gap:.55rem;font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;
   padding:.65rem 1.15rem;border-radius:var(--r);border:1px solid var(--line2);transition:.25s var(--ease);white-space:nowrap}
 .btn-acc{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:500}
-.btn-acc:hover{transform:translateY(-2px);box-shadow:0 10px 30px -10px rgba(201,247,58,.5)}
+.btn-acc:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 30px -10px rgba(201,247,58,.5)}
 .btn-ghost:hover{border-color:var(--acc);color:var(--acc)}
 .avatar-chip{display:flex;align-items:center;gap:.55rem;border:1px solid var(--acc);border-radius:var(--r);padding:.4rem .7rem .4rem .45rem;font-family:var(--mono);font-size:.75rem;color:var(--acc);max-width:180px}
 .avatar-chip .av{flex:none;width:26px;height:26px;border-radius:4px;background:var(--acc);color:var(--acc-ink);display:grid;place-items:center;font-weight:600;overflow:hidden}
@@ -149,7 +150,6 @@ section{scroll-margin-top:80px}
 @keyframes pop{from{opacity:0;transform:translateY(10px) scale(.985)}}
 .card-link{display:flex;flex-direction:column;flex:1}
 
-/* Ilustración de proyecto (SVG) */
 .card-media{position:relative;height:210px;overflow:hidden;border-bottom:1px solid var(--line);
   background:
     radial-gradient(hsl(var(--h) 45% 60% / .13) 1px,transparent 1px) 0 0/22px 22px,
@@ -234,14 +234,15 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
 .modal-x{margin-left:auto;width:34px;height:34px;border:1px solid var(--line2);border-radius:6px;display:grid;place-items:center;color:var(--dim);transition:.2s}
 .modal-x:hover{border-color:var(--acc);color:var(--acc);transform:rotate(90deg)}
 .modal-body{padding:1.4rem 1.5rem}
-.detail-row{display:flex;justify-content:space-between;gap:1rem;padding:.7rem 0;border-bottom:1px dashed var(--line);font-family:var(--mono);font-size:.8rem}
+.detail-row{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px dashed var(--line);font-family:var(--mono);font-size:.8rem}
 .detail-row .k{color:var(--faint);letter-spacing:.1em;font-size:.68rem;text-transform:uppercase}
 .detail-row .v{color:var(--ink);text-align:right;word-break:break-word}
 .detail-row .v.ok{color:var(--acc)}
+.name-input{background:transparent;border:1px solid var(--line2);border-radius:4px;color:var(--ink);font-family:var(--mono);font-size:.78rem;padding:.3rem .55rem;width:min(220px,100%);text-align:right}
+.name-input:focus{border-color:var(--acc);outline:none}
 .google-btn{display:flex;align-items:center;justify-content:center;gap:.7rem;width:100%;padding:.85rem;border:1px solid var(--line2);border-radius:var(--r);
   font-family:var(--mono);font-size:.85rem;transition:.25s var(--ease);background:var(--panel2)}
 .google-btn:hover:not(:disabled){border-color:var(--acc);transform:translateY(-2px)}
-.google-btn:disabled{opacity:.7;cursor:wait}
 .google-btn .g{width:20px;height:20px;border-radius:50%;background:conic-gradient(#4285f4 0 25%,#ea4335 0 50%,#fbbc05 0 75%,#34a853 0);display:grid;place-items:center}
 .google-btn .g::after{content:"";width:12px;height:12px;background:var(--panel2);border-radius:50%}
 .modal-note{font-size:.8rem;color:var(--faint);text-align:center;margin-top:.9rem}
@@ -294,7 +295,7 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
   <div class="top-right">
     <span class="clockchip mono"><span class="dot" aria-hidden="true"></span><time id="clock">--:--:--</time></span>
     <a class="btn btn-ghost" href="https://github.com/trabalonp/trabalonp.github.io" target="_blank" rel="noopener">GitHub&nbsp;↗</a>
-    <button class="btn btn-acc" data-open-profile id="loginBtn">Login</button>
+    <button class="btn btn-acc" id="loginBtn">Login</button>
     <button class="avatar-chip" data-open-profile id="avatarChip" hidden>
       <span class="av" id="avBox">T</span><span id="avName">MI CUENTA</span>
     </button>
@@ -373,11 +374,7 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
   </div>
 </section>
 
-<!-- ============ 02 · PROYECTOS ============
-     ── RUTAS DE PROYECTOS ──
-     Si algún enlace devuelve 404, ajusta el href al nombre exacto de tu carpeta/página:
-     upct-datos · mecanografia · comparador-graficas · compresor · traductor · radio · comparador-ev
--->
+<!-- ============ 02 · PROYECTOS (rutas originales del repo) ============ -->
 <section class="projects" id="projects">
   <div class="wrap">
     <div class="sec-head">
@@ -400,9 +397,9 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
 
     <div class="grid" id="grid">
 
-      <!-- 01 · UPCT-Datos -->
+      <!-- 01 · UPCT-Datos → academicos -->
       <article class="card s7" id="proy-01" data-cat="academico" style="--h:199" data-reveal>
-        <a class="card-link" href="upct-datos" aria-label="Visitar UPCT-Datos">
+        <a class="card-link" href="academicos" aria-label="Visitar UPCT-Datos">
           <figure class="card-media" aria-hidden="true">
             <span class="tagchip mono">ACADÉMICO</span>
             <svg class="art" viewBox="0 0 400 230" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -425,7 +422,7 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
             <h3>UPCT-Datos</h3>
             <p>Acceso rápido y organizado a datos y recursos académicos de la UPCT.</p>
             <div class="chips mono"><span>HTML</span><span>CSS</span><span>JS</span></div>
-            <div class="card-foot"><span class="go">VISITAR <span class="a">↗</span></span><span class="path mono">/upct-datos</span></div>
+            <div class="card-foot"><span class="go">VISITAR <span class="a">↗</span></span><span class="path mono">/academicos</span></div>
           </div>
         </a>
       </article>
@@ -489,9 +486,9 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
         </a>
       </article>
 
-      <!-- 04 · Compresor Online -->
+      <!-- 04 · Compresor Online → compresor-online -->
       <article class="card s7" id="proy-04" data-cat="utilidades" style="--h:258" data-reveal data-delay="90">
-        <a class="card-link" href="compresor" aria-label="Visitar Compresor Online">
+        <a class="card-link" href="compresor-online" aria-label="Visitar Compresor Online">
           <figure class="card-media" aria-hidden="true">
             <span class="tagchip mono">UTILIDADES</span>
             <svg class="art" viewBox="0 0 400 230" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -508,7 +505,7 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
             <h3>Compresor Online</h3>
             <p>Comprime imágenes y archivos directamente desde el navegador, sin subir nada a servidores.</p>
             <div class="chips mono"><span>CANVAS</span><span>OFFLINE</span><span>PRIVACY</span></div>
-            <div class="card-foot"><span class="go">VISITAR <span class="a">↗</span></span><span class="path mono">/compresor</span></div>
+            <div class="card-foot"><span class="go">VISITAR <span class="a">↗</span></span><span class="path mono">/compresor-online</span></div>
           </div>
         </a>
       </article>
@@ -537,9 +534,9 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
         </a>
       </article>
 
-      <!-- 06 · Radio Stream -->
+      <!-- 06 · Radio Stream → radio-stream -->
       <article class="card s4" id="proy-06" data-cat="media" style="--h:42" data-reveal data-delay="90">
-        <a class="card-link" href="radio" aria-label="Visitar Radio Stream">
+        <a class="card-link" href="radio-stream" aria-label="Visitar Radio Stream">
           <figure class="card-media" aria-hidden="true">
             <span class="tagchip mono">MEDIA</span>
             <svg class="art" viewBox="0 0 400 230" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -558,14 +555,14 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
             <h3>Radio Stream</h3>
             <p>Escucha emisoras de radio en directo desde cualquier parte del mundo.</p>
             <div class="chips mono"><span>STREAMING</span><span>AUDIO HTML5</span></div>
-            <div class="card-foot"><span class="go">VISITAR <span class="a">↗</span></span><span class="path mono">/radio</span></div>
+            <div class="card-foot"><span class="go">VISITAR <span class="a">↗</span></span><span class="path mono">/radio-stream</span></div>
           </div>
         </a>
       </article>
 
-      <!-- 07 · Comparador EV -->
+      <!-- 07 · Comparador EV → evhub -->
       <article class="card s4" id="proy-07" data-cat="auto" style="--h:168" data-reveal data-delay="180">
-        <a class="card-link" href="comparador-ev" aria-label="Visitar Comparador EV">
+        <a class="card-link" href="evhub" aria-label="Visitar Comparador EV">
           <figure class="card-media" aria-hidden="true">
             <span class="tagchip mono">AUTO</span>
             <svg class="art" viewBox="0 0 400 230" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -581,7 +578,7 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
             <h3>Comparador EV</h3>
             <p>Compara especificaciones, precios y ranking de coches eléctricos.</p>
             <div class="chips mono"><span>DATASET</span><span>RANKING</span></div>
-            <div class="card-foot"><span class="go">VISITAR <span class="a">↗</span></span><span class="path mono">/comparador-ev</span></div>
+            <div class="card-foot"><span class="go">VISITAR <span class="a">↗</span></span><span class="path mono">/evhub</span></div>
           </div>
         </a>
       </article>
@@ -613,13 +610,13 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
       <div>
         <h5>Módulos</h5>
         <ul>
-          <li><a href="upct-datos">UPCT-Datos</a></li>
+          <li><a href="academicos">UPCT-Datos</a></li>
           <li><a href="mecanografia">Mecanografía</a></li>
           <li><a href="comparador-graficas">Comparador Gráficas</a></li>
-          <li><a href="compresor">Compresor Online</a></li>
+          <li><a href="compresor-online">Compresor Online</a></li>
           <li><a href="traductor">Traductor</a></li>
-          <li><a href="radio">Radio Stream</a></li>
-          <li><a href="comparador-ev">Comparador EV</a></li>
+          <li><a href="radio-stream">Radio Stream</a></li>
+          <li><a href="evhub">Comparador EV</a></li>
         </ul>
       </div>
     </div>
@@ -666,52 +663,30 @@ footer{border-top:1px solid var(--line);padding:clamp(3rem,7vh,5rem) 0 2rem;over
         <p class="modal-note">Autenticación segura · Datos sincronizados en Firebase</p>
       </div>
       <div id="viewIn" hidden>
-        <div class="detail-row"><span class="k">Usuario</span><span class="v" id="dName">—</span></div>
+        <div class="detail-row">
+          <span class="k">Nombre visible</span>
+          <span class="v"><input id="nameInput" class="name-input" type="text" aria-label="Nombre visible" spellcheck="false"></span>
+        </div>
         <div class="detail-row"><span class="k">Correo</span><span class="v" id="dMail">—</span></div>
         <div class="detail-row"><span class="k">Autenticación</span><span class="v ok">✔ Verificada (Google)</span></div>
-        <div class="detail-row"><span class="k">Firebase</span><span class="v ok" id="syncState">● Sincronizado</span></div>
+        <div class="detail-row"><span class="k">Firebase</span><span class="v" id="syncState">—</span></div>
+        <p class="auth-err" id="syncErr" hidden></p>
       </div>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-danger" id="logoutBtn" hidden>Cerrar sesión</button>
+      <button class="btn btn-acc" id="applyBtn" hidden>Aplicar</button>
+      <button class="btn btn-danger" id="logoutBtn" hidden>Cerrar Sesión</button>
       <button class="btn btn-ghost" data-close>Cancelar</button>
     </div>
   </div>
 </div>
 
-<!-- Firebase (auth de Google, igual que tu código original) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-
+<!-- ============ UI (script clásico) ============ -->
 <script>
 (function(){
 "use strict";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-/* ============================================================
-   ⚠ CONFIGURACIÓN DE FIREBASE — IMPORTANTE
-   Pega aquí la configuración de tu código original
-   (Firebase Console → Configuración del proyecto → Tus apps).
-   Todo lo demás (login Google, sesión, logout) ya está cableado.
-   ============================================================ */
-const FIREBASE_CONFIG = {
-  apiKey: "PEGA_AQUI_TU_API_KEY",
-  authDomain: "PEGA_AQUI.firebaseapp.com",
-  projectId: "PEGA_AQUI",
-  storageBucket: "PEGA_AQUI.appspot.com",
-  messagingSenderId: "PEGA_AQUI",
-  appId: "PEGA_AQUI"
-};
-
-/* ---- Firebase Auth real ---- */
-let fbAuth=null;
-try{
-  if(window.firebase && FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes("PEGA_AQUI")){
-    firebase.initializeApp(FIREBASE_CONFIG);
-    fbAuth=firebase.auth();
-  }
-}catch(e){console.warn("Firebase:",e);}
 
 /* ---- Reloj ---- */
 const clock=$('#clock');
@@ -748,14 +723,14 @@ addEventListener('scroll',()=>{
 burger.addEventListener('click',()=>{const o=topbar.classList.toggle('open');burger.setAttribute('aria-expanded',o);});
 $$('.mobile-menu a').forEach(a=>a.addEventListener('click',()=>topbar.classList.remove('open')));
 
-/* ---- SCROLL SUAVE (inercia con la rueda del ratón) ---- */
+/* ---- SCROLL SUAVE (inercia) ---- */
 const Smooth=(()=>{
   if(RM || matchMedia('(pointer:coarse)').matches) return {to:y=>scrollTo(0,y)};
   let target=scrollY, current=scrollY, running=false;
   const max=()=>document.documentElement.scrollHeight-innerHeight;
   const clamp=v=>Math.max(0,Math.min(v,max()));
   addEventListener('wheel',e=>{
-    if(document.body.classList.contains('lock'))return; /* modales abiertos: scroll nativo */
+    if(document.body.classList.contains('lock'))return;
     e.preventDefault();
     const mult=e.deltaMode===1?16:1;
     target=clamp(target+e.deltaY*mult);
@@ -768,7 +743,6 @@ const Smooth=(()=>{
     if(current===target){running=false;return;}
     requestAnimationFrame(loop);
   }
-  /* resincroniza si el navegador desplaza por teclado/focus */
   setInterval(()=>{if(!running){const y=scrollY;if(Math.abs(y-current)>1.5){current=target=y;}}},120);
   return {to:y=>{target=clamp(y);if(!running){running=true;requestAnimationFrame(loop);}}};
 })();
@@ -801,6 +775,7 @@ $$('.chip').forEach(ch=>ch.addEventListener('click',()=>{
 }));
 
 /* ---- Overlays ---- */
+const palette=$('#palette'),profile=$('#profile');
 let lastFocus=null;
 function openOv(ov){lastFocus=document.activeElement;ov.hidden=false;
   requestAnimationFrame(()=>ov.classList.add('on'));
@@ -811,17 +786,20 @@ function closeOv(ov){if(ov.hidden)return;ov.classList.remove('on');
   setTimeout(()=>ov.hidden=true,RM?0:240);
   lastFocus&&lastFocus.focus();}
 $$('.ov [data-close]').forEach(b=>b.addEventListener('click',()=>closeOv(b.closest('.ov'))));
+function openProfile(){openOv(profile);window.dispatchEvent(new CustomEvent('profile:open'));}
+window.OLUI={openProfile,closeProfile:()=>closeOv(profile)};
+$$('[data-open-profile]').forEach(b=>b.addEventListener('click',openProfile));
 
 /* ---- Paleta (Ctrl + K) ---- */
-const palette=$('#palette'),plInput=$('#plInput'),plList=$('#plList');
+const plInput=$('#plInput'),plList=$('#plList');
 const INDEX=[
- {t:'UPCT-Datos',d:'Datos y recursos académicos de la UPCT',cat:'Académico',url:'upct-datos'},
+ {t:'UPCT-Datos',d:'Datos y recursos académicos de la UPCT',cat:'Académico',url:'academicos'},
  {t:'Mecanografía',d:'Ejercicios para mejorar tu velocidad de escritura',cat:'Herramienta',url:'mecanografia'},
  {t:'Comparador Gráficas',d:'Rendimiento, precio y specs de GPUs',cat:'Tech',url:'comparador-graficas'},
- {t:'Compresor Online',d:'Comprime archivos en el navegador',cat:'Utilidades',url:'compresor'},
+ {t:'Compresor Online',d:'Comprime archivos en el navegador',cat:'Utilidades',url:'compresor-online'},
  {t:'Traductor',d:'Traducción inteligente multi-idioma',cat:'IA / Utils',url:'traductor'},
- {t:'Radio Stream',d:'Emisoras en directo de todo el mundo',cat:'Media',url:'radio'},
- {t:'Comparador EV',d:'Especificaciones y ranking de eléctricos',cat:'Auto',url:'comparador-ev'},
+ {t:'Radio Stream',d:'Emisoras en directo de todo el mundo',cat:'Media',url:'radio-stream'},
+ {t:'Comparador EV',d:'Especificaciones y ranking de eléctricos',cat:'Auto',url:'evhub'},
  {t:'Enlaces',d:'Recursos y herramientas de uso diario',cat:'Sección /01',url:'enlaces'},
  {t:'Sources',d:'Repositorios, snippets y fuentes técnicas',cat:'Sección /02',url:'sources'},
  {t:'GitHub',d:'trabalonp.github.io',cat:'Externo',url:'https://github.com/trabalonp/trabalonp.github.io',ext:1},
@@ -859,53 +837,6 @@ plInput.addEventListener('keydown',e=>{
 plList.addEventListener('click',e=>{const b=e.target.closest('.pl-item');if(b)execPL(plItems[+b.dataset.i]);});
 $$('[data-open-palette]').forEach(b=>b.addEventListener('click',openPalette));
 
-/* ---- Perfil + Google Sign-In real ---- */
-const profile=$('#profile'),loginBtn=$('#loginBtn'),avatarChip=$('#avatarChip'),
-      viewOut=$('#viewOut'),viewIn=$('#viewIn'),googleBtn=$('#googleBtn'),
-      gLabel=$('#gLabel'),logoutBtn=$('#logoutBtn'),pStatus=$('#pStatus'),
-      authErr=$('#authErr'),pAv=$('#pAv'),dName=$('#dName'),dMail=$('#dMail'),
-      avBox=$('#avBox'),avName=$('#avName');
-function openProfile(){authErr.hidden=true;openOv(profile);}
-$$('[data-open-profile]').forEach(b=>b.addEventListener('click',openProfile));
-
-function showErr(msg){authErr.textContent=msg;authErr.hidden=false;}
-function setUI(user){
-  viewOut.hidden=!!user;viewIn.hidden=!user;logoutBtn.hidden=!user;
-  loginBtn.hidden=!!user;avatarChip.hidden=!user;
-  if(user){
-    const name=user.displayName||'Usuario';
-    dName.textContent=name;
-    dMail.textContent=user.email||'—';
-    pStatus.textContent='● SESIÓN ACTIVA';pStatus.classList.add('ok');
-    avName.textContent=name.split(' ')[0].toUpperCase();
-    if(user.photoURL){avBox.innerHTML='<img src="'+user.photoURL+'" alt="">';pAv.innerHTML='<img src="'+user.photoURL+'" alt="">';}
-    else{const ini=(name[0]||'T').toUpperCase();avBox.textContent=ini;pAv.textContent=ini;}
-  }else{
-    pStatus.textContent='SIN SESIÓN ACTIVA';pStatus.classList.remove('ok');
-    avBox.textContent='T';pAv.textContent='T';
-  }
-}
-if(fbAuth){
-  fbAuth.onAuthStateChanged(setUI);
-}else{
-  googleBtn.addEventListener('click',()=>showErr('⚠ Falta tu configuración de Firebase: pega FIREBASE_CONFIG al inicio del <script> final (la tienes en tu código original).'));
-}
-googleBtn.addEventListener('click',()=>{
-  if(!fbAuth)return;
-  authErr.hidden=true;googleBtn.disabled=true;
-  gLabel.textContent='Conectando…';
-  const sp=document.createElement('span');sp.className='spinner';googleBtn.prepend(sp);
-  const provider=new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithPopup(provider)
-    .catch(err=>{
-      if(err.code!=='auth/popup-closed-by-user'&&err.code!=='auth/cancelled-popup-request'){
-        showErr('Error de autenticación: '+(err.message||err.code));
-      }
-    })
-    .finally(()=>{sp.remove();gLabel.textContent='Acceso vía Google';googleBtn.disabled=false;});
-});
-logoutBtn.addEventListener('click',()=>{fbAuth&&fbAuth.signOut();});
-
 /* ---- Teclado global ---- */
 document.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();
@@ -925,6 +856,152 @@ document.addEventListener('keydown',e=>{
   }
 });
 })();
+</script>
+
+<!-- ============ FIREBASE + AUTH (configuración real de tu código original) ============ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+/* Configuración original del proyecto onelife-cec55 */
+const firebaseConfig = {
+  apiKey:            "AIzaSyDCm1pFZLRXk34UIGU3UY0ltLkyHkElsIg",
+  authDomain:        "onelife-cec55.firebaseapp.com",
+  projectId:         "onelife-cec55",
+  storageBucket:     "onelife-cec55.firebasestorage.app",
+  messagingSenderId: "599128086819",
+  appId:             "1:599128086819:web:af149214fe5b68a12ad496",
+  databaseURL:       "https://onelife-cec55-default-rtdb.europe-west1.firebasedatabase.app"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const provider = new GoogleAuthProvider();
+
+const $=s=>document.querySelector(s);
+const profile=$('#profile'), loginBtn=$('#loginBtn'), avatarChip=$('#avatarChip'),
+      viewOut=$('#viewOut'), viewIn=$('#viewIn'), googleBtn=$('#googleBtn'), gLabel=$('#gLabel'),
+      logoutBtn=$('#logoutBtn'), applyBtn=$('#applyBtn'), pStatus=$('#pStatus'), authErr=$('#authErr'),
+      syncErr=$('#syncErr'), pAv=$('#pAv'), nameInput=$('#nameInput'), dMail=$('#dMail'),
+      syncState=$('#syncState'), avBox=$('#avBox'), avName=$('#avName');
+
+/* Caché local (mismas claves que tu código original) */
+const CK_LOGGED='ol_logged', CK_AVATAR='ol_avatar', CK_NAME='ol_name', CK_EMAIL='ol_email';
+let lastKnownName='';
+
+function showErr(el,msg){el.textContent=msg;el.hidden=false;}
+function initials(n){return (n||'T').trim().charAt(0).toUpperCase();}
+
+function paintLogged(name,email,photo){
+  viewOut.hidden=true; viewIn.hidden=false;
+  logoutBtn.hidden=false; applyBtn.hidden=false;
+  loginBtn.hidden=true; avatarChip.hidden=false;
+  lastKnownName=name||''; nameInput.value=name||'';
+  dMail.textContent=email||'—';
+  pStatus.textContent='● SESIÓN ACTIVA'; pStatus.classList.add('ok');
+  avName.textContent=(name||'CUENTA').split(' ')[0].toUpperCase();
+  if(photo){avBox.innerHTML='<img src="'+photo+'" alt="">';pAv.innerHTML='<img src="'+photo+'" alt="">';}
+  else{avBox.textContent=initials(name);pAv.textContent=initials(name);}
+}
+function paintLoggedOut(){
+  viewOut.hidden=false; viewIn.hidden=true;
+  logoutBtn.hidden=true; applyBtn.hidden=true;
+  loginBtn.hidden=false; avatarChip.hidden=true;
+  pStatus.textContent='SIN SESIÓN ACTIVA'; pStatus.classList.remove('ok');
+  avBox.textContent='T'; pAv.textContent='T';
+  nameInput.value=''; dMail.textContent='—';
+  syncState.textContent='—'; syncState.classList.remove('ok');
+  syncErr.hidden=true;
+}
+function saveCache(name,email,photo){
+  localStorage.setItem(CK_LOGGED,'true');
+  localStorage.setItem(CK_NAME,name||'');
+  localStorage.setItem(CK_EMAIL,email||'');
+  if(photo)localStorage.setItem(CK_AVATAR,photo);
+}
+function clearCache(){
+  localStorage.setItem(CK_LOGGED,'false');
+  localStorage.removeItem(CK_AVATAR);
+  localStorage.removeItem(CK_NAME);
+  localStorage.removeItem(CK_EMAIL);
+}
+
+/* Carga instantánea desde caché (igual que el original) */
+if(localStorage.getItem(CK_LOGGED)==='true'){
+  paintLogged(localStorage.getItem(CK_NAME),localStorage.getItem(CK_EMAIL),localStorage.getItem(CK_AVATAR));
+  syncState.textContent='Sincronizando…';
+}
+
+onAuthStateChanged(auth, async user=>{
+  if(user){
+    paintLogged(user.displayName,user.email,user.photoURL);
+    syncState.textContent='Sincronizando…'; syncState.classList.remove('ok');
+    try{
+      const r=ref(db,'users/'+user.uid);
+      const snap=await get(r);
+      if(snap.exists()){
+        const d=snap.val()||{};
+        if(d.name){nameInput.value=d.name;lastKnownName=d.name;avName.textContent=d.name.split(' ')[0].toUpperCase();}
+      }else{
+        await set(r,{name:user.displayName||'',email:user.email||'',photo:user.photoURL||'',createdAt:Date.now()});
+      }
+      saveCache(nameInput.value||user.displayName||'',user.email||'',user.photoURL||'');
+      syncState.textContent='● Sincronizado'; syncState.classList.add('ok');
+    }catch(e){
+      console.warn('RTDB:',e);
+      saveCache(nameInput.value||user.displayName||'',user.email||'',user.photoURL||'');
+      syncState.textContent='● Sesión activa (sin sync RTDB)'; syncState.classList.remove('ok');
+    }
+  }else{
+    paintLoggedOut();
+    if(localStorage.getItem(CK_LOGGED)==='true')clearCache();
+  }
+});
+
+function setBusy(b){
+  googleBtn.disabled=b; loginBtn.disabled=b;
+  gLabel.textContent=b?'Conectando…':'Acceso vía Google';
+  const old=googleBtn.querySelector('.spinner'); if(old)old.remove();
+  if(b){const sp=document.createElement('span');sp.className='spinner';googleBtn.prepend(sp);}
+}
+async function doSignIn(){
+  authErr.hidden=true; setBusy(true);
+  try{
+    await signInWithPopup(auth, provider);
+    if(!profile.hidden) window.OLUI.closeProfile();
+  }catch(err){
+    const code=(err&&err.code)||'';
+    if(code!=='auth/popup-closed-by-user' && code!=='auth/cancelled-popup-request'){
+      if(profile.hidden) window.OLUI.openProfile();
+      showErr(authErr,'Error al iniciar sesión: '+((err&&err.message)||code));
+    }
+  }finally{ setBusy(false); }
+}
+loginBtn.addEventListener('click',doSignIn);
+googleBtn.addEventListener('click',doSignIn);
+logoutBtn.addEventListener('click',()=>signOut(auth));
+
+applyBtn.addEventListener('click',async()=>{
+  const user=auth.currentUser; if(!user)return;
+  const val=nameInput.value.trim();
+  if(!val){showErr(syncErr,'El nombre no puede estar vacío.');return;}
+  syncErr.hidden=true; applyBtn.disabled=true;
+  try{
+    await set(ref(db,'users/'+user.uid+'/name'),val);
+    lastKnownName=val; localStorage.setItem(CK_NAME,val);
+    avName.textContent=val.split(' ')[0].toUpperCase();
+    syncState.textContent='● Sincronizado'; syncState.classList.add('ok');
+  }catch(e){
+    showErr(syncErr,'No se pudo guardar en Firebase: '+((e&&e.message)||'error'));
+  }finally{ applyBtn.disabled=false; }
+});
+
+addEventListener('profile:open',()=>{
+  authErr.hidden=true; syncErr.hidden=true;
+  nameInput.value=lastKnownName;
+});
 </script>
 </body>
 </html>
