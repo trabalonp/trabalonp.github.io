@@ -1,0 +1,380 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ═════════════════════════════════════════════════════════════════════
+    // firestore.rules.estricto — FASE 2 del bloque de seguridad (objetivo).
+    //
+    // ⚠ NO DESPLEGAR TODAVÍA. Este fichero cierra también la LECTURA de
+    //   `entrenamientos`, y con el código actual el calendario y las gráficas
+    //   del ENTRENADOR dejarán de cargar: HomeScreen.js:414 y
+    //   CalendarScreen.js:420 consultan where('userId','==',atleta) y
+    //   Firestore no puede demostrar una regla basada en get() para una
+    //   consulta. Antes de desplegarlo hay que hacer una de estas dos cosas:
+    //     (a) escribir `coachUid` en cada entreno y consultar por ese campo, o
+    //     (b) meter los atletas del coach en un custom claim del token.
+    //   Está explicado en el README, sección «Fase 2».
+    //
+    // Para el despliegue de hoy (sin romper nada) usa `firestore.rules`.
+    // El backend (Admin SDK) no pasa por estas reglas.
+    //
+    // Fuente autoritativa de campos y rutas: docs/inventario-escrituras.md
+    // (auditoría B1, 2026-10-21). Todas las líneas citadas abajo son reales.
+    //
+    // PRINCIPIO GENERAL: TODO exige request.auth != null; nada es público.
+    // Las colecciones NO declaradas quedan denegadas por defecto (match
+    // final /{document=**}) — cubre ia_keys, ia_feedback y solicitudes
+    // (confirmado en el inventario §14 que el cliente NO las usa).
+    //
+    // ⚠ LIMITACIÓN CONOCIDA DE QUERIES (Firestore, no nuestra):
+    //   El evaluador de consultas solo admite una query si puede PROBAR la
+    //   regla con las restricciones de la propia query; las ramas basadas en
+    //   get()/esSuEntrenador() no son probables en una consulta. Las queries
+    //   del propietario (where userId == uid) y de apuntados
+    //   (where asignados array-contains uid) siguen funcionando; las del
+    //   ENTRENADOR sobre el calendario del atleta (where userId == atleta,
+    //   HomeScreen.js:414-421, CalendarScreen.js:420-436) pueden fallar con
+    //   "permission-denied" al desplegar. Mitigación futura: custom claims
+    //   de coach en el token, o replicar coachUid en el documento. Se deja
+    //   anotado como riesgo abierto (ver README).
+    // ═════════════════════════════════════════════════════════════════════
+
+    // ── Vinculación entrenador ───────────────────────────────────────────
+    // REUTILIZADA tal cual de firestore.rules (sin cambios): true si el
+    // usuario autenticado es el entrenador vinculado del perfil `userId`.
+    // El campo de vinculación admite 4 variantes reales: `entrenadorUid`
+    // (string), `entrenador` (string), `entrenador` (mapa {uid} o {email})
+    // y `entrenador` (lista de uids). Primero se comprueba que el campo
+    // exista. Las funciones que usan $(database) deben vivir DENTRO de este
+    // match: fuera de él la variable no existe y la consola rechaza la
+    // publicación.
+    function esSuEntrenador(userId) {
+      let p = get(/databases/$(database)/documents/perfiles/$(userId)).data;
+      return ('entrenadorUid' in p && p.entrenadorUid == request.auth.uid)
+          || ('entrenador' in p && (
+               (p.entrenador is string && p.entrenador == request.auth.uid)
+            || (p.entrenador is map
+                && (('uid' in p.entrenador && p.entrenador.uid == request.auth.uid)
+                    || ('email' in p.entrenador
+                        && 'email' in request.auth.token
+                        && p.entrenador.email == request.auth.token.email)))
+            || (p.entrenador is list && request.auth.uid in p.entrenador)));
+    }
+
+    // ── Helpers de entrenos (matriz real del cliente) ────────────────────
+    function esEvento(w) {
+      return 'tipo' in w && w.tipo == 'Evento';
+    }
+    function estaEnAsignados(w, uid) {
+      return 'asignados' in w && w.asignados is list && uid in w.asignados;
+    }
+    // LECTURA: propietario (userId) O entrenador vinculado O apuntado.
+    // Cubre las lecturas reales: por userId (HomeScreen.js:414-415,
+    // CalendarScreen.js:420-427, analyticsEngine), por asignados
+    // array-contains (HomeScreen.js:420-421, CalendarScreen.js:432-436)
+    // y getDoc por id (HomeScreen.js:249, WorkoutDetailModal.js:604).
+    function puedeLeerEntreno(w) {
+      return request.auth != null && (
+        ('userId' in w && w.userId == request.auth.uid)
+        || estaEnAsignados(w, request.auth.uid)
+        || ('userId' in w && esSuEntrenador(w.userId)));
+    }
+    // ESCRITURA: replica el candado del cliente (WorkoutDetailModal.js:202-225):
+    //  · El dueño edita/borra TODO salvo un Evento que NO creó él (creadoPor
+    //    distinto, o documento antiguo sin creadoPor con el dueño apuntado:
+    //    WorkoutDetailModal.js:216-218 asume creador coach en ese caso).
+    //  · El entrenador vinculado del dueño edita/borra todo (ZonesScreen,
+    //    AddWorkoutModal, CalendarScreen.js:771 y WorkoutDetailModal escriben
+    //    con la auth del coach; la relación se verifica AQUÍ en perfiles).
+    //  · Un apuntado de un Evento NO edita: solo marca estado/duración al
+    //    ejecutarlo (ver allow update; PasosResumen.js:458-461).
+    function puedeEditarEntreno(w) {
+      return request.auth != null && (
+        ('userId' in w && w.userId == request.auth.uid
+          && !(esEvento(w) && (
+                ('creadoPor' in w && w.creadoPor != request.auth.uid)
+                || (!('creadoPor' in w) && estaEnAsignados(w, request.auth.uid)))))
+        || ('userId' in w && esSuEntrenador(w.userId)));
+    }
+
+    // Un update nunca puede cambiar de dueño ni de creador (si no, el dueño
+    // podría "regalar" el documento a otro usuario y metérselo en el
+    // calendario, o el entrenador apropiarse de él).
+    function sinCambiarDueno() {
+      return !(request.resource.data.diff(resource.data).affectedKeys()
+                 .hasAny(['userId', 'creadoPor']));
+    }
+
+    // ══════════════════ ENTRENAMIENTOS + SUBCOLECCIONES ══════════════════
+    match /entrenamientos/{docId} {
+      allow read: if puedeLeerEntreno(resource.data);
+      // CREAR: el propio uid (import FIT: SyncService.js:86-104 no lleva
+      // creadoPor) O un atleta del que soy entrenador, siempre con
+      // creadoPor == mi uid (AddWorkoutModal.js:328-347, WorkoutDetailModal
+      // .js:961-971 y 1010-1023). NO se confía en el userId que manda el
+      // cliente para el caso coach: la relación se verifica en perfiles.
+      allow create: if request.auth != null && (
+        request.resource.data.userId == request.auth.uid
+        || (esSuEntrenador(request.resource.data.userId)
+            && request.resource.data.creadoPor == request.auth.uid));
+      // EDITAR: dueño/entrenador según la matriz; un APUNTADO solo puede
+      // marcar estado:'completo' (+ duracion del cronómetro) al ejecutar el
+      // entreno (components/PasosResumen.js:458-461). No puede tocar nada más.
+      allow update: if (puedeEditarEntreno(resource.data) && sinCambiarDueno())
+        || (request.auth != null
+            && estaEnAsignados(resource.data, request.auth.uid)
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['estado', 'duracion']));
+      allow delete: if puedeEditarEntreno(resource.data);
+
+      // Detalles: los mismos actores que el padre. Los COMENTARIOS los
+      // escribe cualquiera en el cliente (WorkoutDetailModal.js:872-874,
+      // 918) pero aquí quedan restringidos a dueño/entrenador: decisión
+      // documentada (los apuntados de un Evento ya no comentan; aceptable
+      // y coherente con "escritura = propietario o entrenador vinculado").
+      match /detalles/{subDoc} {
+        allow read: if puedeLeerEntreno(
+          get(/databases/$(database)/documents/entrenamientos/$(docId)).data);
+        allow create, update, delete: if puedeEditarEntreno(
+          get(/databases/$(database)/documents/entrenamientos/$(docId)).data);
+      }
+      // Registros (puntos GPS/FC): solo los escribe el propietario en la
+      // importación FIT (SyncService.js:98-100); el entrenador puede
+      // leerlos. Mismos actores que el padre.
+      match /registros/{subDoc} {
+        allow read: if puedeLeerEntreno(
+          get(/databases/$(database)/documents/entrenamientos/$(docId)).data);
+        allow create, update, delete: if puedeEditarEntreno(
+          get(/databases/$(database)/documents/entrenamientos/$(docId)).data);
+      }
+    }
+
+    // ══════════════ ANALYTICS CURVES (nuevas, Bloque C) ══════════════════
+    // Lectura: propietario O su entrenador vinculado (el coach ve las curvas
+    // del atleta pero, por diseño del Bloque C 4.5, NO escribe digests:
+    // cuando el coach mira a un atleta calcula en memoria con el legacy).
+    // Escritura: SOLO el propietario.
+    match /analyticsCurves/{uid} {
+      allow read: if request.auth != null
+                   && (request.auth.uid == uid || esSuEntrenador(uid));
+      allow write: if request.auth != null && request.auth.uid == uid;
+
+      match /months/{mes} {
+        allow read: if request.auth != null
+                     && (request.auth.uid == uid || esSuEntrenador(uid));
+        allow write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+
+    // ══════════════════════════════ PERFILES ═════════════════════════════
+    match /perfiles/{userId} {
+      // LECTURA abierta a autenticados: la app social la necesita
+      // (nombres en comentarios/asignados, atletas del coach vía
+      // where('entrenador','==',uid) en SocialScreen.js:920-932, foto
+      // legacy en avatarCache.js:292-300…). ⚠ RIESGO ABIERTO CONFIRMADO
+      // (inventario §15): el perfil contiene expoPushToken (App.js:408),
+      // dni, telefono, email, fechaNac, sexo y foto base64
+      // (ProfileScreen.js:648-653): con lectura abierta todo eso es
+      // visible para cualquier usuario autenticado. Propuesta para el
+      // futuro: dividir en perfiles/{uid} (público) y perfilesPrivados/{uid}
+      // (token push + datos personales) o sacar al menos expoPushToken.
+      allow read: if request.auth != null;
+
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // ESCRITURA SELECTIVA:
+      //  · El dueño escribe TODO (perfil, zonas, marcas, language,
+      //    notificacionesActivadas, expoPushToken, pendingDeletes…).
+      //  · El ENTRENADOR vinculado SOLO puede escribir las claves exactas
+      //    que escribe el coach real, verificadas en el código:
+      //      - ZonesScreen.js:455-466 → zonasFC, zonasRitmo, zonasPotencia,
+      //        zonasActividad, umbralRitmo, umbralCiclismo, umbralFC,
+      //        fcUmbral, fcReposo, umbralPotencia
+      //        (OJO: en el perfil `umbralFC` es la FC MÁXIMA y el umbral de
+      //        FC de verdad va en `fcUmbral`; no existen campos fcmax/
+      //        fcreposo — SyncService.js:51-52).
+      //      - MarcasScreen.js:608-610 → marcasDefs, marcasResults,
+      //        marcasMetrics
+      //    Con hasOnly el coach no puede pisar dni/telefono/email/
+      //    expoPushToken/entrenador ni ningún otro campo.
+      //  · CONSECUENCIA documentada: el fallback offline de borrado de
+      //    eventos de Intervals.icu escribe pendingDeletes en el perfil del
+      //    DUEÑO del entreno (WorkoutDetailModal.js:189). Si lo dispara el
+      //    coach sobre el perfil del atleta queda DENEGADO (falla en
+      //    silencio, línea 190). Solo el propio dueño puede encolar sus
+      //    pendingDeletes. Si se quiere permitir al coach, añadir
+      //    'pendingDeletes' a la lista hasOnly.
+      allow update: if request.auth != null && (
+        request.auth.uid == userId
+        || (esSuEntrenador(userId)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                 'zonasFC', 'zonasRitmo', 'zonasPotencia', 'zonasActividad',
+                 'umbralRitmo', 'umbralCiclismo', 'umbralFC', 'fcUmbral',
+                 'fcReposo', 'umbralPotencia',
+                 'marcasDefs', 'marcasResults', 'marcasMetrics'])));
+
+      allow delete: if request.auth != null && request.auth.uid == userId;
+
+      // Notificaciones (historial propio): SOLO el dueño del perfil lee y
+      // escribe. El cliente SÍ crea su propio historial de solicitudes
+      // (App.js:182-189), así que el create del dueño está permitido
+      // (en firestore.rules actual estaba en false); update limitado a
+      // marcar leido (NotificacionesScreen.js:134, 175-179); borrados del
+      // dueño (NotificacionesScreen.js:209, AppSettingsScreen.js:277-283).
+      match /notificaciones/{notificationId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow create: if request.auth != null && request.auth.uid == userId;
+        allow update: if request.auth != null
+                       && request.auth.uid == userId
+                       && request.resource.data.diff(resource.data).affectedKeys()
+                            .hasOnly(['leido']);
+        allow delete: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // ══════════════ LIBRERÍA Y ARCHIVOS DE LIBRERÍA ══════════════════════
+    // Campo de propietario REAL: `userId`, en AMBAS colecciones
+    // (AddWorkoutModal.js:388, LibreriaDrive.js:174, archivosUpload.js:92,
+    // ArchivosPicker.js:200). Todas las lecturas del cliente van filtradas
+    // por where('userId','==',uid) (LibreriaDrive.js:83,471-475,
+    // ArchivosPicker.js:133-147), así que lectura y escritura se cierran al
+    // propietario.
+    match /libreria/{docId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    match /archivosLib/{docId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // ════════════════════════════════ POSTS ══════════════════════════════
+    match /posts/{postId} {
+      // El tablón es GLOBAL (sin grupos): lectura abierta a autenticados.
+      allow read: if request.auth != null;
+
+      // CREAR: nadie puede suplantar autorUid (SocialScreen.js:566-576,
+      // 2621-2634 lo ponen a me.uid).
+      allow create: if request.auth != null
+                     && request.resource.data.autorUid == request.auth.uid;
+
+      // EDITAR — decisión precisa (nombres REALES de campos confirmados en
+      // el inventario §13):
+      //  · El AUTOR edita lo que quiera (texto, borrado lógico propio…).
+      //  · Cualquier OTRO autenticado SOLO puede tocar las claves de
+      //    reacción/voto: el mapa `reacciones` (SocialScreen.js:1084-1090
+      //    escribe reacciones.<emoji> con arrayUnion/arrayRemove/deleteField;
+      //    top-level key afectada = 'reacciones') y `encuesta.votos`
+      //    (SocialScreen.js:1105 escribe encuesta.votos.<uid>; top-level key
+      //    afectada = 'encuesta'). Para que un no-autor pueda tocar
+      //    'encuesta', el post debe TENER encuesta (mapa) y `pregunta` y
+      //    `opciones` deben quedar IDÉNTICAS: solo se admite cambiar votos.
+      //    → Reaccionar/votar: permitido a cualquier autenticado.
+      //    → Editar texto/borrado lógico AJENO: DENEGADO. El borrado lógico
+      //      de un post ajeno (SocialScreen.js:603,630) queda denegado: la
+      //      vía oficial es el servidor /social/delete-message; el fallback
+      //      directo fallará en silencio (el parche local sí se aplica en
+      //      el dispositivo, pero no se propaga). Decisión asumida del plan.
+      //  · RIESGO residual del esquema: dentro del mapa `reacciones` un
+      //    usuario malicioso puede reescribir arrays completos de uids (las
+      //    reglas no ven la semántica de arrayUnion); es un riesgo de
+      //    integridad, no de datos privados.
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.autorUid
+        || (
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['reacciones', 'encuesta'])
+          && (!request.resource.data.diff(resource.data).affectedKeys()
+                .hasAny(['encuesta'])
+              || ('encuesta' in resource.data && resource.data.encuesta is map
+                  && 'encuesta' in request.resource.data
+                  && request.resource.data.encuesta is map
+                  && request.resource.data.encuesta.pregunta == resource.data.encuesta.pregunta
+                  && request.resource.data.encuesta.opciones == resource.data.encuesta.opciones))
+        ));
+
+      // BORRADO físico: solo el autor. El cliente no lo usa (borrado lógico);
+      // el físico lo hace el backend con Admin (que no pasa por estas reglas).
+      allow delete: if request.auth != null && request.auth.uid == resource.data.autorUid;
+    }
+
+    // ══════════════ WELLNESS / FITNESS (solo lectura cliente) ════════════
+    // El cliente SOLO LEE wellness y fitness (inventario §11): wellness se
+    // lee incluso de otros usuarios para el ranking de retos
+    // (SocialScreen.js:950-963); fitness lo calcula y escribe el servidor
+    // con Admin. Escritura desde el cliente: NINGUNA.
+    match /wellness/{userId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /fitness/{userId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // ══════════════════════════════ ANALYSIS ═════════════════════════════
+    // Lectura: propietario + su entrenador vinculado. Escritura: solo el
+    // propietario (AnalysisScreen.js:257,334).
+    match /analysis/{userId} {
+      allow read: if request.auth != null
+                   && (request.auth.uid == userId || esSuEntrenador(userId));
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ══════════════════════════════ AVATARES ═════════════════════════════
+    // setDoc solo sobre el doc propio (avatarCache.js:213); lectura abierta
+    // a autenticados (el chat la necesita, avatarCache.js:249-342).
+    match /avatares/{userId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ════════════════════════════════ RETOS ══════════════════════════════
+    // Se mantiene el bloque YA ENDURECIDO de firestore.rules (coherente con
+    // el inventario §9): lectura a autenticados; crear solo con
+    // creadorUid == uid; actualizar solo el creador o el invitado que se
+    // apunta (arrayUnion de aceptados, SocialScreen.js:1023); borrar solo
+    // el creador (SocialScreen.js:1045).
+    match /retos/{retoId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.creadorUid == request.auth.uid;
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.creadorUid
+        || (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['aceptados'])
+          && request.auth.uid in request.resource.data.aceptados
+          && (!('aceptados' in resource.data) || !(request.auth.uid in resource.data.aceptados))
+          && (!('invitados' in resource.data) || request.auth.uid in resource.data.invitados)
+        )
+      );
+      allow delete: if request.auth != null && request.auth.uid == resource.data.creadorUid;
+    }
+
+    // ══════════════════════════════ SOPORTE ══════════════════════════════
+    // El cliente solo hace addDoc con su propio userId (SupportScreen.js:58-64);
+    // no hay lecturas ni ediciones desde el cliente.
+    match /soporte/{docId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+
+    // ═══════════════════════ INTERVALS_CONNECTIONS ═══════════════════════
+    // Única referencia del cliente: getDoc del doc PROPIO para comprobar si
+    // hay conexión (HomeScreen.js:485). Las credenciales se guardan por
+    // HTTP (GarminSyncService), no por Firestore: escritura denegada.
+    match /intervals_connections/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    // ════════════════════ CIERRE POR DEFECTO ═════════════════════════════
+    // Cualquier colección o subcolección NO declarada arriba queda denegada.
+    // Cubre explícitamente ia_keys, ia_feedback y solicitudes (el cliente
+    // no las usa: inventario §14) y cualquier colección futura. El backend
+    // no se ve afectado: el Admin SDK no pasa por estas reglas.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

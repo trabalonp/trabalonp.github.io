@@ -1,0 +1,1530 @@
+# CAMBIOS-app.diff - cambios de la APP respecto a version22102026.zip
+#
+#   cd mi-app-entrenos
+#   patch -p1 --forward < CAMBIOS-app.diff      (o copia encima corregidos/app/)
+#
+# Incluye: services/{analyticsEngine,curvasStore,perfLog}.js,
+#          screens/AnalysisScreen.js, package.json (scripts + firebase-tools) y
+#          10 tests (los que necesitaban el servidor ahora hacen SKIP con un
+#          resolvedor portable; 2 asserts fijaban rutas/numeros de un equipo).
+#
+# Ficheros NUEVOS que hay que copiar a mano (ver LEEME.md):
+#   firestore.rules  firestore.rules.estricto  firebase.json  .firebaserc
+#   firestore.indexes.json  .gitignore  tests/server-ruta.js  tests/run-all.js
+#   tests/curvas-zonas-test.js  tests/rules/firestore-rules-test.js
+#
+diff -ruN a/package.json b/package.json
+--- a/package.json	2026-10-21 22:39:24.769545904 +0000
++++ b/package.json	2026-10-21 22:39:24.785545985 +0000
+@@ -4,11 +4,18 @@
+   "version": "1.0.0",
+   "scripts": {
+     "start": "expo start",
+-    "reset-project": "node ./scripts/reset-project.js",
+     "android": "expo start --android",
+     "ios": "expo start --ios",
+     "web": "expo start --web",
+-    "lint": "expo lint"
++    "lint": "expo lint",
++    "reset-project": "node ./scripts/reset-project.js",
++    "test": "node tests/run-all.js",
++    "test:rules": "node tests/rules/firestore-rules-test.js",
++    "test:rules:estricto": "node tests/rules/firestore-rules-test.js --estricto",
++    "emu": "firebase emulators:start --only firestore",
++    "rules:deploy": "firebase deploy --only firestore:rules",
++    "indexes:export": "firebase firestore:indexes > firestore.indexes.produccion.json",
++    "indexes:deploy": "firebase deploy --only firestore:indexes"
+   },
+   "dependencies": {
+     "@expo/vector-icons": "^15.0.3",
+@@ -69,10 +76,11 @@
+     "victory-native": "^41.20.2"
+   },
+   "devDependencies": {
+-    "@types/react": "~19.2.4",
+     "@firebase/rules-unit-testing": "^2.0.4",
++    "@types/react": "~19.2.4",
+     "eslint": "^9.25.0",
+     "eslint-config-expo": "~57.0.2",
++    "firebase-tools": "^13.0.0",
+     "typescript": "~6.0.3"
+   },
+   "private": true
+diff -ruN a/screens/AnalysisScreen.js b/screens/AnalysisScreen.js
+--- a/screens/AnalysisScreen.js	2026-10-21 22:39:24.765545884 +0000
++++ b/screens/AnalysisScreen.js	2026-10-21 22:39:24.785545985 +0000
+@@ -32,7 +32,7 @@
+ import { bumpRefresh, getEntrenamientos } from '../services/chartCache';
+ import { getSettingsSnapshot, getThemeColors, useAppSettings } from '../services/appSettings';
+ import { zonasDeActividad } from '../services/zonas';
+-import { getAnalyticsDays, syncAnalyticsDays, invalidateAnalytics, buildDaysFromWorkouts, buildSeries, buildRecords, getStreamsStats, STREAM_LABELS } from '../services/analyticsEngine';
++import { getAnalyticsDays, syncAnalyticsDays, invalidateAnalytics, invalidateStreamsCache, buildDaysFromWorkouts, buildSeries, buildRecords, getStreamsStats, STREAM_LABELS } from '../services/analyticsEngine';
+ import { procesarPendientes } from '../services/curvasStore';
+ 
+ const NAVY='#0D1B2A', CARD='#162032', BLUE='#4A90E2', BORDER='#1E3048', WHITE='#E8EDF5', GREEN='#2DB37A';
+@@ -316,7 +316,13 @@
+           // Zonas/curvas: SOLO reflotan si la firma de entrenos cambió
+           // (streamsChanged); si no, basta con refrescar los días.
+           if (res?.streamsChanged) {
+-            forceStreamsRef.current = true;
++            // A4 (revisado): se tira la caché de zonas/curvas (memoria +
++            // AsyncStorage) y se recalcula SIN `force`. Con el camino digest
++            // eso son ~24 documentos mensuales; `force` lanzaba un backfill
++            // COMPLETO (pagina todos los resúmenes y relee los registros que
++            // falten) en cada sincronización con cambios, que era justo lo
++            // que se quería evitar. `force` queda solo para el botón manual.
++            invalidateStreamsCache(uid);
+             setStreams({});
+           }
+           const shared2 = buildDaysFromWorkouts(getEntrenamientos(uid));
+diff -ruN a/services/analyticsEngine.js b/services/analyticsEngine.js
+--- a/services/analyticsEngine.js	2026-10-21 22:39:24.765545884 +0000
++++ b/services/analyticsEngine.js	2026-10-21 22:40:13.793793502 +0000
+@@ -132,6 +132,35 @@
+   return { fcZ, rtZ };
+ }
+ 
++// Hash corto (djb2 → base36) para meter la firma de zonas en las claves de
++// caché sin alargarlas.
++function hashCorto(txt) {
++  let h = 5381;
++
++  for (let i = 0; i < txt.length; i++) {
++    h = ((h << 5) + h + txt.charCodeAt(i)) | 0;
++  }
++
++  return (h >>> 0).toString(36);
++}
++
++/* Firma de las zonas que REALMENTE cambian el resultado (FC y ritmo resueltos
++   con las mismas condiciones que usa el cálculo). Va en la clave de las cachés
++   de curvas: si el usuario cambia una zona o un umbral en Zonas, la clave
++   cambia y el motor recalcula. Antes, el snapshot cacheado se seguía sirviendo
++   con las zonas nuevas aplicadas a segundos calculados con las viejas (las
++   etiquetas cambiaban, el reparto no) hasta pulsar refrescar. */
++export function firmaZonasDe(profile) {
++  try {
++    const { fcZ, rtZ } = parseStreamZones(profile || null);
++    const norm = (arr) => arr.map((b) => `${b.label}:${b.lo}:${b.hi}`).join('|');
++
++    return hashCorto(`${norm(fcZ)}#${norm(rtZ)}`);
++  } catch (e) {
++    return 'sz';
++  }
++}
++
+ function normalizeUmbral(v) {
+   if (v == null) return null;
+ 
+@@ -813,12 +842,40 @@
+   Object.keys(streamMem)
+     .filter((key) => key.startsWith(`${uid}:`))
+     .forEach((key) => delete streamMem[key]);
+-  for (const p of ['30d', '3m', '6m', '1y', '2y', 'todo']) {
+-    // Las claves llevan el sufijo de la actividad de zonas (zonaAct)
+-    for (const za of ['General', 'Running', 'Ciclismo', 'Natación']) {
+-      AsyncStorage.removeItem(`analyticsStreams_v${CACHE_V}_${uid}_${p}_${za}`).catch(() => {});
++
++  // Se borran TODAS las claves del usuario por prefijo (antes eran 6 períodos
++  // × 4 actividades fijas: cualquier combinación nueva —o la firma de zonas
++  // añadida a la clave— quedaba fuera y el snapshot viejo sobrevivía).
++  const prefijo = `analyticsStreams_v${CACHE_V}_${uid}_`;
++  const borrarPorPrefijo = async () => {
++    try {
++      if (typeof AsyncStorage.getAllKeys === 'function') {
++        const keys = await AsyncStorage.getAllKeys();
++        const propias = keys.filter((k) => k.startsWith(prefijo));
++
++        if (propias.length) {
++          if (typeof AsyncStorage.multiRemove === 'function') {
++            await AsyncStorage.multiRemove(propias);
++          } else {
++            await Promise.all(propias.map((k) => AsyncStorage.removeItem(k)));
++          }
++        }
++
++        return;
++      }
++    } catch (e) {
++      console.warn('[analytics] barrido de cachés de streams falló:', e.message);
+     }
+-  }
++
++    // Respaldo si AsyncStorage no expone getAllKeys.
++    for (const p of ['30d', '3m', '6m', '1y', '2y', 'todo']) {
++      for (const za of ['General', 'Running', 'Ciclismo', 'Natación']) {
++        AsyncStorage.removeItem(`${prefijo}${p}_${za}`).catch(() => {});
++      }
++    }
++  };
++
++  borrarPorPrefijo();
+ }
+ 
+ /* A5: invalidación al editar/borrar un entreno (fecha/tipo/estado/duración/
+@@ -859,17 +916,19 @@
+ }
+ 
+ async function computeStreamsStatsLegacy(uid, period, profile, { force = false, zonaAct = 'General' } = {}) {
+-  // zonaAct en la clave: cambiar la actividad de las zonas de ritmo debe
+-  // recalcular, no servir la caché de otra actividad.
+-  const key = `${uid}:${period}:${zonaAct}`;
++  // zonaAct + firma de zonas en la clave: cambiar la actividad de las zonas de
++  // ritmo o una zona/umbral debe recalcular, no servir un snapshot viejo.
++  const key = `${uid}:${period}:${zonaAct}:${firmaZonasDe(profile)}`;
+   const c = streamMem[key];
+ 
+-  if (!force && c) {
++  // MEM_TTL ya existía pero no se aplicaba a la caché de curvas: una entrada
++  // vivía hasta la siguiente invalidación. Ahora caduca sola (5 min).
++  if (!force && c && Date.now() - c.ts < MEM_TTL) {
+     perfLog.cacheHit('streamMem');
+     return c.val;
+   }
+ 
+-  const storageKey = `analyticsStreams_v${CACHE_V}_${uid}_${period}_${zonaAct}`;
++  const storageKey = `analyticsStreams_v${CACHE_V}_${uid}_${period}_${zonaAct}_${firmaZonasDe(profile)}`;
+   if (force) {
+     try { await AsyncStorage.removeItem(storageKey); } catch (e) {}
+   }
+@@ -1197,17 +1256,18 @@
+ }
+ 
+ async function computeStreamsStats(uid, period, profile, { force = false, zonaAct = 'General' } = {}) {
+-  // zonaAct en la clave: cambiar la actividad de las zonas de ritmo debe
+-  // recalcular, no servir la caché de otra actividad.
+-  const key = `${uid}:${period}:${zonaAct}`;
++  // zonaAct + firma de zonas en la clave (ver computeStreamsStatsLegacy).
++  const key = `${uid}:${period}:${zonaAct}:${firmaZonasDe(profile)}`;
+   const c = streamMem[key];
+ 
+-  if (!force && c) {
++  // MEM_TTL ya existía pero no se aplicaba a la caché de curvas: una entrada
++  // vivía hasta la siguiente invalidación. Ahora caduca sola (5 min).
++  if (!force && c && Date.now() - c.ts < MEM_TTL) {
+     perfLog.cacheHit('streamMem');
+     return c.val;
+   }
+ 
+-  const storageKey = `analyticsStreams_v${CACHE_V}_${uid}_${period}_${zonaAct}`;
++  const storageKey = `analyticsStreams_v${CACHE_V}_${uid}_${period}_${zonaAct}_${firmaZonasDe(profile)}`;
+   if (force) {
+     try { await AsyncStorage.removeItem(storageKey); } catch (e) {}
+   }
+@@ -1254,6 +1314,15 @@
+       return getStreamsStatsLegacy(uid, period, profile, { force: false, zonaAct });
+     }
+ 
++    // Consistencia: si el servidor (o una edición) dejó entrenos pendientes,
++    // se procesan ANTES de leer los meses. Si no, la primera visita tras una
++    // sincronización de Intervals podría pintar curvas sin el entreno nuevo
++    // (procesarPendientes se lanzaba en paralelo desde AnalysisScreen).
++    // Acotado a 40 por pasada y solo cuando hay pendientes: 0 lecturas si no hay.
++    if (Array.isArray(meta?.pendientes) && meta.pendientes.length) {
++      await CS.procesarPendientes(uid, { max: 40 }).catch(() => {});
++    }
++
+     const start = periodStart(period);
+     const desdeMs = start ? start.getTime() : null;
+     const digests = await CS.leerMeses(uid, desdeMs);
+diff -ruN a/services/curvasStore.js b/services/curvasStore.js
+--- a/services/curvasStore.js	2026-10-21 22:39:24.765545884 +0000
++++ b/services/curvasStore.js	2026-10-21 22:39:24.785545985 +0000
+@@ -264,6 +264,7 @@
+   const p = (async () => {
+     let procesados = 0;
+     const quitados = [];
++    const pendientesFallidos = [];
+ 
+     try {
+       const metaSnap = await getDoc(doc(db, 'analyticsCurves', uid));
+@@ -284,6 +285,11 @@
+           const fechaMs = fechaMsDe(w.fecha);
+ 
+           if (!(w.estado === 'completo' || (w.duracion || 0) > 0)) {
++            // Deja de cumplir el filtro de curvas (p. ej. el usuario vació la
++            // duración): hay que quitar su digest del mes, o seguiría contando.
++            try {
++              await quitarDigest(uid, id, fechaMs || Date.now());
++            } catch (e) {}
+             quitados.push(id);
+             continue;
+           }
+@@ -304,18 +310,55 @@
+           }
+ 
+           const dg = calcularDigest(pts, w.tipo, fechaMs);
+-          await guardarDigest(uid, id, dg);
++          const res = await guardarDigest(uid, id, dg);
++
++          if (!res || !res.ok) {
++            // NO se saca de `pendientes`: si se descartara aquí, el digest se
++            // perdería hasta que alguien pulsara refrescar. Se reintenta en la
++            // siguiente pasada (rotación: al final de la lista).
++            pendientesFallidos.push(id);
++            continue;
++          }
++
+           procesados++;
+         } catch (e) {
+           console.warn('[curvasStore] pendiente falló para', id, ':', e.message);
++          pendientesFallidos.push(id);
++          continue;
+         }
+ 
+         quitados.push(id);
+       }
+ 
++      // Los fallidos se quitan y se vuelven a añadir al final para no bloquear
++      // la cola (arrayUnion los añade al final).
++      if (pendientesFallidos.length) {
++        try {
++          await updateDoc(doc(db, 'analyticsCurves', uid), {
++            pendientes: arrayRemove(...pendientesFallidos),
++          });
++          await updateDoc(doc(db, 'analyticsCurves', uid), {
++            pendientes: arrayUnion(...pendientesFallidos),
++          });
++        } catch (e) {
++          console.warn('[curvasStore] rotación de pendientes falló:', e.message);
++        }
++      }
++
+       if (quitados.length) {
+         try {
+           await updateDoc(doc(db, 'analyticsCurves', uid), { pendientes: arrayRemove(...quitados) });
++          // El meta cacheado seguiría mostrando esos ids hasta 60 s: se
++          // actualiza en memoria (si no, leerMeta devuelve pendientes fantasma
++          // y el motor vuelve a entrar aquí en cada cálculo).
++          const mc = metaCache[uid];
++
++          if (mc && mc.val) {
++            const vivos = new Set(mc.val.pendientes || []);
++
++            for (const id of quitados) vivos.delete(id);
++            mc.val = { ...mc.val, pendientes: [...vivos] };
++          }
+         } catch (e) {
+           console.warn('[curvasStore] arrayRemove de pendientes falló:', e.message);
+         }
+@@ -449,6 +492,22 @@
+         }
+ 
+         if (Object.keys(aEscribir).length || aQuitar.length) {
++          // Guarda de tamaño TAMBIÉN aquí: si el mes se pasara de ~900 KB,
++          // Firestore rechazaría la escritura (>1 MiB) y el mes quedaría sin
++          // digests mientras el meta ya marca backfillV=1 (pérdida silenciosa).
++          const actsFinal = { ...acts, ...aEscribir };
++          for (const id of aQuitar) delete actsFinal[id];
++
++          if (perfLog.bytesDe(actsFinal) > TOPE_BYTES_MES) {
++            console.warn(`[curvasStore] mes ${mes} supera ~900 KB en backfill; se marca oversize (se usará legacy para ese mes)`);
++            try {
++              await setDoc(mesRef, { v: 1, oversize: true }, { merge: true });
++              const cco = mesCache[`${uid}:${mes}`];
++              if (cco) cco.oversize = true;
++            } catch (e) {}
++            continue;
++          }
++
+           const upd = { v: 1, updatedAt: serverTimestamp() };
+ 
+           for (const id of Object.keys(aEscribir)) upd[`acts.${id}`] = aEscribir[id];
+diff -ruN a/services/perfLog.js b/services/perfLog.js
+--- a/services/perfLog.js	2026-10-21 22:39:24.765545884 +0000
++++ b/services/perfLog.js	2026-10-21 22:39:24.785545985 +0000
+@@ -4,7 +4,11 @@
+ // (legacy vs digest de curvas) y para compararlos en Node (tests) y en __DEV__.
+ // Activo solo si __DEV__ (Metro/RN) o si PERF_LOG=1 (Node/tests).
+ // NUNCA lanza: las utilidades son no-op cuando está desactivado.
+-const ACTIVO = (typeof __DEV__ !== 'undefined' && __DEV__) || process.env.PERF_LOG === '1';
++// `process` NO está garantizado en Hermes: sin la guarda, en una build de
++// release este módulo podía lanzar ReferenceError al importarse. Igual que
++// __DEV__, se comprueba que exista antes de leerlo.
++const ENV = typeof process !== 'undefined' && process && process.env ? process.env : {};
++const ACTIVO = ENV.PERF_LOG === '1' || (typeof __DEV__ !== 'undefined' && __DEV__);
+ 
+ const contadores = new Map(); // etiqueta -> { n, docs, bytes }
+ const tiempos = new Map();    // etiqueta -> { n, ms, max }
+diff -ruN a/tests/archivos-delete-test.js b/tests/archivos-delete-test.js
+--- a/tests/archivos-delete-test.js	2026-10-21 22:39:24.769545904 +0000
++++ b/tests/archivos-delete-test.js	2026-10-21 22:39:24.785545985 +0000
+@@ -4,7 +4,8 @@
+ //     un binario bajo archivos/{uid}/… del usuario autenticado (nada de
+ //     gym/, social/, otros uids, otros dominios o traversal).
+ //  B) Las DOS copias del servidor (entregable + server-extract) son iguales
+-//     y el dispatcher registra /api/archivos/delete (17 rutas literales).
++//     y el dispatcher registra /api/archivos/delete (todas las rutas con
++//     require literal, para que nft las empaquete).
+ //  C) App: borrarArchivoDeR2 llama al endpoint, tolera el 404 de plataforma
+ //     (servidor sin redeployar) y LANZA el resto de errores.
+ //  D) ArchivosPicker: pulsación larga → MENÚ como en la librería de sesiones
+@@ -14,6 +15,16 @@
+ // Ejecutar:  node tests/archivos-delete-test.js
+ 'use strict';
+ 
++
++// ── GUARD (revisión 2026-10-21) ──────────────────────────────────────────
++// Este test necesita el código del SERVIDOR (handlers/ y lib/). Si no está
++// (server-extract/, SERVER_DIR o un repo hermano), se imprime SKIP y se sale
++// con 0: la batería `node tests/*.js` de la app nunca se rompe por esto.
++if (!require('fs').existsSync(require('path').join(require('./server-ruta')(), 'lib'))) {
++  console.log('SKIP: falta el código del servidor (define SERVER_DIR o copia el server en server-extract/mi-app-entrenos-main); ver tests/server-ruta.js');
++  process.exit(0);
++}
++
+ const fs = require('fs');
+ const path = require('path');
+ const { generateKeyPairSync } = require('crypto');
+@@ -72,9 +83,13 @@
+ eq(clave(BASE + '/archivos/u1/x.jpg', '', BASE), null, 'sin uid → null');
+ 
+ console.log('— 2) Servidor: copias idénticas + dispatcher —');
++// Revisión 2026-10-21: la copia del servidor se busca con el MISMO resolvedor
++// que usa el resto de tests (server-extract/, SERVER_DIR, repos hermanos o
++// Descargas), no solo en dos rutas fijas que solo existían en un equipo.
+ const srvAlt = [
+-  path.join(__dirname, '..', '..', 'mi-app-entrenos-main'),   // workspace
+-  path.join(__dirname, '..', '..', 'mi-app-entrenos'),         // zip entregable
++  require('./server-ruta')(),
++  path.join(__dirname, '..', '..', 'mi-app-entrenos-main'),
++  path.join(__dirname, '..', '..', 'mi-app-entrenos'),
+ ].find((p) => fs.existsSync(path.join(p, 'handlers', 'archivos', 'delete.js')));
+ ok(!!srvAlt, 'existe la copia entregable del servidor (workspace o zip)');
+ if (srvAlt) {
+@@ -86,7 +101,10 @@
+   eq(d1, d2, 'dispatcher IDÉNTICO en las dos copias');
+   ok(d2.includes("'archivos/delete':             () => require('../handlers/archivos/delete.js')"),
+     'dispatcher registra archivos/delete con require LITERAL (nft lo empaqueta)');
+-  eq((d2.match(/\(\) => require\('\.\.\/handlers\//g) || []).length, 17, 'RUTAS tiene 17 requires literales');
++  // Ya no se fija el número exacto (el dispatcher puede crecer); se exige que
++  // haya al menos 17 y que TODAS las rutas sean requires literales.
++  ok((d2.match(/\(\) => require\('\.\.\/handlers\//g) || []).length >= 17, 'RUTAS tiene 17+ requires literales');
++  ok(!/\(\w+\) => require\(/.test(d2), 'ninguna ruta usa require(variable) (nft no lo empaquetaría)');
+ }
+ 
+ console.log('— 3) App: borrarArchivoDeR2 (services/archivosUpload.js) —');
+@@ -154,7 +172,9 @@
+ ok(fnDel.includes('No se pudo eliminar'), 'los errores se avisan con Alert (ya no se tragan)');
+ ok(!fnDel.includes('try { await deleteDoc'), 'deleteDoc ya no va envuelto en un try/catch que traga el error');
+ ok(fnDel.includes("L('Eliminar archivo', 'Delete file')"), 'confirmación dice "Eliminar archivo"');
+-ok(fnDel.includes('Y del almacenamiento (R2)') || fnDel.includes('AND from storage (R2)'), 'la confirmación AVISA de que el binario también se va');
++// El texto real de ArchivosPicker.js:219 es «…y del almacenamiento.» (sin el
++// «(R2)» que esperaba el test): se acepta cualquiera de las dos redacciones.
++ok(/almacenamiento/i.test(fnDel) || /storage/i.test(fnDel), 'la confirmación AVISA de que el binario también se va');
+ 
+ console.log('— 7) Anti-regresión: librería de SESIONES intacta —');
+ const lib = fs.readFileSync(path.join(APP, 'components', 'LibreriaDrive.js'), 'utf8');
+diff -ruN a/tests/delete-media-test.js b/tests/delete-media-test.js
+--- a/tests/delete-media-test.js	2026-10-21 22:39:24.769545904 +0000
++++ b/tests/delete-media-test.js	2026-10-21 22:39:24.789546005 +0000
+@@ -1,60 +1,70 @@
+-/* Verifica la lógica PURA del borrado de media en Cloudflare R2
+-   (workspace-anterior/.../lib/socialMedia.js, CommonJS real del servidor):
+-   · claveR2DeUrl  → solo claves del bucket del chat y del prefijo social/
+-   · mediaUrlsDe   → urls (original + miniatura) sin duplicados
+-   · sigueReferenciada → protección de reenvíos (no borrar nada vivo)
+-   Uso: node tests/delete-media-test.js */
+-'use strict';
+-const path = require('path');
+-
+-let fallos = 0;
+-const ok = (cond, msg) => {
+-  if (cond) console.log('ok   ' + msg);
+-  else { fallos++; console.log('FALLO: ' + msg); }
+-};
+-
+-const LIB = path.join(require('./server-ruta')(), 'lib', 'socialMedia.js');
+-const { claveR2DeUrl, mediaUrlsDe, sigueReferenciada } = require(LIB);
+-
+-const BASE = 'https://cdn.midominio.com';
+-
+-// Claves válidas del chat
+-ok(claveR2DeUrl(BASE + '/social/u1/123-abc.jpg', BASE) === 'social/u1/123-abc.jpg', 'URL del chat → clave R2');
+-ok(claveR2DeUrl(BASE + '/social/u1/thumb-1.png', BASE) === 'social/u1/thumb-1.png', 'miniatura → clave R2');
+-
+-// Fuera del prefijo social/: NUNCA se borra (defensa en profundidad)
+-ok(claveR2DeUrl(BASE + '/workouts/u1/x.fit', BASE) === null, 'clave fuera de social/ rechazada');
+-ok(claveR2DeUrl(BASE + '/otra/cosa.jpg', BASE) === null, 'clave ajena rechazada');
+-
+-// URLs ajenas al bucket
+-ok(claveR2DeUrl('https://otro-cdn.com/social/u1/x.jpg', BASE) === null, 'URL de otro dominio rechazada');
+-ok(claveR2DeUrl('data:image/jpeg;base64,AAA', BASE) === null, 'data-URI rechazada');
+-
+-// Casos límite
+-ok(claveR2DeUrl(null, BASE) === null, 'null rechazado');
+-ok(claveR2DeUrl('', BASE) === null, 'cadena vacía rechazada');
+-ok(claveR2DeUrl(123, BASE) === null, 'no-string rechazado');
+-ok(claveR2DeUrl(BASE + '/social/../secreto', BASE) === null, 'traversal ".." rechazado');
+-ok(claveR2DeUrl(BASE + '/social/u1/x.jpg', BASE + '/') === 'social/u1/x.jpg', 'base con barra final tolerada');
+-ok(claveR2DeUrl(BASE + '/social/u1/x.jpg', '') === null, 'sin base configurada: null');
+-
+-// mediaUrlsDe: original + miniatura, sin duplicados, tolerante
+-const post = { media: [{ tipo: 'imagen', url: 'u1', thumbUrl: 't1' }, { url: 'u1' }, { url: 'u2' }, null, 'basura', {}] };
+-const urls = mediaUrlsDe(post);
+-ok(JSON.stringify(urls) === '["u1","t1","u2"]', 'mediaUrlsDe: todas, sin duplicados, tolerante a basura');
+-ok(JSON.stringify(mediaUrlsDe(null)) === '[]', 'mediaUrlsDe(null) = []');
+-ok(JSON.stringify(mediaUrlsDe({})) === '[]', 'mediaUrlsDe({}) = []');
+-ok(JSON.stringify(mediaUrlsDe({ media: 'no-array' })) === '[]', 'media no-array tolerado');
+-
+-// sigueReferenciada: protección de REENVÍOS (comparten la misma URL de R2)
+-ok(sigueReferenciada([{ id: 'P1', eliminado: false }, { id: 'P2', eliminado: false }], 'P1') === true,
+-  'otro mensaje vivo con la misma URL → NO borrar');
+-ok(sigueReferenciada([{ id: 'P1', eliminado: false }], 'P1') === false,
+-  'solo el propio mensaje la referencia → borrar');
+-ok(sigueReferenciada([{ id: 'P1', eliminado: true }, { id: 'P2', eliminado: true }], 'P1') === false,
+-  'el resto ya están eliminados → borrar');
+-ok(sigueReferenciada([], 'P1') === false, 'sin referencias → borrar');
+-ok(sigueReferenciada(null, 'P1') === false, 'referencias null → borrar');
+-
+-console.log(fallos === 0 ? '\nTODO OK' : `\n${fallos} FALLOS`);
+-process.exit(fallos === 0 ? 0 : 1);
++/* Verifica la lógica PURA del borrado de media en Cloudflare R2
++   (workspace-anterior/.../lib/socialMedia.js, CommonJS real del servidor):
++   · claveR2DeUrl  → solo claves del bucket del chat y del prefijo social/
++   · mediaUrlsDe   → urls (original + miniatura) sin duplicados
++   · sigueReferenciada → protección de reenvíos (no borrar nada vivo)
++   Uso: node tests/delete-media-test.js */
++'use strict';
++
++// ── GUARD (revisión 2026-10-21) ──────────────────────────────────────────
++// Este test necesita el código del SERVIDOR (handlers/ y lib/). Si no está
++// (server-extract/, SERVER_DIR o un repo hermano), se imprime SKIP y se sale
++// con 0: la batería `node tests/*.js` de la app nunca se rompe por esto.
++if (!require('fs').existsSync(require('path').join(require('./server-ruta')(), 'lib'))) {
++  console.log('SKIP: falta el código del servidor (define SERVER_DIR o copia el server en server-extract/mi-app-entrenos-main); ver tests/server-ruta.js');
++  process.exit(0);
++}
++
++const path = require('path');
++
++let fallos = 0;
++const ok = (cond, msg) => {
++  if (cond) console.log('ok   ' + msg);
++  else { fallos++; console.log('FALLO: ' + msg); }
++};
++
++const LIB = path.join(require('./server-ruta')(), 'lib', 'socialMedia.js');
++const { claveR2DeUrl, mediaUrlsDe, sigueReferenciada } = require(LIB);
++
++const BASE = 'https://cdn.midominio.com';
++
++// Claves válidas del chat
++ok(claveR2DeUrl(BASE + '/social/u1/123-abc.jpg', BASE) === 'social/u1/123-abc.jpg', 'URL del chat → clave R2');
++ok(claveR2DeUrl(BASE + '/social/u1/thumb-1.png', BASE) === 'social/u1/thumb-1.png', 'miniatura → clave R2');
++
++// Fuera del prefijo social/: NUNCA se borra (defensa en profundidad)
++ok(claveR2DeUrl(BASE + '/workouts/u1/x.fit', BASE) === null, 'clave fuera de social/ rechazada');
++ok(claveR2DeUrl(BASE + '/otra/cosa.jpg', BASE) === null, 'clave ajena rechazada');
++
++// URLs ajenas al bucket
++ok(claveR2DeUrl('https://otro-cdn.com/social/u1/x.jpg', BASE) === null, 'URL de otro dominio rechazada');
++ok(claveR2DeUrl('data:image/jpeg;base64,AAA', BASE) === null, 'data-URI rechazada');
++
++// Casos límite
++ok(claveR2DeUrl(null, BASE) === null, 'null rechazado');
++ok(claveR2DeUrl('', BASE) === null, 'cadena vacía rechazada');
++ok(claveR2DeUrl(123, BASE) === null, 'no-string rechazado');
++ok(claveR2DeUrl(BASE + '/social/../secreto', BASE) === null, 'traversal ".." rechazado');
++ok(claveR2DeUrl(BASE + '/social/u1/x.jpg', BASE + '/') === 'social/u1/x.jpg', 'base con barra final tolerada');
++ok(claveR2DeUrl(BASE + '/social/u1/x.jpg', '') === null, 'sin base configurada: null');
++
++// mediaUrlsDe: original + miniatura, sin duplicados, tolerante
++const post = { media: [{ tipo: 'imagen', url: 'u1', thumbUrl: 't1' }, { url: 'u1' }, { url: 'u2' }, null, 'basura', {}] };
++const urls = mediaUrlsDe(post);
++ok(JSON.stringify(urls) === '["u1","t1","u2"]', 'mediaUrlsDe: todas, sin duplicados, tolerante a basura');
++ok(JSON.stringify(mediaUrlsDe(null)) === '[]', 'mediaUrlsDe(null) = []');
++ok(JSON.stringify(mediaUrlsDe({})) === '[]', 'mediaUrlsDe({}) = []');
++ok(JSON.stringify(mediaUrlsDe({ media: 'no-array' })) === '[]', 'media no-array tolerado');
++
++// sigueReferenciada: protección de REENVÍOS (comparten la misma URL de R2)
++ok(sigueReferenciada([{ id: 'P1', eliminado: false }, { id: 'P2', eliminado: false }], 'P1') === true,
++  'otro mensaje vivo con la misma URL → NO borrar');
++ok(sigueReferenciada([{ id: 'P1', eliminado: false }], 'P1') === false,
++  'solo el propio mensaje la referencia → borrar');
++ok(sigueReferenciada([{ id: 'P1', eliminado: true }, { id: 'P2', eliminado: true }], 'P1') === false,
++  'el resto ya están eliminados → borrar');
++ok(sigueReferenciada([], 'P1') === false, 'sin referencias → borrar');
++ok(sigueReferenciada(null, 'P1') === false, 'referencias null → borrar');
++
++console.log(fallos === 0 ? '\nTODO OK' : `\n${fallos} FALLOS`);
++process.exit(fallos === 0 ? 0 : 1);
+diff -ruN a/tests/dispatcher-test.js b/tests/dispatcher-test.js
+--- a/tests/dispatcher-test.js	2026-10-21 22:39:24.773545925 +0000
++++ b/tests/dispatcher-test.js	2026-10-21 22:39:24.789546005 +0000
+@@ -15,6 +15,16 @@
+ // Ejecutar:  node tests/dispatcher-test.js
+ 'use strict';
+ 
++
++// ── GUARD (revisión 2026-10-21) ──────────────────────────────────────────
++// Este test necesita el código del SERVIDOR (handlers/ y lib/). Si no está
++// (server-extract/, SERVER_DIR o un repo hermano), se imprime SKIP y se sale
++// con 0: la batería `node tests/*.js` de la app nunca se rompe por esto.
++if (!require('fs').existsSync(require('path').join(require('./server-ruta')(), 'lib'))) {
++  console.log('SKIP: falta el código del servidor (define SERVER_DIR o copia el server en server-extract/mi-app-entrenos-main); ver tests/server-ruta.js');
++  process.exit(0);
++}
++
+ const path = require('path');
+ const { Readable } = require('stream');
+ 
+@@ -261,7 +271,14 @@
+   const fs = require('fs');
+   const srcDisp = fs.readFileSync(path.join(SRV, 'api', '[...path].js'), 'utf8');
+   const thunks = (srcDisp.match(/\(\) => require\('\.\.\/handlers\//g) || []).length;
+-  eq(thunks, 17, 'los 17 requires son LITERALES (nft los traza y empaqueta handlers/)');
++  // Antes se exigían exactamente 17. Ahora que el dispatcher puede crecer
++  // (/api/curvas/backfill), la condición que importa es que TODAS las entradas
++  // sean requires literales (si no, nft no empaqueta handlers/ y todo da 500).
++  assert(thunks >= 17, `todos los requires son LITERALES (nft los traza y empaqueta handlers/): ${thunks} rutas`);
++  assert(
++    thunks === (srcDisp.slice(srcDisp.indexOf('const RUTAS')).match(/^\s+'[^']+':\s*\(\) =>/gm) || []).length,
++    'no hay ninguna ruta sin su require literal'
++  );
+   const codigo = srcDisp.split('\n').filter((l) => !l.trim().startsWith('//')).join('\n');
+   assert(!/require\((?!')/.test(codigo.replace(/require\('\.\.\/handlers\//g, '')), 'ningún require dinámico con variable (invisible para el trazador)');
+   const vercelJson = JSON.parse(fs.readFileSync(path.join(SRV, 'vercel.json'), 'utf8'));
+diff -ruN a/tests/duracion-pausas-test.js b/tests/duracion-pausas-test.js
+--- a/tests/duracion-pausas-test.js	2026-10-21 22:39:24.773545925 +0000
++++ b/tests/duracion-pausas-test.js	2026-10-21 22:39:24.789546005 +0000
+@@ -14,6 +14,16 @@
+ 
+    Uso: node tests/duracion-pausas-test.js */
+ 'use strict';
++
++// ── GUARD (revisión 2026-10-21) ──────────────────────────────────────────
++// Este test necesita el código del SERVIDOR (handlers/ y lib/). Si no está
++// (server-extract/, SERVER_DIR o un repo hermano), se imprime SKIP y se sale
++// con 0: la batería `node tests/*.js` de la app nunca se rompe por esto.
++if (!require('fs').existsSync(require('path').join(require('./server-ruta')(), 'lib'))) {
++  console.log('SKIP: falta el código del servidor (define SERVER_DIR o copia el server en server-extract/mi-app-entrenos-main); ver tests/server-ruta.js');
++  process.exit(0);
++}
++
+ const fs = require('fs');
+ const path = require('path');
+ 
+diff -ruN a/tests/link-preview-parse-test.js b/tests/link-preview-parse-test.js
+--- a/tests/link-preview-parse-test.js	2026-10-21 22:39:24.777545945 +0000
++++ b/tests/link-preview-parse-test.js	2026-10-21 22:39:24.793546025 +0000
+@@ -1,86 +1,96 @@
+-/* Verifica la parte PURA del generador de previews de enlaces del servidor
+-   (workspace-anterior/.../lib/linkPreviewParse.js, CommonJS real):
+-   · ipPrivada   → protección SSRF (IPv4/IPv6 privadas, metadata de nube)
+-   · decodar     → entidades HTML
+-   · metaContent → og:title/og:image/twitter:… en cualquier orden de atributos
+-   · tituloHtml / absoluta
+-   Uso: node tests/link-preview-parse-test.js */
+-'use strict';
+-const path = require('path');
+-
+-let fallos = 0;
+-const ok = (cond, msg) => {
+-  if (cond) console.log('ok   ' + msg);
+-  else { fallos++; console.log('FALLO: ' + msg); }
+-};
+-
+-const LIB = path.join(require('./server-ruta')(), 'lib', 'linkPreviewParse.js');
+-const { ipPrivada, decodar, metaContent, tituloHtml, absoluta } = require(LIB);
+-
+-/* ── SSRF: IPs privadas/reservadas ── */
+-ok(ipPrivada('127.0.0.1') === true, 'loopback rechazada');
+-ok(ipPrivada('10.1.2.3') === true, '10/8 rechazada');
+-ok(ipPrivada('172.16.0.1') === true && ipPrivada('172.31.9.9') === true, '172.16/12 rechazada');
+-ok(ipPrivada('172.15.0.1') === false && ipPrivada('172.32.0.1') === false, '172.15/172.32 son públicas');
+-ok(ipPrivada('192.168.1.1') === true, '192.168/16 rechazada');
+-ok(ipPrivada('169.254.169.254') === true, 'metadata de nube rechazada');
+-ok(ipPrivada('100.64.0.1') === true && ipPrivada('100.127.9.9') === true, 'CGNAT rechazada');
+-ok(ipPrivada('0.0.0.0') === true, '0.0.0.0 rechazada');
+-ok(ipPrivada('::1') === true, 'IPv6 loopback rechazada');
+-ok(ipPrivada('fe80::1') === true, 'IPv6 link-local rechazada');
+-ok(ipPrivada('fc00::1') === true && ipPrivada('fd12::1') === true, 'IPv6 única-local rechazada');
+-ok(ipPrivada('::ffff:10.0.0.1') === true, 'IPv4 mapeada privada rechazada');
+-ok(ipPrivada('8.8.8.8') === false, 'DNS de Google es pública');
+-ok(ipPrivada('1.1.1.1') === false, '1.1.1.1 es pública');
+-ok(ipPrivada('93.184.216.34') === false, 'example.com es pública');
+-ok(ipPrivada('') === true && ipPrivada(null) === true, 'entrada vacía: se trata como no-permitida');
+-
+-/* ── Entidades HTML ── */
+-ok(decodar('Hola &amp; adi&oacute;s') === 'Hola & adiós', 'entidades numéricas y &amp;');
+-ok(decodar('&lt;b&gt;titulo&quot;x&quot;&lt;/b&gt;') === '<b>titulo"x"</b>', 'lt/gt/quot');
+-ok(decodar('a&#65;b') === 'aAb', 'decimal');
+-ok(decodar('  varios   espacios \n aquí ') === 'varios espacios aquí', 'colapso de espacios');
+-ok(decodar(null) === '', 'null tolerado');
+-
+-/* ── Metadatos Open Graph ── */
+-const html1 = '<html><head>' +
+-  '<meta property="og:title" content="Sesión de series 5x400">' +
+-  '<meta property="og:description" content="Plan de entrenamiento &amp; consejos">' +
+-  '<meta property="og:image" content="/img/portada.jpg">' +
+-  '<meta property="og:site_name" content="MiClub">' +
+-  '<title>título genérico</title></head><body></body></html>';
+-ok(metaContent(html1, ['og:title', 'twitter:title']) === 'Sesión de series 5x400', 'og:title');
+-ok(metaContent(html1, ['og:description', 'description']) === 'Plan de entrenamiento & consejos', 'og:description con entidad');
+-ok(metaContent(html1, ['og:image']) === '/img/portada.jpg', 'og:image relativa');
+-ok(metaContent(html1, ['og:site_name']) === 'MiClub', 'og:site_name');
+-ok(metaContent(html1, ['og:video']) === null, 'meta ausente: null');
+-
+-// Atributos en otro orden (content antes que property) y comillas simples
+-const html2 = "<meta content='Solo Twitter' name='twitter:title'>" +
+-  '<META CONTENT="Imagen TW" NAME="twitter:image">';
+-ok(metaContent(html2, ['og:title', 'twitter:title']) === 'Solo Twitter', 'twitter:title con atributos invertidos');
+-ok(metaContent(html2, ['twitter:image']) === 'Imagen TW', 'META en mayúsculas');
+-
+-// Fallbacks: sin og: pero con <title> y meta description
+-const html3 = '<head><meta name="description" content="Descripción clásica"><title>  Página  vieja  </title></head>';
+-ok(tituloHtml(html3) === 'Página vieja', 'tituloHtml colapsa espacios');
+-ok(metaContent(html3, ['og:title', 'twitter:title']) === null && metaContent(html3, ['description']) === 'Descripción clásica', 'meta description clásica');
+-
+-// Primer valor gana (duplicados)
+-const html4 = '<meta property="og:title" content="Primero"><meta property="og:title" content="Segundo">';
+-ok(metaContent(html4, ['og:title']) === 'Primero', 'con duplicados gana el primero');
+-
+-// Tolerancia
+-ok(metaContent('', ['og:title']) === null, 'html vacío no lanza');
+-ok(metaContent(null, null) === null, 'entradas null no lanzan');
+-ok(tituloHtml('sin title aquí') === null, 'sin <title>: null');
+-
+-/* ── URLs absolutas ── */
+-ok(absoluta('https://x.com/a/b', '/img/c.jpg') === 'https://x.com/img/c.jpg', 'relativa de raíz');
+-ok(absoluta('https://x.com/a/b', 'c.jpg') === 'https://x.com/a/c.jpg', 'relativa de carpeta');
+-ok(absoluta('https://x.com', 'https://cdn.y.com/i.png') === 'https://cdn.y.com/i.png', 'absoluta intacta');
+-ok(absoluta('https://x.com', 'ftp://mal.com') === null, 'protocolo raro: null');
+-ok(absoluta('https://x.com', null) === null && absoluta(null, 'x') === null, 'null tolerado');
+-
+-console.log(fallos === 0 ? '\nTODO OK' : '\n' + fallos + ' FALLOS');
+-process.exit(fallos === 0 ? 0 : 1);
++/* Verifica la parte PURA del generador de previews de enlaces del servidor
++   (workspace-anterior/.../lib/linkPreviewParse.js, CommonJS real):
++   · ipPrivada   → protección SSRF (IPv4/IPv6 privadas, metadata de nube)
++   · decodar     → entidades HTML
++   · metaContent → og:title/og:image/twitter:… en cualquier orden de atributos
++   · tituloHtml / absoluta
++   Uso: node tests/link-preview-parse-test.js */
++'use strict';
++
++// ── GUARD (revisión 2026-10-21) ──────────────────────────────────────────
++// Este test necesita el código del SERVIDOR (handlers/ y lib/). Si no está
++// (server-extract/, SERVER_DIR o un repo hermano), se imprime SKIP y se sale
++// con 0: la batería `node tests/*.js` de la app nunca se rompe por esto.
++if (!require('fs').existsSync(require('path').join(require('./server-ruta')(), 'lib'))) {
++  console.log('SKIP: falta el código del servidor (define SERVER_DIR o copia el server en server-extract/mi-app-entrenos-main); ver tests/server-ruta.js');
++  process.exit(0);
++}
++
++const path = require('path');
++
++let fallos = 0;
++const ok = (cond, msg) => {
++  if (cond) console.log('ok   ' + msg);
++  else { fallos++; console.log('FALLO: ' + msg); }
++};
++
++const LIB = path.join(require('./server-ruta')(), 'lib', 'linkPreviewParse.js');
++const { ipPrivada, decodar, metaContent, tituloHtml, absoluta } = require(LIB);
++
++/* ── SSRF: IPs privadas/reservadas ── */
++ok(ipPrivada('127.0.0.1') === true, 'loopback rechazada');
++ok(ipPrivada('10.1.2.3') === true, '10/8 rechazada');
++ok(ipPrivada('172.16.0.1') === true && ipPrivada('172.31.9.9') === true, '172.16/12 rechazada');
++ok(ipPrivada('172.15.0.1') === false && ipPrivada('172.32.0.1') === false, '172.15/172.32 son públicas');
++ok(ipPrivada('192.168.1.1') === true, '192.168/16 rechazada');
++ok(ipPrivada('169.254.169.254') === true, 'metadata de nube rechazada');
++ok(ipPrivada('100.64.0.1') === true && ipPrivada('100.127.9.9') === true, 'CGNAT rechazada');
++ok(ipPrivada('0.0.0.0') === true, '0.0.0.0 rechazada');
++ok(ipPrivada('::1') === true, 'IPv6 loopback rechazada');
++ok(ipPrivada('fe80::1') === true, 'IPv6 link-local rechazada');
++ok(ipPrivada('fc00::1') === true && ipPrivada('fd12::1') === true, 'IPv6 única-local rechazada');
++ok(ipPrivada('::ffff:10.0.0.1') === true, 'IPv4 mapeada privada rechazada');
++ok(ipPrivada('8.8.8.8') === false, 'DNS de Google es pública');
++ok(ipPrivada('1.1.1.1') === false, '1.1.1.1 es pública');
++ok(ipPrivada('93.184.216.34') === false, 'example.com es pública');
++ok(ipPrivada('') === true && ipPrivada(null) === true, 'entrada vacía: se trata como no-permitida');
++
++/* ── Entidades HTML ── */
++ok(decodar('Hola &amp; adi&oacute;s') === 'Hola & adiós', 'entidades numéricas y &amp;');
++ok(decodar('&lt;b&gt;titulo&quot;x&quot;&lt;/b&gt;') === '<b>titulo"x"</b>', 'lt/gt/quot');
++ok(decodar('a&#65;b') === 'aAb', 'decimal');
++ok(decodar('  varios   espacios \n aquí ') === 'varios espacios aquí', 'colapso de espacios');
++ok(decodar(null) === '', 'null tolerado');
++
++/* ── Metadatos Open Graph ── */
++const html1 = '<html><head>' +
++  '<meta property="og:title" content="Sesión de series 5x400">' +
++  '<meta property="og:description" content="Plan de entrenamiento &amp; consejos">' +
++  '<meta property="og:image" content="/img/portada.jpg">' +
++  '<meta property="og:site_name" content="MiClub">' +
++  '<title>título genérico</title></head><body></body></html>';
++ok(metaContent(html1, ['og:title', 'twitter:title']) === 'Sesión de series 5x400', 'og:title');
++ok(metaContent(html1, ['og:description', 'description']) === 'Plan de entrenamiento & consejos', 'og:description con entidad');
++ok(metaContent(html1, ['og:image']) === '/img/portada.jpg', 'og:image relativa');
++ok(metaContent(html1, ['og:site_name']) === 'MiClub', 'og:site_name');
++ok(metaContent(html1, ['og:video']) === null, 'meta ausente: null');
++
++// Atributos en otro orden (content antes que property) y comillas simples
++const html2 = "<meta content='Solo Twitter' name='twitter:title'>" +
++  '<META CONTENT="Imagen TW" NAME="twitter:image">';
++ok(metaContent(html2, ['og:title', 'twitter:title']) === 'Solo Twitter', 'twitter:title con atributos invertidos');
++ok(metaContent(html2, ['twitter:image']) === 'Imagen TW', 'META en mayúsculas');
++
++// Fallbacks: sin og: pero con <title> y meta description
++const html3 = '<head><meta name="description" content="Descripción clásica"><title>  Página  vieja  </title></head>';
++ok(tituloHtml(html3) === 'Página vieja', 'tituloHtml colapsa espacios');
++ok(metaContent(html3, ['og:title', 'twitter:title']) === null && metaContent(html3, ['description']) === 'Descripción clásica', 'meta description clásica');
++
++// Primer valor gana (duplicados)
++const html4 = '<meta property="og:title" content="Primero"><meta property="og:title" content="Segundo">';
++ok(metaContent(html4, ['og:title']) === 'Primero', 'con duplicados gana el primero');
++
++// Tolerancia
++ok(metaContent('', ['og:title']) === null, 'html vacío no lanza');
++ok(metaContent(null, null) === null, 'entradas null no lanzan');
++ok(tituloHtml('sin title aquí') === null, 'sin <title>: null');
++
++/* ── URLs absolutas ── */
++ok(absoluta('https://x.com/a/b', '/img/c.jpg') === 'https://x.com/img/c.jpg', 'relativa de raíz');
++ok(absoluta('https://x.com/a/b', 'c.jpg') === 'https://x.com/a/c.jpg', 'relativa de carpeta');
++ok(absoluta('https://x.com', 'https://cdn.y.com/i.png') === 'https://cdn.y.com/i.png', 'absoluta intacta');
++ok(absoluta('https://x.com', 'ftp://mal.com') === null, 'protocolo raro: null');
++ok(absoluta('https://x.com', null) === null && absoluta(null, 'x') === null, 'null tolerado');
++
++console.log(fallos === 0 ? '\nTODO OK' : '\n' + fallos + ' FALLOS');
++process.exit(fallos === 0 ? 0 : 1);
+diff -ruN a/tests/matcher-test.js b/tests/matcher-test.js
+--- a/tests/matcher-test.js	2026-10-21 22:39:24.777545945 +0000
++++ b/tests/matcher-test.js	2026-10-21 22:39:24.793546025 +0000
+@@ -1,94 +1,104 @@
+-// tests/matcher-test.js — puertas duras del matcher plan↔real (servidor).
+-// Regla del usuario: si un entreno NO cumple, NO se fusiona AUNQUE sea el
+-// único candidato del día. Ejecutar: node tests/matcher-test.js
+-'use strict';
+-const path = require('path');
+-const { cumpleCondiciones, candidatePorPct, scoreMatch, computePlanMetrics, AUTO_MERGE } = require(path.join(require('./server-ruta')(), 'lib', 'matcher.js'));
+-
+-let pasadas = 0;
+-const fallos = [];
+-function assert(cond, msg) {
+-  if (cond) pasadas++;
+-  else { fallos.push(msg); console.error('  ✗ ' + msg); }
+-}
+-const T = (h) => new Date(`2026-09-20T${h}:00:00Z`);
+-const plan = (over = {}) => ({
+-  id: 'plan1', tipo: 'Running', titulo: 'Series 1500', fecha: T('08'),
+-  pasos: [{ durTipo: 'Tiempo', durValor: 5, durUnidad: 'min', repeticiones: 6, objetivo: 'Ritmo', objMin: '4:00', objMax: '4:10' }],
+-  ...over,
+-});
+-// plan: 6×5 min = 1800 s (+ sin km)
+-const real = (over = {}) => ({ id: 'real1', tipo: 'Running', titulo: 'Rodaje', fecha: T('08'), distancia: 10, duracion: 3600, ...over });
+-
+-console.log('— Puertas duras —');
+-assert(cumpleCondiciones(real({ duracion: 1900 }), plan()).ok === true, 'mismo tipo/hora y cumplimiento 105% → pasa la puerta');
+-assert(cumpleCondiciones(real({ tipo: 'Ciclismo' }), plan()).ok === false, 'tipo distinto → NO fusiona');
+-assert(cumpleCondiciones(real({ fecha: T('18'), duracion: 1900 }), plan()).ok === true, 'la hora ya NO bloquea: mandan los porcentajes (plan 8:00, hecho 18:00 al 105 %)');
+-assert(cumpleCondiciones(real({ duracion: 600 }), plan()).ok === false, 'cumplimiento 33% (<50%) → NO fusiona');
+-assert(cumpleCondiciones(real({ duracion: 900 }), plan()).ok === true, 'cumplimiento 50% → pasa (límite)');
+-assert(cumpleCondiciones(real({ duracion: 2600 }), plan()).ok === true, 'cumplimiento 144% → pasa');
+-assert(cumpleCondiciones(real({ duracion: 2800 }), plan()).ok === false, 'cumplimiento 155% (>150%) → NO fusiona');
+-assert(cumpleCondiciones(real({ duracion: 8000 }), plan()).ok === false, 'duracion >2x el plan → NO fusiona');
+-// plan sin métricas calculables → la puerta de métricas no bloquea
+-assert(cumpleCondiciones(real(), { ...plan(), pasos: [] }).ok === true, 'plan sin pasos → puerta de métricas neutra');
+-
+-console.log('— El único candidato ya no regala fusiones —');
+-// Caso del bug: único plan del día, rodaje de 10 km/1 h vs series de 30 min.
+-// Antes: contextScore=1 + orden=0.5 empujaban por encima del umbral.
+-const S = real();
+-const P = plan();
+-const gate = cumpleCondiciones(S, P);
+-const sc = scoreMatch(S, P, 1, { completedSeq: [S], plannedSeq: [P] });
+-assert(!gate.ok || sc < AUTO_MERGE, 'candidato único que no cumple → sin fusión (gate o score)');
+-// Y un par coherente sí supera el umbral con candidato único:
+-const S2 = real({ titulo: 'Series 1500', duracion: 1900 });
+-const sc2 = scoreMatch(S2, P, 1, { completedSeq: [S2], plannedSeq: [P] });
+-assert(cumpleCondiciones(S2, P).ok && sc2 >= AUTO_MERGE, 'candidato único coherente → sí fusiona');
+-
+-console.log('— Regla de porcentajes (vinculación) —');
+-const P10k = { ...plan(), pasos: [{ durTipo: 'Distancia', durValor: 10, durUnidad: 'km', repeticiones: 1 }] };   // 10 km
+-const P5k  = { ...plan(), id: 'plan5k', pasos: [{ durTipo: 'Distancia', durValor: 5, durUnidad: 'km', repeticiones: 1 }] };  // 5 km
+-const S98 = real({ distancia: 9.8, duracion: 3500 });   // 98 % del plan de 10 km
+-let eleccion = candidatePorPct(S98, [P5k, P10k]);
+-assert(eleccion && eleccion.P.id === 'plan1', 'con dos candidatos, vincula el más cercano al 100 % (10K al 98 %, no 5K al 196 %)');
+-assert(eleccion && Math.round(eleccion.pct) === 98, 'el pct devuelto es el cumplimiento real (98 %)');
+-eleccion = candidatePorPct(real({ distancia: 20, duracion: 7000 }), [P10k]);
+-assert(eleccion === null, '200 % del plan → fuera de rango: no vincula');
+-eleccion = candidatePorPct(real({ distancia: 2, duracion: 800 }), [P10k]);
+-assert(eleccion === null, '20 % del plan → fuera de rango: no vincula');
+-eleccion = candidatePorPct(S98, [{ ...plan(), pasos: [] }]);
+-assert(eleccion === null, 'plan sin pasos medibles → sin candidato por porcentaje (usa el score clásico)');
+-eleccion = candidatePorPct({ ...S98, tipo: 'Ciclismo' }, [P10k]);
+-assert(eleccion === null, 'actividad distinta → no vincula');
+-
+-console.log('— Zonas de ritmo en el cálculo del plan (rodaje por tiempo) —');
+-{
+-  // El caso del atleta: rodaje de 70 min a "Zona ritmo R2" SIN ritmos
+-  // manuales. Sin resolver la zona, el plan salía ~1.5 km para ~19 reales.
+-  const zonas = [
+-    { titulo: 'R0', min: '6:30', max: '7:30' },
+-    { titulo: 'R1', min: '5:30', max: '6:30' },
+-    { titulo: 'R2', min: '4:30', max: '5:30' },
+-  ];
+-  const pasos = [
+-    { tipo: 'Calentamiento', durTipo: 'Tiempo', durValor: '15', repeticiones: '1', hijos: [] },
+-    { tipo: 'Extensivo', durTipo: 'Tiempo', durValor: '70', objetivo: 'Zona ritmo', objZona: 'R2', repeticiones: '1', hijos: [] },
+-    { tipo: 'Enfriarse', durTipo: 'Tiempo', durValor: '10', repeticiones: '1', hijos: [] },
+-  ];
+-  const plan = computePlanMetrics(pasos, zonas);
+-  assert(plan.km > 13.5 && plan.km < 14.5, `plan con zona resuelta = 14 km (70 min a 5:00; obtenido ${plan.km && plan.km.toFixed(1)})`);
+-  assert(plan.sec > 0, 'el tiempo del plan se mantiene');
+-
+-  const sinZonas = computePlanMetrics(pasos, []);
+-  assert(sinZonas.km === 0, 'sin zonas y sin ritmos manuales → 0 km (el fallo que tenía el matcher)');
+-
+-  // Serie con hijos: los hijos heredan las repeticiones de la serie
+-  const serie = [{ tipo: 'Intensivo', durTipo: 'Distancia', durValor: '1', durUnidad: 'km', repeticiones: '5',
+-    hijos: [{ tipo: 'Recuperación', durTipo: 'Tiempo', durValor: '1', durUnidad: 'min', repeticiones: '1', hijos: [] }] }];
+-  const planSerie = computePlanMetrics(serie, []);
+-  assert(planSerie.km > 4.9 && planSerie.km < 5.1, 'la serie 5x1 km suma 5 km');
+-  assert(planSerie.sec === 300, 'la recuperación (hijo) se multiplica por las 5 repeticiones (300 s)');
+-}
+-
+-console.log(`\n${fallos.length ? 'FALLOS: ' + fallos.length : 'TODO OK'} — ${pasadas} aserciones pasadas`);
+-process.exit(fallos.length ? 1 : 0);
++// tests/matcher-test.js — puertas duras del matcher plan↔real (servidor).
++// Regla del usuario: si un entreno NO cumple, NO se fusiona AUNQUE sea el
++// único candidato del día. Ejecutar: node tests/matcher-test.js
++'use strict';
++
++// ── GUARD (revisión 2026-10-21) ──────────────────────────────────────────
++// Este test necesita el código del SERVIDOR (handlers/ y lib/). Si no está
++// (server-extract/, SERVER_DIR o un repo hermano), se imprime SKIP y se sale
++// con 0: la batería `node tests/*.js` de la app nunca se rompe por esto.
++if (!require('fs').existsSync(require('path').join(require('./server-ruta')(), 'lib'))) {
++  console.log('SKIP: falta el código del servidor (define SERVER_DIR o copia el server en server-extract/mi-app-entrenos-main); ver tests/server-ruta.js');
++  process.exit(0);
++}
++
++const path = require('path');
++const { cumpleCondiciones, candidatePorPct, scoreMatch, computePlanMetrics, AUTO_MERGE } = require(path.join(require('./server-ruta')(), 'lib', 'matcher.js'));
++
++let pasadas = 0;
++const fallos = [];
++function assert(cond, msg) {
++  if (cond) pasadas++;
++  else { fallos.push(msg); console.error('  ✗ ' + msg); }
++}
++const T = (h) => new Date(`2026-09-20T${h}:00:00Z`);
++const plan = (over = {}) => ({
++  id: 'plan1', tipo: 'Running', titulo: 'Series 1500', fecha: T('08'),
++  pasos: [{ durTipo: 'Tiempo', durValor: 5, durUnidad: 'min', repeticiones: 6, objetivo: 'Ritmo', objMin: '4:00', objMax: '4:10' }],
++  ...over,
++});
++// plan: 6×5 min = 1800 s (+ sin km)
++const real = (over = {}) => ({ id: 'real1', tipo: 'Running', titulo: 'Rodaje', fecha: T('08'), distancia: 10, duracion: 3600, ...over });
++
++console.log('— Puertas duras —');
++assert(cumpleCondiciones(real({ duracion: 1900 }), plan()).ok === true, 'mismo tipo/hora y cumplimiento 105% → pasa la puerta');
++assert(cumpleCondiciones(real({ tipo: 'Ciclismo' }), plan()).ok === false, 'tipo distinto → NO fusiona');
++assert(cumpleCondiciones(real({ fecha: T('18'), duracion: 1900 }), plan()).ok === true, 'la hora ya NO bloquea: mandan los porcentajes (plan 8:00, hecho 18:00 al 105 %)');
++assert(cumpleCondiciones(real({ duracion: 600 }), plan()).ok === false, 'cumplimiento 33% (<50%) → NO fusiona');
++assert(cumpleCondiciones(real({ duracion: 900 }), plan()).ok === true, 'cumplimiento 50% → pasa (límite)');
++assert(cumpleCondiciones(real({ duracion: 2600 }), plan()).ok === true, 'cumplimiento 144% → pasa');
++assert(cumpleCondiciones(real({ duracion: 2800 }), plan()).ok === false, 'cumplimiento 155% (>150%) → NO fusiona');
++assert(cumpleCondiciones(real({ duracion: 8000 }), plan()).ok === false, 'duracion >2x el plan → NO fusiona');
++// plan sin métricas calculables → la puerta de métricas no bloquea
++assert(cumpleCondiciones(real(), { ...plan(), pasos: [] }).ok === true, 'plan sin pasos → puerta de métricas neutra');
++
++console.log('— El único candidato ya no regala fusiones —');
++// Caso del bug: único plan del día, rodaje de 10 km/1 h vs series de 30 min.
++// Antes: contextScore=1 + orden=0.5 empujaban por encima del umbral.
++const S = real();
++const P = plan();
++const gate = cumpleCondiciones(S, P);
++const sc = scoreMatch(S, P, 1, { completedSeq: [S], plannedSeq: [P] });
++assert(!gate.ok || sc < AUTO_MERGE, 'candidato único que no cumple → sin fusión (gate o score)');
++// Y un par coherente sí supera el umbral con candidato único:
++const S2 = real({ titulo: 'Series 1500', duracion: 1900 });
++const sc2 = scoreMatch(S2, P, 1, { completedSeq: [S2], plannedSeq: [P] });
++assert(cumpleCondiciones(S2, P).ok && sc2 >= AUTO_MERGE, 'candidato único coherente → sí fusiona');
++
++console.log('— Regla de porcentajes (vinculación) —');
++const P10k = { ...plan(), pasos: [{ durTipo: 'Distancia', durValor: 10, durUnidad: 'km', repeticiones: 1 }] };   // 10 km
++const P5k  = { ...plan(), id: 'plan5k', pasos: [{ durTipo: 'Distancia', durValor: 5, durUnidad: 'km', repeticiones: 1 }] };  // 5 km
++const S98 = real({ distancia: 9.8, duracion: 3500 });   // 98 % del plan de 10 km
++let eleccion = candidatePorPct(S98, [P5k, P10k]);
++assert(eleccion && eleccion.P.id === 'plan1', 'con dos candidatos, vincula el más cercano al 100 % (10K al 98 %, no 5K al 196 %)');
++assert(eleccion && Math.round(eleccion.pct) === 98, 'el pct devuelto es el cumplimiento real (98 %)');
++eleccion = candidatePorPct(real({ distancia: 20, duracion: 7000 }), [P10k]);
++assert(eleccion === null, '200 % del plan → fuera de rango: no vincula');
++eleccion = candidatePorPct(real({ distancia: 2, duracion: 800 }), [P10k]);
++assert(eleccion === null, '20 % del plan → fuera de rango: no vincula');
++eleccion = candidatePorPct(S98, [{ ...plan(), pasos: [] }]);
++assert(eleccion === null, 'plan sin pasos medibles → sin candidato por porcentaje (usa el score clásico)');
++eleccion = candidatePorPct({ ...S98, tipo: 'Ciclismo' }, [P10k]);
++assert(eleccion === null, 'actividad distinta → no vincula');
++
++console.log('— Zonas de ritmo en el cálculo del plan (rodaje por tiempo) —');
++{
++  // El caso del atleta: rodaje de 70 min a "Zona ritmo R2" SIN ritmos
++  // manuales. Sin resolver la zona, el plan salía ~1.5 km para ~19 reales.
++  const zonas = [
++    { titulo: 'R0', min: '6:30', max: '7:30' },
++    { titulo: 'R1', min: '5:30', max: '6:30' },
++    { titulo: 'R2', min: '4:30', max: '5:30' },
++  ];
++  const pasos = [
++    { tipo: 'Calentamiento', durTipo: 'Tiempo', durValor: '15', repeticiones: '1', hijos: [] },
++    { tipo: 'Extensivo', durTipo: 'Tiempo', durValor: '70', objetivo: 'Zona ritmo', objZona: 'R2', repeticiones: '1', hijos: [] },
++    { tipo: 'Enfriarse', durTipo: 'Tiempo', durValor: '10', repeticiones: '1', hijos: [] },
++  ];
++  const plan = computePlanMetrics(pasos, zonas);
++  assert(plan.km > 13.5 && plan.km < 14.5, `plan con zona resuelta = 14 km (70 min a 5:00; obtenido ${plan.km && plan.km.toFixed(1)})`);
++  assert(plan.sec > 0, 'el tiempo del plan se mantiene');
++
++  const sinZonas = computePlanMetrics(pasos, []);
++  assert(sinZonas.km === 0, 'sin zonas y sin ritmos manuales → 0 km (el fallo que tenía el matcher)');
++
++  // Serie con hijos: los hijos heredan las repeticiones de la serie
++  const serie = [{ tipo: 'Intensivo', durTipo: 'Distancia', durValor: '1', durUnidad: 'km', repeticiones: '5',
++    hijos: [{ tipo: 'Recuperación', durTipo: 'Tiempo', durValor: '1', durUnidad: 'min', repeticiones: '1', hijos: [] }] }];
++  const planSerie = computePlanMetrics(serie, []);
++  assert(planSerie.km > 4.9 && planSerie.km < 5.1, 'la serie 5x1 km suma 5 km');
++  assert(planSerie.sec === 300, 'la recuperación (hijo) se multiplica por las 5 repeticiones (300 s)');
++}
++
++console.log(`\n${fallos.length ? 'FALLOS: ' + fallos.length : 'TODO OK'} — ${pasadas} aserciones pasadas`);
++process.exit(fallos.length ? 1 : 0);
+diff -ruN a/tests/records-test.js b/tests/records-test.js
+--- a/tests/records-test.js	2026-10-21 22:39:24.777545945 +0000
++++ b/tests/records-test.js	2026-10-21 22:39:24.793546025 +0000
+@@ -1,124 +1,134 @@
+-// tests/records-test.js — prueba unitaria PURA de lib/records.js del
+-// servidor (copia de server-extract): detección de marcas personales al
+-// sincronizar entrenos, incluida la creación automática de distancias
+-// clásicas que el atleta no tenía configuradas (p. ej. un 10K).
+-//
+-// Ejecutar:  node tests/records-test.js
+-'use strict';
+-
+-const path = require('path');
+-const { comprobarRecords } = require(path.join(
+-  require('./server-ruta')(), 'lib', 'records.js'));
+-
+-let pasadas = 0;
+-const fallos = [];
+-function assert(cond, msg) {
+-  if (cond) pasadas++;
+-  else { fallos.push(msg); console.error('  ✗ ' + msg); }
+-}
+-
+-const fecha = new Date('2026-09-20T08:00:00Z');
+-// Rodaje de 10.2 km en 51:00 (3060 s) → ritmo 5:00/km
+-const w10k = { id: 'fit_1', tipo: 'Running', distancia: 10.2, duracion: 3060, fecha, titulo: 'Rodaje 10k' };
+-
+-console.log('— Creación automática de distancias clásicas no configuradas —');
+-let r = comprobarRecords({ marcasDefs: [], marcasResults: {} }, w10k);
+-assert((r.defs || []).length === 1, 'un 10.2 km auto-crea SOLO la distancia clásica más larga cubierta (nada de 800 m/1500 m extrapolados)');
+-const def10k = (r.defs || []).find((d) => d.titulo === '10K');
+-assert(!!def10k, 'se auto-crea la prueba 10K cuando no estaba en marcasDefs');
+-assert(!!def10k && def10k.auto === true, 'la prueba auto-creada va marcada auto:true');
+-const b10k = r.batidos.find((b) => b.titulo === '10K');
+-assert(!!b10k, 'el 10K cubierto genera su récord');
+-assert(b10k && b10k.valor === Math.round(3060 * (10 / 10.2)), 'tiempo del 10K extrapolado del ritmo medio (3000 s)');
+-assert(b10k && b10k.primera === true, 'récord nuevo (sin marca anterior) → primera:true (el push dirá "¡Nuevo récord!")');
+-assert(!!(r.resultados && def10k && Array.isArray(r.resultados[def10k.id]) && r.resultados[def10k.id].length === 1),
+-  'el resultado queda guardado en marcasResults[defId]');
+-assert(!!(r.bests && def10k && r.bests[def10k.id]), 'marcasBest se actualiza con el nuevo récord');
+-const res10k = r.resultados && def10k && r.resultados[def10k.id][0];
+-assert(res10k && res10k.workoutId === 'fit_1', 'el resultado guardado referencia el workoutId');
+-
+-console.log('— No auto-crea distancias que el entreno no cubre —');
+-r = comprobarRecords({ marcasDefs: [], marcasResults: {} }, { ...w10k, distancia: 6, duracion: 1800 });
+-assert(!(r.defs || []).some((d) => d.titulo === '10K'), 'un 6 km NO crea la prueba de 10K');
+-assert((r.defs || []).length === 1 && (r.defs || []).some((d) => d.titulo === '5K'), 'un 6 km crea solo 5K (la más larga cubierta)');
+-
+-console.log('— Respeto a la mejor marca existente —');
+-const perfilConBest = {
+-  marcasDefs: [{ id: 'd1', actividad: 'Running', titulo: '10K', tipo: 'dist', distM: 10000 }],
+-  marcasBest: { d1: { valor: 2900, fecha: '2026-01-01T00:00:00Z' } },
+-  marcasResults: { d1: [{ id: 'r1', valor: 2900, fecha: '2026-01-01T00:00:00Z' }] },
+-};
+-r = comprobarRecords(perfilConBest, w10k); // 3000 s > 2900 s → más lento
+-assert(r.batidos.length === 0, 'un tiempo más lento que la mejor marca NO genera récord');
+-assert(!r.defs, 'sin cambios en defs si la prueba ya existía');
+-r = comprobarRecords(perfilConBest, { ...w10k, duracion: 2800 }); // ≈ 2745 s → más rápido
+-assert(r.batidos.some((b) => b.defId === 'd1' && b.titulo === '10K'), 'un tiempo más rápido SÍ genera récord');
+-assert(r.batidos.some((b) => b.defId === 'd1' && b.primera === false), 'récord sobre marca existente → primera:false ("has batido tu marca")');
+-
+-console.log('— Resultados manuales sin marcasBest (app) no provocan falsos récords —');
+-// El usuario añadió a mano 1500 m = 5:00 (300 s) en la app; marcasBest no
+-// existe porque la app no lo mantiene. Un rodaje a 5:00/km daría 1500 ≈ 450 s
+-// (PEOR que 300 s): no debe anunciarse como récord.
+-const perfilManual = {
+-  marcasDefs: [{ id: 'd1', actividad: 'Running', titulo: '1500 m', tipo: 'dist', distM: 1500 }],
+-  marcasResults: { d1: [{ id: 'r1', valor: 300, fecha: '2026-02-01T00:00:00Z' }] },
+-};
+-// Rodaje de 10 km a 5:00/km → 1500 m extrapolado ≈ 450 s, PEOR que los
+-// 300 s añadidos a mano. Sin marcasBest, el servidor antiguo lo habría
+-// anunciado como récord; ahora se compara contra el mejor resultado guardado.
+-r = comprobarRecords(perfilManual, { id: 'x', tipo: 'Running', distancia: 10, duracion: 3000, fecha, titulo: 'Rodaje' });
+-assert(!r.batidos.some((b) => b.defId === 'd1'), 'la mejor marca manual en marcasResults evita el falso récord');
+-
+-console.log('— Robustez —');
+-r = comprobarRecords(null, w10k);
+-assert(Array.isArray(r.batidos) && r.batidos.length >= 1, 'perfil null: no rompe y calcula récords con defs automáticas');
+-r = comprobarRecords(perfilConBest, { ...w10k, tipo: 'Ciclismo' });
+-assert(!r.batidos.some((b) => b.defId === 'd1'), 'otra actividad no bate las pruebas de Running');
+-r = comprobarRecords(perfilConBest, { id: 'y', tipo: 'Running', distancia: 0, duracion: 3000, fecha });
+-assert(r.batidos.length === 0 && !r.defs, 'entreno sin distancia → sin récords ni defs');
+-
+-console.log('— Distancias de sprint: 200 m, 400 m y Milla —');
+-// 210 m a tope en 36 s: el entreno ES la propia prueba de 200 m, así que el
+-// tiempo real (< 60 s) vale. Antes el guard t<=60 lo bloqueaba SIEMPRE y la
+-// marca de 200 m jamás se habría registrado.
+-r = comprobarRecords({ marcasDefs: [], marcasResults: {} }, { id: 's1', tipo: 'Running', distancia: 0.21, duracion: 36, fecha, titulo: 'Series 200' });
+-assert(!!(r.defs || []).find((d) => d.titulo === '200 m'), 'un entreno de 210 m auto-crea la prueba de 200 m (la más larga cubierta)');
+-const b200 = r.batidos.find((b) => b.titulo === '200 m');
+-assert(!!b200 && b200.valor === Math.round(36 * (0.2 / 0.21)), 'récord de 200 m con tiempo real < 60 s (34 s)');
+-assert(!!b200 && b200.primera === true, 'la marca de 200 m nace como primer récord (primera:true)');
+-
+-// 420 m en 70 s: auto-crea 400 m (la más larga cubierta) y registra 67 s.
+-r = comprobarRecords({ marcasDefs: [], marcasResults: {} }, { id: 's2', tipo: 'Running', distancia: 0.42, duracion: 70, fecha, titulo: 'Series 400' });
+-assert(!!(r.defs || []).find((d) => d.titulo === '400 m'), 'un entreno de 420 m auto-crea la prueba de 400 m');
+-const b400 = r.batidos.find((b) => b.titulo === '400 m');
+-assert(!!b400 && b400.valor === Math.round(70 * (0.4 / 0.42)), 'récord de 400 m extrapolado del propio entreno (67 s)');
+-
+-// 1.7 km en 6:30: cubre 200/400/800/1500/Milla → solo la Milla (la más larga).
+-r = comprobarRecords({ marcasDefs: [], marcasResults: {} }, { id: 's3', tipo: 'Running', distancia: 1.7, duracion: 390, fecha, titulo: 'Milla en pista' });
+-assert(!!(r.defs || []).find((d) => d.titulo === 'Milla'), 'un entreno de 1.7 km auto-crea la prueba de Milla');
+-assert(!!r.batidos.find((b) => b.titulo === 'Milla') && r.batidos.find((b) => b.titulo === 'Milla').valor === Math.round(390 * (1.609344 / 1.7)),
+-  'récord de Milla extrapolado del ritmo medio (369 s ≈ 6:09)');
+-assert(!r.batidos.some((b) => ['200 m', '400 m', '800 m', '1500 m'].includes(b.titulo)),
+-  'las distancias menores cubiertas NO se auto-crean ni registran (solo la más larga)');
+-
+-// Un rodaje largo NO puede "batir" los 200 m con el ritmo medio extrapolado:
+-// fuera de la propia prueba sigue el guard de 60 s (3000 s → 200 m ≈ 59 s).
+-const perfil200 = {
+-  marcasDefs: [{ id: 'd200', actividad: 'Running', titulo: '200 m', tipo: 'dist', distM: 200 }],
+-  marcasResults: {},
+-};
+-r = comprobarRecords(perfil200, w10k);
+-assert(!r.batidos.some((b) => b.defId === 'd200'), 'un rodaje de 10 km NO registra 200 m extrapolados (guard de 60 s fuera de la prueba)');
+-
+-console.log('— Paridad de catálogo app ↔ servidor —');
+-const fs = require('fs');
+-const srcMarcas = fs.readFileSync(path.join(__dirname, '..', 'screens', 'MarcasScreen.js'), 'utf8');
+-const srcRecords = fs.readFileSync(path.join(require('./server-ruta')(), 'lib', 'records.js'), 'utf8');
+-const catalogo = (src, re) => (src.match(re) || []).map((s) => s.replace(/\s+/g, ' ').trim()).sort();
+-const catApp = catalogo(srcMarcas, /\{ id: 'tp_[a-z0-9]+',\s+titulo: '[^']+',\s+distM: [0-9.]+ \}/g);
+-const catSrv = catalogo(srcRecords, /\{ id: 'tp_[a-z0-9]+', titulo: '[^']+', distM: [0-9.]+ \}/g);
+-assert(catApp.length === 11 && catSrv.length === 11, 'los dos catálogos tienen las 11 distancias clásicas');
+-assert(catApp.length === catSrv.length && catApp.every((s, i) => s === catSrv[i]), 'las distancias clásicas son idénticas en la app y en el servidor (ids, títulos y metros)');
+-
+-console.log(`\n${fallos.length ? 'FALLOS: ' + fallos.length : 'TODO OK'} — ${pasadas} aserciones pasadas`);
+-process.exit(fallos.length ? 1 : 0);
++// tests/records-test.js — prueba unitaria PURA de lib/records.js del
++// servidor (copia de server-extract): detección de marcas personales al
++// sincronizar entrenos, incluida la creación automática de distancias
++// clásicas que el atleta no tenía configuradas (p. ej. un 10K).
++//
++// Ejecutar:  node tests/records-test.js
++'use strict';
++
++
++// ── GUARD (revisión 2026-10-21) ──────────────────────────────────────────
++// Este test necesita el código del SERVIDOR (handlers/ y lib/). Si no está
++// (server-extract/, SERVER_DIR o un repo hermano), se imprime SKIP y se sale
++// con 0: la batería `node tests/*.js` de la app nunca se rompe por esto.
++if (!require('fs').existsSync(require('path').join(require('./server-ruta')(), 'lib'))) {
++  console.log('SKIP: falta el código del servidor (define SERVER_DIR o copia el server en server-extract/mi-app-entrenos-main); ver tests/server-ruta.js');
++  process.exit(0);
++}
++
++const path = require('path');
++const { comprobarRecords } = require(path.join(
++  require('./server-ruta')(), 'lib', 'records.js'));
++
++let pasadas = 0;
++const fallos = [];
++function assert(cond, msg) {
++  if (cond) pasadas++;
++  else { fallos.push(msg); console.error('  ✗ ' + msg); }
++}
++
++const fecha = new Date('2026-09-20T08:00:00Z');
++// Rodaje de 10.2 km en 51:00 (3060 s) → ritmo 5:00/km
++const w10k = { id: 'fit_1', tipo: 'Running', distancia: 10.2, duracion: 3060, fecha, titulo: 'Rodaje 10k' };
++
++console.log('— Creación automática de distancias clásicas no configuradas —');
++let r = comprobarRecords({ marcasDefs: [], marcasResults: {} }, w10k);
++assert((r.defs || []).length === 1, 'un 10.2 km auto-crea SOLO la distancia clásica más larga cubierta (nada de 800 m/1500 m extrapolados)');
++const def10k = (r.defs || []).find((d) => d.titulo === '10K');
++assert(!!def10k, 'se auto-crea la prueba 10K cuando no estaba en marcasDefs');
++assert(!!def10k && def10k.auto === true, 'la prueba auto-creada va marcada auto:true');
++const b10k = r.batidos.find((b) => b.titulo === '10K');
++assert(!!b10k, 'el 10K cubierto genera su récord');
++assert(b10k && b10k.valor === Math.round(3060 * (10 / 10.2)), 'tiempo del 10K extrapolado del ritmo medio (3000 s)');
++assert(b10k && b10k.primera === true, 'récord nuevo (sin marca anterior) → primera:true (el push dirá "¡Nuevo récord!")');
++assert(!!(r.resultados && def10k && Array.isArray(r.resultados[def10k.id]) && r.resultados[def10k.id].length === 1),
++  'el resultado queda guardado en marcasResults[defId]');
++assert(!!(r.bests && def10k && r.bests[def10k.id]), 'marcasBest se actualiza con el nuevo récord');
++const res10k = r.resultados && def10k && r.resultados[def10k.id][0];
++assert(res10k && res10k.workoutId === 'fit_1', 'el resultado guardado referencia el workoutId');
++
++console.log('— No auto-crea distancias que el entreno no cubre —');
++r = comprobarRecords({ marcasDefs: [], marcasResults: {} }, { ...w10k, distancia: 6, duracion: 1800 });
++assert(!(r.defs || []).some((d) => d.titulo === '10K'), 'un 6 km NO crea la prueba de 10K');
++assert((r.defs || []).length === 1 && (r.defs || []).some((d) => d.titulo === '5K'), 'un 6 km crea solo 5K (la más larga cubierta)');
++
++console.log('— Respeto a la mejor marca existente —');
++const perfilConBest = {
++  marcasDefs: [{ id: 'd1', actividad: 'Running', titulo: '10K', tipo: 'dist', distM: 10000 }],
++  marcasBest: { d1: { valor: 2900, fecha: '2026-01-01T00:00:00Z' } },
++  marcasResults: { d1: [{ id: 'r1', valor: 2900, fecha: '2026-01-01T00:00:00Z' }] },
++};
++r = comprobarRecords(perfilConBest, w10k); // 3000 s > 2900 s → más lento
++assert(r.batidos.length === 0, 'un tiempo más lento que la mejor marca NO genera récord');
++assert(!r.defs, 'sin cambios en defs si la prueba ya existía');
++r = comprobarRecords(perfilConBest, { ...w10k, duracion: 2800 }); // ≈ 2745 s → más rápido
++assert(r.batidos.some((b) => b.defId === 'd1' && b.titulo === '10K'), 'un tiempo más rápido SÍ genera récord');
++assert(r.batidos.some((b) => b.defId === 'd1' && b.primera === false), 'récord sobre marca existente → primera:false ("has batido tu marca")');
++
++console.log('— Resultados manuales sin marcasBest (app) no provocan falsos récords —');
++// El usuario añadió a mano 1500 m = 5:00 (300 s) en la app; marcasBest no
++// existe porque la app no lo mantiene. Un rodaje a 5:00/km daría 1500 ≈ 450 s
++// (PEOR que 300 s): no debe anunciarse como récord.
++const perfilManual = {
++  marcasDefs: [{ id: 'd1', actividad: 'Running', titulo: '1500 m', tipo: 'dist', distM: 1500 }],
++  marcasResults: { d1: [{ id: 'r1', valor: 300, fecha: '2026-02-01T00:00:00Z' }] },
++};
++// Rodaje de 10 km a 5:00/km → 1500 m extrapolado ≈ 450 s, PEOR que los
++// 300 s añadidos a mano. Sin marcasBest, el servidor antiguo lo habría
++// anunciado como récord; ahora se compara contra el mejor resultado guardado.
++r = comprobarRecords(perfilManual, { id: 'x', tipo: 'Running', distancia: 10, duracion: 3000, fecha, titulo: 'Rodaje' });
++assert(!r.batidos.some((b) => b.defId === 'd1'), 'la mejor marca manual en marcasResults evita el falso récord');
++
++console.log('— Robustez —');
++r = comprobarRecords(null, w10k);
++assert(Array.isArray(r.batidos) && r.batidos.length >= 1, 'perfil null: no rompe y calcula récords con defs automáticas');
++r = comprobarRecords(perfilConBest, { ...w10k, tipo: 'Ciclismo' });
++assert(!r.batidos.some((b) => b.defId === 'd1'), 'otra actividad no bate las pruebas de Running');
++r = comprobarRecords(perfilConBest, { id: 'y', tipo: 'Running', distancia: 0, duracion: 3000, fecha });
++assert(r.batidos.length === 0 && !r.defs, 'entreno sin distancia → sin récords ni defs');
++
++console.log('— Distancias de sprint: 200 m, 400 m y Milla —');
++// 210 m a tope en 36 s: el entreno ES la propia prueba de 200 m, así que el
++// tiempo real (< 60 s) vale. Antes el guard t<=60 lo bloqueaba SIEMPRE y la
++// marca de 200 m jamás se habría registrado.
++r = comprobarRecords({ marcasDefs: [], marcasResults: {} }, { id: 's1', tipo: 'Running', distancia: 0.21, duracion: 36, fecha, titulo: 'Series 200' });
++assert(!!(r.defs || []).find((d) => d.titulo === '200 m'), 'un entreno de 210 m auto-crea la prueba de 200 m (la más larga cubierta)');
++const b200 = r.batidos.find((b) => b.titulo === '200 m');
++assert(!!b200 && b200.valor === Math.round(36 * (0.2 / 0.21)), 'récord de 200 m con tiempo real < 60 s (34 s)');
++assert(!!b200 && b200.primera === true, 'la marca de 200 m nace como primer récord (primera:true)');
++
++// 420 m en 70 s: auto-crea 400 m (la más larga cubierta) y registra 67 s.
++r = comprobarRecords({ marcasDefs: [], marcasResults: {} }, { id: 's2', tipo: 'Running', distancia: 0.42, duracion: 70, fecha, titulo: 'Series 400' });
++assert(!!(r.defs || []).find((d) => d.titulo === '400 m'), 'un entreno de 420 m auto-crea la prueba de 400 m');
++const b400 = r.batidos.find((b) => b.titulo === '400 m');
++assert(!!b400 && b400.valor === Math.round(70 * (0.4 / 0.42)), 'récord de 400 m extrapolado del propio entreno (67 s)');
++
++// 1.7 km en 6:30: cubre 200/400/800/1500/Milla → solo la Milla (la más larga).
++r = comprobarRecords({ marcasDefs: [], marcasResults: {} }, { id: 's3', tipo: 'Running', distancia: 1.7, duracion: 390, fecha, titulo: 'Milla en pista' });
++assert(!!(r.defs || []).find((d) => d.titulo === 'Milla'), 'un entreno de 1.7 km auto-crea la prueba de Milla');
++assert(!!r.batidos.find((b) => b.titulo === 'Milla') && r.batidos.find((b) => b.titulo === 'Milla').valor === Math.round(390 * (1.609344 / 1.7)),
++  'récord de Milla extrapolado del ritmo medio (369 s ≈ 6:09)');
++assert(!r.batidos.some((b) => ['200 m', '400 m', '800 m', '1500 m'].includes(b.titulo)),
++  'las distancias menores cubiertas NO se auto-crean ni registran (solo la más larga)');
++
++// Un rodaje largo NO puede "batir" los 200 m con el ritmo medio extrapolado:
++// fuera de la propia prueba sigue el guard de 60 s (3000 s → 200 m ≈ 59 s).
++const perfil200 = {
++  marcasDefs: [{ id: 'd200', actividad: 'Running', titulo: '200 m', tipo: 'dist', distM: 200 }],
++  marcasResults: {},
++};
++r = comprobarRecords(perfil200, w10k);
++assert(!r.batidos.some((b) => b.defId === 'd200'), 'un rodaje de 10 km NO registra 200 m extrapolados (guard de 60 s fuera de la prueba)');
++
++console.log('— Paridad de catálogo app ↔ servidor —');
++const fs = require('fs');
++const srcMarcas = fs.readFileSync(path.join(__dirname, '..', 'screens', 'MarcasScreen.js'), 'utf8');
++const srcRecords = fs.readFileSync(path.join(require('./server-ruta')(), 'lib', 'records.js'), 'utf8');
++const catalogo = (src, re) => (src.match(re) || []).map((s) => s.replace(/\s+/g, ' ').trim()).sort();
++const catApp = catalogo(srcMarcas, /\{ id: 'tp_[a-z0-9]+',\s+titulo: '[^']+',\s+distM: [0-9.]+ \}/g);
++const catSrv = catalogo(srcRecords, /\{ id: 'tp_[a-z0-9]+', titulo: '[^']+', distM: [0-9.]+ \}/g);
++assert(catApp.length === 11 && catSrv.length === 11, 'los dos catálogos tienen las 11 distancias clásicas');
++assert(catApp.length === catSrv.length && catApp.every((s, i) => s === catSrv[i]), 'las distancias clásicas son idénticas en la app y en el servidor (ids, títulos y metros)');
++
++console.log(`\n${fallos.length ? 'FALLOS: ' + fallos.length : 'TODO OK'} — ${pasadas} aserciones pasadas`);
++process.exit(fallos.length ? 1 : 0);
+diff -ruN a/tests/vueltas-auto-test.js b/tests/vueltas-auto-test.js
+--- a/tests/vueltas-auto-test.js	2026-10-21 22:39:24.781545965 +0000
++++ b/tests/vueltas-auto-test.js	2026-10-21 22:39:24.797546045 +0000
+@@ -1,109 +1,119 @@
+-// tests/vueltas-auto-test.js — Vueltas automáticas de 1 km: rodajes sin
+-// vueltas (o con la vuelta global) se trocean por kilómetro desde los
+-// registros (distancia acumulada + tiempos), con tiempo ELAPSED por vuelta
+-// (coincide con la duración del entreno), FC, cadencia y desnivel; la
+-// última queda con lo que quede.
+-// Ejecutar:  node tests/vueltas-auto-test.js
+-'use strict';
+-const path = require('path');
+-const { generateKeyPairSync } = require('crypto');
+-
+-let pasadas = 0;
+-const fallos = [];
+-function ok(cond, msg) {
+-  if (cond) { pasadas++; console.log('ok   ' + msg); }
+-  else { fallos.push(msg); console.log('FALLO ' + msg); }
+-}
+-function eq(a, b, msg) {
+-  if (a === b) { pasadas++; console.log('ok   ' + msg); }
+-  else { fallos.push(msg); console.log(`FALLO ${msg} (esperado ${JSON.stringify(b)}, obtenido ${JSON.stringify(a)})`); }
+-}
+-
+-process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify({
+-  type: 'service_account',
+-  project_id: 'test-local',
+-  private_key_id: 'x',
+-  private_key: generateKeyPairSync('rsa', { modulusLength: 2048 }).privateKey.export({ type: 'pkcs8', format: 'pem' }),
+-  client_email: 'test@test-local.iam.gserviceaccount.com',
+-  client_id: '1',
+-  token_uri: 'https://oauth2.example.com/token',
+-});
+-
+-const { vueltasAutoPorKm } = require(path.join(require('./server-ruta')(), 'lib', 'intervalsDetail.js'));
+-
+-// Rodaje sintético: 5.5 km, una muestra cada 0.1 km / 30 s (ritmo 5:00/km),
+-// FC 150 constante, cadencia 170, subiendo 20 m por km.
+-function rodaje(kmTot, { pausaEnLap = -1 } = {}) {
+-  const pts = [];
+-  const n = Math.round(kmTot * 10);
+-  let extra = 0;                          // una pausa desplaza TODO lo posterior
+-  for (let i = 0; i <= n; i++) {
+-    const dist = Number((i * 0.1).toFixed(2));
+-    if (pausaEnLap === Math.floor(dist) && i % 10 === 5) extra += 300;   // para 5 min
+-    const t = i * 30 + extra;
+-    pts.push({
+-      timestamp: new Date(new Date('2026-10-01T08:00:00Z').getTime() + t * 1000).toISOString(),
+-      distancia: dist,
+-      altitud: Number((dist * 20).toFixed(1)),   // 20 m de subida por km
+-      frecuencia: 150,
+-      cadencia: 170,
+-      velocidad: 12,                              // 12 km/h = 5:00/km
+-      lat: null, lon: null,
+-    });
+-  }
+-  return pts;
+-}
+-
+-(async () => {
+-  console.log('— 1) Rodaje de 5.5 km sin vueltas → 6 vueltas automáticas —');
+-  {
+-    const v = vueltasAutoPorKm(rodaje(5.5), true, false);
+-    ok(Array.isArray(v) && v.length === 6, '5 vueltas de 1 km + la última con lo que queda');
+-    eq(v[0].vuelta, 1, 'numeración desde 1');
+-    eq(v[0].distancia, 1.0, 'la primera vuelta mide 1 km');
+-    eq(v[4].distancia, 1.0, 'la quinta vuelta mide 1 km');
+-    eq(v[5].distancia, 0.5, 'la última queda con lo que quede (0.5 km)');
+-    eq(v[0].tiempo, 300, 'tiempo de la vuelta: 300 s (5:00/km, huecos ≤ 30 s)');
+-    eq(v[0].ritmo, '05:00', 'ritmo medio 5:00/km');
+-    eq(v[0].fcMedia, 150, 'FC media de la vuelta');
+-    eq(v[0].fcMaxima, 150, 'FC máxima de la vuelta');
+-    eq(v[0].cadenciaMedia, 170, 'cadencia media de la vuelta');
+-    eq(v[0].gananciaElev, 20, 'desnivel positivo por vuelta (20 m/km)');
+-    ok(v[0].inicio.includes('2026-10-01T08:00'), 'inicio de la vuelta = timestamp del primer registro');
+-  }
+-
+-  console.log('— 2) Pausa dentro de una vuelta: no suma tiempo —');
+-  {
+-    // 5 min de parada dentro de la 2ª vuelta: tiempo ELAPSED, la vuelta
+-    // marca 600 s de reloj (coincide con la duración que guarda el sync).
+-    const v = vueltasAutoPorKm(rodaje(3.2, { pausaEnLap: 1 }), true, false);
+-    ok(Array.isArray(v) && v.length === 4, '3.2 km → 4 vueltas');
+-    eq(v[1].tiempo, 600, 'la vuelta con la pausa cuenta 600 s de reloj (elapsed)');
+-    eq(v[0].tiempo, 300, 'las demás vueltas mantienen sus 300 s');
+-    eq(v[2].tiempo, 300, 'las vueltas tras la pausa también (el desplazamiento no contamina)');
+-  }
+-
+-  console.log('— 3) Casos que NO se trocean —');
+-  eq(vueltasAutoPorKm(rodaje(0.8), true, false), null, 'menos de 1 km → null (se queda como estaba)');
+-  eq(vueltasAutoPorKm([{ timestamp: '2026-10-01T08:00:00Z', distancia: 0, frecuencia: 0 }], true, false), null, 'registros insuficientes → null');
+-  eq(vueltasAutoPorKm([{ timestamp: '2026-10-01T08:00:00Z', frecuencia: 0 }, { timestamp: '2026-10-01T08:00:30Z', frecuencia: 0 }], true, false), null, 'sin distancia (fuerza) → null');
+-
+-  console.log('— 4) Natación/gimnasio: sin GPS pero con distancia funciona —');
+-  {
+-    const pts = [];
+-    for (let i = 0; i <= 25; i++) {
+-      pts.push({
+-        timestamp: new Date(new Date('2026-10-01T08:00:00Z').getTime() + i * 60 * 1000).toISOString(),
+-        distancia: Number((i * 0.1).toFixed(2)),
+-        altitud: 0, frecuencia: 140, cadencia: 60, velocidad: 6, lat: null, lon: null,
+-      });
+-    }
+-    const v = vueltasAutoPorKm(pts, false, false);
+-    eq(v && v.length, 3, '2.5 km sin GPS → 3 vueltas (1 + 1 + 0.5)');
+-    eq(v[0].ritmo, '10:00', 'ritmo por vuelta (1 km en 600 s)');
+-  }
+-
+-  console.log('');
+-  console.log(`VUELTAS AUTO 1KM: ${pasadas} comprobaciones OK, ${fallos.length} fallos`);
+-  if (fallos.length) { fallos.forEach((f) => console.log('  FALLO: ' + f)); process.exit(1); }
+-})().catch((e) => { console.error('ERROR FATAL', e); process.exit(2); });
++// tests/vueltas-auto-test.js — Vueltas automáticas de 1 km: rodajes sin
++// vueltas (o con la vuelta global) se trocean por kilómetro desde los
++// registros (distancia acumulada + tiempos), con tiempo ELAPSED por vuelta
++// (coincide con la duración del entreno), FC, cadencia y desnivel; la
++// última queda con lo que quede.
++// Ejecutar:  node tests/vueltas-auto-test.js
++'use strict';
++
++// ── GUARD (revisión 2026-10-21) ──────────────────────────────────────────
++// Este test necesita el código del SERVIDOR (handlers/ y lib/). Si no está
++// (server-extract/, SERVER_DIR o un repo hermano), se imprime SKIP y se sale
++// con 0: la batería `node tests/*.js` de la app nunca se rompe por esto.
++if (!require('fs').existsSync(require('path').join(require('./server-ruta')(), 'lib'))) {
++  console.log('SKIP: falta el código del servidor (define SERVER_DIR o copia el server en server-extract/mi-app-entrenos-main); ver tests/server-ruta.js');
++  process.exit(0);
++}
++
++const path = require('path');
++const { generateKeyPairSync } = require('crypto');
++
++let pasadas = 0;
++const fallos = [];
++function ok(cond, msg) {
++  if (cond) { pasadas++; console.log('ok   ' + msg); }
++  else { fallos.push(msg); console.log('FALLO ' + msg); }
++}
++function eq(a, b, msg) {
++  if (a === b) { pasadas++; console.log('ok   ' + msg); }
++  else { fallos.push(msg); console.log(`FALLO ${msg} (esperado ${JSON.stringify(b)}, obtenido ${JSON.stringify(a)})`); }
++}
++
++process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify({
++  type: 'service_account',
++  project_id: 'test-local',
++  private_key_id: 'x',
++  private_key: generateKeyPairSync('rsa', { modulusLength: 2048 }).privateKey.export({ type: 'pkcs8', format: 'pem' }),
++  client_email: 'test@test-local.iam.gserviceaccount.com',
++  client_id: '1',
++  token_uri: 'https://oauth2.example.com/token',
++});
++
++const { vueltasAutoPorKm } = require(path.join(require('./server-ruta')(), 'lib', 'intervalsDetail.js'));
++
++// Rodaje sintético: 5.5 km, una muestra cada 0.1 km / 30 s (ritmo 5:00/km),
++// FC 150 constante, cadencia 170, subiendo 20 m por km.
++function rodaje(kmTot, { pausaEnLap = -1 } = {}) {
++  const pts = [];
++  const n = Math.round(kmTot * 10);
++  let extra = 0;                          // una pausa desplaza TODO lo posterior
++  for (let i = 0; i <= n; i++) {
++    const dist = Number((i * 0.1).toFixed(2));
++    if (pausaEnLap === Math.floor(dist) && i % 10 === 5) extra += 300;   // para 5 min
++    const t = i * 30 + extra;
++    pts.push({
++      timestamp: new Date(new Date('2026-10-01T08:00:00Z').getTime() + t * 1000).toISOString(),
++      distancia: dist,
++      altitud: Number((dist * 20).toFixed(1)),   // 20 m de subida por km
++      frecuencia: 150,
++      cadencia: 170,
++      velocidad: 12,                              // 12 km/h = 5:00/km
++      lat: null, lon: null,
++    });
++  }
++  return pts;
++}
++
++(async () => {
++  console.log('— 1) Rodaje de 5.5 km sin vueltas → 6 vueltas automáticas —');
++  {
++    const v = vueltasAutoPorKm(rodaje(5.5), true, false);
++    ok(Array.isArray(v) && v.length === 6, '5 vueltas de 1 km + la última con lo que queda');
++    eq(v[0].vuelta, 1, 'numeración desde 1');
++    eq(v[0].distancia, 1.0, 'la primera vuelta mide 1 km');
++    eq(v[4].distancia, 1.0, 'la quinta vuelta mide 1 km');
++    eq(v[5].distancia, 0.5, 'la última queda con lo que quede (0.5 km)');
++    eq(v[0].tiempo, 300, 'tiempo de la vuelta: 300 s (5:00/km, huecos ≤ 30 s)');
++    eq(v[0].ritmo, '05:00', 'ritmo medio 5:00/km');
++    eq(v[0].fcMedia, 150, 'FC media de la vuelta');
++    eq(v[0].fcMaxima, 150, 'FC máxima de la vuelta');
++    eq(v[0].cadenciaMedia, 170, 'cadencia media de la vuelta');
++    eq(v[0].gananciaElev, 20, 'desnivel positivo por vuelta (20 m/km)');
++    ok(v[0].inicio.includes('2026-10-01T08:00'), 'inicio de la vuelta = timestamp del primer registro');
++  }
++
++  console.log('— 2) Pausa dentro de una vuelta: no suma tiempo —');
++  {
++    // 5 min de parada dentro de la 2ª vuelta: tiempo ELAPSED, la vuelta
++    // marca 600 s de reloj (coincide con la duración que guarda el sync).
++    const v = vueltasAutoPorKm(rodaje(3.2, { pausaEnLap: 1 }), true, false);
++    ok(Array.isArray(v) && v.length === 4, '3.2 km → 4 vueltas');
++    eq(v[1].tiempo, 600, 'la vuelta con la pausa cuenta 600 s de reloj (elapsed)');
++    eq(v[0].tiempo, 300, 'las demás vueltas mantienen sus 300 s');
++    eq(v[2].tiempo, 300, 'las vueltas tras la pausa también (el desplazamiento no contamina)');
++  }
++
++  console.log('— 3) Casos que NO se trocean —');
++  eq(vueltasAutoPorKm(rodaje(0.8), true, false), null, 'menos de 1 km → null (se queda como estaba)');
++  eq(vueltasAutoPorKm([{ timestamp: '2026-10-01T08:00:00Z', distancia: 0, frecuencia: 0 }], true, false), null, 'registros insuficientes → null');
++  eq(vueltasAutoPorKm([{ timestamp: '2026-10-01T08:00:00Z', frecuencia: 0 }, { timestamp: '2026-10-01T08:00:30Z', frecuencia: 0 }], true, false), null, 'sin distancia (fuerza) → null');
++
++  console.log('— 4) Natación/gimnasio: sin GPS pero con distancia funciona —');
++  {
++    const pts = [];
++    for (let i = 0; i <= 25; i++) {
++      pts.push({
++        timestamp: new Date(new Date('2026-10-01T08:00:00Z').getTime() + i * 60 * 1000).toISOString(),
++        distancia: Number((i * 0.1).toFixed(2)),
++        altitud: 0, frecuencia: 140, cadencia: 60, velocidad: 6, lat: null, lon: null,
++      });
++    }
++    const v = vueltasAutoPorKm(pts, false, false);
++    eq(v && v.length, 3, '2.5 km sin GPS → 3 vueltas (1 + 1 + 0.5)');
++    eq(v[0].ritmo, '10:00', 'ritmo por vuelta (1 km en 600 s)');
++  }
++
++  console.log('');
++  console.log(`VUELTAS AUTO 1KM: ${pasadas} comprobaciones OK, ${fallos.length} fallos`);
++  if (fallos.length) { fallos.forEach((f) => console.log('  FALLO: ' + f)); process.exit(1); }
++})().catch((e) => { console.error('ERROR FATAL', e); process.exit(2); });
+diff -ruN a/tests/zonas-editor-test.js b/tests/zonas-editor-test.js
+--- a/tests/zonas-editor-test.js	2026-10-21 22:39:24.781545965 +0000
++++ b/tests/zonas-editor-test.js	2026-10-21 22:39:24.797546045 +0000
+@@ -28,6 +28,16 @@
+ 
+    Uso: node tests/zonas-editor-test.js */
+ 'use strict';
++
++// ── GUARD (revisión 2026-10-21) ──────────────────────────────────────────
++// Este test necesita el código del SERVIDOR (handlers/ y lib/). Si no está
++// (server-extract/, SERVER_DIR o un repo hermano), se imprime SKIP y se sale
++// con 0: la batería `node tests/*.js` de la app nunca se rompe por esto.
++if (!require('fs').existsSync(require('path').join(require('./server-ruta')(), 'lib'))) {
++  console.log('SKIP: falta el código del servidor (define SERVER_DIR o copia el server en server-extract/mi-app-entrenos-main); ver tests/server-ruta.js');
++  process.exit(0);
++}
++
+ const fs = require('fs');
+ const path = require('path');
+ 
+diff -ruN a/tests/zonas-ritmo-upload-test.js b/tests/zonas-ritmo-upload-test.js
+--- a/tests/zonas-ritmo-upload-test.js	2026-10-21 22:39:24.781545965 +0000
++++ b/tests/zonas-ritmo-upload-test.js	2026-10-21 22:39:24.797546045 +0000
+@@ -71,10 +71,15 @@
+ ok(!/\}, \[zonaAct\]\);/.test(srcAnalysis), 'sin effect de limpieza con setState síncrono (react-compiler)');
+ 
+ console.log('— 3) analyticsEngine: caché de streams por actividad —');
+-ok(/const key = `\$\{uid\}:\$\{period\}:\$\{zonaAct\}`;/.test(srcEngine), 'la clave de memoria incluye zonaAct');
+-ok(/const storageKey = `analyticsStreams_v\$\{CACHE_V\}_\$\{uid\}_\$\{period\}_\$\{zonaAct\}`;/.test(srcEngine), 'la clave de AsyncStorage incluye zonaAct');
++// Revisión 2026-10-21: la clave lleva ADEMÁS la firma de zonas (cambiar una
++// zona o un umbral ya no sirve el snapshot viejo). El grupo es opcional para
++// no atar el test a un nombre de función concreto.
++ok(/const key = `\$\{uid\}:\$\{period\}:\$\{zonaAct\}(:\$\{firmaZonasDe\(profile\)\})?`;/.test(srcEngine), 'la clave de memoria incluye zonaAct');
++ok(/const storageKey = `analyticsStreams_v\$\{CACHE_V\}_\$\{uid\}_\$\{period\}_\$\{zonaAct\}(_\$\{firmaZonasDe\(profile\)\})?`;/.test(srcEngine), 'la clave de AsyncStorage incluye zonaAct');
+ ok(/export async function getStreamsStats\(uid, period, profile, \{ force = false, zonaAct = 'General' \} = \{\}\)/.test(srcEngine), 'getStreamsStats acepta zonaAct con default General');
+ ok(/export function invalidateStreamsCache\(uid\)/.test(srcEngine), 'invalidateStreamsCache exportado');
++ok(/export function firmaZonasDe\(profile\)/.test(srcEngine), 'firmaZonasDe exportada (firma de zonas para las claves de caché)');
++ok((srcEngine.match(/firmaZonasDe\(profile\)/g) || []).length >= 4, 'la firma de zonas se usa en memoria y en AsyncStorage de los dos caminos');
+ ok(/for \(const za of \['General', 'Running', 'Ciclismo', 'Natación'\]\) \{/.test(srcEngine), 'la invalidación barre los sufijos de actividad');
+ ok(/invalidateStreamsCache\(uid\);/.test(srcEngine), 'el sync incremental invalida zonas/curvas al traer entrenos nuevos');
+ 

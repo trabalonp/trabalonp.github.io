@@ -1,0 +1,35 @@
+# ── App Expo / React Native (mi-app-entrenos) ─────────────────────────────
+# El ZIP entregado traía dentro `dist/` (75 MB), `.expo/` y `build.pdf`:
+# son artefactos, no código. Sin este fichero, `git status` de la app aparece
+# lleno de ruido y cualquier `git add .` mete la build en el repo.
+
+node_modules/
+.expo/
+.expo-shared/
+dist/
+build/
+web-build/
+*.pdf
+*.log
+.expo/*.log
+streams-fn-tmp.txt
+
+# Copia local del servidor que usan los tests (tests/server-ruta.js).
+# Si prefieres versionarla, borra esta línea y quita los tests del .gitignore.
+server-extract/
+
+# Secretos / credenciales locales
+.env
+.env.*
+!.env.example
+google-services.json.bak
+*.keystore
+*.jks
+firebase-debug.log
+firestore-debug.log
+
+# Sistema operativo / editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

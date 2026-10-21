@@ -1,0 +1,257 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // firestore.rules — FASE 1: DESPLEGABLE HOY
+    // ═══════════════════════════════════════════════════════════════════════
+    // Qué cambia respecto al fichero actual (el abierto):
+    //   · TODAS las ESCRITURAS quedan cerradas a propietario / entrenador
+    //     vinculado / apuntado. Nadie puede ya editar ni borrar entrenos,
+    //     posts, librería o perfiles ajenos conociendo el ID. Ese era el
+    //     riesgo grave (integridad del historial de entrenamiento).
+    //   · Las LECTURAS se cierran en todo lo que la app consulta con filtro
+    //     propio (libreria, archivosLib, analysis, analyticsCurves,
+    //     notificaciones, intervals_connections, soporte).
+    //   · SE MANTIENE la lectura de `entrenamientos` (y subcolecciones),
+    //     `perfiles`, `posts`, `wellness`, `fitness`, `avatares` y `retos`
+    //     abierta a usuarios autenticados, IGUAL QUE HOY.
+    //
+    // Por qué no se cierra también la lectura de entrenamientos:
+    //   el entrenador lista el calendario del atleta con
+    //   query(entrenamientos, where('userId','==',atleta)) (HomeScreen.js:414,
+    //   CalendarScreen.js:420). Firestore solo autoriza una CONSULTA si puede
+    //   DEMOSTRAR la regla con las restricciones de esa consulta; las ramas
+    //   basadas en get() (esSuEntrenador) no son demostrables, así que
+    //   cerrarla dejaría al entrenador sin calendario y sin gráficas.
+    //   La solución completa (campo coachUid o custom claims) está descrita en
+    //   el README → «Fase 2»; ese es el fichero `firestore.rules.estricto`.
+    //
+    // El backend (Firebase Admin) NO pasa por estas reglas: sigue igual.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // ── Vínculo entrenador (idéntica a la del fichero actual) ────────────
+    function esSuEntrenador(userId) {
+      let p = get(/databases/$(database)/documents/perfiles/$(userId)).data;
+      return ('entrenadorUid' in p && p.entrenadorUid == request.auth.uid)
+          || ('entrenador' in p && (
+               (p.entrenador is string && p.entrenador == request.auth.uid)
+            || (p.entrenador is map
+                && (('uid' in p.entrenador && p.entrenador.uid == request.auth.uid)
+                    || ('email' in p.entrenador
+                        && 'email' in request.auth.token
+                        && p.entrenador.email == request.auth.token.email)))
+            || (p.entrenador is list && request.auth.uid in p.entrenador)));
+    }
+
+    // ── Helpers de entrenos (misma matriz que el cliente) ────────────────
+    function esEvento(w) {
+      return 'tipo' in w && w.tipo == 'Evento';
+    }
+
+    function estaEnAsignados(w, uid) {
+      return 'asignados' in w && w.asignados is list && uid in w.asignados;
+    }
+
+    // Dueño (salvo Evento ajeno) o entrenador vinculado del dueño.
+    function puedeEditarEntreno(w) {
+      return request.auth != null && (
+        ('userId' in w && w.userId == request.auth.uid
+          && !(esEvento(w) && (
+                ('creadoPor' in w && w.creadoPor != request.auth.uid)
+                || (!('creadoPor' in w) && estaEnAsignados(w, request.auth.uid)))))
+        || ('userId' in w && esSuEntrenador(w.userId)));
+    }
+
+    // Un update nunca puede cambiar de dueño ni de creador.
+    function sinCambiarDueno() {
+      return !(request.resource.data.diff(resource.data).affectedKeys()
+                 .hasAny(['userId', 'creadoPor']));
+    }
+
+    // ══════════════════ ENTRENAMIENTOS + SUBCOLECCIONES ══════════════════
+    match /entrenamientos/{docId} {
+      allow read: if request.auth != null;
+
+      // Crear: para uno mismo, o como entrenador de ese atleta y firmando
+      // con el uid propio (AddWorkoutModal.js:331-333).
+      allow create: if request.auth != null && (
+        request.resource.data.userId == request.auth.uid
+        || (esSuEntrenador(request.resource.data.userId)
+            && request.resource.data.creadoPor == request.auth.uid));
+
+      // Editar: dueño/entrenador sin poder cambiar de dueño; un APUNTADO solo
+      // puede marcar estado y duración al ejecutar el entreno.
+      allow update: if (puedeEditarEntreno(resource.data) && sinCambiarDueno())
+        || (request.auth != null
+            && estaEnAsignados(resource.data, request.auth.uid)
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['estado', 'duracion']));
+
+      allow delete: if puedeEditarEntreno(resource.data);
+
+      match /detalles/{subDoc} {
+        allow read: if request.auth != null;
+        allow create, update, delete: if puedeEditarEntreno(
+          get(/databases/$(database)/documents/entrenamientos/$(docId)).data);
+      }
+
+      match /registros/{subDoc} {
+        allow read: if request.auth != null;
+        allow create, update, delete: if puedeEditarEntreno(
+          get(/databases/$(database)/documents/entrenamientos/$(docId)).data);
+      }
+    }
+
+    // ══════════════════════════ CURVAS (Bloque C) ════════════════════════
+    // Lectura: propietario o su entrenador (getDoc por id → get() sí vale).
+    // Escritura: solo el propietario (el entrenador calcula con el legacy).
+    match /analyticsCurves/{uid} {
+      allow read: if request.auth != null
+                   && (request.auth.uid == uid || esSuEntrenador(uid));
+      allow write: if request.auth != null && request.auth.uid == uid;
+
+      match /months/{mes} {
+        allow read: if request.auth != null
+                     && (request.auth.uid == uid || esSuEntrenador(uid));
+        allow write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+
+    // ══════════════════════════════ PERFILES ═════════════════════════════
+    // Lectura abierta a autenticados: la app social y el coach la necesitan
+    // (nombres en comentarios/asignados, atletas vía where(entrenador==uid),
+    // avatares). Riesgo conocido y documentado: el perfil guarda
+    // expoPushToken, dni, telefono, email y foto. Ver README.
+    match /perfiles/{userId} {
+      allow read: if request.auth != null;
+
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // El dueño escribe todo. El entrenador vinculado, SOLO las claves de
+      // zonas/umbrales/marcas que escribe su pantalla (ZonesScreen.js:455-467,
+      // MarcasScreen.js:608-610). No puede tocar el vínculo ni datos
+      // personales. El fallback pendingDeletes solo lo escribe el dueño.
+      allow update: if request.auth != null && (
+        request.auth.uid == userId
+        || (esSuEntrenador(userId)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                 'zonasFC', 'zonasRitmo', 'zonasPotencia', 'zonasActividad',
+                 'umbralRitmo', 'umbralCiclismo', 'umbralFC', 'fcUmbral',
+                 'fcReposo', 'umbralPotencia',
+                 'marcasDefs', 'marcasResults', 'marcasMetrics'])));
+
+      allow delete: if request.auth != null && request.auth.uid == userId;
+
+      match /notificaciones/{notificationId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow create: if request.auth != null && request.auth.uid == userId;
+        allow update: if request.auth != null
+                       && request.auth.uid == userId
+                       && request.resource.data.diff(resource.data).affectedKeys()
+                            .hasOnly(['leido']);
+        allow delete: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // ══════════════════════════ LIBRERÍA Y ARCHIVOS ══════════════════════
+    // Todas las lecturas del cliente van con where('userId','==',uid), así que
+    // se puede cerrar al propietario y la consulta sigue siendo demostrable.
+    match /libreria/{docId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    match /archivosLib/{docId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // ════════════════════════════════ POSTS ══════════════════════════════
+    match /posts/{postId} {
+      allow read: if request.auth != null;
+
+      allow create: if request.auth != null
+                     && request.resource.data.autorUid == request.auth.uid;
+
+      // El autor edita lo suyo. Cualquier otro autenticado SOLO puede tocar
+      // reacciones y votos (sin cambiar pregunta/opciones de la encuesta).
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.autorUid
+        || (
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['reacciones', 'encuesta'])
+          && (!request.resource.data.diff(resource.data).affectedKeys()
+                .hasAny(['encuesta'])
+              || ('encuesta' in resource.data && resource.data.encuesta is map
+                  && 'encuesta' in request.resource.data
+                  && request.resource.data.encuesta is map
+                  && request.resource.data.encuesta.pregunta == resource.data.encuesta.pregunta
+                  && request.resource.data.encuesta.opciones == resource.data.encuesta.opciones))
+        ));
+
+      allow delete: if request.auth != null && request.auth.uid == resource.data.autorUid;
+    }
+
+    // ══════════════════ WELLNESS / FITNESS (solo lectura) ════════════════
+    match /wellness/{userId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    match /fitness/{userId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // ══════════════════════════════ ANALYSIS ═════════════════════════════
+    match /analysis/{userId} {
+      allow read: if request.auth != null
+                   && (request.auth.uid == userId || esSuEntrenador(userId));
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ══════════════════════════════ AVATARES ═════════════════════════════
+    match /avatares/{userId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ════════════════════════════════ RETOS ══════════════════════════════
+    match /retos/{retoId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.creadorUid == request.auth.uid;
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.creadorUid
+        || (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['aceptados'])
+          && request.auth.uid in request.resource.data.aceptados
+          && (!('aceptados' in resource.data) || !(request.auth.uid in resource.data.aceptados))
+          && (!('invitados' in resource.data) || request.auth.uid in resource.data.invitados)
+        )
+      );
+      allow delete: if request.auth != null && request.auth.uid == resource.data.creadorUid;
+    }
+
+    // ══════════════════════════════ SOPORTE ══════════════════════════════
+    match /soporte/{docId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+
+    // ═══════════════════════ INTERVALS_CONNECTIONS ═══════════════════════
+    match /intervals_connections/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    // ════════════════════ CIERRE POR DEFECTO ═════════════════════════════
+    // Cualquier colección no declarada queda denegada (ia_keys, ia_feedback,
+    // solicitudes y cualquier colección futura).
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

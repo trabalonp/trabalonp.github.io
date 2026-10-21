@@ -3,7 +3,21 @@
 **Fecha:** 21 de octubre de 2026
 **Qué reviso:** `mi-app-entrenos-main.zip` (backend), `version22102026.zip` (app) e `INFORME TÉCNICO APP.zip` (auditoría previa), contrastados con el encargo (bloques A–D) y con la auditoría técnica ya entregada.
 **Cómo lo he revisado:** lectura del código real, **ejecución de la batería de tests** (27 ficheros), consulta del paquete npm declarado, y mediciones propias (tamaño real del digest, número de lecturas). No he podido arrancar el emulador de Firestore ni un dispositivo en este entorno; lo indico en cada punto donde importa.
-**Arreglos listos para copiar:** carpeta `arreglos/` (ver `arreglos/LEEME.md`).
+**Arreglos listos para copiar:** carpeta **`corregidos/`** → `corregidos/LEEME.md` (paquete completo: cada fichero corregido, `firebase.json`, `.firebaserc`, índices, reglas Fase 1 y Fase 2, worker de curvas en el servidor, tests portables y los dos `.diff`).
+`arreglos/` queda como estaba (primera pasada, octubre 21); **está superado por `corregidos/`**.
+
+---
+
+## 0. Entrega de ficheros corregidos (22 oct 2026)
+
+Pedido: «dámelos corregidos para que funcione todo; si falta un fichero, dime cuál».
+La respuesta completa está en **`corregidos/LEEME.md`**; en corto:
+
+- **No falta ningún fichero de código**: 0 imports relativos sin resolver en la app y 0 `require` sin resolver en el servidor.
+- **Sí faltaban en los ZIP** `firebase.json`, `.firebaserc` y `.gitignore` (escritos), y el `firestore.indexes.json` venía **vacío** (rellenado con los 5 índices reales).
+- **Te pido tres cosas**: confirmar el proyecto (`team-jorge-e9d8b`), exportar los índices de producción antes de desplegarlos (`npm run indexes:export`, el deploy es estado deseado y borra lo que no esté en el fichero) y, si has tocado reglas por consola, el volcado de la pestaña Rules.
+- **Verificado ejecutando**: `npm test` 27/27 con el servidor y 17 OK + 10 SKIP sin él; 35 aserciones nuevas del worker; paridad exacta del digest cliente↔servidor; los dos `.diff` aplican limpios sobre los ZIP originales.
+- **No verificado aquí**: la matriz de reglas, porque este entorno no tiene Java y el emulador no arranca (el test sale `SKIP`, no se inventa el resultado).
 
 ---
 

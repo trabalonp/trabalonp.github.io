@@ -1,0 +1,68 @@
+# CAMBIOS-server.diff - cambios del SERVIDOR respecto a mi-app-entrenos-main.zip
+#
+#   cd mi-app-entrenos-main
+#   patch -p1 --forward < CAMBIOS-server.diff
+#
+# Ficheros NUEVOS (copiar a mano, ver LEEME.md):
+#   lib/curvasDigest.js  lib/workers.js  handlers/curvas/backfill.js
+#   tools/importar-digests.js  tests/workers-test.js
+#
+diff -ruN a/api/[...path].js b/api/[...path].js
+--- a/api/[...path].js	2026-10-21 22:38:16.297200045 +0000
++++ b/api/[...path].js	2026-10-21 22:38:16.301200065 +0000
+@@ -27,7 +27,7 @@
+ // regla 404. Sin él, /api/social/presign y compañía devuelven
+ // "The page could not be found NOT_FOUND".
+ //
+-// Rutas atendidas (17):
++// Rutas atendidas (18):
+ //   /api/notify-athlete            /api/sync-fitness
+ //   /api/sync-intervals            /api/sync-intervals-detail
+ //   /api/upload-to-intervals       /api/intervals/delete-event
+@@ -36,7 +36,7 @@
+ //   /api/social/link-preview       /api/social/notify-message
+ //   /api/social/presign            /api/social/purge
+ //   /api/archivos/presign          /api/archivos/config
+-//   /api/archivos/delete
++//   /api/archivos/delete           /api/curvas/backfill   (nueva, 2026-10-21)
+ 
+ // OJO: los require DEBEN ser literales (thunks) para que el trazador de
+ // Vercel (nft) los detecte y empaquete handlers/ + lib/ dentro de la
+@@ -61,6 +61,7 @@
+   'archivos/presign':            () => require('../handlers/archivos/presign.js'),
+   'archivos/config':             () => require('../handlers/archivos/config.js'),
+   'archivos/delete':             () => require('../handlers/archivos/delete.js'),
++  'curvas/backfill':             () => require('../handlers/curvas/backfill.js'),
+ };
+ 
+ const MAX_BODY_BYTES = 26 * 1024 * 1024; // margen sobre el límite de 25 MB de presign
+diff -ruN a/handlers/sync-intervals.js b/handlers/sync-intervals.js
+--- a/handlers/sync-intervals.js	2026-10-21 22:38:16.297200045 +0000
++++ b/handlers/sync-intervals.js	2026-10-21 22:38:16.301200065 +0000
+@@ -17,6 +17,11 @@
+ const { fetchAndStoreWellness } = require('../lib/wellness');
+ const { sendPushForSync, notifyCoachAfterSync } = require('../lib/push');
+ const { comprobarRecords, notificarRecords } = require('../lib/records');
++// Cálculo de digests de curvas EN EL SERVIDOR (ver lib/workers.js). Antes el
++// servidor solo marcaba `analyticsCurves/{uid}.pendientes` y el móvil tenía que
++// abrir Análisis para vaciarla; con esto las curvas quedan al día al terminar
++// la sincronización, sin depender del dispositivo.
++const { enSegundoPlano } = require('../lib/workers');
+ 
+ const db = admin.firestore();
+ const MAX_DETAIL_OPS = 8;
+@@ -597,6 +602,14 @@
+       console.warn('[sync-intervals] Error wellness:', e.message);
+     }
+ 
++    // Curvas: se procesan en segundo plano DESPUÉS de responder (waitUntil).
++    // Nunca puede tumbar la sincronización: la llamada captura sus errores.
++    try {
++      enSegundoPlano(res, uid, { max: 25 });
++    } catch (e) {
++      console.warn('[sync-intervals] no se pudo lanzar el cálculo de curvas:', e.message);
++    }
++
+     await sendPushForSync(uid, synced, skipped, errorsList.length, activities.length, syncedList);
+     await notifyCoachAfterSync(uid, synced, syncedList);
+ 
