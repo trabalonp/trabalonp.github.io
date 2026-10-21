@@ -1,0 +1,105 @@
+diff -ruN a/services/curvasStore.js b/services/curvasStore.js
+--- a/services/curvasStore.js	2026-10-21 22:23:54.322877629 +0000
++++ b/services/curvasStore.js	2026-10-21 22:23:54.326877649 +0000
+@@ -264,6 +264,7 @@
+   const p = (async () => {
+     let procesados = 0;
+     const quitados = [];
++    const pendientesFallidos = [];
+ 
+     try {
+       const metaSnap = await getDoc(doc(db, 'analyticsCurves', uid));
+@@ -284,6 +285,11 @@
+           const fechaMs = fechaMsDe(w.fecha);
+ 
+           if (!(w.estado === 'completo' || (w.duracion || 0) > 0)) {
++            // Deja de cumplir el filtro de curvas (p. ej. el usuario vació la
++            // duración): hay que quitar su digest del mes, o seguiría contando.
++            try {
++              await quitarDigest(uid, id, fechaMs || Date.now());
++            } catch (e) {}
+             quitados.push(id);
+             continue;
+           }
+@@ -304,15 +310,41 @@
+           }
+ 
+           const dg = calcularDigest(pts, w.tipo, fechaMs);
+-          await guardarDigest(uid, id, dg);
++          const res = await guardarDigest(uid, id, dg);
++
++          if (!res || !res.ok) {
++            // NO se saca de `pendientes`: si se descartara aquí, el digest se
++            // perdería hasta que alguien pulsara refrescar. Se reintenta en la
++            // siguiente pasada (rotación: al final de la lista).
++            pendientesFallidos.push(id);
++            continue;
++          }
++
+           procesados++;
+         } catch (e) {
+           console.warn('[curvasStore] pendiente falló para', id, ':', e.message);
++          pendientesFallidos.push(id);
++          continue;
+         }
+ 
+         quitados.push(id);
+       }
+ 
++      // Los fallidos se quitan y se vuelven a añadir al final para no bloquear
++      // la cola (arrayUnion los añade al final).
++      if (pendientesFallidos.length) {
++        try {
++          await updateDoc(doc(db, 'analyticsCurves', uid), {
++            pendientes: arrayRemove(...pendientesFallidos),
++          });
++          await updateDoc(doc(db, 'analyticsCurves', uid), {
++            pendientes: arrayUnion(...pendientesFallidos),
++          });
++        } catch (e) {
++          console.warn('[curvasStore] rotación de pendientes falló:', e.message);
++        }
++      }
++
+       if (quitados.length) {
+         try {
+           await updateDoc(doc(db, 'analyticsCurves', uid), { pendientes: arrayRemove(...quitados) });
+@@ -449,6 +481,22 @@
+         }
+ 
+         if (Object.keys(aEscribir).length || aQuitar.length) {
++          // Guarda de tamaño TAMBIÉN aquí: si el mes se pasara de ~900 KB,
++          // Firestore rechazaría la escritura (>1 MiB) y el mes quedaría sin
++          // digests mientras el meta ya marca backfillV=1 (pérdida silenciosa).
++          const actsFinal = { ...acts, ...aEscribir };
++          for (const id of aQuitar) delete actsFinal[id];
++
++          if (perfLog.bytesDe(actsFinal) > TOPE_BYTES_MES) {
++            console.warn(`[curvasStore] mes ${mes} supera ~900 KB en backfill; se marca oversize (se usará legacy para ese mes)`);
++            try {
++              await setDoc(mesRef, { v: 1, oversize: true }, { merge: true });
++              const cco = mesCache[`${uid}:${mes}`];
++              if (cco) cco.oversize = true;
++            } catch (e) {}
++            continue;
++          }
++
+           const upd = { v: 1, updatedAt: serverTimestamp() };
+ 
+           for (const id of Object.keys(aEscribir)) upd[`acts.${id}`] = aEscribir[id];
+diff -ruN a/services/perfLog.js b/services/perfLog.js
+--- a/services/perfLog.js	2026-10-21 22:23:54.322877629 +0000
++++ b/services/perfLog.js	2026-10-21 22:23:54.326877649 +0000
+@@ -4,7 +4,11 @@
+ // (legacy vs digest de curvas) y para compararlos en Node (tests) y en __DEV__.
+ // Activo solo si __DEV__ (Metro/RN) o si PERF_LOG=1 (Node/tests).
+ // NUNCA lanza: las utilidades son no-op cuando está desactivado.
+-const ACTIVO = (typeof __DEV__ !== 'undefined' && __DEV__) || process.env.PERF_LOG === '1';
++// `process` NO está garantizado en Hermes: sin la guarda, en una build de
++// release este módulo podía lanzar ReferenceError al importarse. Igual que
++// __DEV__, se comprueba que exista antes de leerlo.
++const ENV = typeof process !== 'undefined' && process && process.env ? process.env : {};
++const ACTIVO = ENV.PERF_LOG === '1' || (typeof __DEV__ !== 'undefined' && __DEV__);
+ 
+ const contadores = new Map(); // etiqueta -> { n, docs, bytes }
+ const tiempos = new Map();    // etiqueta -> { n, ms, max }
